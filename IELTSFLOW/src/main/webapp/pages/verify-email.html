@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác thực Email – IELTS Flow | Nhận quà tặng của bạn</title>
+  <meta name="description" content="Xác nhận địa chỉ email để hoàn tất đăng ký IELTS Flow. Trong lúc chờ, hãy khám phá 50 từ vựng IELTS Writing miễn phí dành cho bạn!">
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="verify-page">
+    <div class="verify-container">
+      <!-- Header -->
+      <div class="verify-header">
+        <div class="verify-icon animate-float">📧</div>
+        <h1 class="text-3xl fw-extrabold" style="margin-bottom:0.5rem;">Kiểm tra hộp thư của bạn!</h1>
+        <p class="text-secondary" style="max-width:420px; margin:0 auto; line-height:1.65;">
+          Chúng tôi đã gửi link xác thực đến
+          <strong id="verify-email-display" style="color:var(--clr-primary-400);">email@example.com</strong>.
+          Vui lòng kiểm tra hộp thư (và thư mục Spam nhé!) 😊
+        </p>
+      </div>
+
+      <!-- Gift Section -->
+      <div class="vocab-gift glass-card" style="padding: 1.5rem 2rem;">
+        <div class="vocab-gift-header">
+          <span class="vocab-gift-icon">🎁</span>
+          <div>
+            <div class="vocab-gift-title">Quà tặng của bạn – Trong lúc chờ xác thực!</div>
+            <div class="vocab-gift-subtitle">✨ 50 từ vựng IELTS Writing Task 2 đạt band 7+ · Hoàn toàn miễn phí</div>
+          </div>
+          <div style="margin-left:auto;">
+            <span class="badge badge-success">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              Đã mở khóa
+            </span>
+          </div>
+        </div>
+
+        <!-- Vocab count display -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+          <p class="text-xs text-muted">Nhấp vào từng từ để xem nghĩa chi tiết</p>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <input type="text" id="vocab-search" placeholder="🔍 Tìm từ..." style="background:rgba(255,255,255,0.04); border:1px solid var(--clr-border); border-radius:0.5rem; padding:0.375rem 0.75rem; color:var(--clr-text-primary); font-size:0.75rem; width:140px; outline:none; transition:all .2s;">
+          </div>
+        </div>
+
+        <div class="vocab-grid" id="vocab-grid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(16,185,129,0.1); display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <button class="btn btn-success" style="font-size:0.8125rem; padding: 0.5rem 1rem;" onclick="downloadVocab()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Tải xuống PDF
+          </button>
+          <button class="btn btn-ghost" style="font-size:0.8125rem; padding: 0.5rem 1rem;" onclick="copyVocab()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Sao chép
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:1rem; margin-top:2rem;">
+        <button class="btn btn-ghost" id="btn-resend" onclick="resendVerification()" style="display:flex; align-items:center; gap:0.5rem; font-size:0.875rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 .49-3.96"/>
+          </svg>
+          <span id="resend-text">Gửi lại email xác thực</span>
+        </button>
+        <p class="text-xs text-muted">Không nhận được email? Chờ <span id="resend-countdown" class="text-blue fw-bold"></span> trước khi gửi lại</p>
+        <a href="login.html" class="text-sm text-secondary" style="transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
+          ← Quay lại trang đăng nhập
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vocab Detail Modal -->
+  <div class="modal-overlay hidden" id="vocab-modal">
+    <div class="modal" style="max-width:400px;">
+      <div style="padding:2rem;">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.25rem;">
+          <div>
+            <div id="modal-word" style="font-size:1.5rem; font-weight:800; color:var(--clr-success-400); margin-bottom:0.25rem;"></div>
+            <div id="modal-type" class="badge badge-primary" style="font-size:0.6875rem;"></div>
+          </div>
+          <button onclick="closeVocabModal()" style="color:var(--clr-text-muted); cursor:pointer; padding:0.25rem;">✕</button>
+        </div>
+        <div id="modal-meaning" style="font-size:1rem; color:var(--clr-text-primary); font-weight:500; margin-bottom:0.75rem;"></div>
+        <div id="modal-example" style="font-size:0.875rem; color:var(--clr-text-secondary); font-style:italic; line-height:1.6; padding:0.75rem; background:rgba(255,255,255,0.03); border-radius:0.5rem; border:1px solid var(--clr-border);"></div>
+        <div style="margin-top:0.75rem;">
+          <div style="font-size:0.75rem; color:var(--clr-text-muted); margin-bottom:0.25rem;">Từ đồng nghĩa:</div>
+          <div id="modal-synonyms" style="display:flex; flex-wrap:wrap; gap:0.375rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;display:flex;flex-direction:column;gap:.75rem;"></div>
+  <script src="../js/auth.js"></script>
+</body>
+</html>
