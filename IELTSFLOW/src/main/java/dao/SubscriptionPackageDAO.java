@@ -8,19 +8,39 @@ import java.util.List;
 
 public class SubscriptionPackageDAO {
 
-    public List<SubscriptionPackage> getAllActivePackages() {
+    public List<SubscriptionPackage> getActivePackagesPaginated(int offset, int limit) {
         return JpaHelper.query(em -> {
             TypedQuery<SubscriptionPackage> query = em.createQuery(
-                    "SELECT p FROM SubscriptionPackage p WHERE p.deleted = false", SubscriptionPackage.class);
+                    "SELECT p FROM SubscriptionPackage p WHERE p.deleted = false ORDER BY p.packageId DESC", SubscriptionPackage.class);
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
             return query.getResultList();
         });
     }
 
-    public List<SubscriptionPackage> getAllPackages() {
+    public long getTotalActivePackagesCount() {
+        return JpaHelper.query(em -> {
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(p) FROM SubscriptionPackage p WHERE p.deleted = false", Long.class);
+            return query.getSingleResult();
+        });
+    }
+
+    public List<SubscriptionPackage> getPackagesPaginated(int offset, int limit) {
         return JpaHelper.query(em -> {
             TypedQuery<SubscriptionPackage> query = em.createQuery(
-                    "SELECT p FROM SubscriptionPackage p", SubscriptionPackage.class);
+                    "SELECT p FROM SubscriptionPackage p ORDER BY p.packageId DESC", SubscriptionPackage.class);
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
             return query.getResultList();
+        });
+    }
+
+    public long getTotalPackagesCount() {
+        return JpaHelper.query(em -> {
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(p) FROM SubscriptionPackage p", Long.class);
+            return query.getSingleResult();
         });
     }
 

@@ -76,8 +76,27 @@ public class AdminSubscriptionServlet extends HttpServlet {
 
     private void listPackages(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<SubscriptionPackage> packages = dao.getAllPackages();
+        int page = 1;
+        int limit = 10;
+        
+        String pageParam = request.getParameter("page");
+        if (pageParam != null) {
+            try {
+                page = Integer.parseInt(pageParam);
+                if (page < 1) page = 1;
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+        
+        int offset = (page - 1) * limit;
+        List<SubscriptionPackage> packages = dao.getPackagesPaginated(offset, limit);
+        long totalCount = dao.getTotalPackagesCount();
+        int totalPages = (int) Math.ceil((double) totalCount / limit);
+        
         request.setAttribute("packages", packages);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/html/admin/subscription/list.jsp").forward(request, response);
     }
 
