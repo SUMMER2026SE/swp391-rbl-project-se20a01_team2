@@ -4,7 +4,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Quản Lý Gói Thành Viên</title>
+    <title>Admin - Quản Lý Gói Đăng Ký</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
@@ -17,10 +17,10 @@
 </nav>
 
 <div class="container">
-    <h2 class="mb-4 text-primary"><i class="bi bi-box-seam"></i> Quản Lý Gói Thành Viên</h2>
+    <h2 class="mb-4 text-primary"><i class="bi bi-box-seam"></i> Quản Lý Gói Đăng Ký</h2>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <p class="text-muted mb-0">Quản lý tất cả các gói thành viên cung cấp cho học viên.</p>
+        <p class="text-muted mb-0">Quản lý tất cả các gói đăng ký cung cấp cho học viên.</p>
         <a href="${pageContext.request.contextPath}/admin/subscription?action=create" class="btn btn-primary shadow-sm rounded-pill px-3">
             <i class="bi bi-plus-lg"></i> Thêm Gói Mới
         </a>

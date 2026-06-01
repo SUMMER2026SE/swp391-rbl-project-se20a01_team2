@@ -45,6 +45,6 @@ public class SubscriptionController extends HttpServlet {
         request.setAttribute("packages", packages);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
-        request.getRequestDispatcher("/html/subscription.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/subscription.jsp").forward(request, response);
     }
 }

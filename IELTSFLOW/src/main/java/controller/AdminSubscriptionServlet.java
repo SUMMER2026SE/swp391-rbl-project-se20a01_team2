@@ -105,13 +105,13 @@ public class AdminSubscriptionServlet extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("statusFilter", statusFilter);
         request.setAttribute("sortOption", sortOption);
-        request.getRequestDispatcher("/html/admin/subscription/list.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/admin/subscription/list.jsp").forward(request, response);
     }
 
     private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setAttribute("formAction", "create");
-        request.getRequestDispatcher("/html/admin/subscription/form.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/admin/subscription/form.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
@@ -121,7 +121,7 @@ public class AdminSubscriptionServlet extends HttpServlet {
             SubscriptionPackage pkg = dao.getPackageById(id);
             request.setAttribute("pkg", pkg);
             request.setAttribute("formAction", "edit");
-            request.getRequestDispatcher("/html/admin/subscription/form.jsp").forward(request, response);
+            request.getRequestDispatcher("/jsp/admin/subscription/form.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/admin/subscription");
         }
