@@ -1,7 +1,7 @@
 package controller;
 
-import dao.SubscriptionPackageDAO;
 import jakarta.servlet.ServletException;
+import services.SubscriptionService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,11 +14,11 @@ import java.util.List;
 @WebServlet(name = "SubscriptionController", urlPatterns = {"/subscription"})
 public class SubscriptionController extends HttpServlet {
 
-    private SubscriptionPackageDAO dao;
+    private SubscriptionService service;
 
     @Override
     public void init() {
-        dao = new SubscriptionPackageDAO();
+        service = new SubscriptionService();
     }
 
     @Override
@@ -38,8 +38,8 @@ public class SubscriptionController extends HttpServlet {
         }
         
         int offset = (page - 1) * limit;
-        List<SubscriptionPackage> packages = dao.getActivePackagesPaginated(offset, limit);
-        long totalCount = dao.getTotalActivePackagesCount();
+        List<SubscriptionPackage> packages = service.getActivePackagesPaginated(offset, limit);
+        long totalCount = service.getTotalActivePackagesCount();
         int totalPages = (int) Math.ceil((double) totalCount / limit);
         
         request.setAttribute("packages", packages);
