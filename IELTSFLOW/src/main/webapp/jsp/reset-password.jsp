@@ -104,6 +104,6 @@
   </div>
 
   <div id="toast-container" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;display:flex;flex-direction:column;gap:.75rem;"></div>
-  <script src="../js/auth.js"></script>
+  <script src="../js/auth.js?v=3"></script>
 </body>
 </html>

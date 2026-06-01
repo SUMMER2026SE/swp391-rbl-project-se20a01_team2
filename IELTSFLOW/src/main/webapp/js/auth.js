@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data && data.data) {
             // Đã đăng nhập → Hiển thị banner thay vì auto redirect
             const dashUrl = data.data.roleId === 1
-                ? '/IELTSFLOW/pages/admin/dashboard.html'
-                : '/IELTSFLOW/pages/account.html';
+                ? '/IELTSFLOW/jsp/admin/dashboard.jsp'
+                : '/IELTSFLOW/jsp/account.jsp';
             const name = data.data.fullName || data.data.email || 'Bạn';
 
             // Inject banner vào đầu trang auth-right
@@ -290,9 +290,9 @@ function initAuthPage() {
                 showToast('Đăng nhập thành công! Đang chuyển hướng...', 'success');
                 // Redirect based on role - dùng absolute path
                 if (Number(data.data.roleId) === 1) {
-                    setTimeout(() => window.location.href = '/IELTSFLOW/pages/admin/dashboard.html', 800);
+                    setTimeout(() => window.location.href = '/IELTSFLOW/jsp/admin/dashboard.jsp', 800);
                 } else {
-                    setTimeout(() => window.location.href = '/IELTSFLOW/pages/account.html', 800);
+                    setTimeout(() => window.location.href = '/IELTSFLOW/jsp/account.jsp', 800);
                 }
             } else {
                 handleErrorResponse(response.status, data.message, emailInput.value.trim());
@@ -382,7 +382,7 @@ function initAuthPage() {
                 showToast('Đăng ký thành công! Vui lòng xác thực email.', 'success');
                 sessionStorage.setItem('pendingEmail', emailInput.value.trim());
                 setTimeout(() => {
-                    window.location.href = 'verify-email.html';
+                    window.location.href = 'verify-email.jsp';
                 }, 1500);
             } else {
                 handleErrorResponse(response.status, data.message, emailInput.value.trim());
@@ -407,7 +407,7 @@ function initAuthPage() {
                     showToast('Tài khoản chưa được kích hoạt. Chuyển hướng...', 'warning');
                     if (email) sessionStorage.setItem('pendingEmail', email);
                     setTimeout(() => {
-                        window.location.href = 'verify-email.html';
+                        window.location.href = 'verify-email.jsp';
                     }, 2000);
                 } else if (defaultMessage && defaultMessage.toLowerCase().includes('ban')) {
                     showToast('Tài khoản của bạn đã bị khóa.', 'error', 5000);
@@ -451,14 +451,14 @@ window.handleGoogleCredentialResponse = async function(response) {
             if (res.ok && data.success) {
                 showToast('Đăng nhập Google thành công! Đang chuyển hướng...', 'success');
                 if (data.data && Number(data.data.roleId) === 1) {
-                    setTimeout(() => window.location.href = '/IELTSFLOW/pages/admin/dashboard.html', 800);
+                    setTimeout(() => window.location.href = '/IELTSFLOW/jsp/admin/dashboard.jsp', 800);
                 } else {
-                    setTimeout(() => window.location.href = '/IELTSFLOW/pages/account.html', 800);
+                    setTimeout(() => window.location.href = '/IELTSFLOW/jsp/account.jsp', 800);
                 }
             } else {
                 showToast(data.message || 'Đăng nhập Google thất bại.', 'error');
                 if (res.status === 403 && data.message && data.message.toLowerCase().includes('inactive')) {
-                    setTimeout(() => window.location.href = 'verify-email.html', 1500);
+                    setTimeout(() => window.location.href = 'verify-email.jsp', 1500);
                 }
             }
         } catch (error) {
@@ -469,3 +469,245 @@ window.handleGoogleCredentialResponse = async function(response) {
         showToast('Không lấy được thông tin đăng nhập Google.', 'error');
     }
 };
+
+// === Forgot Password, OTP, Reset Password Logic ===
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Forgot Password Form
+    const forgotForm = document.getElementById('forgot-form');
+    if (forgotForm) {
+        forgotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('forgot-email');
+            const emailErr = document.getElementById('forgot-email-error');
+            const submitBtn = document.getElementById('forgot-submit');
+            
+            const email = emailInput.value.trim();
+            if (!email) {
+                emailInput.classList.add('error');
+                emailErr.textContent = 'Vui lòng nhập email';
+                emailErr.style.display = 'block';
+                return;
+            }
+            
+            emailInput.classList.remove('error');
+            emailErr.style.display = 'none';
+            
+            // Set Loading
+            const span = submitBtn.querySelector('.btn-text');
+            submitBtn.disabled = true;
+            submitBtn.dataset.originalText = span.innerHTML;
+            span.innerHTML = '<div class="spinner"></div>';
+            
+            try {
+                const response = await fetch('/IELTSFLOW/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    window.showToast(data.message, 'success');
+                    sessionStorage.setItem('resetEmail', email);
+                    setTimeout(() => window.location.href = 'otp-verify.jsp', 1500);
+                } else {
+                    window.showToast(data.message || 'Có lỗi xảy ra', 'error');
+                }
+            } catch (err) {
+                window.showToast('Lỗi kết nối', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                span.innerHTML = submitBtn.dataset.originalText;
+            }
+        });
+    }
+
+    // 2. Reset Password Form
+    const resetPwForm = document.getElementById('reset-pw-form');
+    if (resetPwForm) {
+        resetPwForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPw = document.getElementById('new-password').value;
+            const confirmPw = document.getElementById('confirm-new-password').value;
+            const submitBtn = document.getElementById('reset-submit');
+            
+            if (newPw !== confirmPw) {
+                window.showToast('Mật khẩu không khớp', 'error');
+                return;
+            }
+            
+            const email = sessionStorage.getItem('resetEmail');
+            const resetToken = sessionStorage.getItem('resetToken');
+            
+            if (!email || !resetToken) {
+                window.showToast('Phiên làm việc không hợp lệ', 'error');
+                setTimeout(() => window.location.href = 'forgot-password.jsp', 1500);
+                return;
+            }
+            
+            // Set Loading
+            const span = submitBtn.querySelector('.btn-text');
+            submitBtn.disabled = true;
+            submitBtn.dataset.originalText = span.innerHTML;
+            span.innerHTML = '<div class="spinner"></div>';
+            
+            try {
+                const response = await fetch('/IELTSFLOW/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, resetToken, newPassword: newPw })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    window.showToast('Đổi mật khẩu thành công! Đang chuyển hướng...', 'success');
+                    sessionStorage.removeItem('resetEmail');
+                    sessionStorage.removeItem('resetToken');
+                    setTimeout(() => window.location.href = 'auth.jsp', 1500);
+                } else {
+                    window.showToast(data.message || 'Lỗi đổi mật khẩu', 'error');
+                }
+            } catch (err) {
+                window.showToast('Lỗi kết nối', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                span.innerHTML = submitBtn.dataset.originalText;
+            }
+        });
+    }
+});
+
+// OTP logic uses global functions
+window.verifyOTP = async function() {
+    const inputs = document.querySelectorAll('.otp-digit');
+    let otp = '';
+    inputs.forEach(i => otp += i.value);
+    
+    if (otp.length !== 6) {
+        window.showToast('Vui lòng nhập đủ 6 số OTP', 'warning');
+        return;
+    }
+    
+    const email = sessionStorage.getItem('resetEmail');
+    if (!email) {
+        window.showToast('Lỗi phiên làm việc. Vui lòng thử lại.', 'error');
+        setTimeout(() => window.location.href = 'forgot-password.jsp', 1500);
+        return;
+    }
+    
+    const submitBtn = document.getElementById('otp-submit');
+    const span = submitBtn.querySelector('.btn-text');
+    submitBtn.disabled = true;
+    submitBtn.dataset.originalText = span.innerHTML;
+    span.innerHTML = '<div class="spinner"></div>';
+    
+    try {
+        const response = await fetch('/IELTSFLOW/api/auth/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, otp })
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+            window.showToast('Xác thực thành công!', 'success');
+            sessionStorage.setItem('resetToken', data.data ? data.data.resetToken : data.resetToken);
+            setTimeout(() => window.location.href = 'reset-password.jsp', 1000);
+        } else {
+            window.showToast(data.message || 'OTP không hợp lệ', 'error');
+            inputs.forEach(i => i.value = '');
+            inputs[0].focus();
+        }
+    } catch (err) {
+        window.showToast('Lỗi kết nối', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        span.innerHTML = submitBtn.dataset.originalText;
+    }
+};
+
+window.resendOTP = async function() {
+    const email = sessionStorage.getItem('resetEmail');
+    if (!email) return;
+    
+    try {
+        const response = await fetch('/IELTSFLOW/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+            window.showToast('Đã gửi lại mã OTP', 'success');
+        } else {
+            window.showToast(data.message || 'Không thể gửi lại mã', 'error');
+        }
+    } catch (err) {
+        window.showToast('Lỗi kết nối', 'error');
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const otpInputs = document.querySelectorAll('.otp-digit');
+    if (otpInputs.length > 0) {
+        const emailDisplay = document.getElementById('otp-email-display');
+        if (emailDisplay) {
+            const savedEmail = sessionStorage.getItem('resetEmail');
+            if (savedEmail) emailDisplay.textContent = savedEmail;
+        }
+
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+                checkOtpFilled();
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+        
+        function checkOtpFilled() {
+            let filled = 0;
+            otpInputs.forEach(i => { if (i.value) filled++; });
+            document.getElementById('otp-submit').disabled = (filled !== 6);
+        }
+    }
+});
+function startOtpTimer() {
+    const resendBtn = document.getElementById('btn-resend-otp');
+    const timerText = document.getElementById('resend-timer-text');
+    const countdownSpan = document.getElementById('resend-countdown');
+    
+    if (!resendBtn || !timerText || !countdownSpan) return;
+    
+    let timeLeft = 60;
+    resendBtn.disabled = true;
+    resendBtn.style.cursor = 'not-allowed';
+    timerText.style.display = 'inline';
+    
+    const interval = setInterval(() => {
+        timeLeft--;
+        countdownSpan.textContent = timeLeft + 's';
+        
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            resendBtn.disabled = false;
+            resendBtn.style.cursor = 'pointer';
+            timerText.style.display = 'none';
+        }
+    }, 1000);
+    
+    // Also override the resend button to restart the timer
+    resendBtn.onclick = async function(e) {
+        e.preventDefault();
+        await window.resendOTP();
+        startOtpTimer(); // restart timer
+    };
+}
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('otp-inputs')) {
+        startOtpTimer();
+    }
+});

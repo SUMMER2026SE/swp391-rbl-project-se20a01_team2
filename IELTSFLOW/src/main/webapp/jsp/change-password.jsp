@@ -18,7 +18,7 @@
       <div style="width:30px; height:30px; background:var(--grad-primary); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; color:#fff;">IF</div>
       <span class="text-gradient">IELTS Flow</span>
     </div>
-    <a href="profile.html" style="display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; color:var(--clr-text-secondary); transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
+    <a href="account.jsp" style="display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; color:var(--clr-text-secondary); transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       Về hồ sơ
     </a>
@@ -53,7 +53,7 @@
               </button>
             </div>
             <span class="form-error hidden" id="current-pw-error"></span>
-            <a href="forgot-password.html" class="text-xs" style="color:var(--clr-primary-400); margin-top:0.25rem; display:inline-block;">Không nhớ mật khẩu cũ? Dùng OTP</a>
+            <a href="forgot-password.jsp" class="text-xs" style="color:var(--clr-primary-400); margin-top:0.25rem; display:inline-block;">Không nhớ mật khẩu cũ? Dùng OTP</a>
           </div>
 
           <div style="height:1px; background:var(--clr-border);"></div>
@@ -122,7 +122,7 @@
             </svg>
           </button>
 
-          <a href="profile.html" class="text-center text-sm text-secondary" style="transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
+          <a href="account.jsp" class="text-center text-sm text-secondary" style="transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
             Hủy, quay lại hồ sơ
           </a>
         </div>

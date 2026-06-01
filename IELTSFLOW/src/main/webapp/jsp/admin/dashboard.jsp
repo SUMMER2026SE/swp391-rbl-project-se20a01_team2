@@ -439,7 +439,7 @@
       </div>
       <div class="topbar-actions">
         <button class="btn btn-ghost" onclick="loadData()">🔄 Làm mới</button>
-        <a href="/IELTSFLOW/jsp/profile.jsp" class="btn btn-ghost">👤 Hồ sơ</a>
+        <a href="/IELTSFLOW/jsp/account.jsp" class="btn btn-ghost">👋 Hồ sơ</a>
       </div>
     </header>
 
@@ -595,6 +595,6 @@
 
   <div id="toast-container"></div>
 
-  <script src="../../js/admin-dashboard.js"></script>
+  <script src="../../js/admin-dashboard.js?v=2"></script>
 </body>
 </html>

@@ -167,7 +167,7 @@ function completeSurvey() {
   if (finishBtn) { finishBtn.disabled = true; finishBtn.style.opacity = '0.7'; }
 
   showToast(`🎉 Tuyệt vời! Mục tiêu ${selectedBand} đã được ghi nhận. Đang tạo lộ trình cá nhân hóa...`, 'success');
-  setTimeout(() => window.location.href = 'profile.html', 2000);
+  setTimeout(() => window.location.href = '/IELTSFLOW/jsp/account.jsp', 2000);
 }
 
 /* ── Toast ──────────────────────────────────────────────── */

@@ -83,7 +83,7 @@
           <span id="resend-text">Gửi lại email xác thực</span>
         </button>
         <p class="text-xs text-muted">Không nhận được email? Chờ <span id="resend-countdown" class="text-blue fw-bold"></span> trước khi gửi lại</p>
-        <a href="login.html" class="text-sm text-secondary" style="transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
+        <a href="auth.jsp" class="text-sm text-secondary" style="transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
           ← Quay lại trang đăng nhập
         </a>
       </div>

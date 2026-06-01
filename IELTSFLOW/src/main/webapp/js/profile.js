@@ -305,7 +305,7 @@ function saveProfile() {
 function confirmLogout() {
   if (confirm('Bạn có chắc muốn đăng xuất?\nTiến trình học của bạn đã được lưu!')) {
     showToast('Đang đăng xuất...', 'info', 1500);
-    setTimeout(() => window.location.href = 'login.html', 1500);
+    setTimeout(() => window.location.href = '/IELTSFLOW/jsp/auth.jsp', 1500);
   }
 }
 
@@ -403,14 +403,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const resp = await fetch('/IELTSFLOW/api/user/me');
     if (resp.status === 401) {
       // Chưa đăng nhập → Redirect về trang đăng nhập
-      window.location.href = '/IELTSFLOW/pages/login.html?redirect_error=Vui+lòng+đăng+nhập+để+tiếp+tục';
+      window.location.href = '/IELTSFLOW/jsp/auth.jsp?redirect_error=Vui+lòng+đăng+nhập+để+tiếp+tục';
       return;
     }
     const result = await resp.json();
     if (result.success && result.data) {
       const serverUser = result.data;
       if (serverUser.roleId === 1) {
-        window.location.href = 'admin/dashboard.html';
+        window.location.href = 'admin/dashboard.jsp';
         return;
       }
       // Lưu vào localStorage và cập nhật UI ngay lập tức

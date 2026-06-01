@@ -571,7 +571,7 @@
                                 <input type="checkbox" id="rememberMe">
                                 Ghi nhớ đăng nhập
                             </label>
-                            <a href="forgot-password.html" class="link">Quên mật khẩu?</a>
+                            <a href="forgot-password.jsp" class="link">Quên mật khẩu?</a>
                         </div>
 
                         <button type="submit" class="btn-cta btn-full" id="loginSubmit">

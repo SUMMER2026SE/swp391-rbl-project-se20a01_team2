@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/IELTSFLOW/api/user/me');
             if (response.status === 401) {
-                window.location.href = 'login.html';
+                window.location.href = '/IELTSFLOW/jsp/auth.jsp';
                 return;
             }
             const data = await response.json();
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateUserData(user) {
-        const { fullName, email, roleId } = user;
+        let { fullName, email, roleId } = user;
         
         // Remove skeletons
         document.querySelectorAll('.skeleton').forEach(el => {
@@ -67,6 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.style.height = 'auto';
             }
         });
+
+        const savedFullName = localStorage.getItem('user_fullname');
+        if (savedFullName) fullName = savedFullName;
 
         // Sidebar
         document.getElementById('sidebarName').textContent = fullName;
@@ -421,11 +424,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // === 10. Logout ===
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
         e.preventDefault();
-        // Option to clear session if needed
-        // localStorage.clear();
-        window.location.href = 'login.html';
+        try { await fetch('/IELTSFLOW/api/auth/logout', { method: 'POST' }); } catch(err) {}
+        window.location.href = '/IELTSFLOW/jsp/auth.jsp';
     });
 
 });

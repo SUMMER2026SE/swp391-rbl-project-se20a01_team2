@@ -158,20 +158,40 @@ document.addEventListener('DOMContentLoaded', () => {
         startAutoPlay();
     }
 
+    window.landingLogout = async function(e) {
+        e.preventDefault();
+        try { await fetch('/IELTSFLOW/api/auth/logout', { method: 'POST' }); } catch(err) {}
+        window.location.href = 'jsp/auth.jsp';
+    };
+
     // 6. Check Auth Status
     const checkAuthStatus = async () => {
         try {
             const response = await fetch('/IELTSFLOW/api/user/me');
             if (response.ok) {
-                const userData = await response.json();
-                if (userData && userData.email) {
-                    const dashboardHtml = `<a href="pages/dashboard.html" class="btn-cta">Dashboard</a>`;
+                const result = await response.json();
+                if (result.success && result.data) {
+                    const userData = result.data;
+                    const savedName = localStorage.getItem('user_fullname');
+                    let displayName = savedName || userData.fullName || 'Người dùng';
+                    if (displayName.length > 15) displayName = displayName.substring(0, 15) + '...';
+                    
+                    const roleName = userData.roleId === 1 ? 'Admin' : 'Học viên';
+                    const dashboardLink = userData.roleId === 1 ? 'jsp/admin/dashboard.jsp' : 'jsp/account.jsp';
+                    
+                    const authHtml = `
+                        <a href="${dashboardLink}" class="btn-ghost" style="display: flex; flex-direction: column; align-items: flex-end; text-align: right; line-height: 1.2; padding: 0.25rem 1rem;">
+                            <span style="font-weight: 600; font-size: 15px; color: var(--clr-text-primary);">${displayName}</span>
+                            <span style="font-size: 12px; color: var(--clr-primary-500); font-weight: 500;">${roleName}</span>
+                        </a>
+                        <a href="#" class="btn-cta" style="background-color: #ef4444; border: none; padding: 0.5rem 1.25rem;" onclick="landingLogout(event)">Đăng xuất</a>
+                    `;
                     
                     const desktopNav = document.getElementById('desktop-nav-actions');
-                    if(desktopNav) desktopNav.innerHTML = dashboardHtml;
+                    if(desktopNav) desktopNav.innerHTML = authHtml;
                     
                     const mobileNav = document.getElementById('mobile-nav-actions');
-                    if(mobileNav) mobileNav.innerHTML = dashboardHtml;
+                    if(mobileNav) mobileNav.innerHTML = authHtml;
                 }
             }
         } catch (error) {

@@ -17,10 +17,10 @@ import java.io.IOException;
  * AuthFilter – Kiểm tra xác thực và phân quyền theo Role.
  *
  * Quy tắc:
- *  - /pages/admin/*       → Yêu cầu đăng nhập + roleId == 1 (Admin)
- *  - /pages/profile.html  → Yêu cầu đăng nhập (mọi role)
- *  - /pages/survey.html   → Yêu cầu đăng nhập
- *  - /pages/change-password.html → Yêu cầu đăng nhập
+ *  - /jsp/admin/*       → Yêu cầu đăng nhập + roleId == 1 (Admin)
+ *  - /jsp/profile.jsp  → Yêu cầu đăng nhập (mọi role)
+ *  - /jsp/survey.jsp   → Yêu cầu đăng nhập
+ *  - /jsp/change-password.jsp → Yêu cầu đăng nhập
  *  - Còn lại              → Cho phép tự do (Guest)
  */
 @WebFilter("/*")
@@ -28,13 +28,13 @@ public class AuthFilter implements Filter {
 
     // Các đường dẫn yêu cầu đăng nhập (bất kỳ role nào)
     private static final String[] PROTECTED_PATHS = {
-        "/pages/profile.html",
-        "/pages/survey.html",
-        "/pages/change-password.html"
+        "/jsp/profile.jsp",
+        "/jsp/survey.jsp",
+        "/jsp/change-password.jsp"
     };
 
     // Các đường dẫn chỉ dành cho Admin (roleId == 1)
-    private static final String ADMIN_PATH_PREFIX = "/pages/admin";
+    private static final String ADMIN_PATH_PREFIX = "/jsp/admin";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -49,7 +49,7 @@ public class AuthFilter implements Filter {
         HttpServletResponse resp = (HttpServletResponse) response;
 
         String contextPath = req.getContextPath();       // VD: /IELTSFLOW
-        String requestURI  = req.getRequestURI();         // VD: /IELTSFLOW/pages/profile.html
+        String requestURI  = req.getRequestURI();         // VD: /IELTSFLOW/jsp/profile.jsp
         // Đường dẫn sau context
         String path = requestURI.substring(contextPath.length());
 
@@ -109,9 +109,9 @@ public class AuthFilter implements Filter {
             throws IOException {
         try {
             String encodedMsg = java.net.URLEncoder.encode(message, "UTF-8");
-            resp.sendRedirect(contextPath + "/pages/login.html?redirect_error=" + encodedMsg);
+            resp.sendRedirect(contextPath + "/jsp/auth.jsp?redirect_error=" + encodedMsg);
         } catch (Exception e) {
-            resp.sendRedirect(contextPath + "/pages/login.html");
+            resp.sendRedirect(contextPath + "/jsp/auth.jsp");
         }
     }
 }

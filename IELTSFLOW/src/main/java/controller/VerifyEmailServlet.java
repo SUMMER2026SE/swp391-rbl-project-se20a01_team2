@@ -25,7 +25,7 @@ public class VerifyEmailServlet extends HttpServlet {
         String token = req.getParameter("token");
 
         if (token == null || token.trim().isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/pages/login.html?error=invalid-token");
+            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp?error=invalid-token");
             return;
         }
 
@@ -37,13 +37,13 @@ public class VerifyEmailServlet extends HttpServlet {
                 User user = userOpt.get();
                 if ("Inactive".equalsIgnoreCase(user.getStatus())) {
                     userDAO.updateStatus(user.getUserId(), "Active");
-                    resp.sendRedirect(req.getContextPath() + "/pages/login.html?verified=true");
+                    resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp?verified=true");
                     return;
                 }
             }
         }
 
         // Token sai, hết hạn, hoặc user đã active rồi
-        resp.sendRedirect(req.getContextPath() + "/pages/login.html?error=invalid-token");
+        resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp?error=invalid-token");
     }
 }

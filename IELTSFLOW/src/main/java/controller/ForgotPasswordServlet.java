@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Servlet xử lý yêu cầu quên mật khẩu (Gửi mã OTP qua email)
+ * Servlet xá»­ lÃ½ yÃªu cáº§u quÃªn máº­t kháº©u (Gá»­i mÃ£ OTP qua email)
  */
 @WebServlet("/api/auth/forgot-password")
 public class ForgotPasswordServlet extends HttpServlet {
@@ -35,14 +35,11 @@ public class ForgotPasswordServlet extends HttpServlet {
             String email = body.get("email");
 
             if (email == null || email.trim().isEmpty()) {
-                sendError(resp, 400, "Vui lòng nhập email");
+                sendError(resp, 400, "Vui lÃ²ng nháº­p email");
                 return;
             }
 
             Optional<User> userOpt = userDAO.findByEmail(email);
-
-            // Luôn báo thành công để tránh dò rỉ thông tin người dùng (security best practice)
-            String successMessage = "Nếu email tồn tại trên hệ thống, chúng tôi đã gửi mã OTP đặt lại mật khẩu.";
 
             if (userOpt.isPresent()) {
                 String code = OtpService.getInstance().generateOtp(email);
@@ -58,14 +55,19 @@ public class ForgotPasswordServlet extends HttpServlet {
                         + "<h2 style='background-color: #f3f4f6; padding: 10px; display: inline-block; letter-spacing: 5px; font-size: 24px;'>" + code + "</h2>"
                         + "<p>Mã này có hiệu lực trong 5 phút. Vui lòng không chia sẻ cho bất kỳ ai.</p>";
 
-                ResendUtil.sendMail(from, email, "Mã OTP đặt lại mật khẩu - IELTS Flow", htmlBody);
+                boolean sent = ResendUtil.sendMail(from, email, "Mã OTP đặt lại mật khẩu - IELTS Flow", htmlBody);
+                if (sent) {
+                    sendSuccess(resp, "Mã OTP đã được gửi đến email của bạn.");
+                } else {
+                    sendError(resp, 500, "Lỗi khi gửi email qua Resend. Vui lòng thử lại sau.");
+                }
+            } else {
+                sendError(resp, 404, "Email này chưa được đăng ký trong hệ thống.");
             }
-
-            sendSuccess(resp, successMessage);
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendError(resp, 500, "Lỗi hệ thống: " + e.getMessage());
+            sendError(resp, 500, "Lá»—i há»‡ thá»‘ng: " + e.getMessage());
         }
     }
 
