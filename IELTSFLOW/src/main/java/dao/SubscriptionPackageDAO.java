@@ -26,20 +26,46 @@ public class SubscriptionPackageDAO {
         });
     }
 
-    public List<SubscriptionPackage> getPackagesPaginated(int offset, int limit) {
+    public List<SubscriptionPackage> getPackagesPaginated(int offset, int limit, String statusFilter, String sortOption) {
         return JpaHelper.query(em -> {
-            TypedQuery<SubscriptionPackage> query = em.createQuery(
-                    "SELECT p FROM SubscriptionPackage p ORDER BY p.packageId DESC", SubscriptionPackage.class);
+            String jpql = "SELECT p FROM SubscriptionPackage p WHERE 1=1 ";
+            
+            if ("active".equals(statusFilter)) {
+                jpql += " AND p.deleted = false ";
+            } else if ("deleted".equals(statusFilter)) {
+                jpql += " AND p.deleted = true ";
+            }
+            
+            if ("price_asc".equals(sortOption)) {
+                jpql += " ORDER BY p.price ASC ";
+            } else if ("price_desc".equals(sortOption)) {
+                jpql += " ORDER BY p.price DESC ";
+            } else if ("duration_asc".equals(sortOption)) {
+                jpql += " ORDER BY p.durationMonths ASC ";
+            } else if ("duration_desc".equals(sortOption)) {
+                jpql += " ORDER BY p.durationMonths DESC ";
+            } else {
+                jpql += " ORDER BY p.packageId DESC ";
+            }
+
+            TypedQuery<SubscriptionPackage> query = em.createQuery(jpql, SubscriptionPackage.class);
             query.setFirstResult(offset);
             query.setMaxResults(limit);
             return query.getResultList();
         });
     }
 
-    public long getTotalPackagesCount() {
+    public long getTotalPackagesCount(String statusFilter) {
         return JpaHelper.query(em -> {
-            TypedQuery<Long> query = em.createQuery(
-                    "SELECT COUNT(p) FROM SubscriptionPackage p", Long.class);
+            String jpql = "SELECT COUNT(p) FROM SubscriptionPackage p WHERE 1=1 ";
+            
+            if ("active".equals(statusFilter)) {
+                jpql += " AND p.deleted = false ";
+            } else if ("deleted".equals(statusFilter)) {
+                jpql += " AND p.deleted = true ";
+            }
+
+            TypedQuery<Long> query = em.createQuery(jpql, Long.class);
             return query.getSingleResult();
         });
     }

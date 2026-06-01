@@ -25,6 +25,39 @@
             <i class="bi bi-plus-lg"></i> Thêm Gói Mới
         </a>
     </div>
+
+    <!-- Filter & Sort Form -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4 p-3 bg-white">
+        <form action="${pageContext.request.contextPath}/admin/subscription" method="GET" class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="status" class="col-form-label fw-semibold">Trạng Thái:</label>
+            </div>
+            <div class="col-auto">
+                <select name="status" id="status" class="form-select form-select-sm">
+                    <option value="all" ${statusFilter == 'all' ? 'selected' : ''}>Tất Cả</option>
+                    <option value="active" ${statusFilter == 'active' ? 'selected' : ''}>Hoạt Động</option>
+                    <option value="deleted" ${statusFilter == 'deleted' ? 'selected' : ''}>Đã Xóa</option>
+                </select>
+            </div>
+            
+            <div class="col-auto ms-3">
+                <label for="sort" class="col-form-label fw-semibold">Sắp Xếp:</label>
+            </div>
+            <div class="col-auto">
+                <select name="sort" id="sort" class="form-select form-select-sm">
+                    <option value="default" ${sortOption == 'default' ? 'selected' : ''}>Mặc Định (Mới Nhất)</option>
+                    <option value="price_asc" ${sortOption == 'price_asc' ? 'selected' : ''}>Giá Tăng Dần</option>
+                    <option value="price_desc" ${sortOption == 'price_desc' ? 'selected' : ''}>Giá Giảm Dần</option>
+                    <option value="duration_asc" ${sortOption == 'duration_asc' ? 'selected' : ''}>Thời Hạn Tăng Dần</option>
+                    <option value="duration_desc" ${sortOption == 'duration_desc' ? 'selected' : ''}>Thời Hạn Giảm Dần</option>
+                </select>
+            </div>
+            
+            <div class="col-auto">
+                <button type="submit" class="btn btn-secondary btn-sm px-3">Áp Dụng</button>
+            </div>
+        </form>
+    </div>
     
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
         <div class="table-responsive">
@@ -72,7 +105,7 @@
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                Không tìm thấy gói nào. Nhấp vào 'Thêm Gói Mới' để bắt đầu.
+                                Không tìm thấy gói nào phù hợp với bộ lọc hiện tại.
                             </td>
                         </tr>
                     </c:if>
@@ -86,15 +119,15 @@
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center mb-0">
                         <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                            <a class="page-link" href="${pageContext.request.contextPath}/admin/subscription?page=${currentPage - 1}">Trước</a>
+                            <a class="page-link" href="${pageContext.request.contextPath}/admin/subscription?page=${currentPage - 1}&status=${statusFilter}&sort=${sortOption}">Trước</a>
                         </li>
                         <c:forEach begin="1" end="${totalPages}" var="i">
                             <li class="page-item ${currentPage == i ? 'active' : ''}">
-                                <a class="page-link" href="${pageContext.request.contextPath}/admin/subscription?page=${i}">${i}</a>
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin/subscription?page=${i}&status=${statusFilter}&sort=${sortOption}">${i}</a>
                             </li>
                         </c:forEach>
                         <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                            <a class="page-link" href="${pageContext.request.contextPath}/admin/subscription?page=${currentPage + 1}">Sau</a>
+                            <a class="page-link" href="${pageContext.request.contextPath}/admin/subscription?page=${currentPage + 1}&status=${statusFilter}&sort=${sortOption}">Sau</a>
                         </li>
                     </ul>
                 </nav>

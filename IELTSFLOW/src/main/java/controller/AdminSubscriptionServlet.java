@@ -89,14 +89,22 @@ public class AdminSubscriptionServlet extends HttpServlet {
             }
         }
         
+        String statusFilter = request.getParameter("status");
+        if (statusFilter == null) statusFilter = "all";
+        
+        String sortOption = request.getParameter("sort");
+        if (sortOption == null) sortOption = "default";
+        
         int offset = (page - 1) * limit;
-        List<SubscriptionPackage> packages = dao.getPackagesPaginated(offset, limit);
-        long totalCount = dao.getTotalPackagesCount();
+        List<SubscriptionPackage> packages = dao.getPackagesPaginated(offset, limit, statusFilter, sortOption);
+        long totalCount = dao.getTotalPackagesCount(statusFilter);
         int totalPages = (int) Math.ceil((double) totalCount / limit);
         
         request.setAttribute("packages", packages);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute("statusFilter", statusFilter);
+        request.setAttribute("sortOption", sortOption);
         request.getRequestDispatcher("/html/admin/subscription/list.jsp").forward(request, response);
     }
 
