@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
-  <persistence-unit name="IELTSFLOW" transaction-type="JTA">
-    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <jta-data-source>IELTSFlow</jta-data-source>
-    <class>models.User</class>
-    <class>models.Supplier</class>
-    <class>models.Product</class>
-    <class>models.Order</class>
-    <class>models.OrderDetail</class>
-    <class>models.RefundRequest</class>
-    <class>models.LoyaltyConfig</class>
-    <class>models.PointHistory</class>
-    <class>models.ProphetForecast</class>
-    <class>models.Province</class>
-    <class>models.UserAddress</class>
+  <persistence-unit name="IELTSFLOW" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <class>model.SubscriptionPackage</class>
+    <class>model.SystemLog</class>
+    <class>model.Transaction</class>
     <shared-cache-mode>NONE</shared-cache-mode>
     <validation-mode>NONE</validation-mode>
     <properties>
