@@ -25,3 +25,5 @@ replay_pid*
 
 .env
 IELTSFLOW/target/
+.agent/skills/
+.agent/rules/README.md
