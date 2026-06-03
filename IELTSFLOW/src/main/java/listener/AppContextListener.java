@@ -28,7 +28,8 @@ public class AppContextListener implements ServletContextListener {
             "DB_TRUST_SERVER_CERT",
             "DB_EXTRA_PARAMS",
             "SPEECH_KEY",
-            "SPEECH_REGION"
+            "SPEECH_REGION",
+            "GEMINI_API_KEYS"
     );
 
     @Override
