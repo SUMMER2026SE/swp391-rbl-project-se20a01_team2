@@ -26,7 +26,9 @@ public class AppContextListener implements ServletContextListener {
             "DB_PASSWORD",
             "DB_ENCRYPT",
             "DB_TRUST_SERVER_CERT",
-            "DB_EXTRA_PARAMS"
+            "DB_EXTRA_PARAMS",
+            "SPEECH_KEY",
+            "SPEECH_REGION"
     );
 
     @Override
