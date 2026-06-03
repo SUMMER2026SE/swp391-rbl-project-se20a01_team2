@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Azure Speech</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px;}
+        button:hover { background-color: #0056b3; }
+        pre { background-color: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;}
+        .loading { display: none; color: #ff8c00; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Kiểm tra (Test) API Azure AI Speech</h2>
+    <p>Upload một file WAV để thử nghiệm gọi Endpoint <code>/api/speech/assess</code></p>
+    
+    <div class="form-group">
+        <label for="audioFile">File Âm thanh (.wav):</label>
+        <input type="file" id="audioFile" accept="audio/wav" required>
+        <small style="color:red">Lưu ý: File phải là chuẩn WAV (16kHz, 16-bit Mono) theo yêu cầu của Azure.</small>
+    </div>
+
+    <div class="form-group">
+        <label for="referenceText">Đoạn Text Đối Chiếu (Reference Text):</label>
+        <input type="text" id="referenceText" placeholder="Để trống nếu chỉ muốn dịch Speech-To-Text tự do...">
+    </div>
+
+    <button onclick="testApi()">Gửi Lên Server Chấm Điểm</button>
+    <span id="loadingText" class="loading">⏳ Đang gửi lên Azure... Vui lòng chờ...</span>
+
+    <h3>Kết Quả (JSON Response):</h3>
+    <pre id="jsonResult">Kết quả sẽ hiện ở đây...</pre>
+
+    <script>
+        async function testApi() {
+            const fileInput = document.getElementById('audioFile');
+            const refText = document.getElementById('referenceText').value;
+            const resultBox = document.getElementById('jsonResult');
+            const loadingText = document.getElementById('loadingText');
+
+            if (fileInput.files.length === 0) {
+                alert("Vui lòng chọn 1 file WAV!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("audioFile", fileInput.files[0]);
+            
+            if (refText.trim() !== "") {
+                formData.append("referenceText", refText);
+            }
+
+            resultBox.textContent = "";
+            loadingText.style.display = "inline";
+
+            try {
+                // Tự động nhận diện URL của Server hiện tại.
+                const response = await fetch('api/speech/assess', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                resultBox.textContent = JSON.stringify(data, null, 4);
+                
+            } catch (error) {
+                resultBox.textContent = "Lỗi kết nối tới Server: " + error.message;
+            } finally {
+                loadingText.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
