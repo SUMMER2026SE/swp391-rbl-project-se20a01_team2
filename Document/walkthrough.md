@@ -12,6 +12,7 @@ Tôi đã tạo các file xử lý chính trong mã nguồn của bạn:
 - **[PronunciationResult.java](file:///c:/Code/java/SWP_Local/IELTSFLOW_local/src/main/java/model/PronunciationResult.java)**: Đóng gói kết quả trả về từ Azure SDK thành một cấu trúc JSON sạch sẽ, bao gồm các điểm số (Fluency, Accuracy, Prosody...) và JSON chi tiết từng từ để Frontend highlight lỗi.
 
 ### ⚙️ Tầng Services
+- **[SubmissionService.java](file:///c:/Code/github/SWP301_NHOM2_IELTSFLOW/IELTSFLOW/src/main/java/services/SubmissionService.java)** & **[SubmissionServiceImpl.java](file:///c:/Code/github/SWP301_NHOM2_IELTSFLOW/IELTSFLOW/src/main/java/services/SubmissionServiceImpl.java)**: Interface và class thực thi logic cập nhật điểm thi vào CSDL thông qua kiến trúc MVC chuẩn.
 - **[AzureSpeechService.java](file:///c:/Code/java/SWP_Local/IELTSFLOW_local/src/main/java/services/AzureSpeechService.java)**: Nơi chứa logic kết nối với Azure Cognitive Services. 
   - Hàm `assessPronunciation()`: Gọi cấu hình Pronunciation Assessment, chấm điểm và lấy chi tiết.
   - Hàm `speechToText()`: Dành cho kịch bản tự do (ví dụ: làm bài Writing bằng giọng nói hoặc Unscripted Speaking Part 2).
@@ -20,10 +21,12 @@ Tôi đã tạo các file xử lý chính trong mã nguồn của bạn:
 - **[SpeechAssessmentServlet.java](file:///c:/Code/java/SWP_Local/IELTSFLOW_local/src/main/java/controller/SpeechAssessmentServlet.java)**:
   - Tự động load `AZURE_SPEECH_KEY` từ file `.env` (thư mục `WEB-INF/`) trong quá trình `init()`.
   - Mở Endpoint `POST /api/speech/assess` hỗ trợ nhận Multipart form-data chứa file audio (giới hạn dung lượng 20MB để chống spam).
+  - Lấy tham số `detailId` từ Frontend và gọi `SubmissionService` để lưu vào DB.
   - Tích hợp try/catch theo chuẩn `error-handling-patterns` để không bị sập server nếu Azure Timeout.
 
 ### 🗄️ Tầng DAO
 - **[SubmissionDetailsDAO.java](file:///c:/Code/java/SWP_Local/IELTSFLOW_local/src/main/java/dao/SubmissionDetailsDAO.java)**: 
+  - Đã được cập nhật sử dụng **JPA/Hibernate** (thông qua `JpaHelper`) thay vì JDBC thuần.
   - Đã chuẩn bị hàm `updateSpeakingEvaluation(...)` giúp chuyển đổi điểm Azure (thang 100) về chuẩn IELTS Band (0-9.0).
   - Cập nhật dòng `CandidateTranscript` (văn bản được nhận diện) để người học sau này có thể xem lại Transcript của họ trong bài thi.
 
@@ -58,6 +61,9 @@ Khi nộp bài thu âm cho một câu hỏi Speaking:
 ```javascript
 const formData = new FormData();
 formData.append("audioFile", audioBlob, "speaking_part1.wav");
+
+// [QUAN TRỌNG] Bắt buộc gửi kèm detailId (ID của chi tiết bài làm) để Backend biết cập nhật cho Record nào trong Database
+formData.append("detailId", 123);
 
 // NẾU CÓ BÀI ĐỌC CHUẨN (Ví dụ: Read Aloud)
 formData.append("referenceText", "The text candidate supposed to say"); 

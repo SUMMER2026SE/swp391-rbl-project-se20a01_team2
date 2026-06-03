@@ -1,17 +1,11 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import jakarta.persistence.Query;
+import util.JpaHelper;
 
 public class SubmissionDetailsDAO {
 
-    // Giả sử bạn có class DBContext hoặc DBConnection để lấy Connection
-    // private DBContext dbContext;
-    
     public SubmissionDetailsDAO() {
-        // Khởi tạo kết nối DB
-        // dbContext = new DBContext();
     }
 
     /**
@@ -23,31 +17,29 @@ public class SubmissionDetailsDAO {
      * @return true nếu update thành công
      */
     public boolean updateSpeakingEvaluation(int detailId, String transcript, double azureScore) {
-        String sql = "UPDATE SubmissionDetails " +
-                     "SET CandidateTranscript = ?, " +
-                     "Score = ?, " +
-                     "GradingStatus = 'Graded' " +
-                     "WHERE DetailID = ?";
-                     
         // Quy đổi điểm từ thang 100 của Azure sang Band IELTS (0 - 9.0)
         double ieltsBand = convertAzureScoreToIeltsBand(azureScore);
 
-        /* Code mẫu sử dụng JDBC:
-        try (Connection conn = dbContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-             
-            ps.setString(1, transcript);
-            ps.setDouble(2, ieltsBand);
-            ps.setInt(3, detailId);
-            
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
+        try {
+            JpaHelper.execute(em -> {
+                String sql = "UPDATE SubmissionDetails " +
+                             "SET CandidateTranscript = :transcript, " +
+                             "Score = :score, " +
+                             "GradingStatus = 'Graded' " +
+                             "WHERE DetailID = :detailId";
+                Query query = em.createNativeQuery(sql);
+                query.setParameter("transcript", transcript);
+                query.setParameter("score", ieltsBand);
+                query.setParameter("detailId", detailId);
+                
+                int updatedCount = query.executeUpdate();
+                System.out.println("Đã lưu transcript và cập nhật điểm " + ieltsBand + " cho detailId " + detailId + " (Affected rows: " + updatedCount + ")");
+            });
+            return true;
+        } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-        */
-        
-        System.out.println("Đã lưu transcript và cập nhật điểm " + ieltsBand + " cho detailId " + detailId);
-        return true; 
     }
     
     /**
