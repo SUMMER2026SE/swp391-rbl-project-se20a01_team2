@@ -3,6 +3,8 @@ package controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.PronunciationResult;
 import services.AzureSpeechService;
+import services.SubmissionService;
+import services.SubmissionServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -29,11 +31,13 @@ public class SpeechAssessmentServlet extends HttpServlet {
 
     private AzureSpeechService speechService;
     private ObjectMapper objectMapper;
+    private SubmissionService submissionService;
 
     @Override
     public void init() throws ServletException {
         super.init();
         objectMapper = new ObjectMapper();
+        submissionService = new SubmissionServiceImpl();
         
         try {
             // Lấy key từ System Properties (đã được nạp từ .env bởi AppContextListener)
@@ -59,6 +63,18 @@ public class SpeechAssessmentServlet extends HttpServlet {
         try {
             // Lấy đoạn văn bản gốc mà user được yêu cầu đọc
             String referenceText = req.getParameter("referenceText");
+            
+            // Nhận detailId từ request để map với Database
+            String detailIdStr = req.getParameter("detailId");
+            int detailId = -1;
+            if (detailIdStr != null && !detailIdStr.trim().isEmpty()) {
+                try {
+                    detailId = Integer.parseInt(detailIdStr);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid detailId format: " + detailIdStr);
+                }
+            }
+
             Part filePart = req.getPart("audioFile");
 
             // Validation cơ bản
@@ -88,10 +104,17 @@ public class SpeechAssessmentServlet extends HttpServlet {
                 responseData.put("success", true);
                 responseData.put("data", result);
                 
-                // [Lưu ý DAO] - Tại đây bạn (Thanh Phong) sẽ gọi SubmissionDetailsDAO để lưu:
-                // 1. Cập nhật `CandidateTranscript` = result.getRecognizedText()
-                // 2. Chuyển đổi result.getPronunciationScore() (0-100) sang Band IELTS
-                // 3. Cập nhật `Score` vào database
+                // Lưu kết quả vào DB nếu có truyền detailId (Trường hợp 1)
+                if (detailId > 0) {
+                    boolean isSaved = submissionService.updateSpeakingEvaluation(
+                            detailId, 
+                            result.getRecognizedText(), 
+                            result.getPronunciationScore()
+                    );
+                    if (!isSaved) {
+                        System.err.println("Cảnh báo: Không thể lưu kết quả Speaking vào DB cho DetailID = " + detailId);
+                    }
+                }
                 
                 resp.setStatus(200);
             } else {

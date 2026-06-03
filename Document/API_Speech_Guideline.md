@@ -42,6 +42,9 @@ Sử dụng `FormData` trong JavaScript để đóng gói dữ liệu:
 const formData = new FormData();
 formData.append("audioFile", audioBlob, "speaking_record.wav");
 
+// [MỚI CẬP NHẬT] Gửi kèm ID của câu hỏi/bài làm để backend biết cần chấm điểm cho bản ghi nào trong DB
+formData.append("detailId", "123"); 
+
 // NẾU CÓ ĐỀ BÀI ĐỌC CHUẨN (Ví dụ: Thí sinh đang làm dạng bài Read Aloud)
 // Bạn cần gửi thêm câu chữ mà thí sinh phải đọc để AI đối chiếu
 formData.append("referenceText", "This is the text the candidate is supposed to read."); 
@@ -108,10 +111,10 @@ Hệ thống sẽ trả về JSON chứa đầy đủ các điểm (thang 100) v
 
 ## 5. LƯU Ý CHO BACKEND TEAM (Ghi chú nội bộ)
 
-Khi API chạy thành công ở Trường hợp 1 (chấm điểm), Backend (cụ thể là class `SpeechAssessmentServlet.java`) sẽ tự động gọi qua tầng `SubmissionDetailsDAO.java`.
+Khi API chạy thành công ở Trường hợp 1 (chấm điểm), Backend (cụ thể là class `SpeechAssessmentServlet.java`) sẽ trích xuất `detailId` từ request và tự động gọi qua tầng `SubmissionService.java` -> `SubmissionDetailsDAO.java`.
 Hàm `updateSpeakingEvaluation(detailId, transcript, azureScore)` sẽ đảm nhận việc:
 1. Convert con số điểm `pronunciationScore` (ví dụ 83.0) sang chuẩn IELTS Band (từ 0 đến 9.0).
-2. Lưu kết quả Band điểm vào cột `Score` và lưu chữ vào cột `CandidateTranscript` trên Table `SubmissionDetails` của cơ sở dữ liệu.
+2. Lưu kết quả Band điểm vào cột `Score` và lưu chữ vào cột `CandidateTranscript` trên Table `SubmissionDetails` của cơ sở dữ liệu bằng cách sử dụng **JPA/Hibernate (`JpaHelper.execute`)**.
 
 Nếu mọi người gặp lỗi khi test nghiệm thu tính năng này trên máy Local, hãy đảm bảo các bạn đã kéo file `.env` mới nhất hoặc thêm 2 biến `SPEECH_KEY` và `SPEECH_REGION` (được anh Phong cung cấp nội bộ) vào file `.env` trong máy của các bạn.
 
