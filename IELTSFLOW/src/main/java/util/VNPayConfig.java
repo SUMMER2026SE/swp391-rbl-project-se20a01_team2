@@ -9,10 +9,10 @@ public final class VNPayConfig {
     private VNPayConfig() {}
 
     /** Merchant code (vnp_TmnCode) */
-    public static final String TMN_CODE    = "O5V95OY4";
+    public static final String TMN_CODE    = System.getProperty("VNPAY_TMN_CODE", "O5V95OY4");
 
     /** Secret key for HMAC-SHA512 checksum */
-    public static final String HASH_SECRET = "PY9GVFBZI6J7250NWPLEFZIJEKDT05QG";
+    public static final String HASH_SECRET = System.getProperty("VNPAY_HASH_SECRET", "PY9GVFBZI6J7250NWPLEFZIJEKDT05QG");
 
     /** VNPay sandbox payment endpoint */
     public static final String PAY_URL     = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
