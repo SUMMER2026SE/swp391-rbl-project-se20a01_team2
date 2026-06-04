@@ -14,8 +14,10 @@ Tài liệu này hướng dẫn các thành viên trong dự án (đặc biệt 
 - **Content-Type:** `multipart/form-data`
 
 API này xử lý gộp cả 2 trường hợp:
-- **Trường hợp A (Có kịch bản - Read Aloud)**: Bạn gửi lên file ghi âm + Đoạn text thí sinh cần đọc. API sẽ trả về STT và Bảng điểm Pronunciation.
-- **Trường hợp B (Nói tự do - Unscripted)**: Bạn chỉ gửi lên file ghi âm. API chỉ trả về văn bản dịch ra (STT).
+- **Trường hợp A (Có kịch bản - Read Aloud)**: Bạn gửi lên file ghi âm (`audioFile`) + Đoạn text thí sinh cần đọc (`referenceText`). API sẽ trả về Bảng điểm Pronunciation (phát âm).
+- **Trường hợp B (Nói tự do - Unscripted - Áp dụng Luồng Tối Ưu Mới)**: Frontend sẽ chịu trách nhiệm tự dịch Speech-to-Text (STT) trước (Ví dụ: sử dụng `Web Speech API` của trình duyệt). Sau đó, bạn gửi lên file ghi âm (`audioFile`) + Đoạn text vừa dịch được (`referenceText`) + cờ `isUnscripted=true`.
+  - Kết quả trả về ngay lập tức: JSON Bảng điểm Pronunciation (giúp Frontend hiển thị/bôi đỏ các từ thí sinh phát âm sai).
+  - Xử lý ngầm (Backend): Backend sẽ tự động gọi AI (Gemini) để chấm điểm Grammar, Vocabulary, Coherence dựa trên `referenceText` và lưu vào Database.
 
 ---
 
@@ -25,9 +27,9 @@ API này xử lý gộp cả 2 trường hợp:
 > Azure SDK backend yêu cầu định dạng audio nghiêm ngặt. Nếu gửi sai, API sẽ báo lỗi 500 hoặc `NoMatch`.
 > **Định dạng bắt buộc:** `WAV`, Sample Rate `16000Hz (16kHz)`, `16-bit`, `Mono (1 kênh)`.
 
-**Gợi ý cho Frontend (JavaScript):**
-Bởi vì `MediaRecorder` mặc định của trình duyệt web thường tạo ra `.webm` (Chrome) hoặc `.ogg` (Firefox), bạn không thể gửi trực tiếp file này lên Server.
-Frontend cần dùng các thư viện như `recordrtc` hoặc `extendable-media-recorder` kết hợp `wav-encoder` để thu âm và nén đúng chuẩn WAV trước khi gửi request.
+**Gợi ý cho Frontend (JavaScript) - Xử lý Audio & STT:**
+1. **Thu âm**: Bởi vì `MediaRecorder` mặc định của trình duyệt web thường tạo ra `.webm` (Chrome) hoặc `.ogg` (Firefox), bạn không thể gửi trực tiếp file này lên Server. Cần dùng thư viện như `recordrtc` hoặc `extendable-media-recorder` kết hợp `wav-encoder` để thu âm và nén đúng chuẩn WAV.
+2. **Speech-to-Text (STT) cho bài thi tự do**: Frontend có thể sử dụng `Web Speech API` (cụ thể là `SpeechRecognition` object có sẵn trên hầu hết các trình duyệt hiện đại) để chuyển đổi giọng nói thành văn bản realtime ngay trong lúc thí sinh thu âm. Hoặc sử dụng 1 dịch vụ STT nhẹ ở client-side để lấy text trước khi gửi cho Backend.
 
 ---
 
@@ -47,7 +49,10 @@ formData.append("audioFile", audioBlob, "speaking_record.wav");
 formData.append("referenceText", "This is the text the candidate is supposed to read."); 
 
 // NẾU THÍ SINH NÓI TỰ DO (Ví dụ: Speaking Part 2)
-// KHÔNG truyền biến referenceText, hệ thống sẽ tự động hiểu là chỉ cần dịch STT.
+// Theo luồng tối ưu: Frontend tự chạy STT để lấy văn bản, sau đó truyền văn bản này vào biến referenceText
+// Đồng thời, TRUYỀN THÊM CỜ `isUnscripted = true` để Backend biết đây là bài nói tự do và kích hoạt AI chấm Grammar/Vocabulary sau khi chấm phát âm.
+// formData.append("referenceText", textTuSTT);
+// formData.append("isUnscripted", "true");
 
 fetch('http://localhost:8080/IELTSFLOW/api/speech/assess', {
     method: 'POST',

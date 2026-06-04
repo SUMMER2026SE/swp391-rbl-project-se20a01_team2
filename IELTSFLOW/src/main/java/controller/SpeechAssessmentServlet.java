@@ -5,6 +5,7 @@ import model.PronunciationResult;
 import services.AzureSpeechService;
 import services.SubmissionService;
 import services.SubmissionServiceImpl;
+import services.AIEvaluationService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -32,12 +33,14 @@ public class SpeechAssessmentServlet extends HttpServlet {
     private AzureSpeechService speechService;
     private ObjectMapper objectMapper;
     private SubmissionService submissionService;
+    private AIEvaluationService aiEvaluationService;
 
     @Override
     public void init() throws ServletException {
         super.init();
         objectMapper = new ObjectMapper();
         submissionService = new SubmissionServiceImpl();
+        aiEvaluationService = new AIEvaluationService();
         
         try {
             // Lấy key từ System Properties (đã được nạp từ .env bởi AppContextListener)
@@ -74,6 +77,10 @@ public class SpeechAssessmentServlet extends HttpServlet {
                     System.err.println("Invalid detailId format: " + detailIdStr);
                 }
             }
+            
+            // Nhận cờ báo hiệu đây là bài nói tự do (Frontend gửi STT lên làm kịch bản)
+            String isUnscriptedStr = req.getParameter("isUnscripted");
+            boolean isUnscripted = Boolean.parseBoolean(isUnscriptedStr);
 
             Part filePart = req.getPart("audioFile");
 
@@ -113,6 +120,14 @@ public class SpeechAssessmentServlet extends HttpServlet {
                     );
                     if (!isSaved) {
                         System.err.println("Cảnh báo: Không thể lưu kết quả Speaking vào DB cho DetailID = " + detailId);
+                    } else if (isUnscripted) {
+                        // Kích hoạt tiến trình chấm IELTS Speaking với Gemini
+                        String topic = submissionService.getQuestionContentByDetailId(detailId);
+                        if (topic != null) {
+                            aiEvaluationService.evaluateSpeakingAsync(detailId, topic, result.getRecognizedText(), result.getPronunciationScore());
+                        } else {
+                            System.err.println("Không thể lấy đề bài (topic) để chấm AI cho DetailID = " + detailId);
+                        }
                     }
                 }
                 

@@ -14,4 +14,9 @@ public class SubmissionServiceImpl implements SubmissionService {
     public boolean updateSpeakingEvaluation(int detailId, String transcript, double azureScore) {
         return submissionDetailsDAO.updateSpeakingEvaluation(detailId, transcript, azureScore);
     }
+    
+    @Override
+    public String getQuestionContentByDetailId(int detailId) {
+        return submissionDetailsDAO.getQuestionContentByDetailId(detailId);
+    }
 }
