@@ -1,4 +1,3 @@
-
     // ── State ─────────────────────────────
     let allUsers  = [];
     let allStats  = {};
@@ -6,20 +5,6 @@
 
     // ── Bootstrap ─────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
-      // Kiểm tra đăng nhập
-      try {
-        const r = await fetch('/IELTSFLOW/api/user/me');
-        const d = await r.json();
-        if (!d.success) { location.href = '/IELTSFLOW/jsp/auth.jsp'; return; }
-        if (d.data.roleId !== 1) { location.href = '/IELTSFLOW/index.html?error=forbidden'; return; }
-        // Cập nhật tên admin
-        document.getElementById('admin-name').textContent = d.data.fullName || 'Admin';
-        const initials = (d.data.fullName || 'A').split(' ').map(w=>w[0]).slice(-2).join('').toUpperCase();
-        document.getElementById('admin-initials').textContent = initials;
-      } catch(e) {
-        location.href = '/IELTSFLOW/jsp/auth.jsp';
-        return;
-      }
       await loadData();
     });
 

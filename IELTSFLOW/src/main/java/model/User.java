@@ -9,9 +9,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
-/**
- * Thực thể User (Người dùng)
- */
+
+ 
 @Entity
 @Table(name = "Users")
 public class User {
@@ -45,7 +44,7 @@ public class User {
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
 
-    // Các hàm khởi tạo
+    
     public User() {
     }
 
@@ -55,7 +54,7 @@ public class User {
         this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.authProvider = "Local";
-        this.status = "Inactive"; // Đổi thành Inactive để yêu cầu xác thực email
+        this.status = "Inactive"; 
     }
 
     @PrePersist
@@ -139,3 +138,5 @@ public class User {
         this.createdAt = createdAt;
     }
 }
+
+

@@ -1,6 +1,5 @@
 package controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,41 +8,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-/**
- * Servlet xử lý đăng xuất - xóa session và trả về JSON
- */
-@WebServlet("/api/auth/logout")
+@WebServlet(name = "LogoutServlet", urlPatterns = {"/api/auth/logout", "/logout"})
 public class LogoutServlet extends HttpServlet {
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        doLogout(req, resp);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        processLogout(req, resp);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        doLogout(req, resp);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        processLogout(req, resp);
     }
 
-    private void doLogout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json;charset=UTF-8");
-        resp.setHeader("Cache-Control", "no-store");
-
+    private void processLogout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
         if (session != null) {
             session.invalidate();
         }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("message", "Đăng xuất thành công");
-        mapper.writeValue(resp.getOutputStream(), result);
+        resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
     }
 }

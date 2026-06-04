@@ -18,7 +18,7 @@ import java.io.IOException;
  *
  * Quy tắc:
  *  - /jsp/admin/*       → Yêu cầu đăng nhập + roleId == 1 (Admin)
- *  - /jsp/profile.jsp  → Yêu cầu đăng nhập (mọi role)
+ *  - /jsp/account.jsp  → Yêu cầu đăng nhập (mọi role)
  *  - /jsp/survey.jsp   → Yêu cầu đăng nhập
  *  - /jsp/change-password.jsp → Yêu cầu đăng nhập
  *  - Còn lại              → Cho phép tự do (Guest)
@@ -28,10 +28,20 @@ public class AuthFilter implements Filter {
 
     // Các đường dẫn yêu cầu đăng nhập (bất kỳ role nào)
     private static final String[] PROTECTED_PATHS = {
-        "/jsp/profile.jsp",
-        "/jsp/survey.jsp",
-        "/jsp/change-password.jsp"
+        "/jsp/account.jsp",
+        "/jsp/change-password.jsp",
+        "/jsp/notifications.jsp",
+        "/jsp/tickets.jsp",
+        "/jsp/ticket-detail.jsp"
     };
+
+    // Các servlet URL yêu cầu đăng nhập
+    private static final String[] PROTECTED_SERVLETS = {
+        "/account",
+        "/change-password",
+        "/notifications",
+        "/tickets",
+        "/tickets"};
 
     // Các đường dẫn chỉ dành cho Admin (roleId == 1)
     private static final String ADMIN_PATH_PREFIX = "/jsp/admin";
@@ -49,7 +59,7 @@ public class AuthFilter implements Filter {
         HttpServletResponse resp = (HttpServletResponse) response;
 
         String contextPath = req.getContextPath();       // VD: /IELTSFLOW
-        String requestURI  = req.getRequestURI();         // VD: /IELTSFLOW/jsp/profile.jsp
+        String requestURI  = req.getRequestURI();         // VD: /IELTSFLOW/jsp/account.jsp
         // Đường dẫn sau context
         String path = requestURI.substring(contextPath.length());
 

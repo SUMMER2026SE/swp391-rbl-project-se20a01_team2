@@ -20,19 +20,20 @@ public class JpaHelper {
 
     private static Map<String, String> buildJpaOverrides() {
         Map<String, String> overrides = new HashMap<>();
-
+        
         // Ưu tiên System property (được set bởi AppContextListener từ .env)
         String jdbcUrl = readConfig("DB_URL", null);
         if (jdbcUrl == null || jdbcUrl.isBlank()) {
             jdbcUrl = buildDefaultJdbcUrl();
         }
+        
         String jdbcUser     = readConfig("DB_USER",     "sa");
         String jdbcPassword = readConfig("DB_PASSWORD", "123456");
-
+        
         overrides.put("jakarta.persistence.jdbc.url",      jdbcUrl);
         overrides.put("jakarta.persistence.jdbc.user",     jdbcUser);
         overrides.put("jakarta.persistence.jdbc.password", jdbcPassword);
-
+        
         System.out.println("[JpaHelper] Connecting to: " + jdbcUrl + " (user=" + jdbcUser + ")");
         return overrides;
     }
@@ -45,7 +46,7 @@ public class JpaHelper {
         String trust   = readConfig("DB_TRUST_SERVER_CERT","True");
         String extra   = readConfig("DB_EXTRA_PARAMS",
                 "sendStringParametersAsUnicode=true;characterEncoding=UTF-8");
-
+                
         return "jdbc:sqlserver://" + host + ":" + port
                 + ";databaseName=" + dbName
                 + ";Encrypt=" + encrypt

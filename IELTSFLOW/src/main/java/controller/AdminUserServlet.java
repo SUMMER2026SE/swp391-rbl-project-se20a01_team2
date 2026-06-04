@@ -1,4 +1,4 @@
-package controller.admin;
+package controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dao.UserDAO;

@@ -9,14 +9,14 @@ import util.JpaHelper;
 import java.util.Optional;
 
 /**
- * Lớp DAO xử lý dữ liệu người dùng (User) sử dụng JPA
+ * Lá»›p DAO xá»­ lÃ½ dá»¯ liá»‡u ngÆ°á»i dÃ¹ng (User) sá»­ dá»¥ng JPA
  */
 public class UserDAO {
 
     /**
-     * Tìm người dùng qua email
-     * @param email Email cần tìm
-     * @return Optional chứa User nếu tìm thấy
+     * TÃ¬m ngÆ°á»i dÃ¹ng qua email
+     * @param email Email cáº§n tÃ¬m
+     * @return Optional chá»©a User náº¿u tÃ¬m tháº¥y
      */
     public Optional<User> findByEmail(String email) {
         return JpaHelper.query(em -> {
@@ -31,18 +31,18 @@ public class UserDAO {
     }
 
     /**
-     * Tìm người dùng qua ID
-     * @param userId ID người dùng
-     * @return Optional chứa User nếu tìm thấy
+     * TÃ¬m ngÆ°á»i dÃ¹ng qua ID
+     * @param userId ID ngÆ°á»i dÃ¹ng
+     * @return Optional chá»©a User náº¿u tÃ¬m tháº¥y
      */
     public Optional<User> findById(int userId) {
         return JpaHelper.query(em -> Optional.ofNullable(em.find(User.class, userId)));
     }
 
     /**
-     * Kiểm tra email đã tồn tại chưa
-     * @param email Email cần kiểm tra
-     * @return true nếu đã tồn tại
+     * Kiá»ƒm tra email Ä‘Ã£ tá»“n táº¡i chÆ°a
+     * @param email Email cáº§n kiá»ƒm tra
+     * @return true náº¿u Ä‘Ã£ tá»“n táº¡i
      */
     public boolean emailExists(String email) {
         return JpaHelper.query(em -> {
@@ -53,9 +53,9 @@ public class UserDAO {
     }
 
     /**
-     * Tạo mới người dùng
-     * @param user Đối tượng User
-     * @return UserID vừa được tạo
+     * Táº¡o má»›i ngÆ°á»i dÃ¹ng
+     * @param user Äá»‘i tÆ°á»£ng User
+     * @return UserID vá»«a Ä‘Æ°á»£c táº¡o
      */
     public int create(User user) {
         JpaHelper.execute(em -> em.persist(user));
@@ -63,10 +63,10 @@ public class UserDAO {
     }
 
     /**
-     * Cập nhật trạng thái người dùng
-     * @param userId ID người dùng
-     * @param status Trạng thái mới (VD: "Active", "Inactive")
-     * @return true nếu thành công
+     * Cáº­p nháº­t tráº¡ng thÃ¡i ngÆ°á»i dÃ¹ng
+     * @param userId ID ngÆ°á»i dÃ¹ng
+     * @param status Tráº¡ng thÃ¡i má»›i (VD: "Active", "Inactive")
+     * @return true náº¿u thÃ nh cÃ´ng
      */
     public boolean updateStatus(int userId, String status) {
         try {
@@ -84,10 +84,10 @@ public class UserDAO {
     }
 
     /**
-     * Cập nhật mật khẩu người dùng
-     * @param userId ID người dùng
-     * @param newPasswordHash Hash mật khẩu mới
-     * @return true nếu thành công
+     * Cáº­p nháº­t máº­t kháº©u ngÆ°á»i dÃ¹ng
+     * @param userId ID ngÆ°á»i dÃ¹ng
+     * @param newPasswordHash Hash máº­t kháº©u má»›i
+     * @return true náº¿u thÃ nh cÃ´ng
      */
     public boolean updatePassword(int userId, String newPasswordHash) {
         try {
@@ -105,8 +105,8 @@ public class UserDAO {
     }
 
     /**
-     * Lấy ID của quyền Candidate (Học viên)
-     * @return RoleID của Candidate (mặc định là 3 nếu không tìm thấy)
+     * Láº¥y ID cá»§a quyá»n Candidate (Há»c viÃªn)
+     * @return RoleID cá»§a Candidate (máº·c Ä‘á»‹nh lÃ  3 náº¿u khÃ´ng tÃ¬m tháº¥y)
      */
     public int getCandidateRoleId() {
         return JpaHelper.query(em -> {
@@ -116,14 +116,14 @@ public class UserDAO {
                     return ((Number) result).intValue();
                 }
             } catch (NoResultException e) {
-                // Fallback nếu không có
+                // Fallback náº¿u khÃ´ng cÃ³
             }
             return 3;
         });
     }
 
     /**
-     * Lấy danh sách tất cả user cho trang Admin (trả về Map để tránh serialize toàn bộ entity)
+     * Láº¥y danh sÃ¡ch táº¥t cáº£ user cho trang Admin (tráº£ vá» Map Ä‘á»ƒ trÃ¡nh serialize toÃ n bá»™ entity)
      */
     public java.util.List<java.util.Map<String, Object>> findAllForAdmin() {
         return JpaHelper.query(em -> {
@@ -146,7 +146,7 @@ public class UserDAO {
     }
 
     /**
-     * Thống kê nhanh cho Admin Dashboard
+     * Thá»‘ng kÃª nhanh cho Admin Dashboard
      */
     public java.util.Map<String, Object> getStats() {
         return JpaHelper.query(em -> {
@@ -175,7 +175,7 @@ public class UserDAO {
     }
 
     /**
-     * Cập nhật fullName người dùng
+     * Cáº­p nháº­t fullName ngÆ°á»i dÃ¹ng
      */
     public boolean updateFullName(int userId, String fullName) {
         try {
@@ -191,4 +191,16 @@ public class UserDAO {
             return false;
         }
     }
+
+    /**
+     * Lấy toàn bộ user (dùng cho broadcast notification)
+     */
+    public java.util.List<User> findAll() {
+        return JpaHelper.query(em ->
+            em.createQuery("SELECT u FROM User u", User.class).getResultList()
+        );
+    }
 }
+
+
+

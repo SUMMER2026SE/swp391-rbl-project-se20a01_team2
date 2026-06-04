@@ -1,143 +1,104 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="true" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đổi mật khẩu – IELTS Flow</title>
-  <meta name="description" content="Đổi mật khẩu tài khoản IELTS Flow của bạn một cách an toàn.">
-  <link rel="stylesheet" href="../css/auth.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>&#272;&#7893;i m&#7853;t kh&#7849;u - IELTSFlow</title>
+    <link rel="stylesheet" href="../css/design-system.css">
+    <style>
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .page-wrapper { max-width: 480px; margin: 60px auto; padding: 0 20px; }
+        .card {
+            background: white; border-radius: 16px; padding: 36px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        .card-title { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
+        .card-subtitle { color: #64748b; font-size: 14px; margin: 0 0 28px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        .form-label span { color: #ef4444; }
+        .form-input {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0;
+            border-radius: 9px; font-size: 14px; font-family: inherit; box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            outline: none; border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+        }
+        .btn-submit {
+            width: 100%; padding: 13px; background: #f97316; color: white;
+            border: none; border-radius: 9px; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: background 0.2s; margin-top: 8px;
+        }
+        .btn-submit:hover { background: #ea580c; }
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .alert-error { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; }
+        .alert-success { background: #dcfce7; border: 1px solid #86efac; color: #15803d; }
+        .back-link {
+            display: block; text-align: center; margin-top: 18px;
+            color: #64748b; font-size: 14px; text-decoration: none;
+        }
+        .back-link:hover { color: #f97316; }
+    </style>
 </head>
 <body>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
+<div class="page-wrapper">
+    <div class="card">
+        <div class="card-title">&#128272; &#272;&#7893;i m&#7853;t kh&#7849;u</div>
+        <div class="card-subtitle">Nh&#7853;p m&#7853;t kh&#7849;u hi&#7879;n t&#7841;i v&#224; m&#7853;t kh&#7849;u m&#7899;i &#273;&#7875; c&#7853;p nh&#7853;t b&#7843;o m&#7853;t t&#224;i kho&#7843;n.</div>
 
-  <!-- Mini Nav -->
-  <nav style="position:fixed; top:0; left:0; right:0; z-index:200; background:rgba(7,11,20,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--clr-border); padding:0 2rem; height:60px; display:flex; align-items:center; justify-content:space-between;">
-    <div style="display:flex; align-items:center; gap:0.625rem; font-weight:700; font-size:1rem;">
-      <div style="width:30px; height:30px; background:var(--grad-primary); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; color:#fff;">IF</div>
-      <span class="text-gradient">IELTS Flow</span>
+        <c:if test="${not empty error}">
+            <div class="alert alert-error">&#10060; ${error}</div>
+        </c:if>
+        <c:if test="${not empty param.success}">
+            <div class="alert alert-success">&#9989; ${param.success}</div>
+        </c:if>
+
+        <form method="POST" action="${pageContext.request.contextPath}/change-password">
+            <div class="form-group">
+                <label class="form-label" for="currentPassword">
+                    M&#7853;t kh&#7849;u hi&#7879;n t&#7841;i <span>*</span>
+                </label>
+                <input type="password" id="currentPassword" name="currentPassword"
+                       class="form-input" placeholder="Nh&#7853;p m&#7853;t kh&#7849;u hi&#7879;n t&#7841;i" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="newPassword">
+                    M&#7853;t kh&#7849;u m&#7899;i <span>*</span>
+                </label>
+                <input type="password" id="newPassword" name="newPassword"
+                       class="form-input" placeholder="&#205;t nh&#7845;t 8 k&#253; t&#7921;" required minlength="8">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">
+                    X&#225;c nh&#7853;n m&#7853;t kh&#7849;u m&#7899;i <span>*</span>
+                </label>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                       class="form-input" placeholder="Nh&#7853;p l&#7841;i m&#7853;t kh&#7849;u m&#7899;i" required minlength="8">
+            </div>
+
+            <button type="submit" class="btn-submit">C&#7853;p nh&#7853;t m&#7853;t kh&#7849;u &rarr;</button>
+        </form>
+
+        <a href="${pageContext.request.contextPath}/account" class="back-link">&larr; Quay l&#7841;i t&#224;i kho&#7843;n</a>
     </div>
-    <a href="account.jsp" style="display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; color:var(--clr-text-secondary); transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      Về hồ sơ
-    </a>
-  </nav>
+</div>
 
-  <div class="otp-container" style="padding-top:5rem;">
-    <div class="glass-card otp-card" style="max-width:480px; padding:2.5rem;">
-      <div style="text-align:center; margin-bottom:2rem;">
-        <div style="font-size:2.5rem; margin-bottom:0.75rem;" class="animate-float">🔒</div>
-        <h1 class="text-2xl fw-extrabold" style="margin-bottom:0.5rem;">Đổi mật khẩu</h1>
-        <p class="text-secondary text-sm" style="line-height:1.65;">
-          Để bảo mật tài khoản, hãy tạo mật khẩu mạnh và không dùng lại mật khẩu cũ.
-        </p>
-      </div>
-
-      <form id="change-pw-form" novalidate>
-        <div style="display:flex; flex-direction:column; gap:1.25rem;">
-          <div class="form-group">
-            <label class="form-label" for="current-password">Mật khẩu hiện tại</label>
-            <div class="form-input-wrap">
-              <input type="password" id="current-password" class="form-input" placeholder="Nhập mật khẩu hiện tại" autocomplete="current-password" required>
-              <div class="input-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-              </div>
-              <button type="button" class="input-action" id="toggle-current" onclick="togglePw('current-password', this)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            </div>
-            <span class="form-error hidden" id="current-pw-error"></span>
-            <a href="forgot-password.jsp" class="text-xs" style="color:var(--clr-primary-400); margin-top:0.25rem; display:inline-block;">Không nhớ mật khẩu cũ? Dùng OTP</a>
-          </div>
-
-          <div style="height:1px; background:var(--clr-border);"></div>
-
-          <div class="form-group">
-            <label class="form-label" for="new-pw-change">Mật khẩu mới</label>
-            <div class="form-input-wrap">
-              <input type="password" id="new-pw-change" class="form-input" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" required>
-              <div class="input-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-              </div>
-              <button type="button" class="input-action" onclick="togglePw('new-pw-change', this)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            </div>
-            <div class="strength-bar" id="change-strength-bar">
-              <div class="strength-seg" id="c-seg-1"></div>
-              <div class="strength-seg" id="c-seg-2"></div>
-              <div class="strength-seg" id="c-seg-3"></div>
-              <div class="strength-seg" id="c-seg-4"></div>
-            </div>
-            <div class="strength-label text-muted" id="change-strength-label">Nhập mật khẩu để kiểm tra độ mạnh</div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="confirm-pw-change">Xác nhận mật khẩu mới</label>
-            <div class="form-input-wrap">
-              <input type="password" id="confirm-pw-change" class="form-input" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required>
-              <div class="input-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-              </div>
-            </div>
-            <span class="form-error hidden" id="change-confirm-error"></span>
-          </div>
-
-          <!-- Security Tips -->
-          <div style="padding:1rem; background:rgba(255,255,255,0.02); border:1px solid var(--clr-border); border-radius:0.75rem;">
-            <div class="text-xs fw-semibold text-muted" style="margin-bottom:0.625rem; text-transform:uppercase; letter-spacing:0.05em;">💡 Mẹo bảo mật</div>
-            <ul style="display:flex; flex-direction:column; gap:0.375rem;">
-              <li class="text-xs text-secondary" style="display:flex; gap:0.5rem; align-items:flex-start;">
-                <span style="color:var(--clr-success-400); flex-shrink:0;">✓</span>
-                Sử dụng ít nhất 12 ký tự gồm chữ, số và ký tự đặc biệt
-              </li>
-              <li class="text-xs text-secondary" style="display:flex; gap:0.5rem; align-items:flex-start;">
-                <span style="color:var(--clr-success-400); flex-shrink:0;">✓</span>
-                Không dùng tên, ngày sinh hoặc thông tin dễ đoán
-              </li>
-              <li class="text-xs text-secondary" style="display:flex; gap:0.5rem; align-items:flex-start;">
-                <span style="color:var(--clr-success-400); flex-shrink:0;">✓</span>
-                Dùng mật khẩu khác nhau cho mỗi tài khoản
-              </li>
-            </ul>
-          </div>
-
-          <button type="submit" class="auth-submit-btn" id="change-pw-submit">
-            <span class="spinner"></span>
-            <span class="btn-text">Cập nhật mật khẩu</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </button>
-
-          <a href="account.jsp" class="text-center text-sm text-secondary" style="transition:color .2s;" onmouseover="this.style.color='var(--clr-text-primary)'" onmouseout="this.style.color=''">
-            Hủy, quay lại hồ sơ
-          </a>
-        </div>
-      </form>
-
-      <div style="margin-top:1.25rem; padding:0.75rem 1rem; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.15); border-radius:0.75rem; display:flex; gap:0.625rem; align-items:flex-start;">
-        <span style="font-size:1rem; flex-shrink:0;">🛡️</span>
-        <p class="text-xs text-secondary" style="line-height:1.6;">
-          Mật khẩu được băm bằng <strong style="color:var(--clr-success-400);">bcrypt (cost factor 12)</strong> – tiêu chuẩn bảo mật ngân hàng. Không ai có thể đọc mật khẩu của bạn, kể cả admin.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast-container" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;display:flex;flex-direction:column;gap:.75rem;"></div>
-  <script src="../js/auth.js"></script>
+<script>
+    // Ki&#7875;m tra kh&#7899;p m&#7853;t kh&#7849;u ph&#237;a client
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const np = document.getElementById('newPassword').value;
+        const cp = document.getElementById('confirmPassword').value;
+        if (np !== cp) {
+            e.preventDefault();
+            alert('M&#7853;t kh&#7849;u m&#7899;i v&#224; x&#225;c nh&#7853;n kh&#244;ng kh&#7899;p!');
+        }
+    });
+</script>
 </body>
 </html>

@@ -61,14 +61,14 @@ public class OtpService {
     /**
      * Xác thực và sử dụng token đặt lại mật khẩu
      */
-    public boolean consumeResetToken(String email, String token) {
+    public String consumeResetToken(String token) {
         TokenEntry entry = tokenMap.get(token);
         if (entry != null && entry.type.equals("RESET_PASSWORD") 
-                && entry.email.equals(email) && LocalDateTime.now().isBefore(entry.expiresAt)) {
+                && LocalDateTime.now().isBefore(entry.expiresAt)) {
             tokenMap.remove(token);
-            return true;
+            return entry.email;
         }
-        return false;
+        return null;
     }
 
     /**

@@ -1,4 +1,5 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="true" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -410,8 +411,8 @@
       </a>
 
       <div class="nav-section-label" style="margin-top:.5rem">Hệ thống</div>
-      <a href="/IELTSFLOW/index.html" class="nav-item">
-        <span class="nav-icon">🌐</span> Xem trang chủ
+      <a href="/IELTSFLOW/index.jsp" class="nav-item">
+        <span class="nav-icon">🏠</span> Xem trang chủ
       </a>
       <a href="#" class="nav-item" onclick="confirmLogout()">
         <span class="nav-icon">🚪</span> Đăng xuất
@@ -419,13 +420,13 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="admin-profile">
-        <div class="admin-avatar" id="admin-initials">A</div>
-        <div>
-          <div class="admin-name" id="admin-name">Admin</div>
-          <div class="admin-role">Quản trị viên</div>
+        <div class="admin-profile">
+          <div class="admin-avatar" id="admin-initials">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1).toUpperCase() : 'A'}</div>
+          <div>
+            <div class="admin-name" id="admin-name">${not empty sessionScope.fullName ? sessionScope.fullName : 'Admin'}</div>
+            <div class="admin-role">Qu&#7843;n tr&#7883; vi&#234;n</div>
+          </div>
         </div>
-      </div>
     </div>
   </aside>
 

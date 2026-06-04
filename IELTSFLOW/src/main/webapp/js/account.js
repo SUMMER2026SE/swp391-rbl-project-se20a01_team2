@@ -1,3 +1,5 @@
+// Refactored account.js for Tabbed Interface instead of Scroll Spy
+
 document.addEventListener('DOMContentLoaded', () => {
     // === 1. Toast Notification System ===
     const toastContainer = document.getElementById('toastContainer');
@@ -17,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         toastContainer.appendChild(toast);
         
-        // Trigger animation
         setTimeout(() => toast.classList.add('show'), 10);
         
         setTimeout(() => {
@@ -25,88 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => toast.remove(), 300);
         }, duration);
     }
-
-    // === 2. Fetch User Data & Populate ===
-    async function fetchUserData() {
-        try {
-            const response = await fetch('/IELTSFLOW/api/user/me');
-            if (response.status === 401) {
-                window.location.href = '/IELTSFLOW/jsp/auth.jsp';
-                return;
-            }
-            const data = await response.json();
-            
-            if (data.success && data.data) {
-                populateUserData(data.data);
-            } else {
-                // Fallback for UI testing if API fails but not 401
-                showToast('Không thể tải thông tin người dùng', 'error');
-            }
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-            // Fallback for dev environment without backend
-            const mockUser = { fullName: 'Nguyễn Văn A', email: 'nguyenvana@gmail.com', roleId: 2 };
-            populateUserData(mockUser);
-        }
-    }
-
-    function getInitials(name) {
-        if (!name) return 'U';
-        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    }
-
-    function populateUserData(user) {
-        let { fullName, email, roleId } = user;
-        
-        // Remove skeletons
-        document.querySelectorAll('.skeleton').forEach(el => {
-            el.classList.remove('skeleton');
-            // Remove fixed dimensions used for skeleton
-            if (el.id.startsWith('sidebar')) {
-                el.style.width = 'auto';
-                el.style.height = 'auto';
-            }
-        });
-
-        const savedFullName = localStorage.getItem('user_fullname');
-        if (savedFullName) fullName = savedFullName;
-
-        // Sidebar
-        document.getElementById('sidebarName').textContent = fullName;
-        document.getElementById('sidebarEmail').textContent = email;
-        const roleBadge = document.getElementById('sidebarRole');
-        roleBadge.classList.remove('hidden');
-        roleBadge.textContent = roleId === 1 ? 'Admin' : 'Học viên';
-        
-        if (roleId === 1) {
-            document.getElementById('adminLink').classList.remove('hidden');
-        }
-
-        // Initials
-        const initials = getInitials(fullName);
-        document.getElementById('sidebarAvatar').textContent = initials;
-        document.getElementById('profileInitials').textContent = initials;
-
-        // Profile Form
-        document.getElementById('fullName').value = fullName;
-        document.getElementById('email').value = email;
-        document.getElementById('profileDisplayName').textContent = fullName;
-
-        // Load LocalStorage overrides (Avatar & Phone)
-        const savedPhone = localStorage.getItem('user_phone');
-        if (savedPhone) document.getElementById('phone').value = savedPhone;
-
-        const savedAvatar = localStorage.getItem('user_avatar');
-        if (savedAvatar) {
-            const preview = document.getElementById('avatarPreview');
-            preview.src = savedAvatar;
-            preview.style.display = 'block';
-            document.getElementById('profileInitials').style.display = 'none';
-            document.getElementById('sidebarAvatar').innerHTML = `<img src="${savedAvatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-        }
-    }
-
-    fetchUserData();
 
     // === 3. Mobile Sidebar Toggle ===
     const mobileToggle = document.getElementById('mobileToggle');
@@ -116,57 +35,45 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.toggle('open');
     });
 
-    // Close sidebar when clicking outside on mobile
     document.addEventListener('click', (e) => {
         if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
             sidebar.classList.remove('open');
         }
     });
 
-    // === 4. Sidebar Navigation & Scroll Spy ===
+    // === 4. Sidebar Navigation & Tabs ===
     const navItems = document.querySelectorAll('.sidebar-nav-item[data-target]');
     const sections = Array.from(navItems).map(nav => document.getElementById(nav.dataset.target));
+
+    // Hide all sections except the first one initially
+    sections.forEach((sec, index) => {
+        if(sec) {
+            sec.style.display = index === 0 ? 'block' : 'none';
+        }
+    });
 
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const targetId = item.dataset.target;
-            const targetSection = document.getElementById(targetId);
             
-            window.scrollTo({
-                top: targetSection.offsetTop - 20,
-                behavior: 'smooth'
+            // Remove active from all nav items
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+            
+            // Hide all sections, show target section
+            sections.forEach(sec => {
+                if(sec) sec.style.display = 'none';
             });
+            const targetSection = document.getElementById(targetId);
+            if(targetSection) {
+                targetSection.style.display = 'block';
+            }
 
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('open');
             }
         });
-    });
-
-    const observerOptions = {
-        root: null,
-        rootMargin: '-50% 0px -50% 0px', // Trigger when section is in middle of viewport
-        threshold: 0
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.id;
-                navItems.forEach(nav => {
-                    if (nav.dataset.target === id) {
-                        nav.classList.add('active');
-                    } else {
-                        nav.classList.remove('active');
-                    }
-                });
-            }
-        });
-    }, observerOptions);
-
-    sections.forEach(sec => {
-        if (sec) observer.observe(sec);
     });
 
     // === 5. Avatar Upload ===
@@ -176,26 +83,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileInitials = document.getElementById('profileInitials');
     const sidebarAvatar = document.getElementById('sidebarAvatar');
 
-    avatarContainer.addEventListener('click', () => avatarInput.click());
+    if (avatarContainer && avatarInput) {
+        avatarContainer.addEventListener('click', () => avatarInput.click());
 
-    avatarInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Str = e.target.result;
-                avatarPreview.src = base64Str;
-                avatarPreview.style.display = 'block';
-                profileInitials.style.display = 'none';
-                sidebarAvatar.innerHTML = `<img src="${base64Str}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-                
-                // Save to localStorage
-                localStorage.setItem('user_avatar', base64Str);
-                showToast('Đã cập nhật ảnh đại diện');
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Str = e.target.result;
+                    if (avatarPreview) {
+                        avatarPreview.src = base64Str;
+                        avatarPreview.style.display = 'block';
+                    }
+                    if (profileInitials) profileInitials.style.display = 'none';
+                    if (sidebarAvatar) sidebarAvatar.innerHTML = `<img src="${base64Str}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                    localStorage.setItem('user_avatar', base64Str);
+                    showToast('Đã cập nhật ảnh đại diện');
+                }
+                reader.readAsDataURL(file);
             }
-            reader.readAsDataURL(file);
+        });
+    }
+
+    // Load saved avatar
+    const savedAvatar = localStorage.getItem('user_avatar');
+    if (savedAvatar) {
+        if (avatarPreview) {
+            avatarPreview.src = savedAvatar;
+            avatarPreview.style.display = 'block';
         }
-    });
+        if (profileInitials) profileInitials.style.display = 'none';
+        if (sidebarAvatar) sidebarAvatar.innerHTML = `<img src="${savedAvatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+    }
 
     // === 6. Profile Form Save ===
     document.getElementById('profileForm').addEventListener('submit', (e) => {
@@ -206,8 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newName) {
             document.getElementById('profileDisplayName').textContent = newName;
             document.getElementById('sidebarName').textContent = newName;
-            
-            // Only update initials if there's no custom avatar
             if (document.getElementById('profileInitials').style.display !== 'none') {
                 const initials = getInitials(newName);
                 document.getElementById('profileInitials').textContent = initials;
@@ -216,8 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         localStorage.setItem('user_phone', newPhone);
-        localStorage.setItem('user_fullname', newName); // Local storage as fallback
-        
+        localStorage.setItem('user_fullname', newName);
         showToast('Đã lưu thông tin cá nhân');
     });
 
@@ -296,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         matchError.classList.add('hidden');
         document.getElementById('confirmPassword').classList.remove('error');
 
-        // Regex: 8+ chars, letters and numbers
         const pwRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
         if (!pwRegex.test(newPw)) {
             showToast('Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ và số', 'error');
@@ -325,103 +241,101 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // === 9. IELTS Goal Settings ===
-    const bands = ['3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0', '6.5', '7.0', '7.5', '8.0', '8.5', '9.0'];
     const currentSelector = document.getElementById('currentBandSelector');
-    const targetSelector = document.getElementById('targetBandSelector');
-    let currentBandVal = 0;
-    let targetBandVal = 0;
+    if (currentSelector) {
+        const bands = ['3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0', '6.5', '7.0', '7.5', '8.0', '8.5', '9.0'];
+        const targetSelector = document.getElementById('targetBandSelector');
+        let currentBandVal = 0;
+        let targetBandVal = 0;
 
-    function renderBands(container, type) {
-        bands.forEach(band => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'band-option';
-            btn.textContent = band;
-            btn.dataset.value = band;
-            
-            btn.addEventListener('click', () => {
-                // Clear previous selection
-                container.querySelectorAll('.band-option').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
+        function renderBands(container, type) {
+            bands.forEach(band => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'band-option';
+                btn.textContent = band;
+                btn.dataset.value = band;
                 
-                if (type === 'current') currentBandVal = parseFloat(band);
-                else targetBandVal = parseFloat(band);
+                btn.addEventListener('click', () => {
+                    container.querySelectorAll('.band-option').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    
+                    if (type === 'current') currentBandVal = parseFloat(band);
+                    else targetBandVal = parseFloat(band);
+                    
+                    updateGapIndicator();
+                });
                 
-                updateGapIndicator();
+                container.appendChild(btn);
             });
+        }
+
+        renderBands(currentSelector, 'current');
+        renderBands(targetSelector, 'target');
+
+        const gapMessage = document.getElementById('gapMessage');
+        const gapBarCurrent = document.getElementById('gapBarCurrent');
+        const gapBarTarget = document.getElementById('gapBarTarget');
+
+        function updateGapIndicator() {
+            if (!currentBandVal && !targetBandVal) return;
+
+            const maxBand = 9.0;
             
-            container.appendChild(btn);
-        });
-    }
+            if (currentBandVal) {
+                const currentPct = (currentBandVal / maxBand) * 100;
+                gapBarCurrent.style.width = `${currentPct}%`;
+            }
+            
+            if (targetBandVal) {
+                const targetPct = (targetBandVal / maxBand) * 100;
+                gapBarTarget.style.left = `${targetPct}%`;
+            }
 
-    renderBands(currentSelector, 'current');
-    renderBands(targetSelector, 'target');
-
-    const gapMessage = document.getElementById('gapMessage');
-    const gapBarCurrent = document.getElementById('gapBarCurrent');
-    const gapBarTarget = document.getElementById('gapBarTarget');
-
-    function updateGapIndicator() {
-        if (!currentBandVal && !targetBandVal) return;
-
-        const maxBand = 9.0;
-        
-        if (currentBandVal) {
-            const currentPct = (currentBandVal / maxBand) * 100;
-            gapBarCurrent.style.width = `${currentPct}%`;
-        }
-        
-        if (targetBandVal) {
-            const targetPct = (targetBandVal / maxBand) * 100;
-            gapBarTarget.style.left = `${targetPct}%`;
-        }
-
-        if (currentBandVal && targetBandVal) {
-            const gap = (targetBandVal - currentBandVal).toFixed(1);
-            if (gap > 0) {
-                gapMessage.textContent = `Bạn cần cải thiện +${gap} band — Bạn làm được! 💪`;
-                gapMessage.style.color = 'var(--color-primary-700)';
-            } else {
-                gapMessage.textContent = 'Bạn đã đạt mục tiêu! 🎉';
-                gapMessage.style.color = 'var(--color-success-600)';
+            if (currentBandVal && targetBandVal) {
+                const gap = (targetBandVal - currentBandVal).toFixed(1);
+                if (gap > 0) {
+                    gapMessage.textContent = `Bạn cần cải thiện +${gap} band — Bạn làm được! 💪`;
+                    gapMessage.style.color = 'var(--color-primary-700)';
+                } else {
+                    gapMessage.textContent = 'Bạn đã đạt mục tiêu! 🎉';
+                    gapMessage.style.color = 'var(--color-success-600)';
+                }
             }
         }
-    }
 
-    // Load saved goals
-    const savedCurrent = localStorage.getItem('goal_current_band');
-    const savedTarget = localStorage.getItem('goal_target_band');
-    const savedDate = localStorage.getItem('goal_exam_date');
+        const savedCurrent = localStorage.getItem('goal_current_band');
+        const savedTarget = localStorage.getItem('goal_target_band');
+        const savedDate = localStorage.getItem('goal_exam_date');
 
-    if (savedCurrent) {
-        currentBandVal = parseFloat(savedCurrent);
-        const btn = currentSelector.querySelector(`.band-option[data-value="${savedCurrent}"]`);
-        if (btn) btn.classList.add('selected');
-    }
-    
-    if (savedTarget) {
-        targetBandVal = parseFloat(savedTarget);
-        const btn = targetSelector.querySelector(`.band-option[data-value="${savedTarget}"]`);
-        if (btn) btn.classList.add('selected');
-    }
-
-    if (savedDate) {
-        document.getElementById('examDate').value = savedDate;
-    }
-
-    // Initial update
-    setTimeout(updateGapIndicator, 100);
-
-    // Save Goal
-    document.getElementById('saveGoalBtn').addEventListener('click', () => {
-        if (currentBandVal) localStorage.setItem('goal_current_band', currentBandVal.toFixed(1));
-        if (targetBandVal) localStorage.setItem('goal_target_band', targetBandVal.toFixed(1));
+        if (savedCurrent) {
+            currentBandVal = parseFloat(savedCurrent);
+            const btn = currentSelector.querySelector(`.band-option[data-value="${savedCurrent}"]`);
+            if (btn) btn.classList.add('selected');
+        }
         
-        const dateVal = document.getElementById('examDate').value;
-        if (dateVal) localStorage.setItem('goal_exam_date', dateVal);
-        
-        showToast('Đã lưu mục tiêu IELTS thành công!');
-    });
+        if (savedTarget) {
+            targetBandVal = parseFloat(savedTarget);
+            const btn = targetSelector.querySelector(`.band-option[data-value="${savedTarget}"]`);
+            if (btn) btn.classList.add('selected');
+        }
+
+        if (savedDate) {
+            document.getElementById('examDate').value = savedDate;
+        }
+
+        setTimeout(updateGapIndicator, 100);
+
+        document.getElementById('saveGoalBtn').addEventListener('click', () => {
+            if (currentBandVal) localStorage.setItem('goal_current_band', currentBandVal.toFixed(1));
+            if (targetBandVal) localStorage.setItem('goal_target_band', targetBandVal.toFixed(1));
+            
+            const dateVal = document.getElementById('examDate').value;
+            if (dateVal) localStorage.setItem('goal_exam_date', dateVal);
+            
+            showToast('Đã lưu mục tiêu IELTS thành công!');
+        });
+    }
 
     // === 10. Logout ===
     document.getElementById('logoutBtn').addEventListener('click', async (e) => {
@@ -429,5 +343,4 @@ document.addEventListener('DOMContentLoaded', () => {
         try { await fetch('/IELTSFLOW/api/auth/logout', { method: 'POST' }); } catch(err) {}
         window.location.href = '/IELTSFLOW/jsp/auth.jsp';
     });
-
 });
