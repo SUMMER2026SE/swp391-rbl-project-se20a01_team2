@@ -9,4 +9,11 @@ public interface SubmissionService {
      * @return true nếu update thành công
      */
     boolean updateSpeakingEvaluation(int detailId, String transcript, double azureScore);
+    
+    /**
+     * Lấy nội dung đề bài (Topic) để cung cấp cho quá trình chấm điểm AI
+     * @param detailId ID của chi tiết bài làm
+     * @return Nội dung đề bài
+     */
+    String getQuestionContentByDetailId(int detailId);
 }

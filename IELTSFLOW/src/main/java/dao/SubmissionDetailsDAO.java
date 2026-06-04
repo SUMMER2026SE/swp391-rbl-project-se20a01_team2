@@ -59,4 +59,24 @@ public class SubmissionDetailsDAO {
         if (azureScore >= 35) return 4.0;
         return 3.0; // Dưới mức này cho mặc định band thấp nhất
     }
+    
+    /**
+     * Lấy nội dung đề bài (Topic) dựa vào DetailID
+     */
+    public String getQuestionContentByDetailId(int detailId) {
+        try {
+            return JpaHelper.query(em -> {
+                String sql = "SELECT q.Content FROM SubmissionDetails sd " +
+                             "JOIN Questions q ON sd.QuestionID = q.QuestionID " +
+                             "WHERE sd.DetailID = :detailId";
+                Query query = em.createNativeQuery(sql);
+                query.setParameter("detailId", detailId);
+                Object result = query.getSingleResult();
+                return result != null ? result.toString() : null;
+            });
+        } catch (Exception e) {
+            System.err.println("Lỗi khi lấy Question Content cho DetailID " + detailId + ": " + e.getMessage());
+            return null;
+        }
+    }
 }

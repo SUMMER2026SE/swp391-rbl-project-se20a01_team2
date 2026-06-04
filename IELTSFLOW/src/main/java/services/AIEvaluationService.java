@@ -114,13 +114,16 @@ public class AIEvaluationService {
      * @param detailId ID chi tiết bài làm
      * @param topic Chủ đề nói
      * @param transcript Bản dịch Speech-to-Text
+     * @param azurePronunciationScore Điểm phát âm từ hệ thống Azure (thang 100)
      * @return CompletableFuture chứa kết quả FeedbackSpeaking
      */
-    public CompletableFuture<FeedbackSpeaking> evaluateSpeakingAsync(int detailId, String topic, String transcript) {
+    public CompletableFuture<FeedbackSpeaking> evaluateSpeakingAsync(int detailId, String topic, String transcript, double azurePronunciationScore) {
         return CompletableFuture.supplyAsync(() -> {
             LOGGER.info("Bắt đầu chấm điểm Speaking cho DetailID: " + detailId);
             String systemInstruction = "Role: Bạn là giám khảo chấm thi IELTS Speaking chuyên nghiệp.\n" +
                                        "Objective: Đánh giá transcript phần thi IELTS Speaking dựa trên 4 tiêu chí chuẩn (Fluency, Lexical, Grammar, Pronunciation).\n" +
+                                       "Lưu ý quan trọng: Điểm phát âm hệ thống đã chấm bằng công nghệ AI riêng biệt là " + azurePronunciationScore + "/100. " +
+                                       "Hãy dùng điểm số này để ước lượng điểm Pronunciation theo thang điểm IELTS (0-9). Sau đó tập trung đọc Transcript để chấm 3 tiêu chí còn lại.\n" +
                                        "Format: Trả về dữ liệu chính xác theo cấu trúc JSON được yêu cầu, KHÔNG giải thích thêm.";
             String userPrompt = "Chủ đề: " + topic + "\nTranscript: " + transcript;
             
