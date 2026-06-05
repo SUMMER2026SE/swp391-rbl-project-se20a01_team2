@@ -31,7 +31,7 @@ public class User {
     private String fullName;
 
     @Column(name = "Status")
-    private String status = "Active"; // Active, Inactive, Banned
+    private String status = "Active"; // Active, Inactive
 
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;

@@ -63,11 +63,11 @@ public class UserDAO {
         });
     }
 
-    // Khóa tài khoản (#48) - set status = Banned
+    // Khóa tài khoản (#48) - set status = Inactive
     public void lockUser(int id) {
         JpaHelper.execute(em -> {
             User u = em.find(User.class, id);
-            if (u != null) { u.setStatus("Banned"); em.merge(u); }
+            if (u != null) { u.setStatus("Inactive"); em.merge(u); }
         });
     }
 
