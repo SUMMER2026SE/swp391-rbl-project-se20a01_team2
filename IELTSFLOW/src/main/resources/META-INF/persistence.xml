@@ -14,16 +14,13 @@
         <class>model.Pathway</class>
         <class>model.WeeklyPlan</class>
 
-        <!-- Các entity của thành viên khác sẽ được thêm vào đây khi merge -->
+        <class>model.SubscriptionPackage</class>
+        <class>model.SystemLog</class>
+        <class>model.Transaction</class>
 
         <properties>
-            <property name="jakarta.persistence.jdbc.driver"   value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-            <property name="jakarta.persistence.jdbc.url"      value="jdbc:sqlserver://localhost:1433;databaseName=IELTSFlow;Encrypt=True;TrustServerCertificate=True;sendStringParametersAsUnicode=true;characterEncoding=UTF-8"/>
-            <property name="jakarta.persistence.jdbc.user"     value="sa"/>
-            <property name="jakarta.persistence.jdbc.password" value="change-me"/>
             <property name="hibernate.dialect"                 value="org.hibernate.dialect.SQLServerDialect"/>
             <property name="hibernate.show_sql"                value="true"/>
-            <property name="hibernate.hbm2ddl.auto"            value="none"/>
         </properties>
     </persistence-unit>
 </persistence>
