@@ -21,7 +21,7 @@ import java.util.Optional;
  * GET  /api/admin/users          → Danh sách tất cả user + thống kê
  * POST /api/admin/users/ban      → Khóa tài khoản { userId, action: "ban"|"unban" }
  */
-@WebServlet("/api/admin/users")
+@WebServlet(urlPatterns = {"/admin/dashboard", "/api/admin/users/ban"})
 public class AdminUserServlet extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();
@@ -30,14 +30,11 @@ public class AdminUserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        resp.setContentType("application/json;charset=UTF-8");
-
         // Kiểm tra quyền Admin (filter đã kiểm tra, đây là double-check)
         Object roleIdObj = req.getSession(false) != null
                 ? req.getSession(false).getAttribute("roleId") : null;
         if (roleIdObj == null || (int) roleIdObj != 1) {
-            resp.setStatus(403);
-            mapper.writeValue(resp.getOutputStream(), Map.of("success", false, "message", "Không có quyền"));
+            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
             return;
         }
 
@@ -45,17 +42,15 @@ public class AdminUserServlet extends HttpServlet {
             List<Map<String, Object>> users = userDAO.findAllForAdmin();
             Map<String, Object> stats = userDAO.getStats();
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", true);
-            result.put("users", users);
-            result.put("stats", stats);
-            mapper.writeValue(resp.getOutputStream(), result);
+            req.setAttribute("users", users);
+            req.setAttribute("stats", stats);
+            req.setAttribute("statsJson", mapper.writeValueAsString(stats));
+
+            req.getRequestDispatcher("/jsp/admin/dashboard.jsp").forward(req, resp);
 
         } catch (Exception e) {
             e.printStackTrace();
-            resp.setStatus(500);
-            mapper.writeValue(resp.getOutputStream(),
-                    Map.of("success", false, "message", "Lỗi server: " + e.getMessage()));
+            resp.sendError(500, "Lỗi server: " + e.getMessage());
         }
     }
 

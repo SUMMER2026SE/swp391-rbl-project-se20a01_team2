@@ -6,7 +6,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard – IELTS Flow</title>
-  <meta name="description" content="Trang quản trị hệ thống IELTS Flow">
+  <meta name="description" content="Trang qu&#7843;n tr&#7883; h&#7879; th&#7889;ng IELTS Flow">
+  
+  <c:if test="${empty users}">
+    <script>
+      window.location.replace('/IELTSFLOW/admin/dashboard');
+    </script>
+  </c:if>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -452,30 +459,30 @@
         <!-- Stats -->
         <div class="stats-grid">
           <div class="stat-card blue">
-            <div class="stat-icon blue">👥</div>
-            <div class="stat-value blue" id="stat-total">—</div>
-            <div class="stat-label">Tổng người dùng</div>
-            <div class="stat-change">↑ Hệ thống đang phát triển</div>
+            <div class="stat-icon blue">&#128105;&#8205;&#128105;&#8205;&#128103;&#8205;&#128102;</div>
+            <div class="stat-value blue" id="stat-total">${stats.totalUsers}</div>
+            <div class="stat-label">T&#7893;ng ng&#432;&#7901;i d&#249;ng</div>
+            <div class="stat-change">&#8593; H&#7879; th&#7889;ng &#273;ang ph&#225;t tri&#7875;n</div>
           </div>
           <div class="stat-card green">
-            <div class="stat-icon green">✅</div>
-            <div class="stat-value green" id="stat-active">—</div>
-            <div class="stat-label">Tài khoản Active</div>
+            <div class="stat-icon green">&#9989;</div>
+            <div class="stat-value green" id="stat-active">${stats.activeUsers}</div>
+            <div class="stat-label">T&#224;i kho&#7843;n Active</div>
           </div>
           <div class="stat-card amber">
-            <div class="stat-icon amber">🆕</div>
-            <div class="stat-value amber" id="stat-today">—</div>
-            <div class="stat-label">Đăng ký hôm nay</div>
+            <div class="stat-icon amber">&#127381;</div>
+            <div class="stat-value amber" id="stat-today">${stats.newToday}</div>
+            <div class="stat-label">&#272;&#259;ng k&#253; h&#244;m nay</div>
           </div>
           <div class="stat-card purple">
-            <div class="stat-icon purple">🔗</div>
-            <div class="stat-value purple" id="stat-google">—</div>
-            <div class="stat-label">Đăng nhập Google</div>
+            <div class="stat-icon purple">&#128273;</div>
+            <div class="stat-value purple" id="stat-google">${stats.googleUsers}</div>
+            <div class="stat-label">&#272;&#259;ng nh&#7853;p Google</div>
           </div>
           <div class="stat-card red">
-            <div class="stat-icon red">🔒</div>
-            <div class="stat-value red" id="stat-banned">—</div>
-            <div class="stat-label">Tài khoản bị khoá</div>
+            <div class="stat-icon red">&#10060;</div>
+            <div class="stat-value red" id="stat-banned">${stats.bannedUsers}</div>
+            <div class="stat-label">T&#224;i kho&#7843;n b&#7883; kh&#243;a</div>
           </div>
         </div>
 
@@ -550,8 +557,13 @@
         <div class="card">
           <div class="card-header">
             <div>
-              <div class="card-title">Quản lý người dùng</div>
-              <div class="card-sub" id="user-count-label">Đang tải...</div>
+              <div class="card-title">Qu&#7843;n l&#253; ng&#432;&#7901;i d&#249;ng</div>
+              <div class="card-sub" id="user-count-label">
+                <c:choose>
+                  <c:when test="${not empty stats.totalUsers}">${stats.totalUsers} ng&#432;&#7901;i d&#249;ng trong h&#7879; th&#7889;ng</c:when>
+                  <c:otherwise>0 ng&#432;&#7901;i d&#249;ng trong h&#7879; th&#7889;ng</c:otherwise>
+                </c:choose>
+              </div>
             </div>
           </div>
           <div class="table-toolbar">
@@ -584,7 +596,50 @@
                 </tr>
               </thead>
               <tbody id="user-table-body">
-                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text3)">Đang tải dữ liệu...</td></tr>
+                <c:if test="${empty users}">
+                  <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text3)">Kh&#244;ng c&#243; d&#7919; li&#7879;u</td></tr>
+                </c:if>
+                <c:forEach items="${users}" var="u">
+                  <c:set var="statusClass" value="${u.status == 'Active' ? 'active' : (u.status == 'Banned' ? 'banned' : 'inactive')}" />
+                  <tr data-name="${u.fullName.toLowerCase()}" data-email="${u.email.toLowerCase()}" data-status="${u.status}" data-provider="${u.authProvider}">
+                    <td>
+                      <div class="user-cell">
+                        <div class="user-av">${not empty u.fullName ? u.fullName.substring(0, 1).toUpperCase() : '?'}</div>
+                        <div>
+                          <div class="user-name-text">${u.fullName}</div>
+                          <div class="user-email">${u.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <c:choose>
+                        <c:when test="${u.roleId == 1}"><span class="badge admin">Admin</span></c:when>
+                        <c:otherwise><span class="badge candidate">Candidate</span></c:otherwise>
+                      </c:choose>
+                    </td>
+                    <td>
+                      <c:choose>
+                        <c:when test="${u.authProvider == 'Google'}"><span class="badge google">&#128273; Google</span></c:when>
+                        <c:otherwise><span class="badge local">&#128231; Email</span></c:otherwise>
+                      </c:choose>
+                    </td>
+                    <td><span class="status-dot ${statusClass}"></span> ${u.status}</td>
+                    <td>${u.createdAt}</td>
+                    <td>
+                      <c:choose>
+                        <c:when test="${u.status == 'Banned'}">
+                          <button class="action-btn action-unban" onclick="banUser(${u.userId}, 'unban', '${u.fullName}')">&#128275; M&#7903; kh&#243;a</button>
+                        </c:when>
+                        <c:when test="${u.roleId != 1}">
+                          <button class="action-btn action-ban" onclick="banUser(${u.userId}, 'ban', '${u.fullName}')">&#128274; Kh&#243;a</button>
+                        </c:when>
+                        <c:otherwise>
+                          <span style="font-size:.75rem;color:var(--text3)">-</span>
+                        </c:otherwise>
+                      </c:choose>
+                    </td>
+                  </tr>
+                </c:forEach>
               </tbody>
             </table>
           </div>
@@ -595,7 +650,9 @@
   </div><!-- /main -->
 
   <div id="toast-container"></div>
-
-  <script src="../../js/admin-dashboard.js?v=2"></script>
+  <script>
+    const statsData = ${statsJson != null ? statsJson : '{}'};
+  </script>
+  <script src="${pageContext.request.contextPath}/js/admin-dashboard.js?v=4"></script>
 </body>
 </html>
