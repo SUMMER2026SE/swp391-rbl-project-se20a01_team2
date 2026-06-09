@@ -38,6 +38,6 @@ public class DashboardController extends HttpServlet {
         request.setAttribute("totalUsers", totalUsers);
         request.setAttribute("totalTests", totalTests);
 
-        request.getRequestDispatcher("/jsp/Admin/dashboard.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/admin/dashboard.jsp").forward(request, response);
     }
 }

@@ -39,7 +39,7 @@ public class PackageController extends HttpServlet {
                 SubscriptionPackage pkg = packageService.getPackageById(id);
                 request.setAttribute("pkg", pkg);
                 // Chuyển hướng sang trang Form để chỉnh sửa
-                request.getRequestDispatcher("/jsp/Admin/package-form.jsp").forward(request, response);
+                request.getRequestDispatcher("/jsp/admin/package-form.jsp").forward(request, response);
                 break;
             case "delete":
                 int delId = Integer.parseInt(request.getParameter("id"));
@@ -54,7 +54,7 @@ public class PackageController extends HttpServlet {
                 break;
             case "add":
                 // Chuyển hướng sang trang Form để tạo mới
-                request.getRequestDispatcher("/jsp/Admin/package-form.jsp").forward(request, response);
+                request.getRequestDispatcher("/jsp/admin/package-form.jsp").forward(request, response);
                 break;
             default: // "list"
                 List<SubscriptionPackage> list = packageService.getAllPackages();
@@ -64,7 +64,7 @@ public class PackageController extends HttpServlet {
                 request.setAttribute("packages", list);
                 request.setAttribute("showDeleted", showDeleted);
                 // Chuyển hướng sang trang hiển thị danh sách
-                request.getRequestDispatcher("/jsp/Admin/packages.jsp").forward(request, response);
+                request.getRequestDispatcher("/jsp/admin/packages.jsp").forward(request, response);
                 break;
         }
     }

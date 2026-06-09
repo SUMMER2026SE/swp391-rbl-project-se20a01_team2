@@ -40,6 +40,6 @@ public class TransactionController extends HttpServlet {
         request.setAttribute("transactions", list);
         request.setAttribute("currentStatus", status); // Truyền status hiện tại để UI hiển thị đúng bộ lọc
         
-        request.getRequestDispatcher("/jsp/Admin/transactions.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/admin/transactions.jsp").forward(request, response);
     }
 }
