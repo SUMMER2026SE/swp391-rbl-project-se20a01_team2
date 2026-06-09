@@ -41,7 +41,8 @@ String essay = "I completely agree that high school students...";
 // Gọi hàm xử lý Async
 aiService.evaluateWritingAsync(detailId, topic, essay).thenAccept(feedback -> {
     // Đoạn code trong này sẽ được gọi KHI AI CHẤM XONG (ngầm).
-    // Hệ thống ĐÃ TỰ ĐỘNG lưu toàn bộ JSON kết quả vào CSDL bảng `AIEvaluations` cho detailId này.
+    // 1. Hệ thống TỰ ĐỘNG lưu toàn bộ JSON kết quả vào CSDL bảng `AIEvaluations` cho detailId này.
+    // 2. Hệ thống TỰ ĐỘNG cập nhật `WritingBand` và `OverallAIFeedback` vào bảng `TestSubmissions`.
     
     // Bạn có thể log ra để kiểm tra
     if (feedback != null) {
@@ -75,7 +76,9 @@ aiService.evaluateSpeakingAsync(detailId, topic, transcript).thenAccept(feedback
 
 ## 4. Cách lấy kết quả hiển thị lên giao diện (JSP/Frontend)
 
-Sau khi AI chấm xong, toàn bộ chuỗi JSON đánh giá sẽ nằm ở cột `FeedbackJSON` trong bảng `AIEvaluations` tương ứng với `DetailID`.
+Sau khi AI chấm xong, thông tin sẽ được lưu ở 2 nơi:
+1. Cột `WritingBand` / `SpeakingBand` và `OverallAIFeedback` trong bảng `TestSubmissions`: Dùng để hiển thị biểu đồ và lịch sử chung.
+2. Cột `FeedbackJSON` trong bảng `AIEvaluations`: Dùng để hiển thị phân tích chi tiết (Feedback, Gợi ý cải thiện, Lỗi sai).
 
 Khi làm giao diện "Xem chi tiết bài giải" (View Result Dashboard), bạn sẽ lấy chuỗi JSON này từ CSDL lên và parse (ép kiểu) lại thành Object để dễ dàng truy xuất:
 
