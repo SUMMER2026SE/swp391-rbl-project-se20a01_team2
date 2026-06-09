@@ -1,159 +1,92 @@
 package controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.User;
 import services.UserService;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 
 /**
- * UserManagementController - xử lý các chức năng:
- *   #48 Thêm/sửa/khóa tài khoản : GET/POST/PUT/DELETE /api/admin/users
- *   #49 Phân quyền Mentor        : PUT /api/admin/users/{id}/role
- *
- * Lưu ý: việc kiểm tra quyền Admin sẽ được xử lý bởi AuthFilter (của thành viên khác).
+ * UserManagementController - SSR refactored:
+ *   GET /admin/users          : Lấy danh sách user và forward to JSP
+ *   GET /admin/users/mentors  : Lấy danh sách mentor và forward to JSP
+ *   POST /admin/users         : Xử lý Add/Edit/Delete/Lock qua form parameter (action)
  */
-@WebServlet("/api/admin/users/*")
+@WebServlet("/admin/users/*")
 public class UserManagementController extends HttpServlet {
 
     private final UserService userService = new UserService();
-    private final ObjectMapper mapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json;charset=UTF-8");
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = req.getPathInfo();
-
+        
         try {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                // #48 Lấy danh sách tất cả user
-                mapper.writeValue(resp.getWriter(), userService.getAllUsers());
+            if (pathInfo != null && pathInfo.equals("/mentors")) {
+                List<User> mentors = userService.getMentors();
+                req.setAttribute("users", mentors);
+                req.setAttribute("isMentorView", true);
+                req.getRequestDispatcher("/jsp/admin/users.jsp").forward(req, resp);
             } else {
-                String[] parts = pathInfo.substring(1).split("/");
-                int id = Integer.parseInt(parts[0]);
-
-                if (parts.length > 1 && "mentors".equals(parts[1])) {
-                    // #49 Lấy danh sách Mentor
-                    mapper.writeValue(resp.getWriter(), userService.getMentors());
-                } else {
-                    // #48 Lấy chi tiết 1 user
-                    User user = userService.getUserById(id);
-                    if (user == null) {
-                        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        resp.getWriter().write("{\"error\":\"User not found\"}");
-                        return;
-                    }
-                    mapper.writeValue(resp.getWriter(), user);
-                }
+                List<User> users = userService.getAllUsers();
+                req.setAttribute("users", users);
+                req.setAttribute("isMentorView", false);
+                req.getRequestDispatcher("/jsp/admin/users.jsp").forward(req, resp);
             }
-        } catch (NumberFormatException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"error\":\"Invalid ID format\"}");
         } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+            req.setAttribute("error", e.getMessage());
+            req.getRequestDispatcher("/jsp/admin/users.jsp").forward(req, resp);
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        // #48 Thêm user mới
-        resp.setContentType("application/json;charset=UTF-8");
-        try {
-            User user = mapper.readValue(req.getReader(), User.class);
-            userService.createUser(user);
-            resp.setStatus(HttpServletResponse.SC_CREATED);
-            // Không trả về passwordHash
-            user.setPasswordHash(null);
-            mapper.writeValue(resp.getWriter(), user);
-        } catch (IllegalArgumentException e) {
-            resp.setStatus(HttpServletResponse.SC_CONFLICT);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
-        } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
-        }
-    }
-
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json;charset=UTF-8");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
         String pathInfo = req.getPathInfo();
-
+        
         try {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                resp.getWriter().write("{\"error\":\"ID is required\"}");
-                return;
-            }
-
-            String[] parts = pathInfo.substring(1).split("/");
-            int id = Integer.parseInt(parts[0]);
-
-            if (parts.length > 1 && "role".equals(parts[1])) {
-                // #49 Phân quyền Mentor: PUT /api/admin/users/{id}/role
-                // Body: { "action": "assign" } hoặc { "action": "revoke" }
-                @SuppressWarnings("unchecked")
-                Map<String, String> body = mapper.readValue(req.getReader(), Map.class);
-                String action = body.getOrDefault("action", "assign");
-                if ("revoke".equals(action)) {
-                    userService.revokeMentorRole(id);
-                    resp.getWriter().write("{\"message\":\"Đã thu hồi quyền Mentor\"}");
-                } else {
-                    userService.assignMentorRole(id);
-                    resp.getWriter().write("{\"message\":\"Đã phân quyền Mentor thành công\"}");
-                }
-
-            } else if (parts.length > 1 && "lock".equals(parts[1])) {
-                // #48 Khóa tài khoản: PUT /api/admin/users/{id}/lock
-                userService.lockUser(id);
-                resp.getWriter().write("{\"message\":\"Tài khoản đã bị khóa\"}");
-
-            } else {
-                // #48 Cập nhật thông tin user: PUT /api/admin/users/{id}
-                // Chỉ cho phép sửa fullName, email, status — không cho sửa role/password
-                @SuppressWarnings("unchecked")
-                Map<String, String> body = mapper.readValue(req.getReader(), Map.class);
+            if ("create".equals(action)) {
+                User user = new User();
+                user.setFullName(req.getParameter("fullName"));
+                user.setEmail(req.getParameter("email"));
+                user.setRoleId(Integer.parseInt(req.getParameter("roleId")));
+                user.setStatus(req.getParameter("status"));
+                userService.createUser(user);
+            } else if ("update".equals(action)) {
+                int id = Integer.parseInt(req.getParameter("id"));
                 userService.updateUser(
                         id,
-                        body.get("fullName"),
-                        body.get("email"),
-                        body.get("status")
+                        req.getParameter("fullName"),
+                        req.getParameter("email"),
+                        req.getParameter("status")
                 );
-                resp.getWriter().write("{\"message\":\"Cập nhật thành công\"}");
+            } else if ("lock".equals(action)) {
+                int id = Integer.parseInt(req.getParameter("id"));
+                userService.lockUser(id);
+            } else if ("delete".equals(action)) {
+                int id = Integer.parseInt(req.getParameter("id"));
+                userService.deleteUser(id);
+            } else if ("assign_mentor".equals(action)) {
+                int id = Integer.parseInt(req.getParameter("id"));
+                userService.assignMentorRole(id);
+            } else if ("revoke_mentor".equals(action)) {
+                int id = Integer.parseInt(req.getParameter("id"));
+                userService.revokeMentorRole(id);
             }
-
-        } catch (NumberFormatException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"error\":\"Invalid ID format\"}");
-        } catch (IllegalArgumentException e) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+            
+            // Redirect based on the current view to avoid form resubmission
+            if (pathInfo != null && pathInfo.equals("/mentors")) {
+                resp.sendRedirect(req.getContextPath() + "/admin/users/mentors");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/admin/users");
+            }
+            
         } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
-        }
-    }
-
-    @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        // #48 Xóa user
-        String pathInfo = req.getPathInfo();
-        if (pathInfo == null || pathInfo.equals("/")) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        try {
-            userService.deleteUser(Integer.parseInt(pathInfo.substring(1)));
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-        } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+            req.setAttribute("error", e.getMessage());
+            doGet(req, resp);
         }
     }
 }

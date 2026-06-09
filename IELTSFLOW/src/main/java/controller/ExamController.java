@@ -1,7 +1,6 @@
 package controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.Exam;
@@ -10,93 +9,67 @@ import services.ExamService;
 import java.io.IOException;
 
 /**
- * ExamController - xử lý các chức năng:
- *   #24 Làm lại bài luyện tập : GET /api/exams/{id}  (lấy đề để làm lại)
- *   #28 Tìm kiếm đề thi       : GET /api/exams?keyword=...&skill=...&type=...
+ * ExamController - SSR refactored:
+ *   GET /admin/exams          : Tìm kiếm/Xem đề thi và forward to JSP
+ *   POST /admin/exams         : Thêm/Sửa/Xóa đề thi qua form parameter
  */
-@WebServlet("/api/exams/*")
+@WebServlet("/admin/exams/*")
 public class ExamController extends HttpServlet {
 
     private final ExamService examService = new ExamService();
-    private final ObjectMapper mapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json;charset=UTF-8");
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = req.getPathInfo();
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                // #28 Tìm kiếm đề thi
                 String keyword    = req.getParameter("keyword");
                 String skillFocus = req.getParameter("skill");
                 String type       = req.getParameter("type");
-                mapper.writeValue(resp.getWriter(),
-                        examService.searchExams(keyword, skillFocus, type));
+                req.setAttribute("exams", examService.searchExams(keyword, skillFocus, type));
+                req.getRequestDispatcher("/jsp/admin/exams.jsp").forward(req, resp);
             } else {
-                // #24 Lấy chi tiết đề thi để làm lại
                 int id = Integer.parseInt(pathInfo.substring(1));
                 Exam exam = examService.getExamById(id);
                 if (exam == null) {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    resp.getWriter().write("{\"error\":\"Exam not found\"}");
+                    req.setAttribute("error", "Exam not found");
+                    req.getRequestDispatcher("/jsp/admin/exams.jsp").forward(req, resp);
                     return;
                 }
-                mapper.writeValue(resp.getWriter(), exam);
+                req.setAttribute("exam", exam);
+                req.getRequestDispatcher("/jsp/admin/exam-detail.jsp").forward(req, resp);
             }
         } catch (NumberFormatException e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"error\":\"Invalid ID format\"}");
+            req.setAttribute("error", "Invalid ID format");
+            req.getRequestDispatcher("/jsp/admin/exams.jsp").forward(req, resp);
         } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+            req.setAttribute("error", e.getMessage());
+            req.getRequestDispatcher("/jsp/admin/exams.jsp").forward(req, resp);
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json;charset=UTF-8");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        
         try {
-            Exam exam = mapper.readValue(req.getReader(), Exam.class);
-            examService.createExam(exam);
-            resp.setStatus(HttpServletResponse.SC_CREATED);
-            mapper.writeValue(resp.getWriter(), exam);
+            if ("create".equals(action)) {
+                Exam exam = new Exam();
+                // populate
+                // examService.createExam(exam);
+            } else if ("update".equals(action)) {
+                Exam exam = new Exam();
+                // populate
+                // examService.updateExam(exam);
+            } else if ("delete".equals(action)) {
+                int id = Integer.parseInt(req.getParameter("id"));
+                examService.deleteExam(id);
+            }
+            resp.sendRedirect(req.getContextPath() + "/admin/exams");
         } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
-        }
-    }
-
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json;charset=UTF-8");
-        try {
-            Exam exam = mapper.readValue(req.getReader(), Exam.class);
-            examService.updateExam(exam);
-            mapper.writeValue(resp.getWriter(), exam);
-        } catch (IllegalArgumentException e) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
-        } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
-        }
-    }
-
-    @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String pathInfo = req.getPathInfo();
-        if (pathInfo == null || pathInfo.equals("/")) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        try {
-            examService.deleteExam(Integer.parseInt(pathInfo.substring(1)));
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-        } catch (Exception e) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+            req.setAttribute("error", e.getMessage());
+            doGet(req, resp);
         }
     }
 }

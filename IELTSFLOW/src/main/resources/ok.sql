@@ -1,4 +1,3 @@
-﻿-- Tạo cơ sở dữ liệu
 CREATE DATABASE IELTSFlow;
 GO
 
@@ -97,12 +96,12 @@ CREATE TABLE Questions (
     QuestionID INT IDENTITY(1,1) PRIMARY KEY,
     ResourceID INT NULL, 
     Content NVARCHAR(MAX) NOT NULL,
-    QuestionType NVARCHAR(50) NOT NULL, 
+    QuestionType NVARCHAR(50) NOT NULL, -- MultipleChoice, Matching, FillInBlanks. Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
     Skill NVARCHAR(20) NOT NULL, -- Listening, Reading, Writing, Speaking
     Difficulty NVARCHAR(20), -- Easy, Medium, Hard
     Explanation NVARCHAR(MAX),
     OrderInResource INT NULL, -- [CẬP NHẬT] Thứ tự câu hỏi đi theo 1 bài đọc (Passage) hoặc audio
-    MetadataJSON NVARCHAR(MAX) NULL, -- [CẬP NHẬT] Lưu meta data cấu trúc UI hoặc rule chấm thi cho các câu dị (matching, kéo thả)
+    contentJSON NVARCHAR(MAX) NOT NULL, 
     CreatedBy INT NULL, -- Theo dõi Mentor nào tạo
     FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID),
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
@@ -112,7 +111,8 @@ CREATE TABLE Questions (
 CREATE TABLE Answers (
     AnswerID INT IDENTITY(1,1) PRIMARY KEY,
     QuestionID INT NOT NULL,
-    Content NVARCHAR(MAX) NOT NULL,
+    Content NVARCHAR(MAX) NOT NULL, -- text, 
+    ContentJson NVARCHAR(MAX) NOT NULL, -- JSON
     IsCorrect BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID) ON DELETE CASCADE
 );
@@ -183,13 +183,38 @@ CREATE TABLE Exams (
     Deleted BIT DEFAULT 0
 );
 
-CREATE TABLE ExamQuestions (
+CREATE TABLE ExamSections (
+
+    SectionID INT IDENTITY(1,1) PRIMARY KEY,
+
     ExamID INT NOT NULL,
-    QuestionID INT NOT NULL,
+
+    SectionName NVARCHAR(100) NOT NULL, -- Ví dụ: "Reading - Passage 1", "Listening - Part 3"
+
+    ResourceID INT NULL, -- Gắn Passage/Audio thẳng vào Section (nếu có)
+
     OrderIndex INT NOT NULL, 
-    PRIMARY KEY (ExamID, QuestionID),
+
     FOREIGN KEY (ExamID) REFERENCES Exams(ExamID) ON DELETE CASCADE,
+
+    FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID)
+
+);
+
+CREATE TABLE ExamQuestions (
+
+    SectionID INT NOT NULL,
+
+    QuestionID INT NOT NULL,
+
+    OrderIndex INT NOT NULL, 
+
+    PRIMARY KEY (SectionID, QuestionID),
+
+    FOREIGN KEY (SectionID) REFERENCES ExamSections(SectionID) ON DELETE CASCADE,
+
     FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID) ON DELETE CASCADE
+
 );
 
 CREATE TABLE TestSubmissions (

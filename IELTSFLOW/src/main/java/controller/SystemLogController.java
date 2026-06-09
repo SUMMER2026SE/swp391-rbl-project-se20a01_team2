@@ -62,6 +62,6 @@ public class SystemLogController extends HttpServlet {
         request.setAttribute("paramFromDate", fromDateStr);
         request.setAttribute("paramToDate", toDateStr);
 
-        request.getRequestDispatcher("/jsp/Admin/system-logs.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/admin/system-logs.jsp").forward(request, response);
     }
 }
