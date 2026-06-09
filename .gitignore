@@ -26,6 +26,8 @@ replay_pid*
 .env
 IELTSFLOW/target/
 .agent/skills/
+IELTSFLOW/.agent/skills/
 .agent/rules/README.md
+IELTSFLOW/.agent/rules/README.md
 Document/swp_motabandau (1).md
 Document/Template1_Project Tracking - Project.csv

@@ -98,6 +98,10 @@ public class AIEvaluationService {
                     
                     // Parse thành object để có thể trả về cho Frontend nếu cần
                     FeedbackWriting feedback = objectMapper.readValue(jsonResult, FeedbackWriting.class);
+                    
+                    // Cập nhật điểm Band và Feedback lên bảng TestSubmissions
+                    aiEvaluationDAO.updateTestSubmissionBand(detailId, feedback.getOverallBand(), "Writing", feedback.getOverallFeedback());
+                    
                     LOGGER.info("Hoàn tất chấm điểm Writing cho DetailID: " + detailId);
                     return feedback;
                 } catch (Exception e) {
@@ -136,6 +140,10 @@ public class AIEvaluationService {
                     
                     // Parse thành object
                     FeedbackSpeaking feedback = objectMapper.readValue(jsonResult, FeedbackSpeaking.class);
+                    
+                    // Cập nhật điểm Band và Feedback lên bảng TestSubmissions
+                    aiEvaluationDAO.updateTestSubmissionBand(detailId, feedback.getOverallBand(), "Speaking", feedback.getOverallFeedback());
+                    
                     LOGGER.info("Hoàn tất chấm điểm Speaking cho DetailID: " + detailId);
                     return feedback;
                 } catch (Exception e) {
