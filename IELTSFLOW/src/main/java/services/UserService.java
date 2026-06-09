@@ -1,80 +1,99 @@
 package services;
 
-import dao.UserDAO;
 import model.User;
+import java.util.Map;
 import java.util.List;
 
-public class UserService {
+public interface UserService {
+    
+    /**
+     * Authenticate a user by email and password
+     * @return User if successful
+     * @throws Exception if authentication fails
+     */
+    User authenticateUser(String email, String password) throws Exception;
+    
+    /**
+     * Register a new user
+     * @return User if successful
+     * @throws Exception if registration fails (e.g. email exists)
+     */
+    User registerUser(String fullName, String email, String password) throws Exception;
+    
+    /**
+     * Authenticate or register a user via Google OAuth
+     */
+    User authenticateGoogleUser(String idTokenString) throws Exception;
+    
+    /**
+     * Generate and send OTP for forgot password flow
+     */
+    void forgotPassword(String email) throws Exception;
+    
+    /**
+     * Verify the OTP
+     */
+    void verifyOtp(String email, String otp) throws Exception;
+    
+    /**
+     * Reset password using a valid reset token
+     */
+    void resetPassword(String resetToken, String newPassword) throws Exception;
+    
+    /**
+     * Verify email during registration
+     */
+    void verifyEmail(String token) throws Exception;
+    
+    /**
+     * Resend verification email
+     */
+    void resendVerification(String email) throws Exception;
+    
+    /**
+     * Ban or unban a user
+     */
+    void toggleUserBan(int userId) throws Exception;
+    
+    /**
+     * Get system statistics
+     */
+    Map<String, Object> getSystemStats() throws Exception;
+    
+    /**
+     * Get user by ID
+     */
+    User getUserById(int userId) throws Exception;
 
-    private final UserDAO userDAO = new UserDAO();
+    /**
+     * Cập nhật hồ sơ cá nhân (fullName)
+     */
+    void updateProfile(int userId, String fullName) throws Exception;
 
-    // RoleID constants theo DB seed data
-    public static final int ROLE_ADMIN     = 1;
-    public static final int ROLE_MENTOR    = 2;
-    public static final int ROLE_CANDIDATE = 3;
+    /**
+     * Đổi mật khẩu (yêu cầu nhập mật khẩu cũ)
+     */
+    void changePassword(int userId, String currentPassword, String newPassword) throws Exception;
 
-    // Lấy tất cả user (#48)
-    public List<User> getAllUsers() {
-        return userDAO.findAll();
-    }
+    // ==========================================
+    // Methods from branch "theirs"
+    // ==========================================
 
-    // Lấy user theo ID
-    public User getUserById(int id) {
-        return userDAO.findById(id);
-    }
+    List<User> getAllUsers();
 
-    // Lấy user theo email
-    public User getUserByEmail(String email) {
-        return userDAO.findByEmail(email);
-    }
+    User getUserByEmail(String email);
 
-    // Lấy danh sách Mentor (#49)
-    public List<User> getMentors() {
-        return userDAO.findByRole(ROLE_MENTOR);
-    }
+    List<User> getMentors();
 
-    // Thêm user mới (#48)
-    public void createUser(User user) {
-        if (userDAO.findByEmail(user.getEmail()) != null)
-            throw new IllegalArgumentException("Email đã tồn tại: " + user.getEmail());
-        // Mặc định là Candidate nếu không chỉ định role
-        if (user.getRoleId() == 0) user.setRoleId(ROLE_CANDIDATE);
-        userDAO.save(user);
-    }
+    void createUser(User user);
 
-    // Cập nhật user - chỉ cho phép sửa fullName, email, status (#48)
-    public void updateUser(int id, String fullName, String email, String status) {
-        User existing = userDAO.findById(id);
-        if (existing == null) throw new IllegalArgumentException("User not found: " + id);
-        existing.setFullName(fullName);
-        existing.setEmail(email);
-        existing.setStatus(status);
-        userDAO.update(existing);
-    }
+    void updateUser(int id, String fullName, String email, String status);
 
-    // Khóa tài khoản (#48)
-    public void lockUser(int id) {
-        User user = userDAO.findById(id);
-        if (user == null) throw new IllegalArgumentException("User not found: " + id);
-        userDAO.lockUser(id);
-    }
+    void lockUser(int id);
 
-    // Phân quyền Mentor (#49) - chỉ Admin mới được gọi endpoint này
-    public void assignMentorRole(int userId) {
-        User user = userDAO.findById(userId);
-        if (user == null) throw new IllegalArgumentException("User not found: " + userId);
-        userDAO.setRole(userId, ROLE_MENTOR);
-    }
+    void assignMentorRole(int userId);
 
-    // Thu hồi quyền Mentor -> về Candidate (#49)
-    public void revokeMentorRole(int userId) {
-        User user = userDAO.findById(userId);
-        if (user == null) throw new IllegalArgumentException("User not found: " + userId);
-        userDAO.setRole(userId, ROLE_CANDIDATE);
-    }
+    void revokeMentorRole(int userId);
 
-    // Xóa mềm user (#48)
-    public void deleteUser(int id) {
-        userDAO.softDelete(id);
-    }
+    void deleteUser(int id);
 }

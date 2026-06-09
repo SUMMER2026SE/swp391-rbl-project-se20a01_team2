@@ -13,10 +13,13 @@
         <class>model.Exam</class>
         <class>model.Pathway</class>
         <class>model.WeeklyPlan</class>
-
+        <class>model.SubscriptionOrder</class>
         <class>model.SubscriptionPackage</class>
         <class>model.SystemLog</class>
         <class>model.Transaction</class>
+        <class>model.Payment</class>
+        <class>model.Notification</class>
+        <class>model.Ticket</class>
 
         <properties>
             <property name="hibernate.dialect"                 value="org.hibernate.dialect.SQLServerDialect"/>
