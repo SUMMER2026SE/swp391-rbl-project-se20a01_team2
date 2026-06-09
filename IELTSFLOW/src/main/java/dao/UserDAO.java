@@ -7,20 +7,21 @@ import model.User;
 import util.JpaHelper;
 
 import java.util.Optional;
+import java.util.List;
 
 /**
- * Lá»›p DAO xá»­ lÃ½ dá»¯ liá»‡u ngÆ°á»i dÃ¹ng (User) sá»­ dá»¥ng JPA
+ * Lớp DAO xử lý dữ liệu người dùng (User) sử dụng JPA
  */
 public class UserDAO {
 
     /**
-     * TÃ¬m ngÆ°á»i dÃ¹ng qua email
-     * @param email Email cáº§n tÃ¬m
-     * @return Optional chá»©a User náº¿u tÃ¬m tháº¥y
+     * Tìm người dùng qua email
+     * @param email Email cần tìm
+     * @return Optional chứa User nếu tìm thấy
      */
     public Optional<User> findByEmail(String email) {
         return JpaHelper.query(em -> {
-            TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
+            TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email AND u.deleted = false", User.class);
             query.setParameter("email", email);
             try {
                 return Optional.of(query.getSingleResult());
@@ -31,48 +32,56 @@ public class UserDAO {
     }
 
     /**
-     * TÃ¬m ngÆ°á»i dÃ¹ng qua ID
-     * @param userId ID ngÆ°á»i dÃ¹ng
-     * @return Optional chá»©a User náº¿u tÃ¬m tháº¥y
+     * Tìm người dùng qua ID
+     * @param userId ID người dùng
+     * @return Optional chứa User nếu tìm thấy
      */
     public Optional<User> findById(int userId) {
-        return JpaHelper.query(em -> Optional.ofNullable(em.find(User.class, userId)));
+        return JpaHelper.query(em -> {
+            User u = em.find(User.class, userId);
+            return (u != null && !u.isDeleted()) ? Optional.of(u) : Optional.empty();
+        });
     }
 
     /**
-     * Kiá»ƒm tra email Ä‘Ã£ tá»“n táº¡i chÆ°a
-     * @param email Email cáº§n kiá»ƒm tra
-     * @return true náº¿u Ä‘Ã£ tá»“n táº¡i
+     * Kiểm tra email đã tồn tại chưa
+     * @param email Email cần kiểm tra
+     * @return true nếu đã tồn tại
      */
     public boolean emailExists(String email) {
         return JpaHelper.query(em -> {
-            TypedQuery<Long> query = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class);
+            TypedQuery<Long> query = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email AND u.deleted = false", Long.class);
             query.setParameter("email", email);
             return query.getSingleResult() > 0;
         });
     }
 
     /**
-     * Táº¡o má»›i ngÆ°á»i dÃ¹ng
-     * @param user Äá»‘i tÆ°á»£ng User
-     * @return UserID vá»«a Ä‘Æ°á»£c táº¡o
+     * Tạo mới người dùng
+     * @param user Đối tượng User
+     * @return UserID vừa được tạo
      */
     public int create(User user) {
         JpaHelper.execute(em -> em.persist(user));
         return user.getUserId();
     }
 
+    // Thêm user mới (#48)
+    public void save(User user) {
+        JpaHelper.execute(em -> em.persist(user));
+    }
+
     /**
-     * Cáº­p nháº­t tráº¡ng thÃ¡i ngÆ°á»i dÃ¹ng
-     * @param userId ID ngÆ°á»i dÃ¹ng
-     * @param status Tráº¡ng thÃ¡i má»›i (VD: "Active", "Inactive")
-     * @return true náº¿u thÃ nh cÃ´ng
+     * Cập nhật trạng thái người dùng
+     * @param userId ID người dùng
+     * @param status Trạng thái mới (VD: "Active", "Inactive")
+     * @return true nếu thành công
      */
     public boolean updateStatus(int userId, String status) {
         try {
             JpaHelper.execute(em -> {
                 User user = em.find(User.class, userId);
-                if (user != null) {
+                if (user != null && !user.isDeleted()) {
                     user.setStatus(status);
                 }
             });
@@ -84,16 +93,16 @@ public class UserDAO {
     }
 
     /**
-     * Cáº­p nháº­t máº­t kháº©u ngÆ°á»i dÃ¹ng
-     * @param userId ID ngÆ°á»i dÃ¹ng
-     * @param newPasswordHash Hash máº­t kháº©u má»›i
-     * @return true náº¿u thÃ nh cÃ´ng
+     * Cập nhật mật khẩu người dùng
+     * @param userId ID người dùng
+     * @param newPasswordHash Hash mật khẩu mới
+     * @return true nếu thành công
      */
     public boolean updatePassword(int userId, String newPasswordHash) {
         try {
             JpaHelper.execute(em -> {
                 User user = em.find(User.class, userId);
-                if (user != null) {
+                if (user != null && !user.isDeleted()) {
                     user.setPasswordHash(newPasswordHash);
                 }
             });
@@ -105,8 +114,7 @@ public class UserDAO {
     }
 
     /**
-     * Láº¥y ID cá»§a quyá»n Candidate (Há»c viÃªn)
-     * @return RoleID cá»§a Candidate (máº·c Ä‘á»‹nh lÃ  3 náº¿u khÃ´ng tÃ¬m tháº¥y)
+     * Lấy ID của quyền Candidate (Học viên)
      */
     public int getCandidateRoleId() {
         return JpaHelper.query(em -> {
@@ -116,18 +124,18 @@ public class UserDAO {
                     return ((Number) result).intValue();
                 }
             } catch (NoResultException e) {
-                // Fallback náº¿u khÃ´ng cÃ³
+                // Fallback nếu không có
             }
             return 3;
         });
     }
 
     /**
-     * Láº¥y danh sÃ¡ch táº¥t cáº£ user cho trang Admin (tráº£ vá» Map Ä‘á»ƒ trÃ¡nh serialize toÃ n bá»™ entity)
+     * Lấy danh sách tất cả user cho trang Admin
      */
     public java.util.List<java.util.Map<String, Object>> findAllForAdmin() {
         return JpaHelper.query(em -> {
-            java.util.List<User> users = em.createQuery("SELECT u FROM User u ORDER BY u.createdAt DESC", User.class)
+            java.util.List<User> users = em.createQuery("SELECT u FROM User u WHERE u.deleted = false ORDER BY u.createdAt DESC", User.class)
                     .getResultList();
             java.util.List<java.util.Map<String, Object>> result = new java.util.ArrayList<>();
             for (User u : users) {
@@ -146,26 +154,26 @@ public class UserDAO {
     }
 
     /**
-     * Thá»‘ng kÃª nhanh cho Admin Dashboard
+     * Thống kê nhanh cho Admin Dashboard
      */
     public java.util.Map<String, Object> getStats() {
         return JpaHelper.query(em -> {
             java.util.Map<String, Object> stats = new java.util.LinkedHashMap<>();
 
-            Long total = em.createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
+            Long total = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.deleted = false", Long.class).getSingleResult();
             stats.put("totalUsers", total);
 
-            Long active = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.status = 'Active'", Long.class).getSingleResult();
+            Long active = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.status = 'Active' AND u.deleted = false", Long.class).getSingleResult();
             stats.put("activeUsers", active);
 
-            Long banned = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.status = 'Banned'", Long.class).getSingleResult();
+            Long banned = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.status = 'Banned' AND u.deleted = false", Long.class).getSingleResult();
             stats.put("bannedUsers", banned);
 
-            Long googleUsers = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.authProvider = 'Google'", Long.class).getSingleResult();
+            Long googleUsers = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.authProvider = 'Google' AND u.deleted = false", Long.class).getSingleResult();
             stats.put("googleUsers", googleUsers);
 
             Long newToday = em.createQuery(
-                "SELECT COUNT(u) FROM User u WHERE u.createdAt >= :startOfDay", Long.class)
+                "SELECT COUNT(u) FROM User u WHERE u.createdAt >= :startOfDay AND u.deleted = false", Long.class)
                 .setParameter("startOfDay", java.time.LocalDateTime.now().toLocalDate().atStartOfDay())
                 .getSingleResult();
             stats.put("newToday", newToday);
@@ -175,13 +183,13 @@ public class UserDAO {
     }
 
     /**
-     * Cáº­p nháº­t fullName ngÆ°á»i dÃ¹ng
+     * Cập nhật fullName người dùng
      */
     public boolean updateFullName(int userId, String fullName) {
         try {
             JpaHelper.execute(em -> {
                 User user = em.find(User.class, userId);
-                if (user != null) {
+                if (user != null && !user.isDeleted()) {
                     user.setFullName(fullName);
                 }
             });
@@ -193,14 +201,58 @@ public class UserDAO {
     }
 
     /**
-     * Lấy toàn bộ user (dùng cho broadcast notification)
+     * Lấy toàn bộ user
      */
-    public java.util.List<User> findAll() {
+    public List<User> findAll() {
         return JpaHelper.query(em ->
-            em.createQuery("SELECT u FROM User u", User.class).getResultList()
+            em.createQuery("SELECT u FROM User u WHERE u.deleted = false ORDER BY u.createdAt DESC", User.class).getResultList()
         );
     }
+
+    // Lọc user theo roleId (#49)
+    public List<User> findByRole(int roleId) {
+        return JpaHelper.query(em ->
+            em.createQuery(
+                "SELECT u FROM User u WHERE u.roleId = :roleId AND u.deleted = false",
+                User.class)
+              .setParameter("roleId", roleId)
+              .getResultList()
+        );
+    }
+
+    // Cập nhật thông tin user - chỉ cho phép sửa fullName, email, status (#48)
+    public void update(User user) {
+        JpaHelper.execute(em -> {
+            User existing = em.find(User.class, user.getUserId());
+            if (existing == null || existing.isDeleted()) return;
+            existing.setFullName(user.getFullName());
+            existing.setEmail(user.getEmail());
+            existing.setStatus(user.getStatus());
+            em.merge(existing);
+        });
+    }
+
+    // Khóa tài khoản (#48) - set status = Inactive
+    public void lockUser(int id) {
+        JpaHelper.execute(em -> {
+            User u = em.find(User.class, id);
+            if (u != null && !u.isDeleted()) { u.setStatus("Inactive"); em.merge(u); }
+        });
+    }
+
+    // Phân quyền Mentor (#49) - roleId: 1=Admin, 2=Mentor, 3=Candidate
+    public void setRole(int userId, int roleId) {
+        JpaHelper.execute(em -> {
+            User u = em.find(User.class, userId);
+            if (u != null && !u.isDeleted()) { u.setRoleId(roleId); em.merge(u); }
+        });
+    }
+
+    // Soft delete user (#48)
+    public void softDelete(int id) {
+        JpaHelper.execute(em -> {
+            User u = em.find(User.class, id);
+            if (u != null) { u.setDeleted(true); em.merge(u); }
+        });
+    }
 }
-
-
-

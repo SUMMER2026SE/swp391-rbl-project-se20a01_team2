@@ -2,6 +2,7 @@ package services;
 
 import model.User;
 import java.util.Map;
+import java.util.List;
 
 public interface UserService {
     
@@ -73,5 +74,26 @@ public interface UserService {
      * Đổi mật khẩu (yêu cầu nhập mật khẩu cũ)
      */
     void changePassword(int userId, String currentPassword, String newPassword) throws Exception;
-}
 
+    // ==========================================
+    // Methods from branch "theirs"
+    // ==========================================
+
+    List<User> getAllUsers();
+
+    User getUserByEmail(String email);
+
+    List<User> getMentors();
+
+    void createUser(User user);
+
+    void updateUser(int id, String fullName, String email, String status);
+
+    void lockUser(int id);
+
+    void assignMentorRole(int userId);
+
+    void revokeMentorRole(int userId);
+
+    void deleteUser(int id);
+}

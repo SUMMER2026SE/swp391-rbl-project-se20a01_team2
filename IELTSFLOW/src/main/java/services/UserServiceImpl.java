@@ -7,6 +7,7 @@ import util.ResendUtil;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
 
 public class UserServiceImpl implements UserService {
 
@@ -222,6 +223,70 @@ public class UserServiceImpl implements UserService {
         if (!updated) {
             throw new Exception("Không thể đổi mật khẩu. Vui lòng thử lại.");
         }
+    }
+
+    // RoleID constants theo DB seed data
+    public static final int ROLE_ADMIN     = 1;
+    public static final int ROLE_MENTOR    = 2;
+    public static final int ROLE_CANDIDATE = 3;
+
+    @Override
+    public List<User> getAllUsers() {
+        return userDAO.findAll();
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userDAO.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public List<User> getMentors() {
+        return userDAO.findByRole(ROLE_MENTOR);
+    }
+
+    @Override
+    public void createUser(User user) {
+        if (userDAO.emailExists(user.getEmail()))
+            throw new IllegalArgumentException("Email đã tồn tại: " + user.getEmail());
+        if (user.getRoleId() == 0) user.setRoleId(ROLE_CANDIDATE);
+        userDAO.create(user);
+    }
+
+    @Override
+    public void updateUser(int id, String fullName, String email, String status) {
+        User existing = userDAO.findById(id).orElse(null);
+        if (existing == null) throw new IllegalArgumentException("User not found: " + id);
+        existing.setFullName(fullName);
+        existing.setEmail(email);
+        existing.setStatus(status);
+        userDAO.update(existing);
+    }
+
+    @Override
+    public void lockUser(int id) {
+        User user = userDAO.findById(id).orElse(null);
+        if (user == null) throw new IllegalArgumentException("User not found: " + id);
+        userDAO.lockUser(id);
+    }
+
+    @Override
+    public void assignMentorRole(int userId) {
+        User user = userDAO.findById(userId).orElse(null);
+        if (user == null) throw new IllegalArgumentException("User not found: " + userId);
+        userDAO.setRole(userId, ROLE_MENTOR);
+    }
+
+    @Override
+    public void revokeMentorRole(int userId) {
+        User user = userDAO.findById(userId).orElse(null);
+        if (user == null) throw new IllegalArgumentException("User not found: " + userId);
+        userDAO.setRole(userId, ROLE_CANDIDATE);
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        userDAO.softDelete(id);
     }
 }
 

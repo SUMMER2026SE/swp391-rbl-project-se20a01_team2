@@ -1,17 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>IELTSFLOW</groupId>
     <artifactId>IELTSFLOW</artifactId>
     <version>1.0</version>
     <packaging>war</packaging>
-    <name>IELTSFLOW-1.0</name>
-    
+    <name>IELTSFLOW</name>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jakartaee>10.0.0</jakartaee>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>jakarta.platform</groupId>
@@ -27,18 +28,17 @@
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <!-- JSTL Implementation (required at runtime for Tomcat to resolve jakarta.tags.core) -->
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
-            <version>3.0.1</version>
+            <version>3.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
             <version>13.2.1.jre11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.2</version>
         </dependency>
         <dependency>
             <groupId>com.resend</groupId>
@@ -61,6 +61,22 @@
             <version>5.2.1</version>
         </dependency>
         <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.cognitiveservices.speech</groupId>
+            <artifactId>client-sdk</artifactId>
+            <version>1.48.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
@@ -77,7 +93,7 @@
             <version>2.2.0</version>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>

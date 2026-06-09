@@ -17,10 +17,22 @@ import java.util.List;
 public class AppContextListener implements ServletContextListener {
 
     private static final List<String> SUPPORTED_KEYS = Arrays.asList(
-            "RESEND_API_KEY", "RESEND_SEND_DOMAIN",
-            "DB_URL", "DB_HOST", "DB_PORT", "DB_NAME",
-            "DB_USER", "DB_PASSWORD", "DB_ENCRYPT",
-            "DB_TRUST_SERVER_CERT", "DB_EXTRA_PARAMS",
+            "RESEND_API_KEY",
+            "RESEND_SEND_DOMAIN",
+            "DB_URL",
+            "DB_HOST",
+            "DB_PORT",
+            "DB_NAME",
+            "DB_USER",
+            "DB_PASSWORD",
+            "DB_ENCRYPT",
+            "DB_TRUST_SERVER_CERT",
+            "DB_EXTRA_PARAMS",
+            "VNPAY_TMN_CODE",
+            "VNPAY_HASH_SECRET",
+            "SPEECH_KEY",
+            "SPEECH_REGION",
+            "GEMINI_API_KEYS",
             "GOOGLE_CLIENT_ID"
     );
 

@@ -9,8 +9,6 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
-
- 
 @Entity
 @Table(name = "Users")
 public class User {
@@ -20,30 +18,32 @@ public class User {
     @Column(name = "UserID")
     private int userId;
 
-    @Column(name = "RoleID")
+    @Column(name = "RoleID", nullable = false)
     private int roleId;
 
-    @Column(name = "Email", unique = true)
+    @Column(name = "Email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "PasswordHash")
     private String passwordHash;
 
     @Column(name = "AuthProvider")
-    private String authProvider; // "Local", "Google", "Facebook"
+    private String authProvider = "Local"; // "Local", "Google", "Facebook"
 
     @Column(name = "ProviderID")
     private String providerId;
 
-    @Column(name = "FullName")
+    @Column(name = "FullName", nullable = false)
     private String fullName;
 
     @Column(name = "Status")
-    private String status; // "Active", "Inactive", "Banned"
+    private String status = "Active"; // "Active", "Inactive", "Banned"
 
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
 
+    @Column(name = "Deleted")
+    private boolean deleted = false;
     
     public User() {
     }
@@ -137,6 +137,12 @@ public class User {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 }
-
-
