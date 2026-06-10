@@ -27,17 +27,44 @@ function renderDashboardGrid() {
     const list = document.getElementById('today-lessons-grid');
     if (!list) return;
 
+    let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    let learnedList = JSON.parse(localStorage.getItem('learnedLessons') || '[]');
+
+    // Combine MOCK_TODAY_LESSONS with any bookmarked lessons from MOCK_LESSONS
+    let displayLessons = [...MOCK_TODAY_LESSONS];
+    
+    // Add bookmarked lessons that are not already in displayLessons
+    bookmarks.forEach(bId => {
+        if (!displayLessons.find(l => l.id === bId)) {
+            const lesson = MOCK_LESSONS.find(l => l.id === bId);
+            if (lesson) displayLessons.push(lesson);
+        }
+    });
+
     let html = '';
-    MOCK_TODAY_LESSONS.forEach((l, idx) => {
+    displayLessons.forEach((l, idx) => {
+        const isLearned = learnedList.includes(l.id);
+        const fillWidth = isLearned ? '100%' : '0%';
+        const fillStyle = isLearned ? 'background: var(--accent-green)' : '';
+        
+        const isBookmarked = bookmarks.includes(l.id);
+        const bookmarkBadge = isBookmarked ? '<span class="badge badge-red" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">❤️ Bookmarked</span>' : '';
+
         html += `
             <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail.jsp?id=${l.id}'">
-                <div class="card-icon-wrapper" style="background: rgba(var(--accent-${l.color}-rgb), 0.2); border: 1px solid var(--accent-${l.color});">
-                    ${l.icon}
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div class="card-icon-wrapper" style="background: rgba(var(--accent-${l.color}-rgb), 0.2); border: 1px solid var(--accent-${l.color});">
+                        ${l.icon}
+                    </div>
+                    <div style="display: flex; gap: 5px; flex-direction: column; align-items: flex-end;">
+                        ${isLearned ? '<span class="badge badge-green">✓ Learned</span>' : ''}
+                        ${bookmarkBadge}
+                    </div>
                 </div>
-                <span class="badge badge-${l.color}" style="margin-bottom: 10px;">${l.skill}</span>
+                <span class="badge badge-${l.color}" style="margin-bottom: 10px; margin-top: 10px; display: inline-block;">${l.skill}</span>
                 <h3 style="font-size: 1.1rem; margin-bottom: 10px;">${l.title}</h3>
-                <p style="font-size: 0.85rem; color: var(--text-secondary);">⏱️ ${l.time} to complete</p>
-                <div class="progress-track"><div class="progress-fill" style="width: 0%;"></div></div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">⏱️ ${l.time || '15 mins'} to complete</p>
+                <div class="progress-track"><div class="progress-fill" style="width: ${fillWidth}; ${fillStyle}"></div></div>
             </div>
         `;
     });

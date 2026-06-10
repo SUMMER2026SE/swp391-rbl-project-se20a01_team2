@@ -8,7 +8,7 @@
     <title>Quản lý Giao Dịch - IELTSFlow Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/css/admin-style.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet">
     <style>
         .table-custom th { background-color: var(--sidebar-bg); color: var(--text-secondary); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; border-bottom: 2px solid var(--border-color); }
         .table-custom td { vertical-align: middle; border-bottom: 1px solid var(--border-color); }
@@ -18,67 +18,34 @@
 </head>
 <body>
 
-<div class="admin-layout">
-    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <div class="bg-blob blob-1" style="background: var(--accent-blue); opacity: 0.1;"></div>
+    <div class="bg-blob blob-3" style="background: var(--accent-purple); opacity: 0.1;"></div>
 
-    <aside class="admin-sidebar" id="adminSidebar">
-        <div class="sidebar-header">IELTSFlow</div>
-        <div class="sidebar-nav">
-            <div class="nav-section">
-                <div class="nav-section-title">Tổng quan</div>
-                <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-item">
-                    <i class="fa-solid fa-house"></i> Dashboard
-                </a>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Quản lý Người dùng</div>
-                <a href="${pageContext.request.contextPath}/admin/users" class="nav-item">
-                    <i class="fa-solid fa-users-gear"></i> Thêm/Sửa/Khóa TK
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/users/mentors" class="nav-item">
-                    <i class="fa-solid fa-user-shield"></i> Phân quyền Mentor
-                </a>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Tài chính & Doanh thu</div>
-                <a href="${pageContext.request.contextPath}/admin/packages" class="nav-item">
-                    <i class="fa-solid fa-box-open"></i> Gói Thành Viên
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-item active">
-                    <i class="fa-solid fa-money-check-dollar"></i> Giao Dịch
-                </a>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Hệ thống</div>
-                <a href="${pageContext.request.contextPath}/admin/logs" class="nav-item">
-                    <i class="fa-solid fa-server"></i> Log Hệ Thống
-                </a>
-            </div>
-        </div>
-    </aside>
+<div class="layout-wrapper">
+    <jsp:include page="sidebar.jsp">
+        <jsp:param name="active" value="transactions" />
+    </jsp:include>
 
-    <main class="admin-main">
-        <header class="main-header animate-on-scroll">
-            <button class="hamburger" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
-            <h1 class="page-title">Lịch sử Đối Soát Thanh Toán</h1>
+    <main class="main-content">
+        <header class="main-header animate-fade-up" style="margin-bottom: 30px;">
+            <h1 class="page-title" style="font-size: 2rem; margin: 0;">Lịch sử Đối Soát Thanh Toán 💳</h1>
         </header>
 
         <!-- Bộ Lọc -->
-        <div class="animate-on-scroll" style="margin-bottom: 2rem; max-width: 400px; animation-delay: 0.1s;">
+        <div class="animate-fade-up" style="margin-bottom: 2rem; max-width: 400px; animation-delay: 0.1s;">
             <form action="${pageContext.request.contextPath}/admin/transactions" method="get" class="d-flex gap-2">
-                <select name="status" class="form-select filter-select flex-grow-1 shadow-sm">
+                <select name="status" class="form-select filter-select flex-grow-1 shadow-sm" style="background-color: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--glass-border);">
                     <option value="">-- Tất cả trạng thái --</option>
                     <option value="Pending" ${currentStatus == 'Pending' ? 'selected' : ''}>Đang chờ (Pending)</option>
                     <option value="Success" ${currentStatus == 'Success' ? 'selected' : ''}>Thành công (Success)</option>
                     <option value="Failed" ${currentStatus == 'Failed' ? 'selected' : ''}>Thất bại (Failed)</option>
                 </select>
-                <button type="submit" class="btn btn-primary" style="border-radius: 1rem; padding: 0 1.5rem; font-weight: 700; background-color: var(--accent-color); border: none;">Lọc</button>
+                <button type="submit" class="btn btn-primary" style="border-radius: 1rem; padding: 0 1.5rem; font-weight: 700;">Lọc</button>
             </form>
         </div>
 
         <!-- Bảng Dữ Liệu -->
-        <div class="db-card-shell animate-on-scroll" style="animation-delay: 0.2s;">
-            <div class="db-card-core" style="padding: 0; overflow: hidden;">
+        <div class="glass-panel animate-fade-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
                 <div class="table-responsive">
                     <table class="table table-custom mb-0">
                         <thead>
@@ -132,12 +99,11 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
         </div>
 
     </main>
 </div>
 
-<script src="${pageContext.request.contextPath}/js/admin-script.js"></script>
+<!-- <script src="${pageContext.request.contextPath}/js/admin-script.js"></script> -->
 </body>
 </html>

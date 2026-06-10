@@ -50,7 +50,7 @@
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
                             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                                 <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--accent-green);">
-                                <span style="color: rgba(255,255,255,0.5); text-decoration: line-through;">Read Vocab List 1-5</span>
+                                <span style="color: black; text-decoration: line-through;">Read Vocab List 1-5</span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                                 <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--accent-green);">
@@ -191,7 +191,7 @@
                             <div>
                                 <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Phase Completed (3 Months)</span>
                                 <h2 style="margin: 15px 0 10px; color: var(--accent-red); font-size: 1.8rem;">Time for a Re-test! 🎯</h2>
-                                <p style="color: rgba(255,255,255,0.8); font-size: 1rem; line-height: 1.6;">You've reached the end of the 12-week study phase. To continue your journey and let our AI build the next personalized pathway, a re-evaluation is required.</p>
+                                <p style="color: black; font-size: 1rem; line-height: 1.6;">You've reached the end of the 12-week study phase. To continue your journey and let our AI build the next personalized pathway, a re-evaluation is required.</p>
                             </div>
                             <button class="btn btn-primary" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); white-space: nowrap; padding: 15px 30px; font-size: 1.1rem; border-radius: 12px; cursor: pointer;">
                                 Take Re-test Now →

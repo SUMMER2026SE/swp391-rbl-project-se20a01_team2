@@ -37,7 +37,7 @@
             <div class="welcome-banner animate-fade-up">
                 <div>
                     <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Welcome back! 🚀</h1>
-                    <p style="font-size: 1.1rem; color: rgba(255,255,255,0.8);">Keep up the great work. You're 20% closer to your Target Band 7.0.</p>
+                    <p style="font-size: 1.1rem; color: black;">Keep up the great work. You're 20% closer to your Target Band 7.0.</p>
                 </div>
                 <div style="width: 120px; height: 120px; border-radius: 50%; border: 8px solid rgba(59, 130, 246, 0.3); border-top-color: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800;">
                     6.0
@@ -66,6 +66,6 @@
         </main>
     </div>
 
-    <script src="../../js/api.js"></script>
+    <script src="../../js/api.js?v=${System.currentTimeMillis()}"></script>
 </body>
 </html>

@@ -29,22 +29,9 @@
     <div class="bg-blob blob-1" style="background: var(--accent-red); opacity: 0.1;"></div>
     
     <div class="layout-wrapper">
-        <aside class="sidebar">
-            <div class="brand" style="background: linear-gradient(135deg, #ef4444, #f59e0b); -webkit-background-clip: text;">IELTSFLOW Admin</div>
-            <div class="user-profile">
-                <div class="avatar" style="background: linear-gradient(135deg, #ef4444, #f59e0b);">AD</div>
-                <div><h4 style="font-size: 1rem;">Administrator</h4></div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link">📊 Dashboard</a>
-                <a href="${pageContext.request.contextPath}/admin/users" class="nav-link ${!isMentorView ? 'active' : ''}">👥 User Management</a>
-                <a href="${pageContext.request.contextPath}/admin/users/mentors" class="nav-link ${isMentorView ? 'active' : ''}">🛡️ Mentor Roles</a>
-                <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-link">💳 Transactions</a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Logout</a>
-            </div>
-        </aside>
+        <jsp:include page="sidebar.jsp">
+            <jsp:param name="active" value="${isMentorView ? 'mentors' : 'users'}" />
+        </jsp:include>
 
         <main class="main-content">
             <c:if test="${not empty error}">

@@ -8,7 +8,7 @@
     <title>${pkg != null ? 'Sửa' : 'Thêm'} Gói Thành Viên - IELTSFlow Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/css/admin-style.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet">
     <style>
         .form-control { border-radius: 1rem; padding: 0.75rem 1rem; border: 1px solid var(--border-color); background-color: #f9fafb; transition: all 0.2s; }
         .form-control:focus { background-color: #fff; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); border-color: var(--accent-color); }
@@ -17,57 +17,24 @@
 </head>
 <body>
 
-<div class="admin-layout">
-    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <div class="bg-blob blob-1" style="background: var(--accent-blue); opacity: 0.1;"></div>
+    <div class="bg-blob blob-3" style="background: var(--accent-purple); opacity: 0.1;"></div>
 
-    <aside class="admin-sidebar" id="adminSidebar">
-        <div class="sidebar-header">IELTSFlow</div>
-        <div class="sidebar-nav">
-            <div class="nav-section">
-                <div class="nav-section-title">Tổng quan</div>
-                <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-item">
-                    <i class="fa-solid fa-house"></i> Dashboard
-                </a>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Quản lý Người dùng</div>
-                <a href="${pageContext.request.contextPath}/admin/users" class="nav-item">
-                    <i class="fa-solid fa-users-gear"></i> Thêm/Sửa/Khóa TK
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/users/mentors" class="nav-item">
-                    <i class="fa-solid fa-user-shield"></i> Phân quyền Mentor
-                </a>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Tài chính & Doanh thu</div>
-                <a href="${pageContext.request.contextPath}/admin/packages" class="nav-item active">
-                    <i class="fa-solid fa-box-open"></i> Gói Thành Viên
-                </a>
-                <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-item">
-                    <i class="fa-solid fa-money-check-dollar"></i> Giao Dịch
-                </a>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Hệ thống</div>
-                <a href="${pageContext.request.contextPath}/admin/logs" class="nav-item">
-                    <i class="fa-solid fa-server"></i> Log Hệ Thống
-                </a>
-            </div>
-        </div>
-    </aside>
+<div class="layout-wrapper">
+    <jsp:include page="sidebar.jsp">
+        <jsp:param name="active" value="packages" />
+    </jsp:include>
 
-    <main class="admin-main">
-        <header class="main-header animate-on-scroll">
+    <main class="main-content">
+        <header class="main-header animate-fade-up" style="margin-bottom: 30px;">
             <div style="display: flex; align-items: center;">
-                <button class="hamburger" id="hamburgerBtn" style="margin-right: 1rem;"><i class="fa-solid fa-bars"></i></button>
                 <a href="${pageContext.request.contextPath}/admin/packages" style="color: var(--text-secondary); text-decoration: none; margin-right: 1rem; font-size: 1.5rem;"><i class="fa-solid fa-arrow-left"></i></a>
-                <h1 class="page-title">${pkg != null ? 'Cập Nhật Gói' : 'Tạo Gói Mới'}</h1>
+                <h1 class="page-title" style="font-size: 2rem; margin: 0;">${pkg != null ? 'Cập Nhật Gói 📦' : 'Tạo Gói Mới 📦'}</h1>
             </div>
         </header>
 
         <div style="max-width: 600px; margin: 0 auto;">
-            <div class="db-card-shell animate-on-scroll" style="animation-delay: 0.1s;">
-                <div class="db-card-core" style="padding: 2.5rem;">
+            <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 2.5rem;">
                     
                     <form action="${pageContext.request.contextPath}/admin/packages" method="post">
                         <!-- Chứa ID ngầm nếu đang trong chế độ Sửa -->
@@ -106,13 +73,12 @@
                         </div>
                     </form>
 
-                </div>
             </div>
         </div>
 
     </main>
 </div>
 
-<script src="${pageContext.request.contextPath}/js/admin-script.js"></script>
+<!-- <script src="${pageContext.request.contextPath}/js/admin-script.js"></script> -->
 </body>
 </html>

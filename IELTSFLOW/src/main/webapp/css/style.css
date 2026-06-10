@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --bg-base: #0b0f19;
-    --bg-surface: rgba(19, 26, 42, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
+    --bg-base: #f8fafc;
+    --bg-surface: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
     --accent-blue: #3b82f6;
     --accent-purple: #8b5cf6;
     --accent-green: #10b981;
@@ -83,7 +83,7 @@ body {
     align-items: center;
     gap: 15px;
     padding: 15px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.03);
     border-radius: 12px;
     margin-bottom: 2rem;
     border: 1px solid var(--glass-border);
@@ -121,7 +121,7 @@ body {
 }
 
 .nav-link:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.05);
     color: var(--text-primary);
     transform: translateX(5px);
 }
@@ -172,12 +172,12 @@ body {
 }
 
 .btn-glass {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.05);
     color: var(--text-primary);
     border: 1px solid var(--glass-border);
 }
 .btn-glass:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 /* Dashboard Banner */
@@ -200,7 +200,7 @@ body {
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.02);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     padding: 20px;
@@ -218,7 +218,7 @@ body {
 }
 
 .lesson-card-3d {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.02);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     padding: 20px;
@@ -230,9 +230,9 @@ body {
 
 .lesson-card-3d:hover {
     transform: translateY(-10px) scale(1.02);
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-    border-color: rgba(255,255,255,0.2);
+    background: rgba(0, 0, 0, 0.05);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    border-color: rgba(0,0,0,0.1);
 }
 
 .card-icon-wrapper {
@@ -257,7 +257,7 @@ body {
 .progress-track {
     width: 100%;
     height: 8px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.1);
     border-radius: 4px;
     overflow: hidden;
     margin-top: 10px;
@@ -274,20 +274,20 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.02);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     margin-bottom: 15px;
     transition: all 0.3s;
 }
 .history-card:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 /* Search Pill */
 .search-pill {
     display: flex;
-    background: rgba(255,255,255,0.03);
+    background: rgba(0,0,0,0.03);
     border: 1px solid var(--glass-border);
     border-radius: 30px;
     padding: 5px;
@@ -296,16 +296,16 @@ body {
 .search-pill input {
     background: transparent;
     border: none;
-    color: white;
+    color: var(--text-primary);
     padding: 10px 20px;
     flex: 1;
     outline: none;
     font-size: 1rem;
 }
 .search-pill select {
-    background: rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.05);
     border: none;
-    color: white;
+    color: var(--text-primary);
     padding: 10px 20px;
     border-radius: 20px;
     outline: none;
