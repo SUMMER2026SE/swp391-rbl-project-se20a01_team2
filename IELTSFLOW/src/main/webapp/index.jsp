@@ -755,6 +755,7 @@
             <div class="nav-links">
                 <a href="#features" class="nav-link">Tính năng</a>
                 <a href="#pricing" class="nav-link">Bảng giá</a>
+                <a href="/IELTSFLOW/subscription" class="nav-link">Gói Đăng Ký</a>
                 <a href="#testimonials" class="nav-link">Đánh giá</a>
                 <a href="#" class="nav-link">Blog</a>
             </div>
@@ -787,6 +788,7 @@
     <div class="mobile-menu" id="mobile-menu">
         <a href="#features" class="mobile-link">Tính năng</a>
         <a href="#pricing" class="mobile-link">Bảng giá</a>
+        <a href="/IELTSFLOW/subscription" class="mobile-link">Gói Đăng Ký</a>
         <a href="#testimonials" class="mobile-link">Đánh giá</a>
         <a href="#" class="mobile-link">Blog</a>
         <div id="mobile-nav-actions" style="display:flex; flex-direction:column; gap:10px;">
@@ -1142,36 +1144,12 @@
             <span class="section-label scroll-reveal">💎 Bảng giá</span>
             <h2 class="section-title scroll-reveal">Chọn gói phù hợp với mục tiêu của bạn</h2>
             
-            <div class="pricing-cards">
-                <div class="pricing-card free scroll-reveal">
-                    <h3 class="pricing-title">Miễn phí</h3>
-                    <div class="pricing-price">0₫<span>/tháng</span></div>
-                    <p style="color: var(--color-secondary-text);">Bắt đầu hành trình IELTS</p>
-                    <ul class="pricing-features">
-                        <li>Placement Test đầu vào</li>
-                        <li>Xem tuần 1 lộ trình AI</li>
-                        <li>3 bài Mock Test/tháng</li>
-                        <li>Tham gia cộng đồng</li>
-                        <li class="disabled">Chấm điểm Writing/Speaking</li>
-                        <li class="disabled">Thi thử Focus Mode</li>
-                    </ul>
-                    <a href="/IELTSFLOW/jsp/auth.jsp?tab=register" class="btn-outline btn-full">Bắt đầu ngay</a>
-                </div>
-                
-                <div class="pricing-card pro scroll-reveal" style="transition-delay: 0.1s">
-                    <div class="pro-badge">PHỔ BIẾN</div>
-                    <h3 class="pricing-title">Candidate Pro</h3>
-                    <div class="pricing-price">299.000₫<span>/tháng</span></div>
-                    <p style="color: var(--color-secondary-text);">Mở khóa toàn bộ sức mạnh AI</p>
-                    <ul class="pricing-features">
-                        <li>Tất cả tính năng của gói Miễn phí</li>
-                        <li>Full 3 tháng lộ trình học bằng AI</li>
-                        <li>Focus Mode Mock Tests</li>
-                        <li>Chấm Writing/Speaking không giới hạn</li>
-                        <li>Hỗ trợ ưu tiên 24/7</li>
-                    </ul>
-                    <a href="/IELTSFLOW/jsp/auth.jsp?tab=register" class="btn-cta btn-full">Nâng cấp Pro</a>
-                </div>
+            <div style="margin-top: 40px; text-align: center;" class="scroll-reveal">
+                <p style="color: var(--color-secondary-text); font-size: 18px; margin-bottom: 24px;">Hệ thống cung cấp đa dạng gói luyện thi theo tháng, giúp bạn tiết kiệm chi phí và đạt hiệu quả tối ưu.</p>
+                <a href="/IELTSFLOW/subscription" class="btn-cta" style="font-size: 18px; padding: 14px 36px; display: inline-flex; align-items: center; gap: 8px;">
+                    Xem chi tiết Gói Đăng Ký
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </a>
             </div>
         </div>
     </section>
