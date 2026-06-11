@@ -861,23 +861,23 @@
             <div class="marquee-wrapper">
                 <div class="marquee-content" id="marqueeTrack">
                     <!-- Row 1 of university logos -->
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/University_of_Nottingham_logo.svg/1280px-University_of_Nottingham_logo.svg.png" alt="University of Nottingham" style="height:45px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/UoS_Logomark_horizontal_Colour_RGB.svg/2560px-UoS_Logomark_horizontal_Colour_RGB.svg.png" alt="University of Southampton" style="height:40px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Newcastle_University_logo.svg/1200px-Newcastle_University_logo.svg.png" alt="Newcastle University" style="height:40px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Queen_Mary_University_of_London_logo.svg/2560px-Queen_Mary_University_of_London_logo.svg.png" alt="Queen Mary University" style="height:38px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/University_of_Leicester_logo.svg/2560px-University_of_Leicester_logo.svg.png" alt="University of Leicester" style="height:38px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/University_of_Exeter_logo.svg/2560px-University_of_Exeter_logo.svg.png" alt="University of Exeter" style="height:38px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/University_of_York_logo.svg/2560px-University_of_York_logo.svg.png" alt="University of York" style="height:38px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/University_of_Reading_logo.svg/2560px-University_of_Reading_logo.svg.png" alt="University of Reading" style="height:38px;">
+                    <img src="img/logo/nottingham.png" alt="University of Nottingham" style="height:45px;">
+                    <img src="img/logo/southampton.png" alt="University of Southampton" style="height:40px;">
+                    <img src="img/logo/newcastle.png" alt="Newcastle University" style="height:40px;">
+                    <img src="img/logo/queenmary.png" alt="Queen Mary University" style="height:38px;">
+                    <img src="img/logo/leicester.png" alt="University of Leicester" style="height:38px;">
+                    <img src="img/logo/exeter.png" alt="University of Exeter" style="height:38px;">
+                    <img src="img/logo/york.png" alt="University of York" style="height:38px;">
+                    <img src="img/logo/reading.png" alt="University of Reading" style="height:38px;">
                     <!-- Duplicates for infinite scroll -->
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/University_of_Nottingham_logo.svg/1280px-University_of_Nottingham_logo.svg.png" alt="University of Nottingham" style="height:45px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/UoS_Logomark_horizontal_Colour_RGB.svg/2560px-UoS_Logomark_horizontal_Colour_RGB.svg.png" alt="University of Southampton" style="height:40px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b6/Newcastle_University_logo.svg/1200px-Newcastle_University_logo.svg.png" alt="Newcastle University" style="height:40px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Queen_Mary_University_of_London_logo.svg/2560px-Queen_Mary_University_of_London_logo.svg.png" alt="Queen Mary University" style="height:38px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/University_of_Leicester_logo.svg/2560px-University_of_Leicester_logo.svg.png" alt="University of Leicester" style="height:38px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/University_of_Exeter_logo.svg/2560px-University_of_Exeter_logo.svg.png" alt="University of Exeter" style="height:38px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/University_of_York_logo.svg/2560px-University_of_York_logo.svg.png" alt="University of York" style="height:38px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/University_of_Reading_logo.svg/2560px-University_of_Reading_logo.svg.png" alt="University of Reading" style="height:38px;">
+                    <img src="img/logo/nottingham.png" alt="University of Nottingham" style="height:45px;">
+                    <img src="img/logo/southampton.png" alt="University of Southampton" style="height:40px;">
+                    <img src="img/logo/newcastle.png" alt="Newcastle University" style="height:40px;">
+                    <img src="img/logo/queenmary.png" alt="Queen Mary University" style="height:38px;">
+                    <img src="img/logo/leicester.png" alt="University of Leicester" style="height:38px;">
+                    <img src="img/logo/exeter.png" alt="University of Exeter" style="height:38px;">
+                    <img src="img/logo/york.png" alt="University of York" style="height:38px;">
+                    <img src="img/logo/reading.png" alt="University of Reading" style="height:38px;">
                 </div>
             </div>
         </div>
