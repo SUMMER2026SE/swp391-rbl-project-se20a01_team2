@@ -24,4 +24,12 @@ hs_err_pid*
 replay_pid*
 
 .env
-/IELTSFLOW/target/
+IELTSFLOW/target/
+
+IELTSFLOW/.idea
+.agent/skills/
+IELTSFLOW/.agent/skills/
+.agent/rules/README.md
+IELTSFLOW/.agent/rules/README.md
+Document/swp_motabandau (1).md
+Document/Template1_Project Tracking - Project.csv

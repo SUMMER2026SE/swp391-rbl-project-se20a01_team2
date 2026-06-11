@@ -9,21 +9,11 @@ import java.util.List;
 public class SubscriptionPackageDAO {
 
     public List<SubscriptionPackage> getActivePackagesPaginated(int offset, int limit) {
-        return JpaHelper.query(em -> {
-            TypedQuery<SubscriptionPackage> query = em.createQuery(
-                    "SELECT p FROM SubscriptionPackage p WHERE p.deleted = false ORDER BY p.packageId DESC", SubscriptionPackage.class);
-            query.setFirstResult(offset);
-            query.setMaxResults(limit);
-            return query.getResultList();
-        });
+        return getPackagesPaginated(offset, limit, "active", "");
     }
 
     public long getTotalActivePackagesCount() {
-        return JpaHelper.query(em -> {
-            TypedQuery<Long> query = em.createQuery(
-                    "SELECT COUNT(p) FROM SubscriptionPackage p WHERE p.deleted = false", Long.class);
-            return query.getSingleResult();
-        });
+        return getTotalPackagesCount("active");
     }
 
     public List<SubscriptionPackage> getPackagesPaginated(int offset, int limit, String statusFilter, String sortOption) {
@@ -70,6 +60,12 @@ public class SubscriptionPackageDAO {
         });
     }
 
+    public List<SubscriptionPackage> getAllPackages() {
+        return JpaHelper.query(em -> 
+            em.createQuery("SELECT p FROM SubscriptionPackage p", SubscriptionPackage.class).getResultList()
+        );
+    }
+    
     public SubscriptionPackage getPackageById(int id) {
         return JpaHelper.query(em -> em.find(SubscriptionPackage.class, id));
     }
@@ -77,7 +73,11 @@ public class SubscriptionPackageDAO {
     public void addPackage(SubscriptionPackage pkg) {
         JpaHelper.execute(em -> em.persist(pkg));
     }
-
+    
+    public void createPackage(SubscriptionPackage pkg) {
+        addPackage(pkg);
+    }
+    
     public void updatePackage(SubscriptionPackage pkg) {
         JpaHelper.execute(em -> em.merge(pkg));
     }
@@ -91,7 +91,11 @@ public class SubscriptionPackageDAO {
             }
         });
     }
-
+    
+    public void deletePackage(int id) {
+        softDeletePackage(id);
+    }
+    
     public void restorePackage(int id) {
         JpaHelper.execute(em -> {
             SubscriptionPackage pkg = em.find(SubscriptionPackage.class, id);
