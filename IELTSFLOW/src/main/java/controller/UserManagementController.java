@@ -5,7 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.User;
 import services.UserService;
-
+import services.UserServiceImpl;
 import java.io.IOException;
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
 @WebServlet("/admin/users/*")
 public class UserManagementController extends HttpServlet {
 
-    private final UserService userService = new UserService();
+    private final UserService userService = new UserServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
