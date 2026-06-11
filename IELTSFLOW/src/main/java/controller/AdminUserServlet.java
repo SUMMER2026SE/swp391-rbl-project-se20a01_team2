@@ -21,7 +21,7 @@ import java.util.Optional;
  * GET  /api/admin/users          → Danh sách tất cả user + thống kê
  * POST /api/admin/users/ban      → Khóa tài khoản { userId, action: "ban"|"unban" }
  */
-@WebServlet(urlPatterns = {"/admin/dashboard", "/api/admin/users/ban"})
+@WebServlet(urlPatterns = {"/admin/users", "/api/admin/users/ban"})
 public class AdminUserServlet extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();

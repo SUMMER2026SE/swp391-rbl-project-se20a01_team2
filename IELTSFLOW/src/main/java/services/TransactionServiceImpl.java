@@ -14,6 +14,21 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public void createTransaction(Transaction transaction) {
+        transactionDAO.createTransaction(transaction);
+    }
+
+    @Override
+    public void updateTransaction(Transaction transaction) {
+        transactionDAO.updateTransaction(transaction);
+    }
+
+    @Override
+    public Transaction getTransactionById(int id) {
+        return transactionDAO.getTransactionById(id);
+    }
+
+    @Override
     public List<Transaction> getTransactionsByStatus(String status) {
         return transactionDAO.getTransactionsByStatus(status);
     }
