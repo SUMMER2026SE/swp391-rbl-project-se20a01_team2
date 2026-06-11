@@ -38,6 +38,12 @@ public class DashboardController extends HttpServlet {
         request.setAttribute("totalUsers", totalUsers);
         request.setAttribute("totalTests", totalTests);
 
+        java.util.Map<String, Object> stats = new dao.UserDAO().getStats();
+        request.setAttribute("stats", stats);
+        try {
+            request.setAttribute("statsJson", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(stats));
+        } catch (Exception e) {}
+
         request.getRequestDispatcher("/jsp/admin/dashboard.jsp").forward(request, response);
     }
 }

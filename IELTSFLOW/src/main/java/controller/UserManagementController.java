@@ -15,7 +15,7 @@ import java.util.List;
  *   GET /admin/users/mentors  : Lấy danh sách mentor và forward to JSP
  *   POST /admin/users         : Xử lý Add/Edit/Delete/Lock qua form parameter (action)
  */
-@WebServlet("/admin/users/*")
+@WebServlet({"/admin/users/*", "/api/admin/users/ban"})
 public class UserManagementController extends HttpServlet {
 
     private final UserService userService = new UserServiceImpl();
@@ -44,6 +44,31 @@ public class UserManagementController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String servletPath = req.getServletPath();
+        if ("/api/admin/users/ban".equals(servletPath)) {
+            resp.setContentType("application/json;charset=UTF-8");
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                java.util.Map<String, Object> body = mapper.readValue(req.getInputStream(), java.util.Map.class);
+                int targetUserId = (int) body.get("userId");
+                String actionApi = (String) body.get("action"); // "ban" hoặc "unban"
+                String newStatus = "ban".equals(actionApi) ? "Banned" : "Active";
+                
+                userService.updateUserStatus(targetUserId, newStatus);
+                
+                mapper.writeValue(resp.getOutputStream(),
+                        java.util.Map.of("success", true, "message",
+                                "ban".equals(actionApi) ? "Đã khóa tài khoản" : "Đã mở khóa tài khoản"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                resp.setStatus(500);
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                mapper.writeValue(resp.getOutputStream(),
+                        java.util.Map.of("success", false, "message", "Lỗi: " + e.getMessage()));
+            }
+            return;
+        }
+
         String action = req.getParameter("action");
         String pathInfo = req.getPathInfo();
         

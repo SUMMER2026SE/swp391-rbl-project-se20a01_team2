@@ -91,6 +91,8 @@ public interface UserService {
 
     void lockUser(int id);
 
+    void updateUserStatus(int id, String status);
+
     void assignMentorRole(int userId);
 
     void revokeMentorRole(int userId);

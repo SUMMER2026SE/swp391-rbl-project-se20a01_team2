@@ -66,10 +66,7 @@ public class UserDAO {
         return user.getUserId();
     }
 
-    // Thêm user mới (#48)
-    public void save(User user) {
-        JpaHelper.execute(em -> em.persist(user));
-    }
+
 
     /**
      * Cập nhật trạng thái người dùng
@@ -130,28 +127,7 @@ public class UserDAO {
         });
     }
 
-    /**
-     * Lấy danh sách tất cả user cho trang Admin
-     */
-    public java.util.List<java.util.Map<String, Object>> findAllForAdmin() {
-        return JpaHelper.query(em -> {
-            java.util.List<User> users = em.createQuery("SELECT u FROM User u WHERE u.deleted = false ORDER BY u.createdAt DESC", User.class)
-                    .getResultList();
-            java.util.List<java.util.Map<String, Object>> result = new java.util.ArrayList<>();
-            for (User u : users) {
-                java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
-                m.put("userId",       u.getUserId());
-                m.put("fullName",     u.getFullName());
-                m.put("email",        u.getEmail());
-                m.put("roleId",       u.getRoleId());
-                m.put("status",       u.getStatus());
-                m.put("authProvider", u.getAuthProvider());
-                m.put("createdAt",    u.getCreatedAt() != null ? u.getCreatedAt().toString() : null);
-                result.add(m);
-            }
-            return result;
-        });
-    }
+
 
     /**
      * Thống kê nhanh cho Admin Dashboard
@@ -232,13 +208,7 @@ public class UserDAO {
         });
     }
 
-    // Khóa tài khoản (#48) - set status = Inactive
-    public void lockUser(int id) {
-        JpaHelper.execute(em -> {
-            User u = em.find(User.class, id);
-            if (u != null && !u.isDeleted()) { u.setStatus("Inactive"); em.merge(u); }
-        });
-    }
+
 
     // Phân quyền Mentor (#49) - roleId: 1=Admin, 2=Mentor, 3=Candidate
     public void setRole(int userId, int roleId) {

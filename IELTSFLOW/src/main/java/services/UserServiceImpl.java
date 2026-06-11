@@ -267,7 +267,12 @@ public class UserServiceImpl implements UserService {
     public void lockUser(int id) {
         User user = userDAO.findById(id).orElse(null);
         if (user == null) throw new IllegalArgumentException("User not found: " + id);
-        userDAO.lockUser(id);
+        userDAO.updateStatus(id, "Inactive");
+    }
+
+    @Override
+    public void updateUserStatus(int id, String status) {
+        userDAO.updateStatus(id, status);
     }
 
     @Override
