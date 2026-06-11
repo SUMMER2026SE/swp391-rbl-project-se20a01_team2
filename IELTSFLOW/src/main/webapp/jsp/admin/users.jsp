@@ -106,8 +106,8 @@
                                             
                                             <form method="post" action="${pageContext.request.contextPath}/admin/users" style="margin:0;">
                                                 <input type="hidden" name="id" value="${user.userId}">
-                                                <input type="hidden" name="action" value="lock">
-                                                <button type="submit" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; color: ${user.status == 'Active' ? '#fca5a5' : '#6ee7b7'}; border-color: rgba(255, 255, 255, 0.2);" onclick="return confirm('Toggle lock for this user?')">
+                                                <input type="hidden" name="action" value="${user.status == 'Active' ? 'lock' : 'unlock'}">
+                                                <button type="submit" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; color: ${user.status == 'Active' ? '#fca5a5' : '#6ee7b7'}; border-color: rgba(255, 255, 255, 0.2);" onclick="return confirm('${user.status == 'Active' ? 'Lock' : 'Unlock'} this user?')">
                                                     ${user.status == 'Active' ? 'Lock' : 'Unlock'}
                                                 </button>
                                             </form>
@@ -198,6 +198,12 @@
             document.getElementById('formEmail').value = email || '';
             document.getElementById('formRoleId').value = role || 3;
             document.getElementById('formStatus').value = status || 'Active';
+            
+            if (action === 'update') {
+                document.getElementById('formRoleId').disabled = true;
+            } else {
+                document.getElementById('formRoleId').disabled = false;
+            }
             
             document.getElementById('userModal').style.display = 'block';
         }
