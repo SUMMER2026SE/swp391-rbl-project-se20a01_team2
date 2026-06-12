@@ -339,6 +339,89 @@
             .status-btn:hover {
                 background: #2563EB;
             }
+
+            .btn-cancel {
+                background: white;
+                color: #EF4444;
+                border: 1px solid #EF4444;
+                padding: 10px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                width: 100%;
+                margin-top: 16px;
+            }
+            .btn-cancel:hover {
+                background: #FEF2F2;
+            }
+            
+            /* Modal Styles */
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(15, 23, 42, 0.6);
+                backdrop-filter: blur(4px);
+                z-index: 2000;
+                display: none;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .modal-content {
+                background: white;
+                padding: 40px;
+                border-radius: 24px;
+                text-align: center;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                animation: modalFadeIn 0.3s ease-out;
+            }
+            
+            @keyframes modalFadeIn {
+                from { opacity: 0; transform: translateY(20px) scale(0.95); }
+                to { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            
+            .success-icon {
+                width: 64px;
+                height: 64px;
+                background: #10B981;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 24px;
+                color: white;
+            }
+            
+            .cancel-icon {
+                width: 64px;
+                height: 64px;
+                background: #EF4444;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 24px;
+                color: white;
+            }
+            
+            .modal-title {
+                font-size: 24px;
+                font-weight: 800;
+                color: var(--color-primary-text);
+                margin-bottom: 8px;
+            }
+            
+            .modal-text {
+                color: var(--color-secondary-text);
+                margin-bottom: 0;
+            }
         </style>
     </head>
     <body>
@@ -426,6 +509,7 @@
                         </div>
                         
                         <div class="countdown-timer" id="timer">15:00</div>
+                        <button class="btn-cancel" onclick="promptCancel()">Hủy giao dịch</button>
                     </div>
                     
                     <!-- Cột Phải -->
@@ -490,6 +574,16 @@
             </div>
         </footer>
 
+        <!-- Success/Cancel Modal -->
+        <div class="modal-overlay" id="statusModal">
+            <div class="modal-content">
+                <div id="modalIcon"></div>
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <p class="modal-text" id="modalText"></p>
+                <div id="modalButtons" style="margin-top: 24px; display: none; gap: 12px; justify-content: center;"></div>
+            </div>
+        </div>
+
         <script>
             let timeleft = 15 * 60; // 15 minutes
             let timerElement = document.getElementById('timer');
@@ -509,33 +603,118 @@
                 timeleft -= 1;
             }, 1000);
             
-            // Poll for transaction status every 3 seconds
-            let pollInterval = setInterval(function() {
-                fetch('${pageContext.request.contextPath}/api/transaction/status?id=${transaction.transactionId}')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'Success') {
-                            clearInterval(pollInterval);
-                            clearInterval(downloadTimer);
-                            alert("Thanh toán thành công! Hệ thống đang chuyển hướng...");
-                            window.location.href = "${pageContext.request.contextPath}/account";
-                        } else if (data.status === 'Failed' || data.status === 'Failed/Cancelled') {
-                            clearInterval(pollInterval);
-                            clearInterval(downloadTimer);
-                            alert("Giao dịch đã thất bại hoặc bị hủy.");
-                            window.location.href = "${pageContext.request.contextPath}/subscription";
+            function showModal(type, title, text, buttons = null) {
+                const modal = document.getElementById('statusModal');
+                const iconContainer = document.getElementById('modalIcon');
+                const btnContainer = document.getElementById('modalButtons');
+                
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalText').innerText = text;
+                
+                if (type === 'success') {
+                    iconContainer.innerHTML = '<div class="success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>';
+                } else if (type === 'cancel' || type === 'confirm') {
+                    iconContainer.innerHTML = '<div class="cancel-icon" style="' + (type === 'confirm' ? 'background: #F59E0B;' : '') + '"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">' +
+                        (type === 'confirm' ? '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>' : '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>') +
+                        '</svg></div>';
+                }
+                
+                if (buttons) {
+                    btnContainer.innerHTML = '';
+                    btnContainer.style.display = 'flex';
+                    buttons.forEach(btn => {
+                        const buttonEl = document.createElement('button');
+                        buttonEl.innerText = btn.text;
+                        buttonEl.className = btn.class || 'btn-cta';
+                        if (btn.style) {
+                            buttonEl.style = btn.style;
                         }
-                    })
-                    .catch(err => console.error('Polling error:', err));
-            }, 3000);
-
-            function checkStatus() {
-                // In a real scenario, this would make an AJAX request to check the transaction status.
-                // For simplicity, we just redirect to the account page if the user clicked it, or they can refresh.
-                // The webhook updates the database in the background.
-                alert("Hệ thống đang kiểm tra trạng thái thanh toán của bạn. Vui lòng kiểm tra mục thông báo hoặc hồ sơ.");
-                window.location.href = "${pageContext.request.contextPath}/account";
+                        buttonEl.onclick = btn.onClick;
+                        btnContainer.appendChild(buttonEl);
+                    });
+                } else {
+                    btnContainer.style.display = 'none';
+                }
+                
+                modal.style.display = 'flex';
             }
+
+            function promptCancel() {
+                clearInterval(pollInterval); // Stop polling immediately
+                showModal('confirm', 'Hủy Giao Dịch?', 'Bạn có chắc chắn muốn hủy giao dịch này?', [
+                    { text: 'Quay lại', class: 'btn-ghost', style: 'border: 1px solid #CBD5E1; border-radius: 8px; padding: 10px 24px;', onClick: function() { 
+                        document.getElementById('statusModal').style.display = 'none'; 
+                        startPolling(); // Resume polling
+                    }},
+                    { text: 'Đồng ý', class: 'btn-cancel', style: 'margin-top: 0; width: auto;', onClick: function() {
+                        executeCancel();
+                    }}
+                ]);
+            }
+
+            function executeCancel() {
+                document.getElementById('modalButtons').style.display = 'none';
+                document.getElementById('modalTitle').innerText = 'Đang xử lý...';
+                document.getElementById('modalText').innerText = 'Vui lòng chờ giây lát';
+                
+                fetch('${pageContext.request.contextPath}/api/transaction/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'transactionId=${transaction.transactionId}'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        clearInterval(downloadTimer);
+                        showModal('cancel', 'Đã hủy giao dịch', 'Bạn sẽ được chuyển hướng trong 3 giây...');
+                        setTimeout(() => {
+                            window.location.href = "${pageContext.request.contextPath}/subscription";
+                        }, 3000);
+                    } else {
+                        alert("Có lỗi xảy ra: " + data.message);
+                        document.getElementById('statusModal').style.display = 'none';
+                        startPolling();
+                    }
+                })
+                .catch(err => {
+                    console.error('Cancel error:', err);
+                    alert("Lỗi kết nối.");
+                    document.getElementById('statusModal').style.display = 'none';
+                    startPolling();
+                });
+            }
+
+            let pollInterval;
+            function startPolling() {
+                if (pollInterval) clearInterval(pollInterval);
+                pollInterval = setInterval(function() {
+                    fetch('${pageContext.request.contextPath}/api/transaction/status?id=${transaction.transactionId}')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'Success') {
+                                clearInterval(pollInterval);
+                                clearInterval(downloadTimer);
+                                showModal('success', 'Thanh toán thành công!', 'Hệ thống đang chuyển hướng bạn về hồ sơ...');
+                                setTimeout(() => {
+                                    window.location.href = "${pageContext.request.contextPath}/account";
+                                }, 3000);
+                            } else if (data.status === 'Failed' || data.status === 'Failed/Cancelled') {
+                                clearInterval(pollInterval);
+                                clearInterval(downloadTimer);
+                                showModal('cancel', 'Giao dịch thất bại', 'Giao dịch đã bị hủy hoặc thất bại.');
+                                setTimeout(() => {
+                                    window.location.href = "${pageContext.request.contextPath}/subscription";
+                                }, 3000);
+                            }
+                        })
+                        .catch(err => console.error('Polling error:', err));
+                }, 3000);
+            }
+            
+            // Start polling initially
+            startPolling();
         </script>
     </body>
 </html>

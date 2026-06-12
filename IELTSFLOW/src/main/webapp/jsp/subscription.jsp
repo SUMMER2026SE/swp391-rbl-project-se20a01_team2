@@ -398,7 +398,10 @@
                                 </c:if>
                             </ul>
 
-                            <a href="${pageContext.request.contextPath}/checkout?packageId=${pkg.packageId}" class="btn-cta btn-full">Bắt Đầu Ngay</a>
+                            <form method="POST" action="${pageContext.request.contextPath}/checkout">
+                                <input type="hidden" name="packageId" value="${pkg.packageId}">
+                                <button type="submit" class="btn-cta btn-full">Bắt Đầu Ngay</button>
+                            </form>
                         </div>
                     </c:forEach>
 

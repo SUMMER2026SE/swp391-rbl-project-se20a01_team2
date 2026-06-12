@@ -29,7 +29,7 @@ public class CheckoutServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
@@ -40,7 +40,7 @@ public class CheckoutServlet extends HttpServlet {
         String packageIdParam = req.getParameter("packageId");
 
         if (packageIdParam == null || packageIdParam.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/subscription.jsp");
+            resp.sendRedirect(req.getContextPath() + "/subscription");
             return;
         }
 
@@ -49,7 +49,7 @@ public class CheckoutServlet extends HttpServlet {
             SubscriptionPackage pkg = subscriptionService.getPackageById(packageId);
 
             if (pkg == null || Boolean.TRUE.equals(pkg.getDeleted())) {
-                resp.sendRedirect(req.getContextPath() + "/jsp/subscription.jsp");
+                resp.sendRedirect(req.getContextPath() + "/subscription");
                 return;
             }
 
@@ -62,6 +62,39 @@ public class CheckoutServlet extends HttpServlet {
 
             transactionService.createTransaction(transaction);
 
+            resp.sendRedirect(req.getContextPath() + "/checkout?id=" + transaction.getTransactionId());
+
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/subscription");
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            return;
+        }
+
+        int userId = (int) session.getAttribute("userId");
+        String transactionIdParam = req.getParameter("id");
+
+        if (transactionIdParam == null || transactionIdParam.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/subscription");
+            return;
+        }
+
+        try {
+            int transactionId = Integer.parseInt(transactionIdParam);
+            Transaction transaction = transactionService.getTransactionById(transactionId);
+
+            if (transaction == null || transaction.getUserId() != userId || !"Pending".equalsIgnoreCase(transaction.getStatus())) {
+                resp.sendRedirect(req.getContextPath() + "/subscription");
+                return;
+            }
+
+            SubscriptionPackage pkg = transaction.getSubscriptionPackage();
             String qrUrl = SePayUtil.generateQRUrl(transaction);
             
             req.setAttribute("transaction", transaction);
@@ -75,7 +108,7 @@ public class CheckoutServlet extends HttpServlet {
             req.getRequestDispatcher("/jsp/checkout.jsp").forward(req, resp);
 
         } catch (NumberFormatException e) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/subscription.jsp");
+            resp.sendRedirect(req.getContextPath() + "/subscription");
         }
     }
 }

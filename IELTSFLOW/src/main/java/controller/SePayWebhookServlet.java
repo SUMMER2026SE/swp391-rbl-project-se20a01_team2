@@ -11,7 +11,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import model.SystemLog;
 import model.Transaction;
+import dao.SystemLogDAO;
 import services.SubscriptionService;
 import services.TransactionService;
 import services.TransactionServiceImpl;
@@ -21,12 +23,14 @@ public class SePayWebhookServlet extends HttpServlet {
 
     private TransactionService transactionService;
     private SubscriptionService subscriptionService;
+    private SystemLogDAO systemLogDAO;
     private Gson gson;
 
     @Override
     public void init() throws ServletException {
         transactionService = new TransactionServiceImpl();
         subscriptionService = new SubscriptionService();
+        systemLogDAO = new SystemLogDAO();
         gson = new Gson();
     }
 
@@ -97,14 +101,25 @@ public class SePayWebhookServlet extends HttpServlet {
                             System.out.println("SePay Webhook: Amount OK. Updating to Success.");
                             transactionService.updateTransactionStatus(transactionId, "Success", gatewayTxId, rawBody);
                             subscriptionService.processSuccessfulTransaction(t);
+                            if (t.getAmount().intValue() < transferAmount) {
+                                systemLogDAO.createSystemLog(new SystemLog(t.getUserId(), "Invalid Transaction", "Sepay", "Overpaid transaction " + transactionId + ". Expected: " + t.getAmount().intValue() + ", Got: " + transferAmount));
+                            }
                         } else {
                             System.out.println("SePay Webhook: Underpaid. Expected " + t.getAmount().intValue() + ", got " + transferAmount);
                             transactionService.updateTransactionStatus(transactionId, "Failed", gatewayTxId, rawBody);
+                            systemLogDAO.createSystemLog(new SystemLog(t.getUserId(), "Invalid Transaction", "Sepay", "Underpaid transaction " + transactionId + ". Expected: " + t.getAmount().intValue() + ", Got: " + transferAmount));
                         }
+                    } else {
+                        System.out.println("SePay Webhook: Late payment for " + t.getStatus() + " transaction " + transactionId);
+                        systemLogDAO.createSystemLog(new SystemLog(t.getUserId(), "Invalid Transaction", "Sepay", "Late payment for " + t.getStatus() + " transaction " + transactionId + ". Amount: " + transferAmount));
                     }
                 } else {
                     System.out.println("SePay Webhook: DB Transaction not found for ID " + transactionId);
+                    systemLogDAO.createSystemLog(new SystemLog(null, "Invalid Transaction", "Sepay", "Transaction not found for ID " + transactionId + ". Amount: " + transferAmount));
                 }
+            } else {
+                System.out.println("SePay Webhook: Could not parse Transaction ID from content.");
+                systemLogDAO.createSystemLog(new SystemLog(null, "Invalid Transaction", "Sepay", "Could not parse Transaction ID from content: " + content + ". Amount: " + transferAmount));
             }
             
             resp.getWriter().write("{\"success\": true}");
