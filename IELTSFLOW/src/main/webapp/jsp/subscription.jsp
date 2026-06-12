@@ -398,7 +398,7 @@
                                 </c:if>
                             </ul>
 
-                            <a href="${pageContext.request.contextPath}/payment?packageId=${pkg.packageId}" class="btn-cta btn-full">Bắt Đầu Ngay</a>
+                            <a href="${pageContext.request.contextPath}/checkout?packageId=${pkg.packageId}" class="btn-cta btn-full">Bắt Đầu Ngay</a>
                         </div>
                     </c:forEach>
 

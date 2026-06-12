@@ -44,4 +44,39 @@ public class TransactionDAO {
               .getResultList()
         );
     }
+
+    public void updateTransactionStatus(int transactionId, String status, String gatewayTxId, String payload) {
+        JpaHelper.execute(em -> {
+            Transaction t = em.find(Transaction.class, transactionId);
+            if (t != null) {
+                t.setStatus(status);
+                t.setGatewayTransactionId(gatewayTxId);
+                t.setGatewayPayload(payload);
+                if ("Success".equalsIgnoreCase(status)) {
+                    t.setPaymentDate(new java.util.Date());
+                }
+                em.merge(t);
+            }
+        });
+    }
+
+    public boolean isGatewayTransactionProcessed(String gatewayTxId) {
+        if (gatewayTxId == null || gatewayTxId.trim().isEmpty()) {
+            return false;
+        }
+        return JpaHelper.query(em -> {
+            Long count = em.createQuery("SELECT COUNT(t) FROM Transaction t WHERE t.gatewayTransactionId = :txId", Long.class)
+                           .setParameter("txId", gatewayTxId)
+                           .getSingleResult();
+            return count != null && count > 0;
+        });
+    }
+
+    public void expireOldTransactions(int hours) {
+        JpaHelper.execute(em -> {
+            em.createQuery("UPDATE Transaction t SET t.status = 'Failed/Cancelled' WHERE t.status = 'Pending' AND t.createdAt < :cutoff")
+              .setParameter("cutoff", new java.util.Date(System.currentTimeMillis() - (hours * 3600000L)))
+              .executeUpdate();
+        });
+    }
 }

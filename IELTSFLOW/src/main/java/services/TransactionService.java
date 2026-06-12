@@ -9,4 +9,7 @@ public interface TransactionService {
     Transaction getTransactionById(int id);
     List<Transaction> getTransactionsByStatus(String status);
     List<Transaction> getAllTransactions();
+    void updateTransactionStatus(int transactionId, String status, String gatewayTxId, String payload);
+    boolean isGatewayTransactionProcessed(String gatewayTxId);
+    void expireOldTransactions(int hours);
 }

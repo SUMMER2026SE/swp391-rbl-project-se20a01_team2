@@ -8,6 +8,11 @@ import jakarta.servlet.annotation.WebListener;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import services.TransactionService;
+import services.TransactionServiceImpl;
 
 /**
  * Loads configuration from WEB-INF/.env at startup,
@@ -33,8 +38,14 @@ public class AppContextListener implements ServletContextListener {
             "SPEECH_KEY",
             "SPEECH_REGION",
             "GEMINI_API_KEYS",
-            "GOOGLE_CLIENT_ID"
+            "GOOGLE_CLIENT_ID",
+            "SEPAY_BANK_ACC",
+            "SEPAY_BANK_NAME",
+            "SEPAY_BANK_ACCOUNT_NAME",
+            "SEPAY_WEBHOOK_SECRET"
     );
+
+    private ScheduledExecutorService scheduler;
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -63,11 +74,25 @@ public class AppContextListener implements ServletContextListener {
         } catch (Exception e) {
             System.err.println("AppContextListener: could not warm up JPA - " + e.getMessage());
         }
+        
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                TransactionService transactionService = new TransactionServiceImpl();
+                transactionService.expireOldTransactions(1);
+            } catch (Exception e) {
+                System.err.println("AppContextListener: Error expiring transactions - " + e.getMessage());
+            }
+        }, 5, 10, TimeUnit.MINUTES);
+        
         System.out.println("Application started. JPA initialized.");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+        }
         JpaHelper.close();
         System.out.println("Application stopped.");
     }
