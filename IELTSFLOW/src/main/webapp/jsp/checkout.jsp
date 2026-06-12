@@ -451,11 +451,11 @@
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Nội dung CK:</span>
-                                <span class="info-value">TKPIF0 IF<c:out value="${String.format('%02d', transaction.transactionId)}"/></span>
+                                <span class="info-value">TKPSIF IF<c:out value="${String.format('%02d', transaction.transactionId)}"/></span>
                             </div>
                             
                             <div class="note-box">
-                                Lưu ý: Vui lòng giữ nguyên nội dung chuyển khoản IF<c:out value="${String.format('%02d', transaction.transactionId)}"/> để hệ thống tự động xác nhận thanh toán
+                                Lưu ý: Vui lòng giữ nguyên nội dung chuyển khoản TKPSIF IF<c:out value="${String.format('%02d', transaction.transactionId)}"/> để hệ thống tự động xác nhận thanh toán
                             </div>
                         </div>
                     </div>
@@ -508,6 +508,26 @@
                 }
                 timeleft -= 1;
             }, 1000);
+            
+            // Poll for transaction status every 3 seconds
+            let pollInterval = setInterval(function() {
+                fetch('${pageContext.request.contextPath}/api/transaction/status?id=${transaction.transactionId}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'Success') {
+                            clearInterval(pollInterval);
+                            clearInterval(downloadTimer);
+                            alert("Thanh toán thành công! Hệ thống đang chuyển hướng...");
+                            window.location.href = "${pageContext.request.contextPath}/account";
+                        } else if (data.status === 'Failed' || data.status === 'Failed/Cancelled') {
+                            clearInterval(pollInterval);
+                            clearInterval(downloadTimer);
+                            alert("Giao dịch đã thất bại hoặc bị hủy.");
+                            window.location.href = "${pageContext.request.contextPath}/subscription";
+                        }
+                    })
+                    .catch(err => console.error('Polling error:', err));
+            }, 3000);
 
             function checkStatus() {
                 // In a real scenario, this would make an AJAX request to check the transaction status.

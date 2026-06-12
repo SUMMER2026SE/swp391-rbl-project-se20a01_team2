@@ -16,7 +16,7 @@ public class SePayUtil {
         String bankName = System.getProperty("SEPAY_BANK_NAME", "");
         
         String amount = String.valueOf(transaction.getAmount().intValue());
-        String content = "TKPIF0 IF" + String.format("%02d", transaction.getTransactionId());
+        String content = "TKPSIF IF" + String.format("%02d", transaction.getTransactionId());
         
         return "https://qr.sepay.vn/img?acc=" + bankAcc + "&bank=" + bankName + "&amount=" + amount + "&des=" + content + "&template=compact";
     }
