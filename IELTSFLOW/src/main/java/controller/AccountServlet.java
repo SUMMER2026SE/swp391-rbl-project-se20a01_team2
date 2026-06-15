@@ -43,6 +43,10 @@ public class AccountServlet extends HttpServlet {
         try {
             User user = userService.getUserById(userId);
             req.setAttribute("user", user);
+            
+            services.SubscriptionService subscriptionService = new services.SubscriptionService();
+            model.UserSubscription activeSubscription = subscriptionService.getActiveSubscriptionByUserId(userId);
+            req.setAttribute("activeSubscription", activeSubscription);
         } catch (Exception e) {
             req.setAttribute("error", "Không thể tải thông tin tài khoản: " + e.getMessage());
         }

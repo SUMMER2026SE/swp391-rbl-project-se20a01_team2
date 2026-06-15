@@ -48,7 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hide all sections except the first one initially
     sections.forEach((sec, index) => {
         if(sec) {
-            sec.style.display = index === 0 ? 'block' : 'none';
+            if (index === 0) {
+                sec.classList.remove('hidden');
+                sec.style.display = ''; // clear any inline style
+            } else {
+                sec.classList.add('hidden');
+            }
         }
     });
 
@@ -63,11 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Hide all sections, show target section
             sections.forEach(sec => {
-                if(sec) sec.style.display = 'none';
+                if(sec) sec.classList.add('hidden');
             });
             const targetSection = document.getElementById(targetId);
             if(targetSection) {
-                targetSection.style.display = 'block';
+                targetSection.classList.remove('hidden');
             }
 
             if (window.innerWidth <= 768) {
