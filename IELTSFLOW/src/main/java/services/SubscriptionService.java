@@ -24,6 +24,14 @@ public class SubscriptionService {
         return dao.getActivePackagesPaginated(offset, limit);
     }
 
+    public UserSubscription getActiveSubscriptionByUserId(int userId) {
+        return userSubDao.getActiveSubscriptionByUserId(userId);
+    }
+
+    public boolean hasAnySubscription(int userId) {
+        return userSubDao.hasAnySubscription(userId);
+    }
+
     public long getTotalActivePackagesCount() {
         return dao.getTotalActivePackagesCount();
     }

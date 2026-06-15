@@ -400,7 +400,13 @@
 
                             <form method="POST" action="${pageContext.request.contextPath}/checkout">
                                 <input type="hidden" name="packageId" value="${pkg.packageId}">
-                                <button type="submit" class="btn-cta btn-full">Bắt Đầu Ngay</button>
+                                <button type="submit" class="btn-cta btn-full">
+                                    <c:choose>
+                                        <c:when test="${hasActiveSub}">Gia hạn</c:when>
+                                        <c:when test="${hasAnySub}">Đăng ký</c:when>
+                                        <c:otherwise>Bắt Đầu Ngay</c:otherwise>
+                                    </c:choose>
+                                </button>
                             </form>
                         </div>
                     </c:forEach>

@@ -25,4 +25,14 @@ public class UserSubscriptionDAO {
             return list.isEmpty() ? null : list.get(0);
         });
     }
+
+    public boolean hasAnySubscription(int userId) {
+        return JpaHelper.query(em -> {
+            Long count = em.createQuery(
+                "SELECT COUNT(u) FROM UserSubscription u WHERE u.userId = :uid", Long.class)
+                .setParameter("uid", userId)
+                .getSingleResult();
+            return count != null && count > 0;
+        });
+    }
 }

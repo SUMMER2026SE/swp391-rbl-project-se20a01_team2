@@ -79,4 +79,12 @@ public class TransactionDAO {
               .executeUpdate();
         });
     }
+
+    public List<Transaction> getTransactionsByUserId(int userId) {
+        return JpaHelper.query(em -> 
+            em.createQuery("SELECT t FROM Transaction t WHERE t.userId = :userId ORDER BY t.createdAt DESC", Transaction.class)
+              .setParameter("userId", userId)
+              .getResultList()
+        );
+    }
 }

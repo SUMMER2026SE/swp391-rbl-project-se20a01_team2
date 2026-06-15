@@ -12,4 +12,5 @@ public interface TransactionService {
     void updateTransactionStatus(int transactionId, String status, String gatewayTxId, String payload);
     boolean isGatewayTransactionProcessed(String gatewayTxId);
     void expireOldTransactions(int hours);
+    List<Transaction> getTransactionsByUserId(int userId);
 }

@@ -52,4 +52,9 @@ public class TransactionServiceImpl implements TransactionService {
     public void expireOldTransactions(int hours) {
         transactionDAO.expireOldTransactions(hours);
     }
+
+    @Override
+    public List<Transaction> getTransactionsByUserId(int userId) {
+        return transactionDAO.getTransactionsByUserId(userId);
+    }
 }

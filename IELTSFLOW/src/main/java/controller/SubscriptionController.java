@@ -42,9 +42,22 @@ public class SubscriptionController extends HttpServlet {
         long totalCount = service.getTotalActivePackagesCount();
         int totalPages = (int) Math.ceil((double) totalCount / limit);
         
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        boolean hasActiveSub = false;
+        boolean hasAnySub = false;
+        
+        if (session != null && session.getAttribute("userId") != null) {
+            int userId = (int) session.getAttribute("userId");
+            hasActiveSub = (service.getActiveSubscriptionByUserId(userId) != null);
+            hasAnySub = service.hasAnySubscription(userId);
+        }
+
         request.setAttribute("packages", packages);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute("hasActiveSub", hasActiveSub);
+        request.setAttribute("hasAnySub", hasAnySub);
+        
         request.getRequestDispatcher("/jsp/subscription.jsp").forward(request, response);
     }
 }
