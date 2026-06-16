@@ -71,7 +71,7 @@ public class AuthFilter implements Filter {
         }
 
         // ── 1. Kiểm tra đường dẫn Admin ────────────────────────────────────
-        if (path.startsWith(ADMIN_PATH_PREFIX)) {
+        if (isAdminPath(path)) {
             if (!isLoggedIn) {
                 redirectToLogin(resp, contextPath, "Vui lòng đăng nhập để tiếp tục");
                 return;
@@ -102,6 +102,14 @@ public class AuthFilter implements Filter {
     @Override
     public void destroy() {
         // Không làm gì
+    }
+
+    /** Kiểm tra đường dẫn có phải là Admin không */
+    private boolean isAdminPath(String path) {
+        return path.startsWith(ADMIN_PATH_PREFIX)
+                || path.startsWith("/admin/")
+                || path.equals("/admin")
+                || path.startsWith("/api/admin/");
     }
 
     /** Kiểm tra đường dẫn có nằm trong danh sách cần bảo vệ không */

@@ -22,14 +22,14 @@ public class Notification {
     @Column(name = "Title", nullable = false)
     private String title;
 
-    @Column(name = "Message", columnDefinition = "NVARCHAR(MAX)", nullable = false)
-    private String message;
+    @Column(name = "Content", columnDefinition = "NVARCHAR(MAX)", nullable = false)
+    private String content;
 
     /**
      * Loại thông báo: "REMINDER" (nhắc học), "SYSTEM" (hệ thống), "PROMOTION" (khuyến mãi)
      */
     @Column(name = "Type")
-    private String type = "REMINDER";
+    private String type = "System";
 
     @Column(name = "IsRead")
     private boolean isRead = false;
@@ -40,10 +40,10 @@ public class Notification {
     public Notification() {
     }
 
-    public Notification(User user, String title, String message, String type) {
+    public Notification(User user, String title, String content, String type) {
         this.user = user;
         this.title = title;
-        this.message = message;
+        this.content = content;
         this.type = type;
         this.isRead = false;
     }
@@ -64,8 +64,8 @@ public class Notification {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
