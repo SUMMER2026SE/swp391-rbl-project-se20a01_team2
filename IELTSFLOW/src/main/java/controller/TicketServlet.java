@@ -85,13 +85,19 @@ public class TicketServlet extends HttpServlet {
                 Ticket ticket = ticketService.createTicket(userId, subject, content);
                 
                 // Đã sửa lại chuỗi thông báo tiếng Việt trên URL
-                resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticket.getTicketId() + "&success=Gửi+ticket+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticket.getTicketId() + "&success=" + java.net.URLEncoder.encode("Gửi ticket thành công", "UTF-8"));
             } else if ("close".equals(action)) {
                 int ticketId = Integer.parseInt(req.getParameter("ticketId"));
                 ticketService.closeTicket(ticketId, userId);
                 
                 // Đã sửa lại chuỗi thông báo tiếng Việt trên URL
-                resp.sendRedirect(req.getContextPath() + "/candidate/tickets?success=Đã+đóng+ticket");
+                resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticketId + "&success=" + java.net.URLEncoder.encode("Đã đóng ticket", "UTF-8"));
+            } else if ("reply".equals(action)) {
+                int ticketId = Integer.parseInt(req.getParameter("ticketId"));
+                String replyContent = req.getParameter("replyContent");
+                ticketService.candidateReply(ticketId, userId, replyContent);
+                
+                resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticketId);
             } else {
                 resp.sendRedirect(req.getContextPath() + "/candidate/tickets");
             }

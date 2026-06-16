@@ -16,32 +16,45 @@ public class TicketDAO {
      * Lấy tất cả ticket của một user, mới nhất trước
      */
     public List<Ticket> findByUserId(int userId) {
-        return JpaHelper.query(em ->
-            em.createQuery(
+        return JpaHelper.query(em -> {
+            List<Ticket> tickets = em.createQuery(
                 "SELECT t FROM Ticket t WHERE t.user.userId = :userId ORDER BY t.createdAt DESC",
                 Ticket.class)
               .setParameter("userId", userId)
-              .getResultList()
-        );
+              .getResultList();
+            for (Ticket t : tickets) {
+                t.getReplies().size(); // force init
+            }
+            return tickets;
+        });
     }
 
     /**
      * Lấy tất cả ticket (Admin)
      */
     public List<Ticket> findAll() {
-        return JpaHelper.query(em ->
-            em.createQuery("SELECT t FROM Ticket t ORDER BY t.createdAt DESC", Ticket.class)
-              .getResultList()
-        );
+        return JpaHelper.query(em -> {
+            List<Ticket> tickets = em.createQuery("SELECT t FROM Ticket t ORDER BY t.createdAt DESC", Ticket.class)
+              .getResultList();
+            for (Ticket t : tickets) {
+                t.getReplies().size(); // force init
+            }
+            return tickets;
+        });
     }
 
     /**
      * Tìm ticket theo ID
      */
     public Optional<Ticket> findById(int ticketId) {
-        return JpaHelper.query(em ->
-            Optional.ofNullable(em.find(Ticket.class, ticketId))
-        );
+        return JpaHelper.query(em -> {
+            Ticket t = em.find(Ticket.class, ticketId);
+            if (t != null) {
+                t.getReplies().size(); // force init
+                t.getReplies().sort((r1, r2) -> r1.getCreatedAt().compareTo(r2.getCreatedAt()));
+            }
+            return Optional.ofNullable(t);
+        });
     }
 
     /**
@@ -69,16 +82,18 @@ public class TicketDAO {
     }
 
     /**
-     * Admin phản hồi ticket
+     * Thêm phản hồi vào ticket
      */
-    public boolean reply(int ticketId, String replyContent) {
+    public boolean addReply(int ticketId, model.User sender, String message, String newStatus) {
         try {
             JpaHelper.execute(em -> {
                 Ticket ticket = em.find(Ticket.class, ticketId);
                 if (ticket != null) {
-                    ticket.setAdminReply(replyContent);
-                    ticket.setRepliedAt(LocalDateTime.now());
-                    ticket.setStatus("Resolved");
+                    model.TicketReply reply = new model.TicketReply(ticket, sender, message);
+                    em.persist(reply);
+                    if (newStatus != null) {
+                        ticket.setStatus(newStatus);
+                    }
                 }
             });
             return true;

@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -34,13 +34,39 @@
         .ticket-date { font-size: 12px; color: #94a3b8; margin-top: 16px; }
 
         .reply-box {
-            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
-            border: 1px solid #bfdbfe; border-radius: 14px; padding: 24px;
+            border-radius: 14px; padding: 24px;
             margin-bottom: 20px;
         }
-        .reply-title { font-weight: 700; color: #1e40af; margin: 0 0 12px; font-size: 0.9rem; }
+        .user-reply {
+            background: white; border: 1px solid #e2e8f0;
+        }
+        .user-reply .reply-title { color: #334155; }
+        
+        .mentor-reply {
+            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+            border: 1px solid #bfdbfe;
+        }
+        .mentor-reply .reply-title { font-weight: 700; color: #1e40af; }
+        
+        .reply-title { font-weight: 700; margin: 0 0 12px; font-size: 0.9rem; }
         .reply-content { color: #1e293b; line-height: 1.7; white-space: pre-wrap; }
         .reply-date { font-size: 12px; color: #64748b; margin-top: 10px; }
+        
+        .reply-form-box {
+            background: white; border-radius: 14px; padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 20px;
+        }
+        .form-textarea {
+            width: 100%; padding: 12px; border: 1px solid #e2e8f0;
+            border-radius: 8px; font-family: inherit; font-size: 14px;
+            resize: vertical; min-height: 100px; box-sizing: border-box;
+        }
+        .form-textarea:focus { outline: none; border-color: #f97316; }
+        .btn-submit {
+            background: #f97316; color: white; border: none; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s;
+        }
+        .btn-submit:hover { background: #ea580c; }
 
         .pending-box {
             background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 20px;
@@ -89,6 +115,13 @@
         &larr; Quay l&#7841;i danh s&#225;ch
     </a>
 
+    <c:if test="${not empty param.success}">
+        <div class="alert alert-success" style="background: #dcfce7; border: 1px solid #86efac; color: #15803d; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">&#9989; ${param.success}</div>
+    </c:if>
+    <c:if test="${not empty error}">
+        <div class="alert alert-error" style="background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">&#10060; ${error}</div>
+    </c:if>
+
     <c:choose>
         <c:when test="${empty ticket}">
             <div style="text-align:center;padding:60px;color:#94a3b8;">
@@ -112,25 +145,43 @@
                         </c:choose>
                     </span>
                 </div>
-                <div class="ticket-content">${ticket.content}</div>
-                <div class="ticket-date">&#128197; G&#7917;i l&#250;c: ${ticket.createdAt}</div>
             </div>
 
-            <!-- Ph&#7843;n h&#7891;i t&#7915; Mentor -->
-            <c:choose>
-                <c:when test="${not empty ticket.adminReply}">
-                    <div class="reply-box">
-                        <div class="reply-title">&#128172; Ph&#7843;n h&#7891;i t&#7915; Mentor</div>
-                        <div class="reply-content">${ticket.adminReply}</div>
-                        <div class="reply-date">Ph&#7843;n h&#7891;i l&#250;c: ${ticket.repliedAt}</div>
-                    </div>
-                </c:when>
-                <c:when test="${ticket.status != 'Closed'}">
-                    <div class="pending-box">
-                        &#8987; &#272;ang ch&#7901; Mentor ph&#7843;n h&#7891;i. Ch&#250;ng t&#244;i s&#7869; tr&#7843; l&#7901;i trong v&#242;ng 24 gi&#7897;.
-                    </div>
-                </c:when>
-            </c:choose>
+            <!-- Tin nh&#7855;n chat -->
+            <div class="chat-history">
+                <c:forEach var="reply" items="${ticket.replies}">
+                    <c:choose>
+                        <c:when test="${reply.sender.userId == sessionScope.userId}">
+                            <!-- Tin nh&#7855;n c&#7911;a candidate -->
+                            <div class="reply-box user-reply">
+                                <div class="reply-title">&#128100; B&#7841;n</div>
+                                <div class="reply-content">${reply.message}</div>
+                                <div class="reply-date">${reply.createdAt}</div>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <!-- Tin nh&#7855;n c&#7911;a Mentor -->
+                            <div class="reply-box mentor-reply">
+                                <div class="reply-title">&#128172; Mentor (${reply.sender.fullName})</div>
+                                <div class="reply-content">${reply.message}</div>
+                                <div class="reply-date">${reply.createdAt}</div>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </c:forEach>
+            </div>
+
+            <!-- Form reply n&#7871;u ch&#432;a close -->
+            <c:if test="${ticket.status != 'Closed'}">
+                <div class="reply-form-box">
+                    <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
+                        <input type="hidden" name="action" value="reply">
+                        <input type="hidden" name="ticketId" value="${ticket.ticketId}">
+                        <textarea name="replyContent" class="form-textarea" placeholder="Nh&#7853;p n&#7897;i dung ph&#7843;n h&#7891;i..." required></textarea>
+                        <button type="submit" class="btn-submit" style="margin-top: 10px;">G&#7917;i ph&#7843;n h&#7891;i</button>
+                    </form>
+                </div>
+            </c:if>
 
             <!-- N&#250;t &#273;&#243;ng ticket -->
             <c:if test="${ticket.status == 'Open' || ticket.status == 'Resolved'}">

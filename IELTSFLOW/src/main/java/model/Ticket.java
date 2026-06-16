@@ -23,46 +23,32 @@ public class Ticket {
     @Column(name = "Subject", nullable = false)
     private String subject;
 
-    @Column(name = "Content", columnDefinition = "NVARCHAR(MAX)", nullable = false)
-    private String content;
-
     /**
      * Trạng thái ticket: "Open", "InProgress", "Resolved", "Closed"
      */
     @Column(name = "Status", nullable = false)
     private String status = "Open";
 
-    @Column(name = "AdminReply", columnDefinition = "NVARCHAR(MAX)")
-    private String adminReply;
-
-    @Column(name = "RepliedAt")
-    private LocalDateTime repliedAt;
-
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
 
-    @Column(name = "UpdatedAt")
-    private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<TicketReply> replies = new java.util.ArrayList<>();
 
     public Ticket() {
     }
 
-    public Ticket(User user, String subject, String content) {
+    public Ticket(User user, String subject) {
         this.user = user;
         this.subject = subject;
-        this.content = content;
         this.status = "Open";
     }
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
     }
 
     // Getters and Setters
@@ -76,21 +62,19 @@ public class Ticket {
     public String getSubject() { return subject; }
     public void setSubject(String subject) { this.subject = subject; }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-
-    public String getAdminReply() { return adminReply; }
-    public void setAdminReply(String adminReply) { this.adminReply = adminReply; }
-
-    public LocalDateTime getRepliedAt() { return repliedAt; }
-    public void setRepliedAt(LocalDateTime repliedAt) { this.repliedAt = repliedAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public java.util.List<TicketReply> getReplies() { return replies; }
+    public void setReplies(java.util.List<TicketReply> replies) { this.replies = replies; }
+
+    public String getLastMessage() {
+        if (replies != null && !replies.isEmpty()) {
+            return replies.get(replies.size() - 1).getMessage();
+        }
+        return "";
+    }
 }
