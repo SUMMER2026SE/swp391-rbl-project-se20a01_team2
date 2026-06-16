@@ -69,10 +69,10 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("fullName", user.getFullName());
             session.setAttribute("roleId", user.getRoleId());
 
-            if (user.getRoleId() == 1) {
+            if (user.getRoleId() == 1 || user.getRoleId() == 2) { // Admin or Mentor
                 resp.sendRedirect(req.getContextPath() + "/jsp/admin/dashboard.jsp");
-            } else {
-                resp.sendRedirect(req.getContextPath() + "/account");
+            } else { // Candidate
+                resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
             }
         } catch (Exception e) {
             e.printStackTrace();

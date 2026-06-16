@@ -62,21 +62,53 @@ public class TicketService {
         User user = userDAO.findById(userId)
             .orElseThrow(() -> new Exception("Không tìm thấy người dùng"));
 
-        Ticket ticket = new Ticket(user, subject.trim(), content.trim());
-        ticketDAO.create(ticket);
-        return ticket;
+        Ticket ticket = new Ticket(user, subject.trim());
+        int ticketId = ticketDAO.create(ticket);
+        ticketDAO.addReply(ticketId, user, content.trim(), "Open");
+        
+        return ticketDAO.findById(ticketId).orElse(ticket);
     }
 
     /**
      * Admin trả lời ticket
      */
-    public void replyTicket(int ticketId, String reply) throws Exception {
+    public void replyTicket(int ticketId, int adminId, String reply) throws Exception {
         if (reply == null || reply.trim().isEmpty()) {
             throw new Exception("Nội dung phản hồi không được để trống");
         }
-        ticketDAO.findById(ticketId)
+        User admin = userDAO.findById(adminId)
+            .orElseThrow(() -> new Exception("Không tìm thấy người dùng admin"));
+        Ticket ticket = ticketDAO.findById(ticketId)
             .orElseThrow(() -> new Exception("Không tìm thấy ticket #" + ticketId));
-        ticketDAO.reply(ticketId, reply.trim());
+            
+        if ("Closed".equals(ticket.getStatus())) {
+            throw new Exception("Không thể phản hồi vì ticket đã đóng");
+        }
+            
+        ticketDAO.addReply(ticketId, admin, reply.trim(), "Resolved");
+    }
+
+    /**
+     * User (Candidate) trả lời ticket
+     */
+    public void candidateReply(int ticketId, int userId, String reply) throws Exception {
+        if (reply == null || reply.trim().isEmpty()) {
+            throw new Exception("Nội dung phản hồi không được để trống");
+        }
+        User user = userDAO.findById(userId)
+            .orElseThrow(() -> new Exception("Không tìm thấy người dùng"));
+        Ticket ticket = ticketDAO.findById(ticketId)
+            .orElseThrow(() -> new Exception("Không tìm thấy ticket #" + ticketId));
+            
+        if (ticket.getUser().getUserId() != userId) {
+            throw new Exception("Không có quyền phản hồi ticket này");
+        }
+        
+        if ("Closed".equals(ticket.getStatus())) {
+            throw new Exception("Không thể phản hồi vì ticket đã đóng");
+        }
+        
+        ticketDAO.addReply(ticketId, user, reply.trim(), "Open");
     }
 
     /**

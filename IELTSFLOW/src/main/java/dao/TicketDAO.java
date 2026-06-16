@@ -16,32 +16,45 @@ public class TicketDAO {
      * Lấy tất cả ticket của một user, mới nhất trước
      */
     public List<Ticket> findByUserId(int userId) {
-        return JpaHelper.query(em ->
-            em.createQuery(
+        return JpaHelper.query(em -> {
+            List<Ticket> tickets = em.createQuery(
                 "SELECT t FROM Ticket t WHERE t.user.userId = :userId ORDER BY t.createdAt DESC",
                 Ticket.class)
               .setParameter("userId", userId)
-              .getResultList()
-        );
+              .getResultList();
+            for (Ticket t : tickets) {
+                t.getReplies().size(); // force init
+            }
+            return tickets;
+        });
     }
 
     /**
      * Lấy tất cả ticket (Admin)
      */
     public List<Ticket> findAll() {
-        return JpaHelper.query(em ->
-            em.createQuery("SELECT t FROM Ticket t ORDER BY t.createdAt DESC", Ticket.class)
-              .getResultList()
-        );
+        return JpaHelper.query(em -> {
+            List<Ticket> tickets = em.createQuery("SELECT t FROM Ticket t ORDER BY t.createdAt DESC", Ticket.class)
+              .getResultList();
+            for (Ticket t : tickets) {
+                t.getReplies().size(); // force init
+            }
+            return tickets;
+        });
     }
 
     /**
      * Tìm ticket theo ID
      */
     public Optional<Ticket> findById(int ticketId) {
-        return JpaHelper.query(em ->
-            Optional.ofNullable(em.find(Ticket.class, ticketId))
-        );
+        return JpaHelper.query(em -> {
+            Ticket t = em.find(Ticket.class, ticketId);
+            if (t != null) {
+                t.getReplies().size(); // force init
+                t.getReplies().sort((r1, r2) -> r1.getCreatedAt().compareTo(r2.getCreatedAt()));
+            }
+            return Optional.ofNullable(t);
+        });
     }
 
     /**
@@ -69,38 +82,18 @@ public class TicketDAO {
     }
 
     /**
-     * Cập nhật thông tin AI cho ticket (MediaUrl, Transcript, AIReport, Trạng thái)
+     * Thêm phản hồi vào ticket
      */
-    public boolean updateAIReport(int ticketId, String mediaUrl, String transcript, String aiReport, String status) {
+    public boolean addReply(int ticketId, model.User sender, String message, String newStatus) {
         try {
             JpaHelper.execute(em -> {
                 Ticket ticket = em.find(Ticket.class, ticketId);
                 if (ticket != null) {
-                    if (mediaUrl != null) ticket.setMediaUrl(mediaUrl);
-                    if (transcript != null) ticket.setTranscript(transcript);
-                    if (aiReport != null) ticket.setAiReport(aiReport);
-                    if (status != null) ticket.setStatus(status);
-                    ticket.setUpdatedAt(LocalDateTime.now());
-                }
-            });
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * Admin phản hồi ticket
-     */
-    public boolean reply(int ticketId, String replyContent) {
-        try {
-            JpaHelper.execute(em -> {
-                Ticket ticket = em.find(Ticket.class, ticketId);
-                if (ticket != null) {
-                    ticket.setAdminReply(replyContent);
-                    ticket.setRepliedAt(LocalDateTime.now());
-                    ticket.setStatus("Resolved");
+                    model.TicketReply reply = new model.TicketReply(ticket, sender, message);
+                    em.persist(reply);
+                    if (newStatus != null) {
+                        ticket.setStatus(newStatus);
+                    }
                 }
             });
             return true;

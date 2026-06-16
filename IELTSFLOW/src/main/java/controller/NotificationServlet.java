@@ -23,7 +23,7 @@ import services.UserServiceImpl;
  * - POST action=markRead    → Đánh dấu một thông báo đã đọc
  * - POST action=markAllRead → Đánh dấu tất cả đã đọc
  */
-@WebServlet(name = "NotificationServlet", urlPatterns = {"/notifications"})
+@WebServlet(name = "NotificationServlet", urlPatterns = {"/candidate/notifications"})
 public class NotificationServlet extends HttpServlet {
 
     private NotificationService notificationService;
@@ -58,7 +58,7 @@ public class NotificationServlet extends HttpServlet {
             req.setAttribute("error", "Không thể tải thông báo: " + e.getMessage());
         }
         
-        req.getRequestDispatcher("/jsp/notifications.jsp").forward(req, resp);
+        req.getRequestDispatcher("/jsp/candidate/notifications.jsp").forward(req, resp);
     }
 
     @Override
@@ -88,6 +88,6 @@ public class NotificationServlet extends HttpServlet {
             // Có thể bổ sung log lỗi hoặc đẩy thông báo lỗi vào session nếu cần
         }
         
-        resp.sendRedirect(req.getContextPath() + "/notifications");
+        resp.sendRedirect(req.getContextPath() + "/candidate/notifications");
     }
 }
