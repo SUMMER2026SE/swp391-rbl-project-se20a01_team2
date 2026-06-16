@@ -99,7 +99,11 @@ public class GoogleAuthServlet extends HttpServlet {
                 if (userOpt.isPresent()) {
                     user = userOpt.get();
                     if ("Banned".equals(user.getStatus())) {
-                        forwardError(request, response, "Tài khoản của bạn đã bị khóa");
+                        forwardError(request, response, "Tài khoản của bạn đã bị khóa (Banned)");
+                        return;
+                    }
+                    if ("Inactive".equals(user.getStatus())) {
+                        forwardError(request, response, "Tài khoản của bạn hiện đang bị khóa tạm thời (Inactive)");
                         return;
                     }
                     if (user.getAuthProvider() != null && user.getAuthProvider().equals("Local")) {

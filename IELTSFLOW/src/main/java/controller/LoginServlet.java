@@ -57,7 +57,7 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
             if ("Inactive".equals(user.getStatus())) {
-                req.setAttribute("error", "Tài khoản chưa được xác thực. Vui lòng kiểm tra email (kể cả mục Spam) để kích hoạt.");
+                req.setAttribute("error", "Tài khoản đang bị khóa hoặc chưa được xác thực.");
                 req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
                 return;
             }

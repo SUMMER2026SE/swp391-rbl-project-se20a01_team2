@@ -76,6 +76,25 @@ public class AuthFilter implements Filter {
         int roleId = 0;
         if (isLoggedIn && session.getAttribute("roleId") != null) {
             roleId = (int) session.getAttribute("roleId");
+            int userId = (int) session.getAttribute("userId");
+            
+            // Kiểm tra trạng thái tài khoản liên tục từ DB
+            try {
+                dao.UserDAO userDAO = new dao.UserDAO();
+                java.util.Optional<model.User> userOpt = userDAO.findById(userId);
+                if (userOpt.isPresent()) {
+                    String status = userOpt.get().getStatus();
+                    if ("Banned".equals(status) || "Inactive".equals(status)) {
+                        session.invalidate();
+                        isLoggedIn = false;
+                    }
+                } else {
+                    session.invalidate();
+                    isLoggedIn = false;
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
         }
 
         // ── 1. Kiểm tra đường dẫn Admin ────────────────────────────────────
