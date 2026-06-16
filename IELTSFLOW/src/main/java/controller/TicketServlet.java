@@ -20,7 +20,7 @@ import java.util.List;
  * - POST action=create  → Tạo ticket mới
  * - POST action=close   → Đóng ticket
  */
-@WebServlet(name = "TicketServlet", urlPatterns = {"/tickets"})
+@WebServlet(name = "TicketServlet", urlPatterns = {"/candidate/tickets"})
 public class TicketServlet extends HttpServlet {
 
     private TicketService ticketService;
@@ -49,16 +49,16 @@ public class TicketServlet extends HttpServlet {
                 int ticketId = Integer.parseInt(ticketIdStr);
                 Ticket ticket = ticketService.getTicketById(ticketId, userId);
                 req.setAttribute("ticket", ticket);
-                req.getRequestDispatcher("/jsp/ticket-detail.jsp").forward(req, resp);
+                req.getRequestDispatcher("/jsp/candidate/ticket-detail.jsp").forward(req, resp);
             } else {
                 // Danh sách ticket
                 List<Ticket> tickets = ticketService.getUserTickets(userId);
                 req.setAttribute("tickets", tickets);
-                req.getRequestDispatcher("/jsp/tickets.jsp").forward(req, resp);
+                req.getRequestDispatcher("/jsp/candidate/tickets.jsp").forward(req, resp);
             }
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
-            req.getRequestDispatcher("/jsp/tickets.jsp").forward(req, resp);
+            req.getRequestDispatcher("/jsp/candidate/tickets.jsp").forward(req, resp);
         }
     }
 
@@ -85,21 +85,21 @@ public class TicketServlet extends HttpServlet {
                 Ticket ticket = ticketService.createTicket(userId, subject, content);
                 
                 // Đã sửa lại chuỗi thông báo tiếng Việt trên URL
-                resp.sendRedirect(req.getContextPath() + "/tickets?id=" + ticket.getTicketId() + "&success=Gửi+ticket+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticket.getTicketId() + "&success=Gửi+ticket+thành+công");
             } else if ("close".equals(action)) {
                 int ticketId = Integer.parseInt(req.getParameter("ticketId"));
                 ticketService.closeTicket(ticketId, userId);
                 
                 // Đã sửa lại chuỗi thông báo tiếng Việt trên URL
-                resp.sendRedirect(req.getContextPath() + "/tickets?success=Đã+đóng+ticket");
+                resp.sendRedirect(req.getContextPath() + "/candidate/tickets?success=Đã+đóng+ticket");
             } else {
-                resp.sendRedirect(req.getContextPath() + "/tickets");
+                resp.sendRedirect(req.getContextPath() + "/candidate/tickets");
             }
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
             List<Ticket> tickets = ticketService.getUserTickets(userId);
             req.setAttribute("tickets", tickets);
-            req.getRequestDispatcher("/jsp/tickets.jsp").forward(req, resp);
+            req.getRequestDispatcher("/jsp/candidate/tickets.jsp").forward(req, resp);
         }
     }
 }

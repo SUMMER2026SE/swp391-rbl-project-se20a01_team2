@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+﻿<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -6,10 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H&#7895; tr&#7907; - IELTSFlow</title>
-    <link rel="stylesheet" href="../css/design-system.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #f8fafc; }
-        .page-wrapper { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
         .page-title { font-size: 1.8rem; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
         .page-subtitle { color: #64748b; font-size: 0.9rem; margin: 0 0 32px; }
 
@@ -78,9 +76,37 @@
     </style>
 </head>
 <body>
-<div class="page-wrapper">
-    <div class="page-title">&#127915; H&#7895; tr&#7907;</div>
-    <div class="page-subtitle">G&#7917;i c&#226;u h&#7887;i v&#224; theo d&#245;i ph&#7843;n h&#7891;i t&#7915; Mentor</div>
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="layout-wrapper">
+        <aside class="sidebar">
+            <div class="brand">IELTSFLOW</div>
+            <div class="user-profile">
+                <div class="avatar">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}</div>
+                <div>
+                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: 7.0</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Dashboard</a>
+                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Weekly Plan</a>
+                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Library</a>
+                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 History & Redo</a>
+                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
+                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link active">🎫 Ticket hỗ trợ</a>
+                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
+            </nav>
+            <div style="margin-top: auto;">
+                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+        <div class="animate-fade-up" style="margin-bottom: 20px;">
+            <h1 style="margin-bottom: 10px;">🎫 Ticket Hỗ Trợ</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 30px;">Gửi câu hỏi và theo dõi phản hồi từ Mentor</p>
+        </div>
 
     <c:if test="${not empty param.success}">
         <div class="alert alert-success">&#9989; ${param.success}</div>
@@ -89,7 +115,7 @@
         <div class="alert alert-error">&#10060; ${error}</div>
     </c:if>
 
-    <div class="layout">
+    <div class="layout animate-fade-up" style="animation-delay: 0.1s;">
         <!-- Danh sach ticket -->
         <div>
             <h2 style="font-size:1rem;font-weight:600;color:#374151;margin:0 0 16px;">Ticket c&#7911;a b&#7841;n</h2>
@@ -103,7 +129,7 @@
                 <c:otherwise>
                     <div class="ticket-list">
                         <c:forEach var="t" items="${tickets}">
-                            <a href="${pageContext.request.contextPath}/tickets?id=${t.ticketId}"
+                            <a href="${pageContext.request.contextPath}/candidate/tickets?id=${t.ticketId}"
                                class="ticket-card" data-status="${t.status}">
                                 <div class="ticket-header">
                                     <div class="ticket-subject">#${t.ticketId} - ${t.subject}</div>
@@ -129,7 +155,7 @@
         <div>
             <div class="create-card">
                 <div class="create-title">&#9997;&#65039; G&#7917;i c&#226;u h&#7887;i m&#7899;i</div>
-                <form method="POST" action="${pageContext.request.contextPath}/tickets">
+                <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
                     <input type="hidden" name="action" value="create">
                     <div class="form-group">
                         <label class="form-label" for="subject">Ti&#234;u &#273;&#7873; *</label>
@@ -146,6 +172,7 @@
             </div>
         </div>
     </div>
-</div>
+        </main>
+    </div>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+﻿<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -6,10 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi ti&#7871;t Ticket - IELTSFlow</title>
-    <link rel="stylesheet" href="../../css/design-system.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #f8fafc; }
-        .page-wrapper { max-width: 760px; margin: 0 auto; padding: 40px 20px; }
         .back-link {
             display: inline-flex; align-items: center; gap: 6px; color: #64748b;
             text-decoration: none; font-size: 14px; margin-bottom: 24px;
@@ -59,8 +57,35 @@
     </style>
 </head>
 <body>
-<div class="page-wrapper">
-    <a href="${pageContext.request.contextPath}/tickets" class="back-link">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="layout-wrapper">
+        <aside class="sidebar">
+            <div class="brand">IELTSFLOW</div>
+            <div class="user-profile">
+                <div class="avatar">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}</div>
+                <div>
+                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: 7.0</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Dashboard</a>
+                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Weekly Plan</a>
+                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Library</a>
+                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 History & Redo</a>
+                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
+                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link active">🎫 Ticket hỗ trợ</a>
+                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
+            </nav>
+            <div style="margin-top: auto;">
+                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+    <div class="animate-fade-up">
+    <a href="${pageContext.request.contextPath}/candidate/tickets" class="back-link">
         &larr; Quay l&#7841;i danh s&#225;ch
     </a>
 
@@ -109,7 +134,7 @@
 
             <!-- N&#250;t &#273;&#243;ng ticket -->
             <c:if test="${ticket.status == 'Open' || ticket.status == 'Resolved'}">
-                <form method="POST" action="${pageContext.request.contextPath}/tickets">
+                <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
                     <input type="hidden" name="action" value="close">
                     <input type="hidden" name="ticketId" value="${ticket.ticketId}">
                     <button type="submit" class="btn-close">&#10005; &#272;&#243;ng ticket</button>
@@ -117,6 +142,8 @@
             </c:if>
         </c:otherwise>
     </c:choose>
-</div>
+    </div>
+        </main>
+    </div>
 </body>
 </html>

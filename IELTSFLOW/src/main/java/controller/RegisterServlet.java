@@ -87,7 +87,7 @@ public class RegisterServlet extends HttpServlet {
             session.setAttribute("fullName", fullName.trim());
             session.setAttribute("roleId", roleId);
 
-            resp.sendRedirect(req.getContextPath() + "/account?success=Dang+ky+thanh+cong%21+Chao+mung+ban+den+voi+IELTS+Flow");
+            resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
 
         } catch (Exception e) {
             e.printStackTrace();

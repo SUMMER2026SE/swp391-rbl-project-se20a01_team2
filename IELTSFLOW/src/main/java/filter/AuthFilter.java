@@ -30,17 +30,25 @@ public class AuthFilter implements Filter {
     private static final String[] PROTECTED_PATHS = {
         "/jsp/account.jsp",
         "/jsp/change-password.jsp",
-        "/jsp/notifications.jsp",
-        "/jsp/tickets.jsp",
-        "/jsp/ticket-detail.jsp"
+        "/jsp/candidate/dashboard.jsp",
+        "/jsp/candidate/weekly-plan.jsp",
+        "/jsp/candidate/lessons.jsp",
+        "/jsp/candidate/redo-exercises.jsp",
+        "/jsp/candidate/notifications.jsp",
+        "/jsp/candidate/tickets.jsp",
+        "/jsp/candidate/ticket-detail.jsp"
     };
 
     private static final String[] PROTECTED_SERVLETS = {
         "/account",
         "/change-password",
-        "/notifications",
-        "/tickets",
-        "/checkout"
+        "/checkout",
+        "/candidate/dashboard",
+        "/candidate/weekly-plan",
+        "/candidate/lessons",
+        "/candidate/redo-exercises",
+        "/candidate/notifications",
+        "/candidate/tickets"
     };
 
     // Các đường dẫn chỉ dành cho Admin (roleId == 1)

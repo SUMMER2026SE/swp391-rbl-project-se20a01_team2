@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (displayName.length > 15) displayName = displayName.substring(0, 15) + '...';
                     
                     const roleName = userData.roleId === 1 ? 'Admin' : 'Học viên';
-                    const dashboardLink = userData.roleId === 1 ? 'jsp/admin/dashboard.jsp' : 'jsp/account.jsp';
+                    const dashboardLink = (userData.roleId === 1 || userData.roleId === 2) ? 'jsp/admin/dashboard.jsp' : 'candidate/dashboard';
                     
                     const authHtml = `
                         <a href="${dashboardLink}" class="btn-ghost" style="display: flex; flex-direction: column; align-items: flex-end; text-align: right; line-height: 1.2; padding: 0.25rem 1rem;">

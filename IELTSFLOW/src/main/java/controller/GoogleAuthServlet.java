@@ -113,7 +113,7 @@ public class GoogleAuthServlet extends HttpServlet {
                     user.setFullName(name);
                     user.setAuthProvider("Google");
                     user.setStatus("Active");
-                    user.setRoleId(2); // User
+                    user.setRoleId(userDAO.getCandidateRoleId()); // Default to Candidate
                     userDAO.create(user);
                     
                     userOpt = userDAO.findByEmail(email);
@@ -126,10 +126,10 @@ public class GoogleAuthServlet extends HttpServlet {
                 session.setAttribute("fullName", user.getFullName());
                 session.setAttribute("roleId", user.getRoleId());
 
-                if (user.getRoleId() == 1) {
+                if (user.getRoleId() == 1 || user.getRoleId() == 2) {
                     response.sendRedirect(request.getContextPath() + "/jsp/admin/dashboard.jsp");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/account");
+                    response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
                 }
             } else {
                 forwardError(request, response, "Token không hợp lệ hoặc đã hết hạn");
