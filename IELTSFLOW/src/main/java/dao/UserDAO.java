@@ -196,7 +196,7 @@ public class UserDAO {
         );
     }
 
-    // Cập nhật thông tin user - chỉ cho phép sửa fullName, email, status (#48)
+    // Cập nhật thông tin user - sửa fullName, email, status, roleId
     public void update(User user) {
         JpaHelper.execute(em -> {
             User existing = em.find(User.class, user.getUserId());
@@ -204,6 +204,7 @@ public class UserDAO {
             existing.setFullName(user.getFullName());
             existing.setEmail(user.getEmail());
             existing.setStatus(user.getStatus());
+            existing.setRoleId(user.getRoleId());
             em.merge(existing);
         });
     }

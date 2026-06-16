@@ -87,7 +87,7 @@ public interface UserService {
 
     void createUser(User user);
 
-    void updateUser(int id, String fullName, String email, String status);
+    void updateUser(int id, String fullName, String email, String status, int roleId);
 
     void lockUser(int id);
 
