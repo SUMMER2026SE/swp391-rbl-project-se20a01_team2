@@ -90,10 +90,10 @@
                                     </td>
                                     <td>
                                         <c:if test="${txn.status == 'Success'}">
-                                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success px-3">Success</span>
+                                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success px-3">Thành công</span>
                                         </c:if>
                                         <c:if test="${txn.status == 'Failed'}">
-                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger px-3">Failed</span>
+                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger px-3">Thất bại</span>
                                         </c:if>
                                         <c:if test="${txn.status != 'Success' && txn.status != 'Failed'}">
                                             <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning px-3 text-dark">${txn.status}</span>

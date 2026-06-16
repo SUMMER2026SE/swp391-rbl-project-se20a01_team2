@@ -12,6 +12,10 @@ import services.NotificationService;
 import java.io.IOException;
 import java.util.List;
 
+import model.User;
+import services.UserService;
+import services.UserServiceImpl;
+
 /**
  * Servlet quản lý thông báo của người dùng.
  * URL: /notifications
@@ -23,10 +27,12 @@ import java.util.List;
 public class NotificationServlet extends HttpServlet {
 
     private NotificationService notificationService;
+    private UserService userService;
 
     @Override
     public void init() throws ServletException {
         notificationService = new NotificationService();
+        userService = new UserServiceImpl();
     }
 
     @Override
@@ -41,6 +47,9 @@ public class NotificationServlet extends HttpServlet {
 
         int userId = (int) session.getAttribute("userId");
         try {
+            User user = userService.getUserById(userId);
+            req.setAttribute("user", user);
+            
             List<Notification> notifications = notificationService.getNotifications(userId);
             long unreadCount = notificationService.countUnread(userId);
             req.setAttribute("notifications", notifications);
