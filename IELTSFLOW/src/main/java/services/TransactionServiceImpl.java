@@ -37,4 +37,24 @@ public class TransactionServiceImpl implements TransactionService {
     public List<Transaction> getAllTransactions() {
         return transactionDAO.getAllTransactions();
     }
+
+    @Override
+    public void updateTransactionStatus(int transactionId, String status, String gatewayTxId, String payload) {
+        transactionDAO.updateTransactionStatus(transactionId, status, gatewayTxId, payload);
+    }
+
+    @Override
+    public boolean isGatewayTransactionProcessed(String gatewayTxId) {
+        return transactionDAO.isGatewayTransactionProcessed(gatewayTxId);
+    }
+
+    @Override
+    public void expireOldTransactions(int hours) {
+        transactionDAO.expireOldTransactions(hours);
+    }
+
+    @Override
+    public List<Transaction> getTransactionsByUserId(int userId) {
+        return transactionDAO.getTransactionsByUserId(userId);
+    }
 }

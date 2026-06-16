@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -25,7 +26,7 @@
         .user-info-small { min-width: 0; flex: 1; }
 
         /* Main Content */
-        .main-content { margin-left: 260px; padding: var(--sp-8); max-width: 780px; }
+        .main-content { margin-left: 260px; padding: var(--sp-8); max-width: 1024px; }
         .card { background: var(--color-surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); }
         .card-header { padding: var(--sp-6); border-bottom: 1px solid var(--color-border); }
         .card-title { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 0; }
@@ -45,11 +46,23 @@
         .form-input-wrap { position: relative; }
         .form-hint { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: var(--sp-1); }
 
-        .btn { padding: var(--sp-3) var(--sp-5); border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--text-sm); cursor: pointer; border: none; transition: all var(--dur-200); }
+        .btn { padding: var(--sp-3) var(--sp-5); border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--text-sm); cursor: pointer; border: none; transition: all var(--dur-200); display: inline-block; text-decoration: none; text-align: center; }
         .btn-cta { background: var(--grad-primary); color: white; }
-        .btn-cta:hover { opacity: 0.9; }
+        .btn-cta:hover { opacity: 0.9; color: white; }
         .btn-primary { background: var(--color-primary-600); color: white; }
-        .btn-primary:hover { background: var(--color-primary-700); }
+        .btn-primary:hover { background: var(--color-primary-700); color: white; }
+        .btn-outline { border: 1.5px solid var(--color-border); color: var(--color-text-primary); background: transparent; }
+        .btn-outline:hover { border-color: var(--color-primary-400); color: var(--color-primary-600); }
+
+        .sub-details { display: flex; flex-direction: column; gap: var(--sp-4); }
+        .sub-detail-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: var(--sp-4); border-bottom: 1px solid var(--color-border); }
+        .sub-detail-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .sub-label { color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--fw-medium); }
+        .sub-value { font-weight: var(--fw-semibold); font-size: var(--text-base); }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; background: var(--color-success-100); color: var(--color-success-600); }
+        
+        .empty-state { text-align: center; padding: var(--sp-12) var(--sp-4); }
+        .empty-icon { font-size: 3rem; margin-bottom: var(--sp-4); }
 
         .strength-bar { display: flex; gap: 4px; height: 4px; margin-top: var(--sp-2); }
         .strength-seg { flex: 1; background: var(--color-gray-200); border-radius: 2px; transition: background var(--dur-300); }
@@ -116,6 +129,10 @@
                 M&#7909;c ti&#234;u IELTS
             </a>
             </c:if>
+            <a href="${pageContext.request.contextPath}/my-transactions" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                L&#7883;ch s&#7917; giao d&#7883;ch
+            </a>
             <a href="${pageContext.request.contextPath}/notifications" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                 Th&#244;ng b&#225;o
@@ -167,7 +184,8 @@
         </c:if>
 
         <!-- Profile Section -->
-        <section id="profile-section" class="card mb-8">
+        <div id="profile-section" class="flex gap-6 items-start flex-wrap">
+        <section class="card mb-8 flex-1" style="min-width: 350px;">
             <div class="card-header">
                 <h2 class="card-title">H&#7891; s&#417; c&#225; nh&#226;n</h2>
             </div>
@@ -210,6 +228,53 @@
                 </form>
             </div>
         </section>
+
+        <!-- Subscription Section -->
+        <section class="card mb-8 flex-1" style="min-width: 350px;">
+            <div class="card-header">
+                <h2 class="card-title">G&#243;i &#273;&#259;ng k&#253; c&#7911;a t&#244;i</h2>
+            </div>
+            <div class="card-body">
+                <c:choose>
+                    <c:when test="${not empty activeSubscription}">
+                        <div class="sub-details">
+                            <div class="sub-detail-item">
+                                <span class="sub-label">T&#234;n g&#243;i:</span>
+                                <span class="sub-value text-primary">${activeSubscription.subscriptionPackage.name}</span>
+                            </div>
+                            <div class="sub-detail-item">
+                                <span class="sub-label">Tr&#7841;ng th&#225;i:</span>
+                                <span class="status-badge">${activeSubscription.status}</span>
+                            </div>
+                            <div class="sub-detail-item">
+                                <span class="sub-label">Ng&#224;y k&#237;ch ho&#7841;t:</span>
+                                <span class="sub-value"><fmt:formatDate value="${activeSubscription.startDate}" pattern="dd/MM/yyyy HH:mm"/></span>
+                            </div>
+                            <div class="sub-detail-item">
+                                <span class="sub-label">Ng&#224;y h&#7871;t h&#7841;n:</span>
+                                <span class="sub-value"><fmt:formatDate value="${activeSubscription.endDate}" pattern="dd/MM/yyyy HH:mm"/></span>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 mt-8">
+                            <a href="${pageContext.request.contextPath}/subscription" class="btn btn-cta">Gia h&#7841;n / N&#226;ng c&#7845;p</a>
+                            <a href="${pageContext.request.contextPath}/my-transactions" class="btn btn-outline">Xem l&#7883;ch s&#7917; giao d&#7883;ch</a>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="empty-state">
+                            <div class="empty-icon">&#128081;</div>
+                            <h3 class="text-xl fw-bold mb-2">Ch&#432;a c&#243; g&#243;i &#273;&#259;ng k&#253; n&#224;o</h3>
+                            <p class="text-muted mb-6">N&#226;ng c&#7845;p t&#224;i kho&#7843;n &#273;&#7875; s&#7917; d&#7909;ng &#273;&#7847;y &#273;&#7911; t&#237;nh n&#259;ng luy&#7879;n t&#7853;p thi IELTS v&#7899;i AI ngay h&#244;m nay.</p>
+                            <div class="flex justify-center gap-4">
+                                <a href="${pageContext.request.contextPath}/subscription" class="btn btn-cta">Xem b&#7843;ng gi&#225;</a>
+                                <a href="${pageContext.request.contextPath}/my-transactions" class="btn btn-outline">L&#7883;ch s&#7917; giao d&#7883;ch</a>
+                            </div>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </section>
+        </div>
 
         <!-- Security Section -->
         <section id="security-section" class="card mb-8">
@@ -265,6 +330,6 @@
 
     <div class="toast-container" id="toastContainer"></div>
 
-    <script src="${pageContext.request.contextPath}/js/account.js?v=4"></script>
+    <script src="${pageContext.request.contextPath}/js/account.js?v=5"></script>
 </body>
 </html>

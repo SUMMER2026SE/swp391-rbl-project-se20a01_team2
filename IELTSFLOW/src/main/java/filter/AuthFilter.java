@@ -35,13 +35,13 @@ public class AuthFilter implements Filter {
         "/jsp/ticket-detail.jsp"
     };
 
-    // Các servlet URL yêu cầu đăng nhập
     private static final String[] PROTECTED_SERVLETS = {
         "/account",
         "/change-password",
         "/notifications",
         "/tickets",
-        "/tickets"};
+        "/checkout"
+    };
 
     // Các đường dẫn chỉ dành cho Admin (roleId == 1)
     private static final String ADMIN_PATH_PREFIX = "/jsp/admin";
@@ -108,6 +108,11 @@ public class AuthFilter implements Filter {
     private boolean isProtectedPath(String path) {
         for (String protectedPath : PROTECTED_PATHS) {
             if (path.equals(protectedPath) || path.startsWith(protectedPath + "?")) {
+                return true;
+            }
+        }
+        for (String protectedServlet : PROTECTED_SERVLETS) {
+            if (path.equals(protectedServlet) || path.startsWith(protectedServlet + "?") || path.startsWith(protectedServlet + "/")) {
                 return true;
             }
         }
