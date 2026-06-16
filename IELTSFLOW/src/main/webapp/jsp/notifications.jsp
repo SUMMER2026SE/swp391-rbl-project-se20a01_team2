@@ -128,10 +128,10 @@
 
         <div class="sidebar-footer">
             <div class="user-mini-card">
-                <div class="user-avatar-small">${not empty sessionScope.user ? sessionScope.user.fullName.substring(0, 1) : '?'}</div>
+                <div class="user-avatar-small" id="sidebarAvatar">${not empty user ? user.fullName.substring(0, 1) : '?'}</div>
                 <div class="user-info-small">
-                    <div class="text-sm fw-bold truncate">${not empty sessionScope.user ? sessionScope.user.fullName : 'Guest'}</div>
-                    <div class="text-xs text-muted truncate">${not empty sessionScope.user ? sessionScope.user.email : ''}</div>
+                    <div class="text-sm fw-bold truncate">${not empty user ? user.fullName : 'Guest'}</div>
+                    <div class="text-xs text-muted truncate">${not empty user ? user.email : ''}</div>
                 </div>
             </div>
         </div>
