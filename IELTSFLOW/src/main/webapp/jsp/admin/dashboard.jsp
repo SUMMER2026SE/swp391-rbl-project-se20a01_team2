@@ -25,7 +25,7 @@
             <main class="main-content">
 
                 <header class="main-header animate-fade-up" style="margin-bottom: 30px;">
-                    <h1 class="page-title" style="font-size: 2rem; margin-bottom: 5px;">Dashboard Tổng Quan</h1>
+                    <h1 class="page-title" style="font-size: 2rem; margin-bottom: 5px;">Tổng Quan Hệ Thống</h1>
                     <p style="color: var(--text-secondary);">Chào mừng trở lại, cùng xem hôm nay hệ thống có gì mới nhé!
                     </p>
                 </header>
@@ -68,8 +68,8 @@
                             style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
                             <div>
                                 <span
-                                    style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.1em;">User
-                                    Hoạt Động</span>
+                                    style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.1em;">Người
+                                    Dùng Hoạt Động</span>
                                 <h2
                                     style="font-size: 3rem; font-weight: 800; margin: 0; color: var(--text-primary); letter-spacing: -0.04em;">
                                     ${totalUsers != null ? totalUsers : '0'}</h2>
@@ -93,7 +93,7 @@
                             <div>
                                 <span
                                     style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.1em;">Tổng
-                                    Bài Test</span>
+                                    Bài Kiểm Tra</span>
                                 <h2
                                     style="font-size: 3rem; font-weight: 800; margin: 0; color: var(--text-primary); letter-spacing: -0.04em;">
                                     ${totalTests != null ? totalTests : '0'}</h2>
@@ -129,7 +129,7 @@
                         <button class="btn btn-primary"
                             style="background: linear-gradient(135deg, #64748b, #475569); box-shadow: 0 4px 15px rgba(100,116,139,0.3);"
                             onclick="window.location.href='${pageContext.request.contextPath}/admin/logs'">
-                            Log Hệ Thống <i class="fa-solid fa-triangle-exclamation ms-2"></i>
+                            Nhật Ký Hệ Thống <i class="fa-solid fa-triangle-exclamation ms-2"></i>
                         </button>
                     </div>
                 </div>
