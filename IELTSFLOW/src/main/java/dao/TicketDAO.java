@@ -69,6 +69,28 @@ public class TicketDAO {
     }
 
     /**
+     * Cập nhật thông tin AI cho ticket (MediaUrl, Transcript, AIReport, Trạng thái)
+     */
+    public boolean updateAIReport(int ticketId, String mediaUrl, String transcript, String aiReport, String status) {
+        try {
+            JpaHelper.execute(em -> {
+                Ticket ticket = em.find(Ticket.class, ticketId);
+                if (ticket != null) {
+                    if (mediaUrl != null) ticket.setMediaUrl(mediaUrl);
+                    if (transcript != null) ticket.setTranscript(transcript);
+                    if (aiReport != null) ticket.setAiReport(aiReport);
+                    if (status != null) ticket.setStatus(status);
+                    ticket.setUpdatedAt(LocalDateTime.now());
+                }
+            });
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Admin phản hồi ticket
      */
     public boolean reply(int ticketId, String replyContent) {

@@ -44,6 +44,18 @@ public class Ticket {
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
 
+    @Column(name = "TicketType", length = 50)
+    private String ticketType = "General";
+
+    @Column(name = "MediaUrl", columnDefinition = "NVARCHAR(MAX)")
+    private String mediaUrl;
+
+    @Column(name = "Transcript", columnDefinition = "NVARCHAR(MAX)")
+    private String transcript;
+
+    @Column(name = "AIReport", columnDefinition = "NVARCHAR(MAX)")
+    private String aiReport;
+
     public Ticket() {
     }
 
@@ -93,4 +105,16 @@ public class Ticket {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getTicketType() { return ticketType; }
+    public void setTicketType(String ticketType) { this.ticketType = ticketType; }
+
+    public String getMediaUrl() { return mediaUrl; }
+    public void setMediaUrl(String mediaUrl) { this.mediaUrl = mediaUrl; }
+
+    public String getTranscript() { return transcript; }
+    public void setTranscript(String transcript) { this.transcript = transcript; }
+
+    public String getAiReport() { return aiReport; }
+    public void setAiReport(String aiReport) { this.aiReport = aiReport; }
 }

@@ -35,6 +35,22 @@
         .ticket-content { color: #475569; line-height: 1.7; white-space: pre-wrap; }
         .ticket-date { font-size: 12px; color: #94a3b8; margin-top: 16px; }
 
+        .ai-box {
+            background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 12px; padding: 20px;
+            margin-top: 20px; color: #4a044e;
+        }
+        .ai-title { font-weight: 700; display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 0.95rem; }
+        .ai-score { display: inline-block; background: #c026d3; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+        .ai-feedback { margin-bottom: 16px; font-size: 0.9rem; line-height: 1.6; }
+        .ai-errors { background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 4px solid #ef4444; }
+        .err-mistake { color: #ef4444; text-decoration: line-through; margin-right: 8px; }
+        .err-correct { color: #10b981; font-weight: 600; }
+        
+        #processingUI {
+            background: #f0fdfa; border: 1px solid #5eead4; border-radius: 12px; padding: 20px;
+            text-align: center; color: #0f766e; margin-bottom: 20px;
+        }
+
         .reply-box {
             background: linear-gradient(135deg, #eff6ff, #f0fdf4);
             border: 1px solid #bfdbfe; border-radius: 14px; padding: 24px;
@@ -88,8 +104,71 @@
                     </span>
                 </div>
                 <div class="ticket-content">${ticket.content}</div>
+                
+                <c:if test="${not empty ticket.mediaUrl}">
+                    <div style="margin-top: 16px;">
+                        <audio controls src="${ticket.mediaUrl}" style="width: 100%;"></audio>
+                    </div>
+                </c:if>
+                <c:if test="${not empty ticket.transcript}">
+                    <div style="margin-top: 12px; font-style: italic; color: #64748b; background: #f8fafc; padding: 12px; border-radius: 8px;">
+                        <strong>Transcript (AI nghe &#273;&#432;&#7907;c):</strong><br>
+                        ${ticket.transcript}
+                    </div>
+                </c:if>
+
+                <div id="aiReportContainer">
+                    <c:if test="${not empty ticket.aiReport}">
+                        <textarea id="aiReportData" style="display:none;"><c:out value="${ticket.aiReport}" /></textarea>
+                        <script>
+                            try {
+                                const rawJson = document.getElementById('aiReportData').value;
+                                const report = JSON.parse(rawJson);
+                                let html = `<div class="ai-box">
+                                    <div class="ai-title">&#129302; AI Pre-screening <span class="ai-score">Band \${report.score}</span></div>
+                                    <div class="ai-feedback">\${report.feedback}</div>`;
+                                
+                                if(report.grammar_errors && report.grammar_errors.length > 0) {
+                                    html += `<div><strong>C&#225;c l&#7895;i ng&#7919; ph&#225;p c&#417; b&#7843;n:</strong></div>`;
+                                    report.grammar_errors.forEach(err => {
+                                        html += `<div class="ai-errors">
+                                            <span class="err-mistake">\${err.mistake}</span> &rarr; 
+                                            <span class="err-correct">\${err.correction}</span>
+                                        </div>`;
+                                    });
+                                }
+                                html += `</div>`;
+                                document.write(html);
+                            } catch(e) {
+                                document.write(`<div class="ai-box">Kh\u00f4ng th\u1ec3 \u0111\u1ecdc b\u00e1o c\u00e1o AI (\${e.message})</div>`);
+                            }
+                        </script>
+                    </c:if>
+                </div>
+
                 <div class="ticket-date">&#128197; G&#7917;i l&#250;c: ${ticket.createdAt}</div>
             </div>
+
+            <!-- Processing UI -->
+            <c:if test="${ticket.status == 'Processing'}">
+                <div id="processingUI">
+                    <div style="font-size: 24px; margin-bottom: 8px;">&#8987;</div>
+                    <div style="font-weight: 600;">H&#7879; th&#7889;ng AI &#273;ang ch&#7845;m &#273;i&#7875;m s&#417; b&#7897;...</div>
+                    <div style="font-size: 13px; margin-top: 4px;">Vui l&#242;ng &#273;&#7907;i v&#224;i gi&#226;y, trang s&#7869; t&#7921; &#273;&#7897;ng c&#7853;p nh&#7853;t k&#7871;t qu&#7843;.</div>
+                </div>
+                <script>
+                    let pollInterval = setInterval(async () => {
+                        try {
+                            const res = await fetch('${pageContext.request.contextPath}/api/ticket/status?id=${ticket.ticketId}');
+                            const data = await res.json();
+                            if (data.status !== 'Processing') {
+                                clearInterval(pollInterval);
+                                window.location.reload(); // reload \u0111\u1ec3 th\u1ea5y b\u00e1o c\u00e1o
+                            }
+                        } catch(e) { console.error(e); }
+                    }, 3000);
+                </script>
+            </c:if>
 
             <!-- Ph&#7843;n h&#7891;i t&#7915; Mentor -->
             <c:choose>

@@ -129,20 +129,121 @@
         <div>
             <div class="create-card">
                 <div class="create-title">&#9997;&#65039; G&#7917;i c&#226;u h&#7887;i m&#7899;i</div>
-                <form method="POST" action="${pageContext.request.contextPath}/tickets">
-                    <input type="hidden" name="action" value="create">
+                <form id="ticketForm">
+                    <div class="form-group">
+                        <label class="form-label" for="ticketType">Lo&#7841;i Ticket</label>
+                        <select id="ticketType" class="form-input">
+                            <option value="General">H&#7887;i &#273;&#225;p chung</option>
+                            <option value="Speaking">Nh&#7901; ch&#7845;m Speaking (Ghi &#226;m)</option>
+                            <option value="Writing">Nh&#7901; ch&#7845;m Writing (&#272;o&#7841;n v&#259;n)</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label class="form-label" for="subject">Ti&#234;u &#273;&#7873; *</label>
-                        <input type="text" id="subject" name="subject" class="form-input"
-                               placeholder="T&#243;m t&#7855;t v&#7845;n &#273;&#7873; c&#7911;a b&#7841;n" required maxlength="200">
+                        <input type="text" id="subject" class="form-input" placeholder="T&#243;m t&#7855;t v&#7845;n &#273;&#7873; c&#7911;a b&#7841;n" required maxlength="200">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="contentGroup">
                         <label class="form-label" for="content">N&#7897;i dung *</label>
-                        <textarea id="content" name="content" class="form-textarea"
-                                  placeholder="M&#244; t&#7843; chi ti&#7871;t c&#226;u h&#7887;i ho&#7863;c v&#7845;n &#273;&#7873; b&#7841;n g&#7863;p ph&#7843;i..." required></textarea>
+                        <textarea id="content" class="form-textarea" placeholder="M&#244; t&#7843; chi ti&#7871;t c&#226;u h&#7887;i ho&#7863;c b&#224;i Writing..." required></textarea>
                     </div>
-                    <button type="submit" class="btn-submit">G&#7917;i ticket &rarr;</button>
+                    <div class="form-group" id="recordUI" style="display:none; background: #fffbeb; padding: 16px; border-radius: 8px; border: 1px dashed #f59e0b; text-align: center;">
+                        <div style="margin-bottom: 12px; color: #b45309; font-weight: 600;">Nh&#7845;n Ghi &#226;m v&#224; n&#243;i v&#224;o Micro</div>
+                        <button type="button" id="btnRecord" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">&#127908; B&#7855;t &#273;&#7847;u ghi &#226;m</button>
+                        <button type="button" id="btnStop" style="display:none; background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">&#9209; D&#7915;ng ghi &#226;m</button>
+                        <audio id="audioPlayback" controls style="display:none; margin-top: 12px; width: 100%;"></audio>
+                    </div>
+                    <button type="submit" class="btn-submit" id="btnSubmitForm">G&#7917;i ticket &rarr;</button>
                 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+
+    const typeSelect = document.getElementById('ticketType');
+    const recordUI = document.getElementById('recordUI');
+    const contentGroup = document.getElementById('contentGroup');
+    const btnRecord = document.getElementById('btnRecord');
+    const btnStop = document.getElementById('btnStop');
+    const audioPlayback = document.getElementById('audioPlayback');
+
+    typeSelect.addEventListener('change', () => {
+        if (typeSelect.value === 'Speaking') {
+            recordUI.style.display = 'block';
+            contentGroup.style.display = 'none';
+            document.getElementById('content').removeAttribute('required');
+        } else {
+            recordUI.style.display = 'none';
+            contentGroup.style.display = 'block';
+            document.getElementById('content').setAttribute('required', 'required');
+        }
+    });
+
+    btnRecord.addEventListener('click', async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            audioChunks = [];
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                audioPlayback.src = URL.createObjectURL(audioBlob);
+                audioPlayback.style.display = 'block';
+            };
+            mediaRecorder.start();
+            btnRecord.style.display = 'none';
+            btnStop.style.display = 'inline-block';
+        } catch (e) {
+            alert('Kh\u00f4ng th\u1ec3 truy c\u1eadp Microphone: ' + e.message);
+        }
+    });
+
+    btnStop.addEventListener('click', () => {
+        if(mediaRecorder) mediaRecorder.stop();
+        btnRecord.style.display = 'inline-block';
+        btnStop.style.display = 'none';
+        btnRecord.innerHTML = '&#128260; Ghi \u00e2m l\u1ea1i';
+    });
+
+    document.getElementById('ticketForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.getElementById('btnSubmitForm');
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = '\u0110ang g\u1eedi...';
+
+        const formData = new FormData();
+        formData.append('ticketType', typeSelect.value);
+        formData.append('subject', document.getElementById('subject').value);
+        
+        if(typeSelect.value === 'Speaking') {
+            if(!audioBlob) { alert('Vui l\u00f2ng ghi \u00e2m ph\u1ea7n tr\u1ea3 l\u1eddi c\u1ee7a b\u1ea1n!'); btnSubmit.disabled=false; btnSubmit.textContent = 'G\u1eedi ticket \u2192'; return; }
+            formData.append('audioFile', audioBlob, 'recording.webm');
+            formData.append('content', 'File \u00e2m thanh \u0111\u00ednh k\u00e8m');
+        } else {
+            formData.append('content', document.getElementById('content').value);
+        }
+
+        try {
+            const res = await fetch('${pageContext.request.contextPath}/api/ticket/ai', {
+                method: 'POST', body: formData
+            });
+            const data = await res.json();
+            if(res.ok) {
+                window.location.href = '${pageContext.request.contextPath}/tickets?id=' + data.ticketId + '&success=G\u1eedi+th\u00e0nh+c\u00f4ng';
+            } else {
+                alert(data.error);
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'G\u1eedi ticket \u2192';
+            }
+        } catch(e) {
+            alert('L\u1ed7i k\u1ebft n\u1ed1i');
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = 'G\u1eedi ticket \u2192';
+        }
+    });
+});
+</script>
             </div>
         </div>
     </div>

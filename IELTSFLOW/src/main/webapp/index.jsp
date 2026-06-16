@@ -681,6 +681,10 @@
             border-top: 1px solid #E2E8F0;
         }
 
+        .mobile-menu {
+            display: none;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .hero-content {

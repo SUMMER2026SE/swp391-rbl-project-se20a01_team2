@@ -11,7 +11,7 @@
     <style>
         :root { --grad-brand-dark: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
         body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background-color: #f9fafb; display: flex; min-height: 100vh; }
-        .auth-container { display: flex; width: 100%; height: 100vh; }
+        .auth-container { display: flex; width: 100%; min-height: 100vh; }
 
         /* Left Panel */
         .auth-left { width: 45%; background: var(--grad-brand-dark); color: white; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
@@ -36,7 +36,7 @@
         .testimonial span { font-size: 14px; color: rgba(255,255,255,0.7); }
 
         /* Right Panel */
-        .auth-right { width: 55%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; position: relative; background: white; overflow-y: auto; }
+        .auth-right { width: 55%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; position: relative; background: white; }
         .auth-form-wrapper { width: 100%; max-width: 440px; }
         .mobile-logo { display: none; text-align: center; margin-bottom: 32px; font-size: 24px; font-weight: 700; color: #1e293b; text-decoration: none; }
 
