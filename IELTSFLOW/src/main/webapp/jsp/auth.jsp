@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác thực - IELTSFlow</title>
-    <link rel="stylesheet" href="../css/design-system.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css">
+    <script>window.CONTEXT_PATH = '${pageContext.request.contextPath}';</script>
     <script src="https://accounts.google.com/gsi/client" async defer onload="if(window.onGoogleLibraryLoad) window.onGoogleLibraryLoad();"></script>
     <style>
         :root { --grad-brand-dark: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
@@ -165,6 +166,9 @@
                 <c:if test="${not empty successMessage}">
                     <div class="alert-success">${successMessage}</div>
                 </c:if>
+                <c:if test="${not empty param.successMessage}">
+                    <div class="alert-success">${param.successMessage}</div>
+                </c:if>
                 <c:if test="${not empty param.redirect_error}">
                     <div class="alert-error">${param.redirect_error}</div>
                 </c:if>
@@ -175,7 +179,8 @@
 
                     <div class="divider">ho&#7863;c &#273;&#259;ng nh&#7853;p b&#7857;ng email</div>
 
-                    <form id="loginForm" action="${pageContext.request.contextPath}/login" method="POST">
+                    <form id="loginForm" action="${pageContext.request.contextPath}/auth" method="POST">
+                        <input type="hidden" name="action" value="login">
                         <div class="form-group">
                             <label for="loginEmail">Email</label>
                             <div class="input-wrapper">
@@ -198,6 +203,7 @@
                                 <input type="checkbox" id="rememberMe">
                                 Ghi nh&#7899; &#273;&#259;ng nh&#7853;p
                             </label>
+                            <a href="${pageContext.request.contextPath}/forgot-password" class="link text-sm" style="font-weight: 500;">Qu&#234;n m&#7853;t kh&#7849;u?</a>
                         </div>
 
                         <button type="submit" class="btn-cta btn-full">
@@ -218,7 +224,8 @@
 
                     <div class="divider">ho&#7863;c &#273;&#259;ng k&#253; b&#7857;ng email</div>
 
-                    <form id="registerForm" action="${pageContext.request.contextPath}/register" method="POST">
+                    <form id="registerForm" action="${pageContext.request.contextPath}/auth" method="POST">
+                        <input type="hidden" name="action" value="register">
                         <div class="form-group">
                             <label for="regName">H&#7885; v&#224; t&#234;n</label>
                             <div class="input-wrapper">
@@ -278,7 +285,7 @@
         </div>
     </div>
 
-    <script src="../js/auth.js?v=2"></script>
+    <script src="${pageContext.request.contextPath}/js/auth.js?v=3"></script>
     <script>
         // Tab switching with register tab support from server
         const tabLogin = document.getElementById('tabLoginBtn');

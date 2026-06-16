@@ -75,19 +75,22 @@ public class RegisterServlet extends HttpServlet {
             int roleId = userDAO.getCandidateRoleId();
 
             User newUser = new User(roleId, email.trim(), passwordHash, fullName.trim());
-            newUser.setStatus("Active");
+            newUser.setStatus("Inactive");
             newUser.setAuthProvider("Local");
 
             int userId = userDAO.create(newUser);
 
-            // Tao session va dang nhap luon sau khi dang ky
-            HttpSession session = req.getSession(true);
-            session.setAttribute("userId", userId);
-            session.setAttribute("userEmail", email.trim());
-            session.setAttribute("fullName", fullName.trim());
-            session.setAttribute("roleId", roleId);
+            // Gửi email xác thực
+            services.OtpService otpService = services.OtpService.getInstance();
+            String token = otpService.generateVerifyToken(email.trim());
+            String verifyLink = "http://localhost:8080/IELTSFLOW/verify-email?token=" + token;
+            util.ResendUtil.sendMail("IELTS Flow <noreply@email.tanmanh350.ovh>", email.trim(), "Xác nhận tài khoản IELTS FLOW", 
+                "Chào " + fullName.trim() + ",<br><br>Vui lòng click vào link bên dưới để xác nhận địa chỉ email của bạn:<br><br>" +
+                "<a href='" + verifyLink + "' style='background:#f97316;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;'>XÁC NHẬN TÀI KHOẢN</a>");
 
-            resp.sendRedirect(req.getContextPath() + "/account?success=Dang+ky+thanh+cong%21+Chao+mung+ban+den+voi+IELTS+Flow");
+            req.setAttribute("successMessage", "Đăng ký thành công! Vui lòng kiểm tra hộp thư email (kể cả mục Spam) để kích hoạt tài khoản.");
+            req.setAttribute("tab", "login");
+            req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
 
         } catch (Exception e) {
             e.printStackTrace();

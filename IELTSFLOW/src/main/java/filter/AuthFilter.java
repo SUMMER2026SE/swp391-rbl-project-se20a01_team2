@@ -118,10 +118,10 @@ public class AuthFilter implements Filter {
     private void redirectToLogin(HttpServletResponse resp, String contextPath, String message)
             throws IOException {
         try {
-            String encodedMsg = java.net.URLEncoder.encode(message, "UTF-8");
-            resp.sendRedirect(contextPath + "/jsp/auth.jsp?redirect_error=" + encodedMsg);
+            String encodedMsg = java.net.URLEncoder.encode("Vui lòng đăng nhập để tiếp tục", "UTF-8");
+            resp.sendRedirect(contextPath + "/auth?redirect_error=" + encodedMsg);
         } catch (Exception e) {
-            resp.sendRedirect(contextPath + "/jsp/auth.jsp");
+            resp.sendRedirect(contextPath + "/auth");
         }
     }
 }

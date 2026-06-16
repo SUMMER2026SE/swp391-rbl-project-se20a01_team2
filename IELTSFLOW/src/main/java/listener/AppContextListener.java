@@ -8,6 +8,11 @@ import jakarta.servlet.annotation.WebListener;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.time.LocalDateTime;
+import dao.UserLessonProgressDAO;
+import services.NotificationService;
 
 /**
  * Loads configuration from WEB-INF/.env at startup,
@@ -15,6 +20,8 @@ import java.util.List;
  */
 @WebListener
 public class AppContextListener implements ServletContextListener {
+
+    private Timer reminderTimer;
 
     private static final List<String> SUPPORTED_KEYS = Arrays.asList(
             "RESEND_API_KEY",
@@ -64,10 +71,39 @@ public class AppContextListener implements ServletContextListener {
             System.err.println("AppContextListener: could not warm up JPA - " + e.getMessage());
         }
         System.out.println("Application started. JPA initialized.");
+
+        // Start background job for study reminders
+        reminderTimer = new Timer(true);
+        reminderTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("Running automatic study reminder task...");
+                    UserLessonProgressDAO progressDAO = new UserLessonProgressDAO();
+                    NotificationService notifService = new NotificationService();
+                    
+                    // Find users who haven't studied for 3 days
+                    LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+                    List<Integer> inactiveUsers = progressDAO.findInactiveUsers(threeDaysAgo);
+                    
+                    for (Integer userId : inactiveUsers) {
+                        try {
+                            notifService.createReminder(userId, "Nhắc nhở học tập", 
+                                "Đã 3 ngày bạn chưa luyện tập IELTS. Hãy dành chút thời gian vào ôn tập nhé để đạt được mục tiêu!");
+                        } catch (Exception ignored) { }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error in reminder task: " + e.getMessage());
+                }
+            }
+        }, 60000, 86400000L); // Delay 1 min, run every 24h
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        if (reminderTimer != null) {
+            reminderTimer.cancel();
+        }
         JpaHelper.close();
         System.out.println("Application stopped.");
     }

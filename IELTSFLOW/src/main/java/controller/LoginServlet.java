@@ -56,6 +56,11 @@ public class LoginServlet extends HttpServlet {
                 req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
                 return;
             }
+            if ("Inactive".equals(user.getStatus())) {
+                req.setAttribute("error", "Tài khoản chưa được xác thực. Vui lòng kiểm tra email (kể cả mục Spam) để kích hoạt.");
+                req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
+                return;
+            }
 
             // Dang nhap thanh cong, luu session
             HttpSession session = req.getSession(true);

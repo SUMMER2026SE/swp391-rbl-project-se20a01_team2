@@ -113,7 +113,7 @@ public class GoogleAuthServlet extends HttpServlet {
                     user.setFullName(name);
                     user.setAuthProvider("Google");
                     user.setStatus("Active");
-                    user.setRoleId(2); // User
+                    user.setRoleId(userDAO.getCandidateRoleId()); // Candidate
                     userDAO.create(user);
                     
                     userOpt = userDAO.findByEmail(email);

@@ -115,7 +115,6 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
                 M&#7909;c ti&#234;u IELTS
             </a>
-            </c:if>
             <a href="${pageContext.request.contextPath}/notifications" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                 Th&#244;ng b&#225;o
@@ -124,6 +123,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                 Ticket h&#7895; tr&#7907;
             </a>
+            </c:if>
 
             <div class="nav-divider"></div>
 
@@ -224,54 +224,128 @@
                 <h2 class="card-title">B&#7843;o m&#7853;t</h2>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-4">&#272;&#7893;i m&#7853;t kh&#7849;u &#273;&#7875; b&#7843;o v&#7879; t&#224;i kho&#7843;n c&#7911;a b&#7841;n.</p>
-                <a href="${pageContext.request.contextPath}/change-password" class="btn btn-primary">&#272;&#7893;i m&#7853;t kh&#7849;u &rarr;</a>
+                <c:choose>
+                    <c:when test="${not empty user and user.authProvider == 'Google'}">
+                        <div style="background:#f0f9ff;border:1px solid #bae6fd;color:#0369a1;padding:14px 18px;border-radius:10px;font-weight:500;">
+                            Tài khoản của bạn được đăng nhập bằng Google. Không cần đổi mật khẩu tại đây.
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <form id="passwordForm" class="flex-col gap-4">
+                            <div class="form-group">
+                                <label class="form-label form-label-required">Mật khẩu hiện tại</label>
+                                <div class="form-input-wrap">
+                                    <input type="password" class="form-input" id="currentPassword" required>
+                                    <button type="button" class="toggle-password" style="position: absolute; right: 12px; top: 12px; background: none; border: none; cursor: pointer; color: var(--color-text-muted);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group mt-4">
+                                <label class="form-label form-label-required">Mật khẩu mới</label>
+                                <div class="form-input-wrap">
+                                    <input type="password" class="form-input" id="newPassword" required>
+                                    <button type="button" class="toggle-password" style="position: absolute; right: 12px; top: 12px; background: none; border: none; cursor: pointer; color: var(--color-text-muted);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
+                                <div class="strength-bar">
+                                    <div class="strength-seg" id="str-1"></div>
+                                    <div class="strength-seg" id="str-2"></div>
+                                    <div class="strength-seg" id="str-3"></div>
+                                    <div class="strength-seg" id="str-4"></div>
+                                </div>
+                                <div class="strength-label" id="str-label">Độ mạnh mật khẩu</div>
+                            </div>
+                            <div class="form-group mt-4">
+                                <label class="form-label form-label-required">Xác nhận mật khẩu mới</label>
+                                <div class="form-input-wrap">
+                                    <input type="password" class="form-input" id="confirmPassword" required>
+                                    <button type="button" class="toggle-password" style="position: absolute; right: 12px; top: 12px; background: none; border: none; cursor: pointer; color: var(--color-text-muted);">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
+                                <div id="passwordMatchError" class="form-error hidden">Mật khẩu xác nhận không khớp</div>
+                            </div>
+                            <div class="flex justify-end mt-4">
+                                <button type="submit" class="btn btn-cta">Lưu mật khẩu mới</button>
+                            </div>
+                        </form>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </section>
 
         <c:if test="${sessionScope.roleId != 1}">
         <!-- Goal Section -->
         <section id="goal-section" class="card mb-12">
-            <div class="card-header">
-                <h2 class="card-title">M&#7909;c ti&#234;u IELTS</h2>
-                <div class="card-subtitle">Theo d&#245;i h&#224;nh tr&#236;nh &#273;&#7841;t band &#273;i&#7875;m m&#417; &#432;&#7899;c</div>
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <h2 class="card-title">&#127919; M&#7909;c ti&#234;u IELTS</h2>
+                    <div class="card-subtitle">Theo d&#245;i h&#224;nh tr&#236;nh &#273;&#7841;t band &#273;i&#7875;m m&#417; &#432;&#7899;c</div>
+                </div>
+                <div id="goalSavedBadge" style="display:none;background:#dcfce7;color:#15803d;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">&#10003; &#272;&#227; l&#432;u l&#234;n server</div>
             </div>
             <div class="card-body">
+
+                <!-- Summary card -->
+                <div id="goalSummary" style="display:none;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border-radius:12px;padding:20px;margin-bottom:24px;">
+                    <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+                        <div style="text-align:center;flex:1;min-width:80px;">
+                            <div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Hi&#7879;n t&#7841;i</div>
+                            <div id="summaryCurrentBand" style="font-size:2.2rem;font-weight:800;color:#3b82f6;">&mdash;</div>
+                        </div>
+                        <div style="font-size:1.5rem;color:#cbd5e1;">&rarr;</div>
+                        <div style="text-align:center;flex:1;min-width:80px;">
+                            <div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">M&#7909;c ti&#234;u</div>
+                            <div id="summaryTargetBand" style="font-size:2.2rem;font-weight:800;color:#10b981;">&mdash;</div>
+                        </div>
+                        <div style="flex:2;min-width:160px;">
+                            <div style="font-size:12px;color:#64748b;margin-bottom:6px;" id="summaryGapText">Thi&#7871;t l&#7853;p &#273;&#7875; xem ti&#7871;n &#273;&#7897;</div>
+                            <div style="background:#e2e8f0;border-radius:8px;height:10px;overflow:hidden;">
+                                <div id="summaryProgressBar" style="height:100%;background:linear-gradient(90deg,#3b82f6,#10b981);border-radius:8px;transition:width 0.5s;width:0%;"></div>
+                            </div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:4px;" id="summaryExamDate"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label class="form-label">Band &#273;i&#7875;m hi&#7879;n t&#7841;i</label>
-                    <div class="band-selector" id="currentBandSelector"></div>
+                    <label class="form-label" style="font-weight:700;color:#334155;">Band &#273;i&#7875;m hi&#7879;n t&#7841;i</label>
+                    <p style="font-size:12px;color:#94a3b8;margin:4px 0 10px;">&#128161; S&#7869; t&#7921; &#273;&#7897;ng c&#7853;p nh&#7853;t sau khi b&#7841;n ho&#224;n th&#224;nh b&#224;i Placement Test</p>
+                    <div id="currentBandSelector" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Band &#273;i&#7875;m m&#7909;c ti&#234;u</label>
-                    <div class="band-selector" id="targetBandSelector"></div>
+
+                <div class="form-group" style="margin-top:20px;">
+                    <label class="form-label" style="font-weight:700;color:#334155;">Band &#273;i&#7875;m m&#7909;c ti&#234;u</label>
+                    <p style="font-size:12px;color:#94a3b8;margin:4px 0 10px;">B&#7841;n mu&#7889;n &#273;&#7841;t band &#273;i&#7875;m n&#224;o?</p>
+                    <div id="targetBandSelector" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
                 </div>
-                <div class="form-group" style="max-width: 300px;">
-                    <label class="form-label">Ng&#224;y d&#7921; &#273;&#7883;nh thi</label>
-                    <div class="form-input-wrap">
-                        <input type="date" class="form-input" id="examDate">
-                    </div>
+
+                <div class="form-group" style="max-width:280px;margin-top:20px;">
+                    <label class="form-label" style="font-weight:700;color:#334155;">Ng&#224;y d&#7921; &#273;&#7883;nh thi</label>
+                    <input type="date" class="form-input" id="examDate" style="margin-top:8px;">
                 </div>
-                <div class="gap-indicator">
-                    <div class="gap-message" id="gapMessage">H&#227;y thi&#7871;t l&#7853;p &#273;i&#7875;m &#273;&#7875; xem ti&#7871;n &#273;&#7897;!</div>
-                    <div class="gap-bar-track">
-                        <div class="gap-bar-current" id="gapBarCurrent"></div>
-                        <div class="gap-bar-target" id="gapBarTarget"></div>
-                    </div>
-                    <div class="flex justify-between text-xs text-muted font-medium mt-2">
-                        <span>0.0</span>
-                        <span>9.0</span>
-                    </div>
-                </div>
-                <div class="flex justify-end mt-2">
-                    <button type="button" id="saveGoalBtn" class="btn btn-cta">L&#432;u m&#7909;c ti&#234;u</button>
+
+                <div style="display:flex;justify-content:flex-end;margin-top:24px;">
+                    <button type="button" id="saveGoalBtn" class="btn btn-cta" style="padding:12px 28px;font-size:15px;">
+                        &#128190; L&#432;u m&#7909;c ti&#234;u
+                    </button>
                 </div>
             </div>
         </section>
+        <script>
+            window.GOAL_DATA = {
+                currentBand: '${not empty candidateTarget ? candidateTarget.currentBand : ""}',
+                targetBand:  '${not empty candidateTarget ? candidateTarget.targetBand : ""}',
+                examDate:    '${not empty candidateTarget and not empty candidateTarget.examDate ? candidateTarget.examDate : ""}'
+            };
+        </script>
         </c:if>
     </main>
 
     <div class="toast-container" id="toastContainer"></div>
 
-    <script src="${pageContext.request.contextPath}/js/account.js?v=4"></script>
+    <script src="${pageContext.request.contextPath}/js/account.js?v=5"></script>
 </body>
 </html>

@@ -1,16 +1,19 @@
 package controller;
 
+import dao.CandidateTargetDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.CandidateTarget;
 import model.User;
 import services.UserService;
 import services.UserServiceImpl;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Servlet quản lý trang tài khoản cá nhân (Account Management).
@@ -22,10 +25,12 @@ import java.io.IOException;
 public class AccountServlet extends HttpServlet {
 
     private UserService userService;
+    private CandidateTargetDAO targetDAO;
 
     @Override
     public void init() throws ServletException {
         userService = new UserServiceImpl();
+        targetDAO = new CandidateTargetDAO();
     }
 
     @Override
@@ -43,6 +48,9 @@ public class AccountServlet extends HttpServlet {
         try {
             User user = userService.getUserById(userId);
             req.setAttribute("user", user);
+            // Load mục tiêu IELTS từ DB
+            Optional<CandidateTarget> goal = targetDAO.findActiveByUserId(userId);
+            goal.ifPresent(g -> req.setAttribute("candidateTarget", g));
         } catch (Exception e) {
             req.setAttribute("error", "Không thể tải thông tin tài khoản: " + e.getMessage());
         }
