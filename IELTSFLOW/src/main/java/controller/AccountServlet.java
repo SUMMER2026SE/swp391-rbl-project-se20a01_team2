@@ -48,6 +48,10 @@ public class AccountServlet extends HttpServlet {
         try {
             User user = userService.getUserById(userId);
             req.setAttribute("user", user);
+            services.SubscriptionService subscriptionService = new services.SubscriptionService();
+            model.UserSubscription activeSubscription = subscriptionService.getActiveSubscriptionByUserId(userId);
+            req.setAttribute("activeSubscription", activeSubscription);
+
             // Load mục tiêu IELTS từ DB
             Optional<CandidateTarget> goal = targetDAO.findActiveByUserId(userId);
             goal.ifPresent(g -> req.setAttribute("candidateTarget", g));

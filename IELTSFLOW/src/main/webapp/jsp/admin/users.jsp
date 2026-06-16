@@ -43,19 +43,19 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <h1 class="animate-fade-up">
                     <c:choose>
-                        <c:when test="${isMentorView}">Mentor Role Management</c:when>
-                        <c:otherwise>User Management</c:otherwise>
+                        <c:when test="${isMentorView}">Quản lý vai trò Mentor</c:when>
+                        <c:otherwise>Quản lý người dùng</c:otherwise>
                     </c:choose>
                 </h1>
                 <c:if test="${!isMentorView}">
-                    <button class="btn btn-primary animate-fade-up" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);" onclick="openUserModal('create')">+ Add New User</button>
+                    <button class="btn btn-primary animate-fade-up" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);" onclick="openUserModal('create')">+ Thêm người dùng mới</button>
                 </c:if>
             </div>
             
             <div class="search-pill animate-fade-up" style="animation-delay: 0.1s;">
-                <input type="text" id="local-search-input" placeholder="Search users by email or name..." onkeyup="filterTable()">
+                <input type="text" id="local-search-input" placeholder="Tìm kiếm người dùng theo email hoặc tên..." onkeyup="filterTable()">
                 <select id="local-role-filter" onchange="filterTable()">
-                    <option value="all">All Roles</option>
+                    <option value="all">Tất cả vai trò</option>
                     <option value="1">Admin</option>
                     <option value="2">Mentor</option>
                     <option value="3">Candidate</option>
@@ -67,11 +67,11 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Full Name</th>
+                            <th>Họ và tên</th>
                             <th>Email</th>
-                            <th>Status</th>
-                            <th>Role</th>
-                            <th>Actions</th>
+                            <th>Trạng thái</th>
+                            <th>Vai trò</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -98,17 +98,17 @@
                                             <form method="post" action="${pageContext.request.contextPath}/admin/users" style="margin:0;">
                                                 <input type="hidden" name="id" value="${user.userId}">
                                                 <input type="hidden" name="action" value="revoke_mentor">
-                                                <button type="submit" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;" onclick="return confirm('Revoke mentor role?')">Revoke</button>
+                                                <button type="submit" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;" onclick="return confirm('Thu hồi vai trò mentor?')">Thu hồi</button>
                                             </form>
                                         </c:when>
                                         <c:otherwise>
-                                            <button class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openUserModal('update', ${user.userId}, '${user.fullName.replace('\'', '\\\'')}', '${user.email.replace('\'', '\\\'')}', ${user.roleId}, '${user.status}')">Edit</button>
+                                            <button class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openUserModal('update', ${user.userId}, '${user.fullName.replace('\'', '\\\'')}', '${user.email.replace('\'', '\\\'')}', ${user.roleId}, '${user.status}')">Chỉnh sửa</button>
                                             
                                             <form method="post" action="${pageContext.request.contextPath}/admin/users" style="margin:0;">
                                                 <input type="hidden" name="id" value="${user.userId}">
-                                                <input type="hidden" name="action" value="lock">
-                                                <button type="submit" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; color: ${user.status == 'Active' ? '#fca5a5' : '#6ee7b7'}; border-color: rgba(255, 255, 255, 0.2);" onclick="return confirm('Toggle lock for this user?')">
-                                                    ${user.status == 'Active' ? 'Lock' : 'Unlock'}
+                                                <input type="hidden" name="action" value="${user.status == 'Active' ? 'lock' : 'unlock'}">
+                                                <button type="submit" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; color: ${user.status == 'Active' ? '#fca5a5' : '#6ee7b7'}; border-color: rgba(255, 255, 255, 0.2);" onclick="return confirm('${user.status == 'Active' ? 'Khóa' : 'Mở khóa'} người dùng này?')">
+                                                    ${user.status == 'Active' ? 'Khóa' : 'Mở khóa'}
                                                 </button>
                                             </form>
                                         </c:otherwise>
@@ -118,7 +118,7 @@
                         </c:forEach>
                         <c:if test="${empty users}">
                             <tr>
-                                <td colspan="6" style="text-align: center;">No users found.</td>
+                                <td colspan="6" style="text-align: center;">Không tìm thấy người dùng nào.</td>
                             </tr>
                         </c:if>
                     </tbody>
@@ -131,13 +131,13 @@
     <div id="userModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeUserModal()">&times;</span>
-            <h2 id="modalTitle">Add New User</h2>
+            <h2 id="modalTitle">Thêm người dùng mới</h2>
             <form id="userForm" method="post" action="${pageContext.request.contextPath}/admin/users">
                 <input type="hidden" name="action" id="formAction" value="create">
                 <input type="hidden" name="id" id="formUserId" value="0">
                 
                 <div class="form-group">
-                    <label>Full Name</label>
+                    <label>Họ và tên</label>
                     <input type="text" name="fullName" id="formFullName" required>
                 </div>
                 <div class="form-group">
@@ -145,21 +145,21 @@
                     <input type="email" name="email" id="formEmail" required>
                 </div>
                 <div class="form-group">
-                    <label>Role</label>
+                    <label>Vai trò</label>
                     <select name="roleId" id="formRoleId">
-                        <option value="3">Candidate</option>
+                        <option value="3">Học viên</option>
                         <option value="2">Mentor</option>
                         <option value="1">Admin</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
+                    <label>Trạng thái</label>
                     <select name="status" id="formStatus">
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-form">Save User</button>
+                <button type="submit" class="btn-form">Lưu người dùng</button>
             </form>
         </div>
     </div>
@@ -191,13 +191,19 @@
 
         // Modal logic
         function openUserModal(action, id, name, email, role, status) {
-            document.getElementById('modalTitle').innerText = action === 'create' ? 'Add New User' : 'Edit User';
+            document.getElementById('modalTitle').innerText = action === 'create' ? 'Thêm người dùng mới' : 'Chỉnh sửa người dùng';
             document.getElementById('formAction').value = action;
             document.getElementById('formUserId').value = id || 0;
             document.getElementById('formFullName').value = name || '';
             document.getElementById('formEmail').value = email || '';
             document.getElementById('formRoleId').value = role || 3;
             document.getElementById('formStatus').value = status || 'Active';
+            
+            if (action === 'update') {
+                document.getElementById('formRoleId').disabled = true;
+            } else {
+                document.getElementById('formRoleId').disabled = false;
+            }
             
             document.getElementById('userModal').style.display = 'block';
         }

@@ -35,13 +35,13 @@ public class AuthFilter implements Filter {
         "/jsp/ticket-detail.jsp"
     };
 
-    // Các servlet URL yêu cầu đăng nhập
     private static final String[] PROTECTED_SERVLETS = {
         "/account",
         "/change-password",
         "/notifications",
         "/tickets",
-        "/tickets"};
+        "/checkout"
+    };
 
     // Các đường dẫn chỉ dành cho Admin (roleId == 1)
     private static final String ADMIN_PATH_PREFIX = "/jsp/admin";
@@ -71,7 +71,7 @@ public class AuthFilter implements Filter {
         }
 
         // ── 1. Kiểm tra đường dẫn Admin ────────────────────────────────────
-        if (path.startsWith(ADMIN_PATH_PREFIX)) {
+        if (isAdminPath(path)) {
             if (!isLoggedIn) {
                 redirectToLogin(resp, contextPath, "Vui lòng đăng nhập để tiếp tục");
                 return;
@@ -104,10 +104,23 @@ public class AuthFilter implements Filter {
         // Không làm gì
     }
 
+    /** Kiểm tra đường dẫn có phải là Admin không */
+    private boolean isAdminPath(String path) {
+        return path.startsWith(ADMIN_PATH_PREFIX)
+                || path.startsWith("/admin/")
+                || path.equals("/admin")
+                || path.startsWith("/api/admin/");
+    }
+
     /** Kiểm tra đường dẫn có nằm trong danh sách cần bảo vệ không */
     private boolean isProtectedPath(String path) {
         for (String protectedPath : PROTECTED_PATHS) {
             if (path.equals(protectedPath) || path.startsWith(protectedPath + "?")) {
+                return true;
+            }
+        }
+        for (String protectedServlet : PROTECTED_SERVLETS) {
+            if (path.equals(protectedServlet) || path.startsWith(protectedServlet + "?") || path.startsWith(protectedServlet + "/")) {
                 return true;
             }
         }

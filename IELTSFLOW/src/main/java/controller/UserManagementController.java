@@ -90,7 +90,10 @@ public class UserManagementController extends HttpServlet {
                 );
             } else if ("lock".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-                userService.lockUser(id);
+                userService.updateUserStatus(id, "Inactive");
+            } else if ("unlock".equals(action)) {
+                int id = Integer.parseInt(req.getParameter("id"));
+                userService.updateUserStatus(id, "Active");
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
                 userService.deleteUser(id);

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+<%@ taglib uri="jakarta.tags.fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -51,6 +52,7 @@
                         <thead>
                             <tr>
                                 <th class="ps-4">Mã Giao Dịch</th>
+                                <th>Mã Đối Soát (SePay)</th>
                                 <th>Người Dùng (ID)</th>
                                 <th>Tên Gói Mua</th>
                                 <th>Số Tiền</th>
@@ -63,8 +65,20 @@
                             <c:forEach var="txn" items="${transactions}">
                                 <tr>
                                     <td class="ps-4 font-monospace text-secondary" style="font-size: 0.875rem;">
-                                        <i class="fa-solid fa-hashtag text-black-50 me-1"></i>
-                                        ${txn.gatewayTransactionId != null ? txn.gatewayTransactionId : txn.transactionId}
+                                        <div style="color: var(--text-primary); font-weight: 600;">
+                                            <i class="fa-solid fa-hashtag text-black-50 me-1" style="font-size: 0.75rem;"></i>
+                                            <fmt:formatNumber value="${txn.transactionId}" pattern="00"/>
+                                        </div>
+                                    </td>
+                                    <td class="font-monospace text-secondary" style="font-size: 0.875rem;">
+                                        <c:if test="${txn.gatewayTransactionId != null}">
+                                            <span style="color: #64748b; background: var(--bg-surface); padding: 0.25rem 0.5rem; border-radius: 0.25rem; border: 1px solid var(--border-color);">
+                                                <i class="fa-solid fa-building-columns me-1"></i>${txn.gatewayTransactionId}
+                                            </span>
+                                        </c:if>
+                                        <c:if test="${txn.gatewayTransactionId == null}">
+                                            <span class="text-muted" style="font-size: 0.75rem;">-</span>
+                                        </c:if>
                                     </td>
                                     <td class="fw-bold" style="color: var(--text-primary);">User #${txn.userId}</td>
                                     <td class="fw-medium">${txn.subscriptionPackage.name}</td>
@@ -76,10 +90,10 @@
                                     </td>
                                     <td>
                                         <c:if test="${txn.status == 'Success'}">
-                                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success px-3">Success</span>
+                                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success px-3">Thành công</span>
                                         </c:if>
                                         <c:if test="${txn.status == 'Failed'}">
-                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger px-3">Failed</span>
+                                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger px-3">Thất bại</span>
                                         </c:if>
                                         <c:if test="${txn.status != 'Success' && txn.status != 'Failed'}">
                                             <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning px-3 text-dark">${txn.status}</span>

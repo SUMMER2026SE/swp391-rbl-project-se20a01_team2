@@ -59,11 +59,11 @@ public class NotificationService {
     /**
      * Tạo thông báo nhắc học (dùng cho Scheduler hoặc Admin)
      */
-    public Notification createReminder(int userId, String title, String message) throws Exception {
+    public Notification createReminder(int userId, String title, String content) throws Exception {
         User user = userDAO.findById(userId)
             .orElseThrow(() -> new Exception("Không tìm thấy người dùng"));
 
-        Notification n = new Notification(user, title, message, "REMINDER");
+        Notification n = new Notification(user, title, content, "Reminder");
         notificationDAO.create(n);
         return n;
     }
@@ -71,10 +71,10 @@ public class NotificationService {
     /**
      * Tạo thông báo hệ thống cho tất cả user (Admin broadcast)
      */
-    public void broadcastSystemNotification(String title, String message) {
+    public void broadcastSystemNotification(String title, String content) {
         // Lấy toàn bộ user và tạo notification cho từng người
         userDAO.findAll().forEach(user -> {
-            Notification n = new Notification(user, title, message, "SYSTEM");
+            Notification n = new Notification(user, title, content, "System");
             notificationDAO.create(n);
         });
     }

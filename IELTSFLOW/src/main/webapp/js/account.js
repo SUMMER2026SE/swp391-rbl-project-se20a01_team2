@@ -30,19 +30,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // === 3. Sidebar Tabs ===
     const navItems = document.querySelectorAll('.sidebar-nav-item[data-target]');
     const sectionIds = Array.from(navItems).map(n => n.dataset.target);
-    sectionIds.forEach((id, i) => {
-        const s = document.getElementById(id);
-        if (s) s.style.display = i === 0 ? 'block' : 'none';
+    const sections = sectionIds.map(id => document.getElementById(id));
+
+    // Hide all sections except the first one initially
+    sections.forEach((sec, index) => {
+        if(sec) {
+            if (index === 0) {
+                sec.classList.remove('hidden');
+                sec.style.display = ''; // clear any inline style
+            } else {
+                sec.classList.add('hidden');
+            }
+        }
     });
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             navItems.forEach(n => n.classList.remove('active'));
             item.classList.add('active');
-            sectionIds.forEach(id => { const s = document.getElementById(id); if (s) s.style.display = 'none'; });
-            const t = document.getElementById(item.dataset.target);
-            if (t) t.style.display = 'block';
-            if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
+            const targetId = item.dataset.target;
+            sections.forEach(sec => {
+                if(sec) sec.classList.add('hidden');
+            });
+            const targetSection = document.getElementById(targetId);
+            if(targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+
+            if (window.innerWidth <= 768 && sidebar) {
+                sidebar.classList.remove('open');
+            }
         });
     });
 

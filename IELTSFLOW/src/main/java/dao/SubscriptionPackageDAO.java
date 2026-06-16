@@ -1,43 +1,88 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
-/**
- *
- * @author ntpho
- */
+import jakarta.persistence.TypedQuery;
 import model.SubscriptionPackage;
 import util.JpaHelper;
+
 import java.util.List;
 
 public class SubscriptionPackageDAO {
-    
-    // Lấy toàn bộ danh sách gói
+
+    public List<SubscriptionPackage> getActivePackagesPaginated(int offset, int limit) {
+        return getPackagesPaginated(offset, limit, "active", "");
+    }
+
+    public long getTotalActivePackagesCount() {
+        return getTotalPackagesCount("active");
+    }
+
+    public List<SubscriptionPackage> getPackagesPaginated(int offset, int limit, String statusFilter, String sortOption) {
+        return JpaHelper.query(em -> {
+            String jpql = "SELECT p FROM SubscriptionPackage p WHERE 1=1 ";
+            
+            if ("active".equals(statusFilter)) {
+                jpql += " AND p.deleted = false ";
+            } else if ("deleted".equals(statusFilter)) {
+                jpql += " AND p.deleted = true ";
+            }
+            
+            if ("price_asc".equals(sortOption)) {
+                jpql += " ORDER BY p.price ASC ";
+            } else if ("price_desc".equals(sortOption)) {
+                jpql += " ORDER BY p.price DESC ";
+            } else if ("duration_asc".equals(sortOption)) {
+                jpql += " ORDER BY p.durationMonths ASC ";
+            } else if ("duration_desc".equals(sortOption)) {
+                jpql += " ORDER BY p.durationMonths DESC ";
+            } else {
+                jpql += " ORDER BY p.packageId DESC ";
+            }
+
+            TypedQuery<SubscriptionPackage> query = em.createQuery(jpql, SubscriptionPackage.class);
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
+            return query.getResultList();
+        });
+    }
+
+    public long getTotalPackagesCount(String statusFilter) {
+        return JpaHelper.query(em -> {
+            String jpql = "SELECT COUNT(p) FROM SubscriptionPackage p WHERE 1=1 ";
+            
+            if ("active".equals(statusFilter)) {
+                jpql += " AND p.deleted = false ";
+            } else if ("deleted".equals(statusFilter)) {
+                jpql += " AND p.deleted = true ";
+            }
+
+            TypedQuery<Long> query = em.createQuery(jpql, Long.class);
+            return query.getSingleResult();
+        });
+    }
+
     public List<SubscriptionPackage> getAllPackages() {
         return JpaHelper.query(em -> 
             em.createQuery("SELECT p FROM SubscriptionPackage p", SubscriptionPackage.class).getResultList()
         );
     }
     
-    // Lấy một gói theo ID
     public SubscriptionPackage getPackageById(int id) {
         return JpaHelper.query(em -> em.find(SubscriptionPackage.class, id));
     }
-    
-    // Tạo gói mới
-    public void createPackage(SubscriptionPackage pkg) {
+
+    public void addPackage(SubscriptionPackage pkg) {
         JpaHelper.execute(em -> em.persist(pkg));
     }
     
-    // Cập nhật thông tin gói
+    public void createPackage(SubscriptionPackage pkg) {
+        addPackage(pkg);
+    }
+    
     public void updatePackage(SubscriptionPackage pkg) {
         JpaHelper.execute(em -> em.merge(pkg));
     }
-    
-    // Xóa mềm gói
-    public void deletePackage(int id) {
+
+    public void softDeletePackage(int id) {
         JpaHelper.execute(em -> {
             SubscriptionPackage pkg = em.find(SubscriptionPackage.class, id);
             if (pkg != null) {
@@ -47,7 +92,10 @@ public class SubscriptionPackageDAO {
         });
     }
     
-    // Khôi phục gói (ẩn -> hiện)
+    public void deletePackage(int id) {
+        softDeletePackage(id);
+    }
+    
     public void restorePackage(int id) {
         JpaHelper.execute(em -> {
             SubscriptionPackage pkg = em.find(SubscriptionPackage.class, id);

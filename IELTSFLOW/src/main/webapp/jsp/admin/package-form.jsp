@@ -66,9 +66,8 @@
                         
                         <div class="d-flex justify-content-end align-items-center gap-3">
                             <a href="${pageContext.request.contextPath}/admin/packages" class="text-secondary fw-bold" style="text-decoration: none;">Hủy bỏ</a>
-                            <button type="submit" class="btn-nested" style="background-color: #10B981; padding-left: 2rem;">
+                            <button type="submit" class="btn" style="background-color: #10B981; color: white;">
                                 Lưu Thông Tin
-                                <span class="btn-icon"><i class="fa-solid fa-check"></i></span>
                             </button>
                         </div>
                     </form>

@@ -15,7 +15,7 @@
         .table-custom tbody tr:hover { background-color: rgba(79, 70, 229, 0.02); }
         
         @media print {
-            .admin-sidebar, .mobile-overlay, .header-actions, .hamburger {
+            .sidebar, .mobile-overlay, .header-actions, .hamburger {
                 display: none !important;
             }
             .main-content {

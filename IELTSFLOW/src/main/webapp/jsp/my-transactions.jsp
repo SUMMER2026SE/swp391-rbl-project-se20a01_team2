@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông báo - IELTSFlow</title>
+    <title>Lịch sử giao dịch - IELTSFlow</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css">
     <style>
         body { background-color: var(--color-bg); margin: 0; overflow-x: hidden; }
@@ -26,40 +26,26 @@
         .user-info-small { min-width: 0; flex: 1; }
 
         /* Main Content */
-        .main-content { margin-left: 260px; padding: var(--sp-8); max-width: 1024px; }
-        .card { background: var(--color-surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); }
-        .card-header { padding: var(--sp-6); border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; }
-        .card-title { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 0; }
-        .card-subtitle { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--sp-1); }
-        .card-body { padding: var(--sp-6); }
-
-        .btn { padding: var(--sp-3) var(--sp-5); border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--text-sm); cursor: pointer; border: none; transition: all var(--dur-200); display: inline-block; text-decoration: none; text-align: center; }
-        .btn-outline { border: 1.5px solid var(--color-border); color: var(--color-text-primary); background: transparent; }
-        .btn-outline:hover { border-color: var(--color-primary-400); color: var(--color-primary-600); }
-
-        .badge-unread { background: var(--color-danger-500); color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
-
-        .notification-list { display: flex; flex-direction: column; gap: var(--sp-4); }
-        .notification-item { background: white; border-radius: var(--radius-md); padding: var(--sp-4); border: 1px solid var(--color-border); display: flex; gap: var(--sp-4); align-items: flex-start; border-left: 4px solid transparent; transition: box-shadow var(--dur-200), border-color var(--dur-200); }
-        .notification-item.unread { border-left-color: var(--color-primary-500); background: var(--color-primary-50); }
-        .notification-item:hover { box-shadow: var(--shadow-sm); }
-
-        .notif-icon { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .icon-reminder { background: #fff7ed; color: #ea580c; }
-        .icon-system { background: #eff6ff; color: #2563eb; }
-        .icon-payment { background: #f0fdf4; color: #16a34a; }
-        .icon-exam { background: #fdf4ff; color: #c026d3; }
-
-        .notif-body { flex: 1; }
-        .notif-title { font-weight: var(--fw-bold); color: var(--color-text-primary); font-size: var(--text-base); margin: 0 0 4px; }
-        .notif-message { font-size: var(--text-sm); color: var(--color-text-secondary); margin: 0 0 8px; line-height: 1.5; }
-        .notif-meta { display: flex; justify-content: space-between; align-items: center; font-size: var(--text-xs); color: var(--color-text-muted); }
+        .main-content { margin-left: 260px; padding: var(--sp-8); max-width: 900px; }
+        .card { background: var(--color-surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); overflow: hidden; }
         
-        .btn-read { background: none; border: none; color: var(--color-primary-600); font-size: var(--text-xs); font-weight: var(--fw-semibold); cursor: pointer; padding: 0; transition: color var(--dur-200); }
-        .btn-read:hover { color: var(--color-primary-800); text-decoration: underline; }
-        
-        .empty-state { text-align: center; padding: var(--sp-12) var(--sp-4); color: var(--color-text-muted); }
-        .empty-state p { font-size: var(--text-base); margin-top: var(--sp-4); }
+        .tx-table { width: 100%; border-collapse: collapse; }
+        .tx-table th, .tx-table td { padding: var(--sp-4); text-align: left; border-bottom: 1px solid var(--color-border); }
+        .tx-table th { background: var(--color-bg-alt); font-weight: var(--fw-semibold); color: var(--color-text-secondary); font-size: var(--text-sm); }
+        .tx-table tbody tr:last-child td { border-bottom: none; }
+        .tx-table tbody tr:hover { background: var(--color-gray-50); }
+
+        .tx-id { font-family: monospace; font-size: var(--text-sm); color: var(--color-text-muted); }
+        .tx-amount { font-weight: var(--fw-bold); color: var(--color-primary-700); }
+        .tx-pkg { font-weight: var(--fw-medium); }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge-success { background: var(--color-success-100); color: var(--color-success-700); }
+        .badge-pending { background: var(--color-warning-100); color: var(--color-warning-700); }
+        .badge-failed { background: var(--color-danger-100); color: var(--color-danger-700); }
+
+        .empty-state { text-align: center; padding: var(--sp-12) var(--sp-4); }
+        .empty-icon { font-size: 3rem; margin-bottom: var(--sp-4); }
 
         .mobile-toggle { display: none; position: fixed; top: var(--sp-4); left: var(--sp-4); z-index: var(--z-max); background: white; border-radius: var(--radius-md); padding: var(--sp-2); box-shadow: var(--shadow-md); border: none; cursor: pointer; }
 
@@ -68,6 +54,7 @@
             .sidebar.open { transform: translateX(0); }
             .main-content { margin-left: 0; padding: var(--sp-12) var(--sp-4) var(--sp-4); }
             .mobile-toggle { display: block; }
+            .tx-table { display: block; overflow-x: auto; white-space: nowrap; }
         }
     </style>
 </head>
@@ -101,11 +88,11 @@
                 Mục tiêu IELTS
             </a>
             </c:if>
-            <a href="${pageContext.request.contextPath}/my-transactions" class="sidebar-nav-item">
+            <a href="${pageContext.request.contextPath}/my-transactions" class="sidebar-nav-item active">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
                 Lịch sử giao dịch
             </a>
-            <a href="${pageContext.request.contextPath}/notifications" class="sidebar-nav-item active">
+            <a href="${pageContext.request.contextPath}/notifications" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                 Thông báo
             </a>
@@ -120,6 +107,12 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Trang chủ
             </a>
+            <c:if test="${sessionScope.roleId == 1 || sessionScope.roleId == 2}">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Hệ thống
+            </a>
+            </c:if>
             <a href="${pageContext.request.contextPath}/logout" class="sidebar-nav-item text-danger">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                 Đăng xuất
@@ -140,80 +133,68 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="mb-8">
-            <h1 class="text-3xl fw-bold text-primary">Thông báo</h1>
-            <p class="text-muted mt-2">Nhắc nhở và cập nhật từ hệ thống.</p>
+            <h1 class="text-3xl fw-bold text-primary">Lịch sử giao dịch</h1>
+            <p class="text-muted mt-2">Toàn bộ hóa đơn thanh toán trên hệ thống IELTS Flow.</p>
         </div>
 
-        <c:if test="${not empty error}">
-            <div style="background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;padding:14px 18px;border-radius:10px;margin-bottom:20px;font-weight:500;">
-                &#10060; ${error}
-            </div>
-        </c:if>
-
-        <section class="card mb-8">
-            <div class="card-header">
-                <div style="display: flex; align-items: center; gap: var(--sp-3);">
-                    <h2 class="card-title">Tất cả thông báo</h2>
-                    <c:if test="${unreadCount > 0}">
-                        <span class="badge-unread">${unreadCount} chưa đọc</span>
-                    </c:if>
-                </div>
-                <c:if test="${unreadCount > 0}">
-                    <form method="POST" action="${pageContext.request.contextPath}/notifications" style="margin:0;">
-                        <input type="hidden" name="action" value="markAllRead">
-                        <button type="submit" class="btn btn-outline">Đánh dấu tất cả đã đọc</button>
-                    </form>
-                </c:if>
-            </div>
-            <div class="card-body">
-                <c:choose>
-                    <c:when test="${empty notifications}">
-                        <div class="empty-state">
-                            <div style="font-size:3rem; margin-bottom: var(--sp-4);">📭</div>
-                            <h3 class="text-xl fw-bold mb-2">Bạn chưa có thông báo nào</h3>
-                            <p>Khi có nhắc nhở hoặc cập nhật mới, chúng sẽ xuất hiện ở đây.</p>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="notification-list">
-                            <c:forEach var="n" items="${notifications}">
-                                <div class="notification-item ${!n.read ? 'unread' : ''}">
-                                    <div class="notif-icon icon-${n.type.toLowerCase()}">
+        <section class="card">
+            <c:choose>
+                <c:when test="${not empty transactions}">
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Mã GD</th>
+                                <th>Ngày tạo</th>
+                                <th>Gói cước</th>
+                                <th>Số tiền (VND)</th>
+                                <th>Phương thức</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="tx" items="${transactions}">
+                                <tr>
+                                    <td class="tx-id">#${tx.transactionId}</td>
+                                    <td><fmt:formatDate value="${tx.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                    <td class="tx-pkg">${tx.subscriptionPackage.name}</td>
+                                    <td class="tx-amount"><fmt:formatNumber value="${tx.amount}" pattern="#,###"/></td>
+                                    <td>${not empty tx.paymentMethod ? tx.paymentMethod : 'Bank Transfer'}</td>
+                                    <td>
                                         <c:choose>
-                                            <c:when test="${n.type == 'Reminder'}">⏰</c:when>
-                                            <c:when test="${n.type == 'System'}">📢</c:when>
-                                            <c:when test="${n.type == 'Payment'}">💳</c:when>
-                                            <c:when test="${n.type == 'Exam'}">📝</c:when>
-                                            <c:otherwise>🔔</c:otherwise>
+                                            <c:when test="${tx.status == 'Success'}"><span class="badge badge-success">Thành công</span></c:when>
+                                            <c:when test="${tx.status == 'Pending'}"><span class="badge badge-pending">Đang xử lý</span></c:when>
+                                            <c:otherwise><span class="badge badge-failed">Thất bại</span></c:otherwise>
                                         </c:choose>
-                                    </div>
-                                    <div class="notif-body">
-                                        <div class="notif-title">${n.title}</div>
-                                        <div class="notif-message">${n.content}</div>
-                                        <div class="notif-meta">
-                                            <span>${n.createdAt}</span>
-                                            <c:if test="${!n.read}">
-                                                <form method="POST" action="${pageContext.request.contextPath}/notifications" style="margin:0;">
-                                                    <input type="hidden" name="action" value="markRead">
-                                                    <input type="hidden" name="notificationId" value="${n.notificationId}">
-                                                    <button type="submit" class="btn-read">Đánh dấu đã đọc</button>
-                                                </form>
-                                            </c:if>
-                                        </div>
-                                    </div>
-                                </div>
+                                    </td>
+                                </tr>
                             </c:forEach>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
+                        </tbody>
+                    </table>
+                </c:when>
+                <c:otherwise>
+                    <div class="empty-state">
+                        <div class="empty-icon">🧾</div>
+                        <h3 class="text-xl fw-bold mb-2">Chưa có giao dịch nào</h3>
+                        <p class="text-muted">Bạn chưa thực hiện bất kỳ giao dịch thanh toán nào.</p>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </section>
     </main>
 
     <script>
-        document.getElementById('mobileToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('open');
-        });
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+        if (mobileToggle && sidebar) {
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
     </script>
 </body>
 </html>
