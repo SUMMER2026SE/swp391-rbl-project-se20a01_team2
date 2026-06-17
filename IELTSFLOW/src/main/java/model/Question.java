@@ -3,6 +3,8 @@ package model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Questions")
@@ -46,6 +48,17 @@ public class Question {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "QuestionID")
     private List<Answer> answers = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "QuestionTags",
+            joinColumns = @JoinColumn(name = "QuestionID"),
+            inverseJoinColumns = @JoinColumn(name = "TagID")
+    )
+    private Set<Tag> tags = new HashSet<>();
+
+    public Set<Tag> getTags() { return tags; }
+    public void setTags(Set<Tag> tags) { this.tags = tags; }
 
     public Question() {}
 

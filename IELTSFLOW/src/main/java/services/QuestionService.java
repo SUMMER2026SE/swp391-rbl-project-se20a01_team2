@@ -4,6 +4,8 @@ import dao.QuestionDAO;
 import model.Answer;
 import model.Question;
 import java.util.List;
+import dao.TagDAO;
+import model.Tag;
 
 public class QuestionService {
 
@@ -73,5 +75,35 @@ public class QuestionService {
             throw new Exception("Kỹ năng không được để trống");
         if (q.getContentJson() == null || q.getContentJson().isBlank())
             q.setContentJson("{}");
+    }
+
+    private final TagDAO tagDAO = new TagDAO();
+
+    public Question getQuestionWithTags(int id) throws Exception {
+        Question q = questionDAO.findByIdWithTags(id);
+        if (q == null) throw new Exception("Không tìm thấy câu hỏi #" + id);
+        return q;
+    }
+
+    public List<Tag> getAllTags() {
+        return tagDAO.findAll();
+    }
+
+    public void addTagToQuestion(int questionId, int tagId, int mentorId) throws Exception {
+        Question q = questionDAO.findById(questionId);
+        if (q == null) throw new Exception("Không tìm thấy câu hỏi #" + questionId);
+        if (!q.getCreatedBy().equals(mentorId))
+            throw new Exception("Bạn không có quyền gắn tag cho câu hỏi này");
+        if (tagDAO.findById(tagId) == null)
+            throw new Exception("Không tìm thấy tag #" + tagId);
+        questionDAO.addTag(questionId, tagId);
+    }
+
+    public void removeTagFromQuestion(int questionId, int tagId, int mentorId) throws Exception {
+        Question q = questionDAO.findById(questionId);
+        if (q == null) throw new Exception("Không tìm thấy câu hỏi #" + questionId);
+        if (!q.getCreatedBy().equals(mentorId))
+            throw new Exception("Bạn không có quyền xóa tag của câu hỏi này");
+        questionDAO.removeTag(questionId, tagId);
     }
 }

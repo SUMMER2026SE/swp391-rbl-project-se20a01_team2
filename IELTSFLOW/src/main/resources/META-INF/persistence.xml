@@ -23,6 +23,7 @@ https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
     <class>model.QuestionResource</class>
     <class>model.Question</class>
     <class>model.Answer</class>
+    <class>model.Tag</class>
     <shared-cache-mode>NONE</shared-cache-mode>
     <validation-mode>NONE</validation-mode>
     <properties>

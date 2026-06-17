@@ -39,15 +39,16 @@ public class MentorQuestionServlet extends HttpServlet {
                 req.getRequestDispatcher("/jsp/mentor/questions.jsp").forward(req, resp);
             } else {
                 int id = Integer.parseInt(pathInfo.substring(1));
-                Question question = questionService.getQuestionById(id);
+                Question question = questionService.getQuestionWithTags(id);
                 if (question == null) {
                     req.setAttribute("error", "Không tìm thấy câu hỏi");
                     req.getRequestDispatcher("/jsp/mentor/questions.jsp").forward(req, resp);
                     return;
                 }
                 req.setAttribute("question", question);
+                req.setAttribute("allTags", questionService.getAllTags());
                 req.getRequestDispatcher("/jsp/mentor/question-detail.jsp").forward(req, resp);
-            }
+                }
         } catch (NumberFormatException e) {
             req.setAttribute("error", "ID không hợp lệ");
             req.getRequestDispatcher("/jsp/mentor/questions.jsp").forward(req, resp);
@@ -91,6 +92,17 @@ public class MentorQuestionServlet extends HttpServlet {
                 questionService.deleteQuestion(id, mentorId);
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=Xóa+câu+hỏi+thành+công");
 
+            } else if ("addTag".equals(action)) {
+                int questionId = Integer.parseInt(req.getParameter("questionId"));
+                int tagId      = Integer.parseInt(req.getParameter("tagId"));
+                questionService.addTagToQuestion(questionId, tagId, mentorId);
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=Gắn+tag+thành+công");
+
+            } else if ("removeTag".equals(action)) {
+                int questionId = Integer.parseInt(req.getParameter("questionId"));
+                int tagId = Integer.parseInt(req.getParameter("tagId"));
+                questionService.removeTagFromQuestion(questionId, tagId, mentorId);
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=Xóa+tag+thành+công");
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions");
             }
