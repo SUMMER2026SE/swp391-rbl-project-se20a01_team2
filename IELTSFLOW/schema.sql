@@ -338,6 +338,21 @@ CREATE TABLE SystemLogs (
 );
 GO
 -- ==========================================
+-- BẢNG THEO DÕI FILE UPLOAD
+-- ==========================================
+
+CREATE TABLE UploadedFiles (
+    FileID INT IDENTITY(1,1) PRIMARY KEY,
+    OriginalName NVARCHAR(255) NOT NULL,
+    SavedPath NVARCHAR(500) NOT NULL,
+    FileType NVARCHAR(50) NOT NULL,-- 'profile_pic', 'material', 'video'
+    UploadedBy INT NOT NULL,
+    UploadedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (UploadedBy) REFERENCES Users(UserID)
+);
+GO
+
+-- ==========================================
 -- DỮ LIỆU MẶC ĐỊNH
 -- ==========================================
 
