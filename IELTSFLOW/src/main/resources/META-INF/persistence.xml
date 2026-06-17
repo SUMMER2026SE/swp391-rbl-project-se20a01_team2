@@ -6,6 +6,7 @@
 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
   <persistence-unit name="IELTSFLOW" transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <class>model.CandidateTarget</class>
     <class>model.SubscriptionPackage</class>
     <class>model.SystemLog</class>
     <class>model.Transaction</class>

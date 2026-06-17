@@ -6,12 +6,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác thực - IELTSFlow</title>
-    <link rel="stylesheet" href="../css/design-system.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css">
+    <script>window.CONTEXT_PATH = '${pageContext.request.contextPath}';</script>
     <script src="https://accounts.google.com/gsi/client" async defer onload="if(window.onGoogleLibraryLoad) window.onGoogleLibraryLoad();"></script>
     <style>
         :root { --grad-brand-dark: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
         body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background-color: #f9fafb; display: flex; min-height: 100vh; }
-        .auth-container { display: flex; width: 100%; height: 100vh; }
+        .auth-container { display: flex; width: 100%; min-height: 100vh; }
 
         /* Left Panel */
         .auth-left { width: 45%; background: var(--grad-brand-dark); color: white; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
@@ -36,7 +37,7 @@
         .testimonial span { font-size: 14px; color: rgba(255,255,255,0.7); }
 
         /* Right Panel */
-        .auth-right { width: 55%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; position: relative; background: white; overflow-y: auto; }
+        .auth-right { width: 55%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; position: relative; background: white; }
         .auth-form-wrapper { width: 100%; max-width: 440px; }
         .mobile-logo { display: none; text-align: center; margin-bottom: 32px; font-size: 24px; font-weight: 700; color: #1e293b; text-decoration: none; }
 
@@ -106,7 +107,7 @@
             </div>
 
             <div class="auth-left-content">
-                <a href="../index.jsp" class="brand-logo">
+                <a href="${pageContext.request.contextPath}/index.jsp" class="brand-logo">
                     <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="40" height="40" rx="8" fill="#f97316"/>
                         <path d="M12 28V12H16V28H12ZM20 12H28V16H24V20H28V24H24V28H20V12Z" fill="white"/>
@@ -150,7 +151,7 @@
         <!-- Right Panel -->
         <div class="auth-right">
             <div class="auth-form-wrapper">
-                <a href="../index.jsp" class="mobile-logo">IELTS Flow</a>
+                <a href="${pageContext.request.contextPath}/index.jsp" class="mobile-logo">IELTS Flow</a>
 
                 <div class="tab-switcher">
                     <div class="tab-slider" id="tabSlider"></div>
@@ -165,6 +166,9 @@
                 <c:if test="${not empty successMessage}">
                     <div class="alert-success">${successMessage}</div>
                 </c:if>
+                <c:if test="${not empty param.successMessage}">
+                    <div class="alert-success">${param.successMessage}</div>
+                </c:if>
                 <c:if test="${not empty param.redirect_error}">
                     <div class="alert-error">${param.redirect_error}</div>
                 </c:if>
@@ -175,7 +179,8 @@
 
                     <div class="divider">ho&#7863;c &#273;&#259;ng nh&#7853;p b&#7857;ng email</div>
 
-                    <form id="loginForm" action="${pageContext.request.contextPath}/login" method="POST">
+                    <form id="loginForm" action="${pageContext.request.contextPath}/auth" method="POST">
+                        <input type="hidden" name="action" value="login">
                         <div class="form-group">
                             <label for="loginEmail">Email</label>
                             <div class="input-wrapper">
@@ -198,6 +203,7 @@
                                 <input type="checkbox" id="rememberMe">
                                 Ghi nh&#7899; &#273;&#259;ng nh&#7853;p
                             </label>
+                            <a href="${pageContext.request.contextPath}/forgot-password" class="link text-sm" style="font-weight: 500;">Qu&#234;n m&#7853;t kh&#7849;u?</a>
                         </div>
 
                         <button type="submit" class="btn-cta btn-full">
@@ -218,7 +224,8 @@
 
                     <div class="divider">ho&#7863;c &#273;&#259;ng k&#253; b&#7857;ng email</div>
 
-                    <form id="registerForm" action="${pageContext.request.contextPath}/register" method="POST">
+                    <form id="registerForm" action="${pageContext.request.contextPath}/auth" method="POST">
+                        <input type="hidden" name="action" value="register">
                         <div class="form-group">
                             <label for="regName">H&#7885; v&#224; t&#234;n</label>
                             <div class="input-wrapper">
@@ -278,7 +285,7 @@
         </div>
     </div>
 
-    <script src="../js/auth.js?v=2"></script>
+    <script src="${pageContext.request.contextPath}/js/auth.js?v=3"></script>
     <script>
         // Tab switching with register tab support from server
         const tabLogin = document.getElementById('tabLoginBtn');

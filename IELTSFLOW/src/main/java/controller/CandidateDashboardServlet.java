@@ -20,10 +20,12 @@ import java.io.IOException;
 public class CandidateDashboardServlet extends HttpServlet {
 
     private UserService userService;
+    private dao.CandidateDashboardDAO candidateDashboardDAO;
 
     @Override
     public void init() throws ServletException {
         userService = new UserServiceImpl();
+        candidateDashboardDAO = new dao.CandidateDashboardDAO();
     }
 
     @Override
@@ -42,8 +44,21 @@ public class CandidateDashboardServlet extends HttpServlet {
             User user = userService.getUserById(userId);
             req.setAttribute("user", user);
             
-            // Note: Candidate targets (Goal) logic could be added here if needed, 
-            // but for now we follow the existing pattern in AccountServlet.
+            dao.CandidateTargetDAO targetDAO = new dao.CandidateTargetDAO();
+            java.util.Optional<model.CandidateTarget> targetOpt = targetDAO.findActiveByUserId(userId);
+            if (targetOpt.isPresent()) {
+                req.setAttribute("target", targetOpt.get());
+                java.time.LocalDate examLocalDate = targetOpt.get().getExamDate();
+                if (examLocalDate != null) {
+                    java.time.LocalDate today = java.time.LocalDate.now();
+                    long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, examLocalDate);
+                    req.setAttribute("daysRemaining", daysRemaining);
+                }
+            }
+
+            // Fetch real candidate stats from DB
+            java.util.Map<String, Object> stats = candidateDashboardDAO.getCandidateStats(userId);
+            req.setAttribute("stats", stats);
         } catch (Exception e) {
             req.setAttribute("error", "Không thể tải thông tin người dùng: " + e.getMessage());
         }

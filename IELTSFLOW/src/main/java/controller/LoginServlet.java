@@ -56,6 +56,11 @@ public class LoginServlet extends HttpServlet {
                 req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
                 return;
             }
+            if ("Inactive".equals(user.getStatus())) {
+                req.setAttribute("error", "Tài khoản đang bị khóa hoặc chưa được xác thực.");
+                req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
+                return;
+            }
 
             // Dang nhap thanh cong, luu session
             HttpSession session = req.getSession(true);
@@ -63,9 +68,12 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("userEmail", user.getEmail());
             session.setAttribute("fullName", user.getFullName());
             session.setAttribute("roleId", user.getRoleId());
+            if (user.getProfilePic() != null) {
+                session.setAttribute("profilePic", user.getProfilePic());
+            }
 
             if (user.getRoleId() == 1 || user.getRoleId() == 2) { // Admin or Mentor
-                resp.sendRedirect(req.getContextPath() + "/jsp/admin/dashboard.jsp");
+                resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
             } else { // Candidate
                 resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
             }

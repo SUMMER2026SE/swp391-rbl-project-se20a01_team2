@@ -44,4 +44,14 @@ public class UserLessonProgressDAO {
             }
         });
     }
+
+    public List<Integer> findInactiveUsers(java.time.LocalDateTime threshold) {
+        return JpaHelper.query(em ->
+            em.createQuery(
+                "SELECT u.userId FROM UserLessonProgress u GROUP BY u.userId HAVING MAX(u.lastAccessed) < :threshold",
+                Integer.class)
+              .setParameter("threshold", threshold)
+              .getResultList()
+        );
+    }
 }

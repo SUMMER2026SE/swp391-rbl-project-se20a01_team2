@@ -681,6 +681,10 @@
             border-top: 1px solid #E2E8F0;
         }
 
+        .mobile-menu {
+            display: none;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .hero-content {
@@ -771,8 +775,8 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <a href="/IELTSFLOW/jsp/auth.jsp" class="btn-ghost">&#272;&#259;ng nh&#7853;p</a>
-                        <a href="/IELTSFLOW/jsp/auth.jsp?tab=register" class="btn-cta">B&#7855;t &#273;&#7847;u mi&#7875;n ph&#237;</a>
+                        <a href="/IELTSFLOW/auth" class="btn-ghost">&#272;&#259;ng nh&#7853;p</a>
+                        <a href="/IELTSFLOW/auth?tab=register" class="btn-cta">B&#7855;t &#273;&#7847;u mi&#7875;n ph&#237;</a>
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -801,8 +805,8 @@
                     <a href="/IELTSFLOW/account" class="btn-cta" style="text-align: center;">V&#224;o trang H&#7891; s&#417;</a>
                 </c:when>
                 <c:otherwise>
-                    <a href="/IELTSFLOW/jsp/auth.jsp" class="btn-ghost">&#272;&#259;ng nh&#7853;p</a>
-                    <a href="/IELTSFLOW/jsp/auth.jsp?tab=register" class="btn-cta">B&#7855;t &#273;&#7847;u mi&#7875;n ph&#237;</a>
+                    <a href="/IELTSFLOW/auth" class="btn-ghost">&#272;&#259;ng nh&#7853;p</a>
+                    <a href="/IELTSFLOW/auth?tab=register" class="btn-cta">B&#7855;t &#273;&#7847;u mi&#7875;n ph&#237;</a>
                 </c:otherwise>
             </c:choose>
         </div>
@@ -817,7 +821,7 @@
                     <h1 class="hero-title">Chinh phục IELTS với Lộ trình AI Cá nhân hóa</h1>
                     <p class="hero-subtitle">Mọi công cụ bạn cần để luyện thi IELTS hiệu quả, tiết kiệm thời gian và đạt điểm mục tiêu nhanh chóng.</p>
                     <div class="hero-actions">
-                        <a href="/IELTSFLOW/jsp/auth.jsp?tab=register" class="btn-cta">Bắt đầu miễn phí →</a>
+                        <a href="/IELTSFLOW/auth?tab=register" class="btn-cta">Bắt đầu miễn phí →</a>
                         <a href="#features" class="btn-ghost">Xem giới thiệu ▶</a>
                     </div>
                 </div>
@@ -1239,7 +1243,7 @@
         <div class="container scroll-reveal">
             <h2 class="section-title">Sẵn sàng chinh phục IELTS?</h2>
             <p class="hero-subtitle">Tham gia cùng hơn 50.000 học viên đã đạt điểm số mơ ước.</p>
-            <a href="/IELTSFLOW/jsp/auth.jsp?tab=register" class="btn-white">Bắt đầu miễn phí ngay</a>
+            <a href="/IELTSFLOW/auth?tab=register" class="btn-white">Bắt đầu miễn phí ngay</a>
         </div>
     </section>
 

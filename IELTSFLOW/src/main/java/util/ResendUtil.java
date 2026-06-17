@@ -1,9 +1,11 @@
 package util;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 /**
  * Low-level Resend helper using standard Java HttpURLConnection.
@@ -15,7 +17,10 @@ public class ResendUtil {
 
     private static String getApiKey() {
         String key = System.getProperty("RESEND_API_KEY");
-        return (key != null && !key.isEmpty()) ? key : "";
+        if (key == null || key.trim().isEmpty()) {
+            key = System.getenv("RESEND_API_KEY");
+        }
+        return (key != null && !key.trim().isEmpty()) ? key : "";
     }
 
     /**
@@ -42,9 +47,9 @@ public class ResendUtil {
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             conn.setDoOutput(true);
             
-            // Set 3-second connect and read timeouts to prevent hanging threads
-            conn.setConnectTimeout(3000);
-            conn.setReadTimeout(3000);
+            // Set 10-second connect and read timeouts to prevent hanging threads while allowing slow connections
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
 
             // Escape JSON strings
             String escapedFrom = escapeJson(from);
@@ -69,7 +74,15 @@ public class ResendUtil {
                 System.out.println("ResendUtil: email sent successfully via HTTP to " + to);
                 return true;
             } else {
-                System.err.println("ResendUtil: HTTP error response code = " + code);
+                String errorBody = "";
+                try (InputStream es = conn.getErrorStream()) {
+                    if (es != null) {
+                        try (Scanner scanner = new Scanner(es, StandardCharsets.UTF_8.name())) {
+                            errorBody = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
+                        }
+                    }
+                }
+                System.err.println("ResendUtil: HTTP error response code = " + code + ", body: " + errorBody);
                 return false;
             }
 

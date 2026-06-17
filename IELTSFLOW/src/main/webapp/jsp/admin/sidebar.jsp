@@ -5,8 +5,15 @@
         style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text;">
         IELTSFLOW Admin</div>
     <div class="user-profile">
-        <div class="avatar" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;">
-            ${sessionScope.user != null ? sessionScope.user.fullName.substring(0,1) : 'A'}
+        <div class="avatar" style="overflow: hidden; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;">
+            <c:choose>
+                <c:when test="${not empty sessionScope.profilePic}">
+                    <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                </c:when>
+                <c:otherwise>
+                    ${sessionScope.user != null ? sessionScope.user.fullName.substring(0,1) : 'A'}
+                </c:otherwise>
+            </c:choose>
         </div>
         <div>
             <h4 style="font-size: 1rem;">${sessionScope.user != null ? sessionScope.user.fullName : 'Quản trị viên'}</h4>

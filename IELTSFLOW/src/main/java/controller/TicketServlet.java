@@ -44,15 +44,18 @@ public class TicketServlet extends HttpServlet {
         String ticketIdStr = req.getParameter("id");
         
         try {
+            int roleId = session.getAttribute("roleId") != null ? (int) session.getAttribute("roleId") : 3;
+            
             if (ticketIdStr != null && !ticketIdStr.isBlank()) {
                 // Xem chi tiết một ticket
                 int ticketId = Integer.parseInt(ticketIdStr);
-                Ticket ticket = ticketService.getTicketById(ticketId, userId);
+                int queryUserId = roleId == 2 ? -1 : userId; // Mentor bypasses owner check
+                Ticket ticket = ticketService.getTicketById(ticketId, queryUserId);
                 req.setAttribute("ticket", ticket);
                 req.getRequestDispatcher("/jsp/candidate/ticket-detail.jsp").forward(req, resp);
             } else {
                 // Danh sách ticket
-                List<Ticket> tickets = ticketService.getUserTickets(userId);
+                List<Ticket> tickets = roleId == 2 ? ticketService.getAllTickets() : ticketService.getUserTickets(userId);
                 req.setAttribute("tickets", tickets);
                 req.getRequestDispatcher("/jsp/candidate/tickets.jsp").forward(req, resp);
             }
@@ -76,6 +79,7 @@ public class TicketServlet extends HttpServlet {
         }
 
         int userId = (int) session.getAttribute("userId");
+        int roleId = session.getAttribute("roleId") != null ? (int) session.getAttribute("roleId") : 3;
         String action = req.getParameter("action");
         
         try {
@@ -95,15 +99,19 @@ public class TicketServlet extends HttpServlet {
             } else if ("reply".equals(action)) {
                 int ticketId = Integer.parseInt(req.getParameter("ticketId"));
                 String replyContent = req.getParameter("replyContent");
-                ticketService.candidateReply(ticketId, userId, replyContent);
-                
-                resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticketId);
+                if (roleId == 2) {
+                    ticketService.replyTicket(ticketId, userId, replyContent);
+                    resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticketId + "&success=" + java.net.URLEncoder.encode("Đã gửi phản hồi", "UTF-8"));
+                } else {
+                    ticketService.candidateReply(ticketId, userId, replyContent);
+                    resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticketId);
+                }
             } else {
                 resp.sendRedirect(req.getContextPath() + "/candidate/tickets");
             }
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
-            List<Ticket> tickets = ticketService.getUserTickets(userId);
+            List<Ticket> tickets = roleId == 2 ? ticketService.getAllTickets() : ticketService.getUserTickets(userId);
             req.setAttribute("tickets", tickets);
             req.getRequestDispatcher("/jsp/candidate/tickets.jsp").forward(req, resp);
         }
