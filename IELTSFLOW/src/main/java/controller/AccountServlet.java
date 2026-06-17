@@ -48,6 +48,12 @@ public class AccountServlet extends HttpServlet {
         try {
             User user = userService.getUserById(userId);
             req.setAttribute("user", user);
+            
+            Optional<CandidateTarget> targetOpt = targetDAO.findActiveByUserId(userId);
+            if (targetOpt.isPresent()) {
+                req.setAttribute("target", targetOpt.get());
+            }
+            
             services.SubscriptionService subscriptionService = new services.SubscriptionService();
             model.UserSubscription activeSubscription = subscriptionService.getActiveSubscriptionByUserId(userId);
             req.setAttribute("activeSubscription", activeSubscription);
@@ -94,6 +100,32 @@ public class AccountServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/account?success=Cập+nhật+hồ+sơ+thành+công");
             } catch (Exception e) {
                 req.setAttribute("error", "Cập nhật thất bại: " + e.getMessage());
+                doGet(req, resp);
+            }
+        } else if ("changePassword".equals(action)) {
+            String currentPassword = req.getParameter("currentPassword");
+            String newPassword = req.getParameter("newPassword");
+            String confirmPassword = req.getParameter("confirmPassword");
+
+            if (currentPassword == null || currentPassword.isBlank()
+                    || newPassword == null || newPassword.isBlank()
+                    || confirmPassword == null || confirmPassword.isBlank()) {
+                req.setAttribute("error", "Vui lòng điền đầy đủ tất cả các trường đổi mật khẩu");
+                doGet(req, resp);
+                return;
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                req.setAttribute("error", "Mật khẩu mới và xác nhận mật khẩu không khớp");
+                doGet(req, resp);
+                return;
+            }
+
+            try {
+                userService.changePassword(userId, currentPassword, newPassword);
+                resp.sendRedirect(req.getContextPath() + "/account?success=Đổi+mật+khẩu+thành+công");
+            } catch (Exception e) {
+                req.setAttribute("error", e.getMessage());
                 doGet(req, resp);
             }
         } else {

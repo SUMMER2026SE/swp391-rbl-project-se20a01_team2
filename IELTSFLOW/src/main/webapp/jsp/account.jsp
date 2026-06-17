@@ -329,6 +329,13 @@
 
     <div class="toast-container" id="toastContainer"></div>
 
+    <script>
+        window.GOAL_DATA = {
+            currentBand: '${not empty target ? target.currentBand : ""}',
+            targetBand: '${not empty target ? target.targetBand : ""}',
+            examDate: '${not empty target ? target.examDate : ""}'
+        };
+    </script>
     <script src="${pageContext.request.contextPath}/js/account.js?v=5"></script>
 </body>
 </html>
