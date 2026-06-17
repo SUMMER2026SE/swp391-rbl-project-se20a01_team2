@@ -135,6 +135,7 @@
             </a>
 
 
+
             <div class="nav-divider"></div>
 
             <a href="${pageContext.request.contextPath}/index.jsp" class="sidebar-nav-item">
@@ -145,6 +146,12 @@
             <a href="${pageContext.request.contextPath}/admin/dashboard" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 Hệ thống
+            </a>
+            </c:if>
+            <c:if test="${sessionScope.roleId != 1 && sessionScope.roleId != 2}">
+            <a href="${pageContext.request.contextPath}/candidate/dashboard" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Bảng điều khiển
             </a>
             </c:if>
             <a href="${pageContext.request.contextPath}/logout" class="sidebar-nav-item text-danger">

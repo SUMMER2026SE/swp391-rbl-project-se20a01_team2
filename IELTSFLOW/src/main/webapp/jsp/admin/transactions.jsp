@@ -82,7 +82,7 @@
                                     </td>
                                     <td class="fw-bold" style="color: var(--text-primary);">User #${txn.userId}</td>
                                     <td class="fw-medium">${txn.subscriptionPackage.name}</td>
-                                    <td class="fw-bold" style="color: #10B981;">$ ${txn.amount}</td>
+                                    <td class="fw-bold" style="color: #10B981;">${txn.amount} ₫</td>
                                     <td>
                                         <span style="background: var(--bg-color); padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; border: 1px solid var(--border-color);">
                                             ${txn.paymentMethod != null ? txn.paymentMethod : 'N/A'}
