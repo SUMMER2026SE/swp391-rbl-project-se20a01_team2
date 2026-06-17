@@ -66,9 +66,9 @@ public interface UserService {
     User getUserById(int userId) throws Exception;
 
     /**
-     * Cập nhật hồ sơ cá nhân (fullName)
+     * Cập nhật hồ sơ cá nhân (fullName, profilePic)
      */
-    void updateProfile(int userId, String fullName) throws Exception;
+    void updateProfile(int userId, String fullName, String profilePic) throws Exception;
 
     /**
      * Đổi mật khẩu (yêu cầu nhập mật khẩu cũ)
@@ -87,7 +87,7 @@ public interface UserService {
 
     void createUser(User user);
 
-    void updateUser(int id, String fullName, String email, String status);
+    void updateUser(int id, String fullName, String email, String status, int roleId);
 
     void lockUser(int id);
 

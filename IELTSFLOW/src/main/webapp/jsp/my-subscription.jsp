@@ -99,6 +99,7 @@
                 Lịch sử giao dịch
             </a>
 
+
             <div class="nav-divider"></div>
 
             <c:if test="${sessionScope.roleId == 3}">

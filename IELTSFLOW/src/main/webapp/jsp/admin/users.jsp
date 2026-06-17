@@ -14,15 +14,47 @@
         .admin-table tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
         .admin-table tr:hover td { background: rgba(255,255,255,0.05); }
         
-        /* Modal Styles */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
-        .modal-content { background-color: var(--sidebar-bg, #2a2a2a); margin: 10% auto; padding: 20px; border: 1px solid #888; width: 50%; border-radius: 12px; color: white; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close:hover { color: #fff; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; background: rgba(255,255,255,0.1); color: white; }
-        .btn-form { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; background: var(--accent-red, #ef4444); color: white; font-weight: bold; }
+        /* Modern White Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s ease; }
+        .modal.show { opacity: 1; }
+        .modal-content { 
+            background-color: #ffffff; 
+            margin: 8% auto; 
+            padding: 30px; 
+            border: none; 
+            width: 400px; 
+            border-radius: 24px; 
+            color: #1e293b; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05);
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal.show .modal-content { transform: translateY(0) scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .modal-title { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin: 0; }
+        .close { color: #94a3b8; font-size: 24px; font-weight: bold; cursor: pointer; line-height: 1; padding: 4px; border-radius: 50%; transition: all 0.2s ease; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; }
+        .close:hover { background-color: #f1f5f9; color: #ef4444; }
+        
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 0.875rem; font-weight: 600; color: #475569; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #cbd5e1; 
+            background: #f8fafc; color: #334155; font-size: 0.95rem; transition: all 0.2s ease; outline: none; box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus { 
+            background: #ffffff; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); 
+        }
+        .form-group select:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+        
+        .btn-modal { padding: 12px 24px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; width: 100%; box-sizing: border-box; }
+        .btn-modal-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); }
+        .btn-modal-primary:hover { box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
+        .btn-modal-danger { background: linear-gradient(135deg, #ef4444, #f43f5e); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); width: auto; flex: 1; }
+        .btn-modal-danger:hover { box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4); transform: translateY(-1px); }
+        .btn-modal-secondary { background: #f1f5f9; color: #475569; width: auto; flex: 1; }
+        .btn-modal-secondary:hover { background: #e2e8f0; color: #1e293b; }
+        
+        .modal-footer { display: flex; gap: 12px; margin-top: 25px; }
     </style>
 </head>
 <body>
@@ -41,15 +73,8 @@
             </c:if>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h1 class="animate-fade-up">
-                    <c:choose>
-                        <c:when test="${isMentorView}">Quản lý vai trò Mentor</c:when>
-                        <c:otherwise>Quản lý người dùng</c:otherwise>
-                    </c:choose>
-                </h1>
-                <c:if test="${!isMentorView}">
-                    <button class="btn btn-primary animate-fade-up" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);" onclick="openUserModal('create')">+ Thêm người dùng mới</button>
-                </c:if>
+                <h1 class="animate-fade-up">Quản lý người dùng</h1>
+                <button class="btn btn-primary animate-fade-up" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);" onclick="openUserModal('create')">+ Thêm người dùng mới</button>
             </div>
             
             <div class="search-pill animate-fade-up" style="animation-delay: 0.1s;">
@@ -93,26 +118,15 @@
                                     </c:choose>
                                 </td>
                                 <td style="display: flex; gap: 5px;">
-                                    <c:choose>
-                                        <c:when test="${isMentorView}">
-                                            <form method="post" action="${pageContext.request.contextPath}/admin/users" style="margin:0;">
-                                                <input type="hidden" name="id" value="${user.userId}">
-                                                <input type="hidden" name="action" value="revoke_mentor">
-                                                <button type="submit" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;" onclick="return confirm('Thu hồi vai trò mentor?')">Thu hồi</button>
-                                            </form>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <button class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openUserModal('update', ${user.userId}, '${user.fullName.replace('\'', '\\\'')}', '${user.email.replace('\'', '\\\'')}', ${user.roleId}, '${user.status}')">Chỉnh sửa</button>
-                                            
-                                            <form method="post" action="${pageContext.request.contextPath}/admin/users" style="margin:0;">
-                                                <input type="hidden" name="id" value="${user.userId}">
-                                                <input type="hidden" name="action" value="${user.status == 'Active' ? 'lock' : 'unlock'}">
-                                                <button type="submit" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; color: ${user.status == 'Active' ? '#fca5a5' : '#6ee7b7'}; border-color: rgba(255, 255, 255, 0.2);" onclick="return confirm('${user.status == 'Active' ? 'Khóa' : 'Mở khóa'} người dùng này?')">
-                                                    ${user.status == 'Active' ? 'Khóa' : 'Mở khóa'}
-                                                </button>
-                                            </form>
-                                        </c:otherwise>
-                                    </c:choose>
+                                    <button class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openUserModal('update', ${user.userId}, '${user.fullName.replace('\'', '\\\'')}', '${user.email.replace('\'', '\\\'')}', ${user.roleId}, '${user.status}')">Chỉnh sửa</button>
+                                    
+                                    <form id="lockForm_${user.userId}" method="post" action="${pageContext.request.contextPath}/admin/users" style="margin:0;">
+                                        <input type="hidden" name="id" value="${user.userId}">
+                                        <input type="hidden" name="action" value="${user.status == 'Active' ? 'lock' : 'unlock'}">
+                                        <button type="button" class="btn btn-glass" style="padding: 5px 10px; font-size: 0.8rem; color: ${user.status == 'Active' ? '#fca5a5' : '#6ee7b7'}; border-color: rgba(255, 255, 255, 0.2);" onclick="openConfirmModal(${user.userId}, '${user.status == 'Active' ? 'Khóa' : 'Mở khóa'}', '${user.fullName.replace('\'', '\\\'')}')">
+                                            ${user.status == 'Active' ? 'Khóa' : 'Mở khóa'}
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -130,23 +144,26 @@
     <!-- User Modal Form -->
     <div id="userModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeUserModal()">&times;</span>
-            <h2 id="modalTitle">Thêm người dùng mới</h2>
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Thêm người dùng mới</h2>
+                <span class="close" onclick="closeUserModal()">&times;</span>
+            </div>
             <form id="userForm" method="post" action="${pageContext.request.contextPath}/admin/users">
                 <input type="hidden" name="action" id="formAction" value="create">
                 <input type="hidden" name="id" id="formUserId" value="0">
                 
                 <div class="form-group">
                     <label>Họ và tên</label>
-                    <input type="text" name="fullName" id="formFullName" required>
+                    <input type="text" name="fullName" id="formFullName" required placeholder="Nhập họ và tên...">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" id="formEmail" required>
+                    <input type="email" name="email" id="formEmail" required placeholder="example@email.com">
                 </div>
                 <div class="form-group">
                     <label>Vai trò</label>
-                    <select name="roleId" id="formRoleId">
+                    <input type="hidden" name="roleId" id="formRoleId">
+                    <select id="formRoleIdDisplay" onchange="document.getElementById('formRoleId').value = this.value;">
                         <option value="3">Học viên</option>
                         <option value="2">Mentor</option>
                         <option value="1">Admin</option>
@@ -155,12 +172,28 @@
                 <div class="form-group">
                     <label>Trạng thái</label>
                     <select name="status" id="formStatus">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
+                        <option value="Active">Active (Hoạt động)</option>
+                        <option value="Inactive">Inactive (Vô hiệu)</option>
+                        <option value="Banned">Banned (Cấm)</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-form">Lưu người dùng</button>
+                <button type="submit" class="btn-modal btn-modal-primary" style="margin-top: 10px;">Lưu người dùng</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content" style="width: 350px; text-align: center;">
+            <div id="confirmIconContainer" style="background: #fee2e2; color: #ef4444; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px;">
+                ⚠️
+            </div>
+            <h2 class="modal-title" id="confirmTitle" style="margin-bottom: 10px; justify-content: center;">Xác nhận</h2>
+            <p id="confirmMessage" style="color: #64748b; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;"></p>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-modal-secondary" onclick="closeConfirmModal()">Hủy</button>
+                <button type="button" class="btn-modal btn-modal-danger" id="confirmBtn">Đồng ý</button>
+            </div>
         </div>
     </div>
 
@@ -197,24 +230,73 @@
             document.getElementById('formFullName').value = name || '';
             document.getElementById('formEmail').value = email || '';
             document.getElementById('formRoleId').value = role || 3;
+            document.getElementById('formRoleIdDisplay').value = role || 3;
             document.getElementById('formStatus').value = status || 'Active';
             
-            if (action === 'update') {
-                document.getElementById('formRoleId').disabled = true;
+            if (role == 1) {
+                document.getElementById('formRoleIdDisplay').disabled = true;
             } else {
-                document.getElementById('formRoleId').disabled = false;
+                document.getElementById('formRoleIdDisplay').disabled = false;
             }
             
-            document.getElementById('userModal').style.display = 'block';
+            const modal = document.getElementById('userModal');
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
         }
 
         function closeUserModal() {
-            document.getElementById('userModal').style.display = 'none';
+            const modal = document.getElementById('userModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
         }
+
+        // Custom Confirm Modal Logic
+        let currentTargetFormId = null;
+
+        function openConfirmModal(userId, actionText, userName) {
+            currentTargetFormId = 'lockForm_' + userId;
+            document.getElementById('confirmTitle').innerText = actionText + ' tài khoản';
+            document.getElementById('confirmMessage').innerHTML = 'Bạn có chắc chắn muốn <b>' + actionText.toLowerCase() + '</b> tài khoản của người dùng <b>' + userName + '</b>?';
+            
+            const btn = document.getElementById('confirmBtn');
+            const iconContainer = document.getElementById('confirmIconContainer');
+            
+            if(actionText === 'Khóa') {
+                btn.className = 'btn-modal btn-modal-danger';
+                iconContainer.style.background = '#fee2e2';
+                iconContainer.style.color = '#ef4444';
+                iconContainer.innerText = '🔒';
+            } else {
+                btn.className = 'btn-modal btn-modal-primary';
+                iconContainer.style.background = '#d1fae5';
+                iconContainer.style.color = '#10b981';
+                iconContainer.innerText = '🔓';
+            }
+            
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+            currentTargetFormId = null;
+        }
+
+        document.getElementById('confirmBtn').onclick = function() {
+            if (currentTargetFormId) {
+                document.getElementById(currentTargetFormId).submit();
+            }
+        };
 
         window.onclick = function(event) {
             if (event.target == document.getElementById('userModal')) {
                 closeUserModal();
+            }
+            if (event.target == document.getElementById('confirmModal')) {
+                closeConfirmModal();
             }
         }
     </script>

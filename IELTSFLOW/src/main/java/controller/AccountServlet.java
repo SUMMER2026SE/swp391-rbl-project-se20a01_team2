@@ -83,6 +83,7 @@ public class AccountServlet extends HttpServlet {
 
         if ("updateProfile".equals(action)) {
             String fullName = req.getParameter("fullName");
+            String profilePic = req.getParameter("profilePic");
 
             if (fullName == null || fullName.trim().isEmpty()) {
                 req.setAttribute("error", "Họ và tên không được để trống");
@@ -91,13 +92,16 @@ public class AccountServlet extends HttpServlet {
             }
 
             try {
-                // Cập nhật fullName trong DB thông qua UserService
-                userService.updateProfile(userId, fullName.trim());
+                // Cập nhật fullName và profilePic trong DB thông qua UserService
+                userService.updateProfile(userId, fullName.trim(), profilePic);
 
                 // Cập nhật lại session
                 session.setAttribute("fullName", fullName.trim());
+                if (profilePic != null && !profilePic.isBlank()) {
+                    session.setAttribute("profilePic", profilePic.trim());
+                }
 
-                resp.sendRedirect(req.getContextPath() + "/account?success=Cập+nhật+hồ+sơ+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/account?success=" + java.net.URLEncoder.encode("Cập nhật hồ sơ thành công", "UTF-8"));
             } catch (Exception e) {
                 req.setAttribute("error", "Cập nhật thất bại: " + e.getMessage());
                 doGet(req, resp);

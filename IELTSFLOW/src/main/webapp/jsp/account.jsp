@@ -138,6 +138,7 @@
                 Lịch sử giao dịch
             </a>
 
+
             <div class="nav-divider"></div>
 
             <c:if test="${sessionScope.roleId == 3}">
@@ -157,6 +158,12 @@
                 Hệ thống
             </a>
             </c:if>
+            <c:if test="${sessionScope.roleId != 1 && sessionScope.roleId != 2}">
+            <a href="${pageContext.request.contextPath}/candidate/dashboard" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Bảng điều khiển
+            </a>
+            </c:if>
             <a href="${pageContext.request.contextPath}/logout" class="sidebar-nav-item text-danger">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                 Đăng xuất
@@ -165,7 +172,16 @@
 
         <div class="sidebar-footer">
             <div class="user-mini-card">
-                <div class="user-avatar-small" id="sidebarAvatar">${not empty user ? user.fullName.substring(0, 1) : '?'}</div>
+                <div class="user-avatar-small" id="sidebarAvatar">
+                    <c:choose>
+                        <c:when test="${not empty user.profilePic}">
+                            <img src="${pageContext.request.contextPath}${user.profilePic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                        </c:when>
+                        <c:otherwise>
+                            ${not empty user ? user.fullName.substring(0, 1) : '?'}
+                        </c:otherwise>
+                    </c:choose>
+                </div>
                 <div class="user-info-small">
                     <div class="text-sm fw-bold truncate">${not empty user ? user.fullName : 'Guest'}</div>
                     <div class="text-xs text-muted truncate">${not empty user ? user.email : ''}</div>
@@ -202,8 +218,8 @@
                 <div class="avatar-upload-container">
                     <input type="file" id="avatarInput" accept="image/png, image/jpeg" style="display: none;">
                     <div class="avatar-large" id="profileAvatar">
-                        <img id="avatarPreview" src="" alt="Avatar" style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: absolute; z-index: 1;">
-                        <span id="profileInitials" style="position: relative; z-index: 2;">${not empty user ? user.fullName.substring(0, 1) : '?'}</span>
+                        <img id="avatarPreview" src="${not empty user.profilePic ? pageContext.request.contextPath.concat(user.profilePic) : ''}" alt="Avatar" style="${empty user.profilePic ? 'display: none;' : ''} width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: absolute; z-index: 1;">
+                        <span id="profileInitials" style="${not empty user.profilePic ? 'display: none;' : ''} position: relative; z-index: 2;">${not empty user ? user.fullName.substring(0, 1) : '?'}</span>
                         <div class="avatar-overlay" style="z-index: 3;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                         </div>
@@ -216,6 +232,7 @@
 
                 <form id="profileForm" action="${pageContext.request.contextPath}/account" method="POST" class="flex-col gap-4">
                     <input type="hidden" name="action" value="updateProfile">
+                    <input type="hidden" id="profilePicInput" name="profilePic" value="${not empty user ? user.profilePic : ''}">
                     <div class="form-group">
                         <label class="form-label form-label-required">H&#7885; v&#224; t&#234;n</label>
                         <div class="form-input-wrap">

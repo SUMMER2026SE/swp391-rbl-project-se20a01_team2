@@ -51,9 +51,9 @@
                                 <input type="number" class="form-control" name="durationMonths" value="${pkg != null ? pkg.durationMonths : ''}" min="1" required>
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Giá Tiền ($)</label>
+                                <label class="form-label">Giá Tiền (₫)</label>
                                 <div class="input-group">
-                                    <span class="input-group-text" style="border-radius: 1rem 0 0 1rem; border: 1px solid var(--border-color); background: #f9fafb; font-weight: bold;">$</span>
+                                    <span class="input-group-text" style="border-radius: 1rem 0 0 1rem; border: 1px solid var(--border-color); background: #f9fafb; font-weight: bold;">₫</span>
                                     <input type="number" step="0.01" class="form-control" name="price" value="${pkg != null ? pkg.price : ''}" style="border-radius: 0 1rem 1rem 0;" required>
                                 </div>
                             </div>

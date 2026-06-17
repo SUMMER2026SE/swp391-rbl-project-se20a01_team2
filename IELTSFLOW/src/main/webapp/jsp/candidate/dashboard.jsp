@@ -16,10 +16,19 @@
         <aside class="sidebar">
             <div class="brand">IELTSFLOW</div>
             <div class="user-profile">
-                <div class="avatar">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}</div>
+                <div class="avatar" style="overflow: hidden;">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.profilePic}">
+                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                        </c:when>
+                        <c:otherwise>
+                            ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}
+                        </c:otherwise>
+                    </c:choose>
+                </div>
                 <div>
                     <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: 7.0</p>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: ${not empty stats.targetBand and stats.targetBand > 0 ? stats.targetBand : 'N/A'}</p>
                 </div>
             </div>
             <nav class="nav-menu">
@@ -85,15 +94,15 @@
             <div class="stats-grid animate-fade-up" style="animation-delay: 0.1s;">
                 <div class="stat-card">
                     <p>Study Hours (This Week)</p>
-                    <h3 style="color: var(--accent-blue);">12.5h</h3>
+                    <h3 style="color: var(--accent-blue);">${stats.studyHours}h</h3>
                 </div>
                 <div class="stat-card">
                     <p>Lessons Completed</p>
-                    <h3 style="color: var(--accent-green);">24</h3>
+                    <h3 style="color: var(--accent-green);">${stats.lessonsCompleted}</h3>
                 </div>
                 <div class="stat-card">
                     <p>Latest Mock Test</p>
-                    <h3 style="color: var(--accent-purple);">6.5</h3>
+                    <h3 style="color: var(--accent-purple);">${not empty stats.latestMockTest and stats.latestMockTest > 0 ? stats.latestMockTest : 'N/A'}</h3>
                 </div>
             </div>
 

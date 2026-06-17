@@ -72,30 +72,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (avatarContainer && avatarInput) {
         avatarContainer.addEventListener('click', () => avatarInput.click());
-        avatarInput.addEventListener('change', function() {
+        avatarInput.addEventListener('change', async function() {
             const file = this.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const b64 = e.target.result;
-                if (avatarPreview) { avatarPreview.src = b64; avatarPreview.style.display = 'block'; }
-                if (profileInitials) profileInitials.style.display = 'none';
-                if (sidebarAvatar) sidebarAvatar.innerHTML = '<img src="' + b64 + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
-                localStorage.setItem('user_avatar', b64);
-                showToast('Da cap nhat anh dai dien');
-            };
-            reader.readAsDataURL(file);
+            if (file) {
+                // Show temporary preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Str = e.target.result;
+                    if (avatarPreview) {
+                        avatarPreview.src = base64Str;
+                        avatarPreview.style.display = 'block';
+                    }
+                    if (profileInitials) profileInitials.style.display = 'none';
+                    if (sidebarAvatar) sidebarAvatar.innerHTML = `<img src="${base64Str}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                }
+                reader.readAsDataURL(file);
+
+                // Upload to server
+                const formData = new FormData();
+                formData.append('type', 'profile_pic');
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/IELTSFLOW/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        const profilePicInput = document.getElementById('profilePicInput');
+                        if (profilePicInput) {
+                            profilePicInput.value = result.url;
+                        }
+                        showToast('Đã tải ảnh lên thành công. Vui lòng nhấn Lưu thay đổi.');
+                    } else {
+                        showToast(result.error || 'Tải ảnh lên thất bại', 'error');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showToast('Lỗi kết nối khi tải ảnh lên', 'error');
+                }
+            }
         });
     }
-    const savedAvatar = localStorage.getItem('user_avatar');
-    if (savedAvatar && avatarPreview) {
-        avatarPreview.src = savedAvatar; avatarPreview.style.display = 'block';
-        if (profileInitials) profileInitials.style.display = 'none';
-        if (sidebarAvatar) sidebarAvatar.innerHTML = '<img src="' + savedAvatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
-    }
 
-    // === 5. Password Toggle ===
-    document.querySelectorAll('.toggle-password').forEach(btn => {
+    // === 6. Profile Form Save ===
+    document.getElementById('profileForm').addEventListener('submit', (e) => {
+        // Let the form submit normally to the AccountServlet
+    });
+
+    // === 7. Password Toggle & Strength ===
+    const toggleBtns = document.querySelectorAll('.toggle-password');
+    toggleBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const input = this.previousElementSibling;
             if (!input) return;

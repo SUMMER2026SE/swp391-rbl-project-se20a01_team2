@@ -5,8 +5,15 @@
         style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text;">
         IELTSFLOW Admin</div>
     <div class="user-profile">
-        <div class="avatar" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;">
-            ${sessionScope.user != null ? sessionScope.user.fullName.substring(0,1) : 'A'}
+        <div class="avatar" style="overflow: hidden; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;">
+            <c:choose>
+                <c:when test="${not empty sessionScope.profilePic}">
+                    <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                </c:when>
+                <c:otherwise>
+                    ${sessionScope.user != null ? sessionScope.user.fullName.substring(0,1) : 'A'}
+                </c:otherwise>
+            </c:choose>
         </div>
         <div>
             <h4 style="font-size: 1rem;">${sessionScope.user != null ? sessionScope.user.fullName : 'Quản trị viên'}</h4>
@@ -17,7 +24,6 @@
     <nav class="nav-menu">
         <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link ${param.active == 'dashboard' ? 'active' : ''}">📊 Tổng quan</a>
         <a href="${pageContext.request.contextPath}/admin/users" class="nav-link ${param.active == 'users' ? 'active' : ''}">👥 Quản lý người dùng</a>
-        <a href="${pageContext.request.contextPath}/admin/users/mentors" class="nav-link ${param.active == 'mentors' ? 'active' : ''}">🛡️ Vai trò Mentor</a>
         <a href="${pageContext.request.contextPath}/admin/packages" class="nav-link ${param.active == 'packages' ? 'active' : ''}">📦 Gói thành viên</a>
         <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-link ${param.active == 'transactions' ? 'active' : ''}">💳 Giao dịch</a>
         <a href="${pageContext.request.contextPath}/admin/logs" class="nav-link ${param.active == 'logs' ? 'active' : ''}">⚙️ Nhật ký hệ thống</a>

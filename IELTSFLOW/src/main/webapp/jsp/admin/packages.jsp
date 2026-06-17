@@ -62,7 +62,7 @@
                                         <td class="ps-4 text-secondary">${pkg.packageId}</td>
                                         <td class="fw-bold" style="color: var(--text-primary);">${pkg.name}</td>
                                         <td>${pkg.durationMonths} tháng</td>
-                                        <td class="fw-bold" style="color: #10B981;">$ ${pkg.price}</td>
+                                        <td class="fw-bold" style="color: #10B981;">${pkg.price} ₫</td>
                                         <td class="text-secondary">${pkg.description}</td>
                                         <td>
                                             <c:if test="${pkg.deleted}">

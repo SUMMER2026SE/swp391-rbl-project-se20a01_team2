@@ -45,7 +45,7 @@
                                     Doanh Thu</span>
                                 <h2
                                     style="font-size: 3rem; font-weight: 800; margin: 0; color: var(--text-primary); letter-spacing: -0.04em;">
-                                    $ ${totalRevenue != null ? totalRevenue : '0'}</h2>
+                                    ${totalRevenue != null ? totalRevenue : '0'} ₫</h2>
                             </div>
                             <div
                                 style="width: 48px; height: 48px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">

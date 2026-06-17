@@ -204,11 +204,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateProfile(int userId, String fullName) throws Exception {
+    public void updateProfile(int userId, String fullName, String profilePic) throws Exception {
         if (fullName == null || fullName.trim().isEmpty()) {
             throw new Exception("Họ và tên không được để trống");
         }
-        boolean updated = userDAO.updateFullName(userId, fullName.trim());
+        boolean updated = userDAO.updateProfile(userId, fullName.trim(), profilePic);
         if (!updated) {
             throw new Exception("Không thể cập nhật hồ sơ. Vui lòng thử lại.");
         }
@@ -266,12 +266,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(int id, String fullName, String email, String status) {
+    public void updateUser(int id, String fullName, String email, String status, int roleId) {
         User existing = userDAO.findById(id).orElse(null);
         if (existing == null) throw new IllegalArgumentException("User not found: " + id);
+        
+        // Prevent editing Admin role or changing a user to Admin
+        if (existing.getRoleId() == ROLE_ADMIN) {
+            roleId = ROLE_ADMIN; // Ignore any role change if they are already Admin
+        } else if (roleId == ROLE_ADMIN) {
+            throw new IllegalArgumentException("Cannot promote a user to Admin role.");
+        }
+        
         existing.setFullName(fullName);
         existing.setEmail(email);
         existing.setStatus(status);
+        existing.setRoleId(roleId);
         userDAO.update(existing);
     }
 

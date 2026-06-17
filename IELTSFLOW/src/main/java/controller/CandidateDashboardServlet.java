@@ -20,10 +20,12 @@ import java.io.IOException;
 public class CandidateDashboardServlet extends HttpServlet {
 
     private UserService userService;
+    private dao.CandidateDashboardDAO candidateDashboardDAO;
 
     @Override
     public void init() throws ServletException {
         userService = new UserServiceImpl();
+        candidateDashboardDAO = new dao.CandidateDashboardDAO();
     }
 
     @Override
@@ -53,6 +55,10 @@ public class CandidateDashboardServlet extends HttpServlet {
                     req.setAttribute("daysRemaining", daysRemaining);
                 }
             }
+
+            // Fetch real candidate stats from DB
+            java.util.Map<String, Object> stats = candidateDashboardDAO.getCandidateStats(userId);
+            req.setAttribute("stats", stats);
         } catch (Exception e) {
             req.setAttribute("error", "Không thể tải thông tin người dùng: " + e.getMessage());
         }

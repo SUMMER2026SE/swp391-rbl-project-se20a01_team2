@@ -36,6 +36,9 @@ public class User {
     @Column(name = "FullName", nullable = false)
     private String fullName;
 
+    @Column(name = "ProfilePic")
+    private String profilePic;
+
     @Column(name = "Status")
     private String status = "Active"; // "Active", "Inactive", "Banned"
 
@@ -120,6 +123,14 @@ public class User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getProfilePic() {
+        return profilePic;
+    }
+
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 
     public String getStatus() {
