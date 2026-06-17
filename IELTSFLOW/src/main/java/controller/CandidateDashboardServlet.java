@@ -20,10 +20,12 @@ import java.io.IOException;
 public class CandidateDashboardServlet extends HttpServlet {
 
     private UserService userService;
+    private dao.CandidateDashboardDAO candidateDashboardDAO;
 
     @Override
     public void init() throws ServletException {
         userService = new UserServiceImpl();
+        candidateDashboardDAO = new dao.CandidateDashboardDAO();
     }
 
     @Override
@@ -42,8 +44,9 @@ public class CandidateDashboardServlet extends HttpServlet {
             User user = userService.getUserById(userId);
             req.setAttribute("user", user);
             
-            // Note: Candidate targets (Goal) logic could be added here if needed, 
-            // but for now we follow the existing pattern in AccountServlet.
+            // Fetch real candidate stats from DB
+            java.util.Map<String, Object> stats = candidateDashboardDAO.getCandidateStats(userId);
+            req.setAttribute("stats", stats);
         } catch (Exception e) {
             req.setAttribute("error", "Không thể tải thông tin người dùng: " + e.getMessage());
         }

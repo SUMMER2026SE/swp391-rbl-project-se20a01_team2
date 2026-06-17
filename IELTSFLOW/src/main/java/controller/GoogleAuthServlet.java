@@ -125,6 +125,9 @@ public class GoogleAuthServlet extends HttpServlet {
                 session.setAttribute("userEmail", user.getEmail());
                 session.setAttribute("fullName", user.getFullName());
                 session.setAttribute("roleId", user.getRoleId());
+                if (user.getProfilePic() != null) {
+                    session.setAttribute("profilePic", user.getProfilePic());
+                }
 
                 if (user.getRoleId() == 1 || user.getRoleId() == 2) {
                     response.sendRedirect(request.getContextPath() + "/jsp/admin/dashboard.jsp");

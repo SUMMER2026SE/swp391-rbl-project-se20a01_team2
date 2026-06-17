@@ -33,8 +33,19 @@
         <aside class="sidebar">
             <div class="brand">IELTSFLOW</div>
             <div class="user-profile">
-                <div class="avatar">HV</div>
-                <div><h4 style="font-size: 1rem;">Học Viên 1</h4></div>
+                <div class="avatar" style="overflow: hidden;">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.profilePic}">
+                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                        </c:when>
+                        <c:otherwise>
+                            ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                <div>
+                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
+                </div>
             </div>
             <nav class="nav-menu">
                 <a href="dashboard.jsp" class="nav-link">🏠 Dashboard</a>

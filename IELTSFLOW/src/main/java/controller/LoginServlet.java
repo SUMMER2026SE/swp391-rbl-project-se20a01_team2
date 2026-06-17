@@ -63,6 +63,9 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("userEmail", user.getEmail());
             session.setAttribute("fullName", user.getFullName());
             session.setAttribute("roleId", user.getRoleId());
+            if (user.getProfilePic() != null) {
+                session.setAttribute("profilePic", user.getProfilePic());
+            }
 
             if (user.getRoleId() == 1 || user.getRoleId() == 2) { // Admin or Mentor
                 resp.sendRedirect(req.getContextPath() + "/jsp/admin/dashboard.jsp");
