@@ -47,4 +47,8 @@ public class LessonService {
     public void deleteLesson(int id) {
         lessonDAO.softDelete(id);
     }
+
+    public List<Lesson> getLessonsByMentor(int mentorId) {
+        return lessonDAO.findByMentor(mentorId);
+    }
 }
