@@ -254,12 +254,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(int id, String fullName, String email, String status) {
+    public void updateUser(int id, String fullName, String email, String status, int roleId) {
         User existing = userDAO.findById(id).orElse(null);
         if (existing == null) throw new IllegalArgumentException("User not found: " + id);
+        
+        // Prevent editing Admin role or changing a user to Admin
+        if (existing.getRoleId() == ROLE_ADMIN) {
+            roleId = ROLE_ADMIN; // Ignore any role change if they are already Admin
+        } else if (roleId == ROLE_ADMIN) {
+            throw new IllegalArgumentException("Cannot promote a user to Admin role.");
+        }
+        
         existing.setFullName(fullName);
         existing.setEmail(email);
         existing.setStatus(status);
+        existing.setRoleId(roleId);
         userDAO.update(existing);
     }
 

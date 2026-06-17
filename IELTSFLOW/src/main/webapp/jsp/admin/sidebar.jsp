@@ -17,7 +17,6 @@
     <nav class="nav-menu">
         <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link ${param.active == 'dashboard' ? 'active' : ''}">📊 Tổng quan</a>
         <a href="${pageContext.request.contextPath}/admin/users" class="nav-link ${param.active == 'users' ? 'active' : ''}">👥 Quản lý người dùng</a>
-        <a href="${pageContext.request.contextPath}/admin/users/mentors" class="nav-link ${param.active == 'mentors' ? 'active' : ''}">🛡️ Vai trò Mentor</a>
         <a href="${pageContext.request.contextPath}/admin/packages" class="nav-link ${param.active == 'packages' ? 'active' : ''}">📦 Gói thành viên</a>
         <a href="${pageContext.request.contextPath}/admin/transactions" class="nav-link ${param.active == 'transactions' ? 'active' : ''}">💳 Giao dịch</a>
         <a href="${pageContext.request.contextPath}/admin/logs" class="nav-link ${param.active == 'logs' ? 'active' : ''}">⚙️ Nhật ký hệ thống</a>

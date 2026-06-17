@@ -22,20 +22,11 @@ public class UserManagementController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String pathInfo = req.getPathInfo();
-        
         try {
-            if (pathInfo != null && pathInfo.equals("/mentors")) {
-                List<User> mentors = userService.getMentors();
-                req.setAttribute("users", mentors);
-                req.setAttribute("isMentorView", true);
-                req.getRequestDispatcher("/jsp/admin/users.jsp").forward(req, resp);
-            } else {
-                List<User> users = userService.getAllUsers();
-                req.setAttribute("users", users);
-                req.setAttribute("isMentorView", false);
-                req.getRequestDispatcher("/jsp/admin/users.jsp").forward(req, resp);
-            }
+            List<User> users = userService.getAllUsers();
+            req.setAttribute("users", users);
+            req.setAttribute("isMentorView", false);
+            req.getRequestDispatcher("/jsp/admin/users.jsp").forward(req, resp);
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
             req.getRequestDispatcher("/jsp/admin/users.jsp").forward(req, resp);
@@ -82,11 +73,13 @@ public class UserManagementController extends HttpServlet {
                 userService.createUser(user);
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
+                int roleId = Integer.parseInt(req.getParameter("roleId"));
                 userService.updateUser(
                         id,
                         req.getParameter("fullName"),
                         req.getParameter("email"),
-                        req.getParameter("status")
+                        req.getParameter("status"),
+                        roleId
                 );
             } else if ("lock".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
@@ -105,12 +98,8 @@ public class UserManagementController extends HttpServlet {
                 userService.revokeMentorRole(id);
             }
             
-            // Redirect based on the current view to avoid form resubmission
-            if (pathInfo != null && pathInfo.equals("/mentors")) {
-                resp.sendRedirect(req.getContextPath() + "/admin/users/mentors");
-            } else {
-                resp.sendRedirect(req.getContextPath() + "/admin/users");
-            }
+            // Redirect to avoid form resubmission
+            resp.sendRedirect(req.getContextPath() + "/admin/users");
             
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
