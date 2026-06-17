@@ -1,13 +1,36 @@
 package model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import java.sql.Timestamp;
 
+@Entity
+@Table(name = "UploadedFiles")
 public class UploadedFile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "FileID")
     private int fileId;
+
+    @Column(name = "OriginalName")
     private String originalName;
+
+    @Column(name = "SavedPath")
     private String savedPath;
+
+    @Column(name = "FileType")
     private String fileType;
+
+    @Column(name = "UploadedBy")
     private int uploadedBy;
+
+    @Column(name = "UploadedAt")
     private Timestamp uploadedAt;
 
     public UploadedFile() {
@@ -18,6 +41,13 @@ public class UploadedFile {
         this.savedPath = savedPath;
         this.fileType = fileType;
         this.uploadedBy = uploadedBy;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (uploadedAt == null) {
+            uploadedAt = new Timestamp(System.currentTimeMillis());
+        }
     }
 
     public int getFileId() {

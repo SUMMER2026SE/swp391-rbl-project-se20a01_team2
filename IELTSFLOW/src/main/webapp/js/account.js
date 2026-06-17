@@ -91,9 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (avatarContainer && avatarInput) {
         avatarContainer.addEventListener('click', () => avatarInput.click());
 
-        avatarInput.addEventListener('change', function() {
+        avatarInput.addEventListener('change', async function() {
             const file = this.files[0];
             if (file) {
+                // Show temporary preview
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const base64Str = e.target.result;
@@ -103,44 +104,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     if (profileInitials) profileInitials.style.display = 'none';
                     if (sidebarAvatar) sidebarAvatar.innerHTML = `<img src="${base64Str}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-                    localStorage.setItem('user_avatar', base64Str);
-                    showToast('Đã cập nhật ảnh đại diện');
                 }
                 reader.readAsDataURL(file);
+
+                // Upload to server
+                const formData = new FormData();
+                formData.append('type', 'profile_pic');
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/IELTSFLOW/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        const profilePicInput = document.getElementById('profilePicInput');
+                        if (profilePicInput) {
+                            profilePicInput.value = result.url;
+                        }
+                        showToast('Đã tải ảnh lên thành công. Vui lòng nhấn Lưu thay đổi.');
+                    } else {
+                        showToast(result.error || 'Tải ảnh lên thất bại', 'error');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showToast('Lỗi kết nối khi tải ảnh lên', 'error');
+                }
             }
         });
     }
 
-    // Load saved avatar
-    const savedAvatar = localStorage.getItem('user_avatar');
-    if (savedAvatar) {
-        if (avatarPreview) {
-            avatarPreview.src = savedAvatar;
-            avatarPreview.style.display = 'block';
-        }
-        if (profileInitials) profileInitials.style.display = 'none';
-        if (sidebarAvatar) sidebarAvatar.innerHTML = `<img src="${savedAvatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-    }
-
     // === 6. Profile Form Save ===
     document.getElementById('profileForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const newName = document.getElementById('fullName').value.trim();
-        const newPhone = document.getElementById('phone').value.trim();
-        
-        if (newName) {
-            document.getElementById('profileDisplayName').textContent = newName;
-            document.getElementById('sidebarName').textContent = newName;
-            if (document.getElementById('profileInitials').style.display !== 'none') {
-                const initials = getInitials(newName);
-                document.getElementById('profileInitials').textContent = initials;
-                document.getElementById('sidebarAvatar').textContent = initials;
-            }
-        }
-        
-        localStorage.setItem('user_phone', newPhone);
-        localStorage.setItem('user_fullname', newName);
-        showToast('Đã lưu thông tin cá nhân');
+        // Let the form submit normally to the AccountServlet
     });
 
     // === 7. Password Toggle & Strength ===

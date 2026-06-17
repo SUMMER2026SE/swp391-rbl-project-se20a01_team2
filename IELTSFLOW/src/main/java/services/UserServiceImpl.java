@@ -192,11 +192,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateProfile(int userId, String fullName) throws Exception {
+    public void updateProfile(int userId, String fullName, String profilePic) throws Exception {
         if (fullName == null || fullName.trim().isEmpty()) {
             throw new Exception("Họ và tên không được để trống");
         }
-        boolean updated = userDAO.updateFullName(userId, fullName.trim());
+        boolean updated = userDAO.updateProfile(userId, fullName.trim(), profilePic);
         if (!updated) {
             throw new Exception("Không thể cập nhật hồ sơ. Vui lòng thử lại.");
         }

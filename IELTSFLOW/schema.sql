@@ -23,6 +23,7 @@ CREATE TABLE Users (
     AuthProvider NVARCHAR(50) DEFAULT 'Local', -- Local, Google, Facebook
     ProviderID NVARCHAR(100) NULL, -- ID trả về từ Google/Facebook
     FullName NVARCHAR(100) NOT NULL,
+    ProfilePic NVARCHAR(500) NULL,
     Status NVARCHAR(20) DEFAULT 'Active', -- Active, Inactive, Banned
     CreatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID),
@@ -345,7 +346,7 @@ CREATE TABLE UploadedFiles (
     FileID INT IDENTITY(1,1) PRIMARY KEY,
     OriginalName NVARCHAR(255) NOT NULL,
     SavedPath NVARCHAR(500) NOT NULL,
-    FileType NVARCHAR(50) NOT NULL,-- 'profile_pic', 'material', 'video'
+    FileType NVARCHAR(50) NOT NULL,-- 'profile_pic', 'material', 'video', 'audio'
     UploadedBy INT NOT NULL,
     UploadedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (UploadedBy) REFERENCES Users(UserID)

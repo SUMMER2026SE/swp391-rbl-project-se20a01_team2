@@ -159,14 +159,17 @@ public class UserDAO {
     }
 
     /**
-     * Cập nhật fullName người dùng
+     * Cập nhật fullName và profilePic người dùng
      */
-    public boolean updateFullName(int userId, String fullName) {
+    public boolean updateProfile(int userId, String fullName, String profilePic) {
         try {
             JpaHelper.execute(em -> {
                 User user = em.find(User.class, userId);
                 if (user != null && !user.isDeleted()) {
                     user.setFullName(fullName);
+                    if (profilePic != null && !profilePic.isBlank()) {
+                        user.setProfilePic(profilePic);
+                    }
                 }
             });
             return true;
@@ -205,6 +208,7 @@ public class UserDAO {
             existing.setEmail(user.getEmail());
             existing.setStatus(user.getStatus());
             existing.setRoleId(user.getRoleId());
+            existing.setProfilePic(user.getProfilePic());
             em.merge(existing);
         });
     }

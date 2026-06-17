@@ -189,7 +189,7 @@ public class FileUploadServlet extends HttpServlet {
                 Files.copy(bufferedFileStream, targetFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
                 // 6. Database tracking
-                String fileUrl = req.getContextPath() + relativeSaveDir + "/" + randomFileName;
+                String fileUrl = relativeSaveDir + "/" + randomFileName;
                 int userId = (int) session.getAttribute("userId");
                 dao.UploadedFileDAO fileDao = new dao.UploadedFileDAO();
                 model.UploadedFile uploadedFile = new model.UploadedFile(sanitizedFileName, fileUrl, type, userId);
