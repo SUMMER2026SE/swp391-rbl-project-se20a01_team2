@@ -42,8 +42,17 @@ public class CandidateDashboardServlet extends HttpServlet {
             User user = userService.getUserById(userId);
             req.setAttribute("user", user);
             
-            // Note: Candidate targets (Goal) logic could be added here if needed, 
-            // but for now we follow the existing pattern in AccountServlet.
+            dao.CandidateTargetDAO targetDAO = new dao.CandidateTargetDAO();
+            java.util.Optional<model.CandidateTarget> targetOpt = targetDAO.findActiveByUserId(userId);
+            if (targetOpt.isPresent()) {
+                req.setAttribute("target", targetOpt.get());
+                java.time.LocalDate examLocalDate = targetOpt.get().getExamDate();
+                if (examLocalDate != null) {
+                    java.time.LocalDate today = java.time.LocalDate.now();
+                    long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, examLocalDate);
+                    req.setAttribute("daysRemaining", daysRemaining);
+                }
+            }
         } catch (Exception e) {
             req.setAttribute("error", "Không thể tải thông tin người dùng: " + e.getMessage());
         }

@@ -130,10 +130,10 @@ public class GoogleAuthServlet extends HttpServlet {
                 session.setAttribute("fullName", user.getFullName());
                 session.setAttribute("roleId", user.getRoleId());
 
-                if (user.getRoleId() == 1) {
-                    response.sendRedirect(request.getContextPath() + "/jsp/admin/dashboard.jsp");
+                if (user.getRoleId() == 1 || user.getRoleId() == 2) {
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/account");
+                    response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
                 }
             } else {
                 forwardError(request, response, "Token không hợp lệ hoặc đã hết hạn");

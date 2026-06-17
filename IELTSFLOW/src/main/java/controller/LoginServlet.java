@@ -70,7 +70,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("roleId", user.getRoleId());
 
             if (user.getRoleId() == 1 || user.getRoleId() == 2) { // Admin or Mentor
-                resp.sendRedirect(req.getContextPath() + "/jsp/admin/dashboard.jsp");
+                resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
             } else { // Candidate
                 resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
             }
