@@ -1,0 +1,52 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+  release:
+    types: [published] # Triggers when a new release is published
+
+env:
+  REGISTRY: ghcr.io
+  # Automatically uses your GitHub account/organization and repository name
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    # Sets the necessary permissions granted to the GITHUB_TOKEN
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Generates a `latest` tag only when triggered by a release,
+          # a version tag (e.g., `v1.0.0`) for releases, and a branch tag for manual runs.
+          tags: |
+            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./IELTSFLOW
+          file: ./IELTSFLOW/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
