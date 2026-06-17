@@ -19,6 +19,17 @@ public class UserServiceImpl implements UserService {
         this.otpService = OtpService.getInstance();
     }
 
+    private String getSender() {
+        String domain = System.getProperty("RESEND_SEND_DOMAIN");
+        if (domain == null || domain.trim().isEmpty()) {
+            domain = System.getenv("RESEND_SEND_DOMAIN");
+        }
+        if (domain == null || domain.trim().isEmpty()) {
+            domain = "email.tanmanh350.ovh";
+        }
+        return "IELTS Flow <noreply@" + domain.trim() + ">";
+    }
+
     @Override
     public User authenticateUser(String email, String password) throws Exception {
         Optional<User> userOpt = userDAO.findByEmail(email);
@@ -67,7 +78,7 @@ public class UserServiceImpl implements UserService {
         // Gi OTP xA?c thc
         String token = otpService.generateVerifyToken(email);
         String verifyLink = "http://localhost:8080/IELTSFLOW/verify-email?token=" + token;
-        ResendUtil.sendMail("IELTS Flow <noreply@email.tanmanh350.ovh>", email, "Xác nhận tài khoản IELTS FLOW", 
+        ResendUtil.sendMail(getSender(), email, "Xác nhận tài khoản IELTS FLOW", 
             "Chào " + fullName + ",<br><br>Vui lòng click vào link bên dưới để xác thực tài khoản:<br>" +
             "<a href='" + verifyLink + "'>XÁC NHẬN TÀI KHOẢN</a>");
 
@@ -89,7 +100,7 @@ public class UserServiceImpl implements UserService {
         }
         
         String code = otpService.generateOtp(email);
-        boolean sent = ResendUtil.sendMail("IELTS Flow <noreply@email.tanmanh350.ovh>", email, "Mã OTP Quên Mật Khẩu - IELTS FLOW", 
+        boolean sent = ResendUtil.sendMail(getSender(), email, "Mã OTP Quên Mật Khẩu - IELTS FLOW", 
                 "Mã OTP 6 số của bạn là: <b>" + code + "</b>. Mã có hiệu lực 5 phút.");
         
         if (!sent) {
@@ -98,10 +109,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void verifyOtp(String email, String otp) throws Exception {
+    public String verifyOtp(String email, String otp) throws Exception {
         if (!otpService.validateOtp(email, otp)) {
             throw new Exception("Mã OTP không chính xác hoặc đã hết hạn!");
         }
+        return otpService.generateResetToken(email);
     }
 
     @Override
@@ -155,7 +167,7 @@ public class UserServiceImpl implements UserService {
         
         String token = otpService.generateVerifyToken(email);
         String verifyLink = "http://localhost:8080/IELTSFLOW/verify-email?token=" + token;
-        ResendUtil.sendMail("IELTS Flow <noreply@email.tanmanh350.ovh>", email, "Xác nhận tài khoản IELTS FLOW", 
+        ResendUtil.sendMail(getSender(), email, "Xác nhận tài khoản IELTS FLOW", 
             "Vui lòng click vào link bên dưới để xác thực tài khoản:<br><a href='" + verifyLink + "'>XÁC NHẬN</a>");
     }
 

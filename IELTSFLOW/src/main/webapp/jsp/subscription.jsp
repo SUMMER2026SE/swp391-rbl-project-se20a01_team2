@@ -182,6 +182,23 @@
                 border-color: #CBD5E1;
             }
 
+            .pricing-card.pro {
+                border-color: #EA580C;
+                box-shadow: 0 20px 40px rgba(234, 88, 12, 0.1);
+            }
+
+            .pro-badge {
+                position: absolute;
+                top: -12px;
+                right: 32px;
+                background: var(--grad-cta);
+                color: white;
+                padding: 4px 12px;
+                border-radius: 999px;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
             .pricing-title {
                 font-size: 24px;
                 font-weight: 700;
@@ -382,8 +399,11 @@
                 </p>
 
                 <div class="pricing-cards">
-                    <c:forEach var="pkg" items="${packages}">
-                        <div class="pricing-card">
+                    <c:forEach var="pkg" items="${packages}" varStatus="status">
+                        <div class="pricing-card ${pkg.price > 0 ? 'pro' : 'free'}" style="transition-delay: ${status.index * 0.1}s">
+                            <c:if test="${pkg.price > 0}">
+                                <div class="pro-badge">PHỔ BIẾN</div>
+                            </c:if>
                             <h3 class="pricing-title">${pkg.name}</h3>
                             <div class="pricing-price">
                                 ${pkg.price} <span>VND</span>

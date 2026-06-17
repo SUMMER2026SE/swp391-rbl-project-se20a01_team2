@@ -21,7 +21,7 @@ public class UserDAO {
      */
     public Optional<User> findByEmail(String email) {
         return JpaHelper.query(em -> {
-            TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email AND u.deleted = false", User.class);
+            TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
             query.setParameter("email", email);
             try {
                 return Optional.of(query.getSingleResult());
@@ -50,7 +50,7 @@ public class UserDAO {
      */
     public boolean emailExists(String email) {
         return JpaHelper.query(em -> {
-            TypedQuery<Long> query = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email AND u.deleted = false", Long.class);
+            TypedQuery<Long> query = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class);
             query.setParameter("email", email);
             return query.getSingleResult() > 0;
         });
@@ -136,20 +136,20 @@ public class UserDAO {
         return JpaHelper.query(em -> {
             java.util.Map<String, Object> stats = new java.util.LinkedHashMap<>();
 
-            Long total = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.deleted = false", Long.class).getSingleResult();
+            Long total = em.createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
             stats.put("totalUsers", total);
 
-            Long active = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.status = 'Active' AND u.deleted = false", Long.class).getSingleResult();
+            Long active = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.status = 'Active'", Long.class).getSingleResult();
             stats.put("activeUsers", active);
 
-            Long banned = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.status = 'Banned' AND u.deleted = false", Long.class).getSingleResult();
+            Long banned = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.status = 'Banned'", Long.class).getSingleResult();
             stats.put("bannedUsers", banned);
 
-            Long googleUsers = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.authProvider = 'Google' AND u.deleted = false", Long.class).getSingleResult();
+            Long googleUsers = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.authProvider = 'Google'", Long.class).getSingleResult();
             stats.put("googleUsers", googleUsers);
 
             Long newToday = em.createQuery(
-                "SELECT COUNT(u) FROM User u WHERE u.createdAt >= :startOfDay AND u.deleted = false", Long.class)
+                "SELECT COUNT(u) FROM User u WHERE u.createdAt >= :startOfDay", Long.class)
                 .setParameter("startOfDay", java.time.LocalDateTime.now().toLocalDate().atStartOfDay())
                 .getSingleResult();
             stats.put("newToday", newToday);
@@ -184,7 +184,7 @@ public class UserDAO {
      */
     public List<User> findAll() {
         return JpaHelper.query(em ->
-            em.createQuery("SELECT u FROM User u WHERE u.deleted = false ORDER BY u.createdAt DESC", User.class).getResultList()
+            em.createQuery("SELECT u FROM User u ORDER BY u.createdAt DESC", User.class).getResultList()
         );
     }
 
@@ -192,7 +192,7 @@ public class UserDAO {
     public List<User> findByRole(int roleId) {
         return JpaHelper.query(em ->
             em.createQuery(
-                "SELECT u FROM User u WHERE u.roleId = :roleId AND u.deleted = false",
+                "SELECT u FROM User u WHERE u.roleId = :roleId",
                 User.class)
               .setParameter("roleId", roleId)
               .getResultList()

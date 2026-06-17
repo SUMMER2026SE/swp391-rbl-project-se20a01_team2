@@ -118,7 +118,7 @@ window.handleGoogleCredentialResponse = function(response) {
         // Create a hidden form to submit the token to GoogleAuthServlet using SSR
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '../auth/google';
+        form.action = (window.CONTEXT_PATH || '') + '/auth/google';
 
         const input = document.createElement('input');
         input.type = 'hidden';

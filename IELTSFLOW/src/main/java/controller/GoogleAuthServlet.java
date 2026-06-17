@@ -99,7 +99,11 @@ public class GoogleAuthServlet extends HttpServlet {
                 if (userOpt.isPresent()) {
                     user = userOpt.get();
                     if ("Banned".equals(user.getStatus())) {
-                        forwardError(request, response, "Tài khoản của bạn đã bị khóa");
+                        forwardError(request, response, "Tài khoản của bạn đã bị khóa (Banned)");
+                        return;
+                    }
+                    if ("Inactive".equals(user.getStatus())) {
+                        forwardError(request, response, "Tài khoản của bạn hiện đang bị khóa tạm thời (Inactive)");
                         return;
                     }
                     if (user.getAuthProvider() != null && user.getAuthProvider().equals("Local")) {
@@ -113,7 +117,7 @@ public class GoogleAuthServlet extends HttpServlet {
                     user.setFullName(name);
                     user.setAuthProvider("Google");
                     user.setStatus("Active");
-                    user.setRoleId(userDAO.getCandidateRoleId()); // Default to Candidate
+                    user.setRoleId(userDAO.getCandidateRoleId()); // Candidate
                     userDAO.create(user);
                     
                     userOpt = userDAO.findByEmail(email);
@@ -130,7 +134,7 @@ public class GoogleAuthServlet extends HttpServlet {
                 }
 
                 if (user.getRoleId() == 1 || user.getRoleId() == 2) {
-                    response.sendRedirect(request.getContextPath() + "/jsp/admin/dashboard.jsp");
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
                 } else {
                     response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
                 }

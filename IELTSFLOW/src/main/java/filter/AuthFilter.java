@@ -76,6 +76,25 @@ public class AuthFilter implements Filter {
         int roleId = 0;
         if (isLoggedIn && session.getAttribute("roleId") != null) {
             roleId = (int) session.getAttribute("roleId");
+            int userId = (int) session.getAttribute("userId");
+            
+            // Kiểm tra trạng thái tài khoản liên tục từ DB
+            try {
+                dao.UserDAO userDAO = new dao.UserDAO();
+                java.util.Optional<model.User> userOpt = userDAO.findById(userId);
+                if (userOpt.isPresent()) {
+                    String status = userOpt.get().getStatus();
+                    if ("Banned".equals(status) || "Inactive".equals(status)) {
+                        session.invalidate();
+                        isLoggedIn = false;
+                    }
+                } else {
+                    session.invalidate();
+                    isLoggedIn = false;
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
         }
 
         // ── 1. Kiểm tra đường dẫn Admin ────────────────────────────────────
@@ -139,10 +158,10 @@ public class AuthFilter implements Filter {
     private void redirectToLogin(HttpServletResponse resp, String contextPath, String message)
             throws IOException {
         try {
-            String encodedMsg = java.net.URLEncoder.encode(message, "UTF-8");
-            resp.sendRedirect(contextPath + "/jsp/auth.jsp?redirect_error=" + encodedMsg);
+            String encodedMsg = java.net.URLEncoder.encode("Vui lòng đăng nhập để tiếp tục", "UTF-8");
+            resp.sendRedirect(contextPath + "/auth?redirect_error=" + encodedMsg);
         } catch (Exception e) {
-            resp.sendRedirect(contextPath + "/jsp/auth.jsp");
+            resp.sendRedirect(contextPath + "/auth");
         }
     }
 }

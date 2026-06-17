@@ -31,9 +31,9 @@ public interface UserService {
     void forgotPassword(String email) throws Exception;
     
     /**
-     * Verify the OTP
+     * Verify the OTP and return a reset token
      */
-    void verifyOtp(String email, String otp) throws Exception;
+    String verifyOtp(String email, String otp) throws Exception;
     
     /**
      * Reset password using a valid reset token

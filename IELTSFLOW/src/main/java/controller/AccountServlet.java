@@ -1,16 +1,19 @@
 package controller;
 
+import dao.CandidateTargetDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.CandidateTarget;
 import model.User;
 import services.UserService;
 import services.UserServiceImpl;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Servlet quản lý trang tài khoản cá nhân (Account Management).
@@ -22,10 +25,12 @@ import java.io.IOException;
 public class AccountServlet extends HttpServlet {
 
     private UserService userService;
+    private CandidateTargetDAO targetDAO;
 
     @Override
     public void init() throws ServletException {
         userService = new UserServiceImpl();
+        targetDAO = new CandidateTargetDAO();
     }
 
     @Override
@@ -44,9 +49,18 @@ public class AccountServlet extends HttpServlet {
             User user = userService.getUserById(userId);
             req.setAttribute("user", user);
             
+            Optional<CandidateTarget> targetOpt = targetDAO.findActiveByUserId(userId);
+            if (targetOpt.isPresent()) {
+                req.setAttribute("target", targetOpt.get());
+            }
+            
             services.SubscriptionService subscriptionService = new services.SubscriptionService();
             model.UserSubscription activeSubscription = subscriptionService.getActiveSubscriptionByUserId(userId);
             req.setAttribute("activeSubscription", activeSubscription);
+
+            // Load mục tiêu IELTS từ DB
+            Optional<CandidateTarget> goal = targetDAO.findActiveByUserId(userId);
+            goal.ifPresent(g -> req.setAttribute("candidateTarget", g));
         } catch (Exception e) {
             req.setAttribute("error", "Không thể tải thông tin tài khoản: " + e.getMessage());
         }
@@ -90,6 +104,32 @@ public class AccountServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/account?success=" + java.net.URLEncoder.encode("Cập nhật hồ sơ thành công", "UTF-8"));
             } catch (Exception e) {
                 req.setAttribute("error", "Cập nhật thất bại: " + e.getMessage());
+                doGet(req, resp);
+            }
+        } else if ("changePassword".equals(action)) {
+            String currentPassword = req.getParameter("currentPassword");
+            String newPassword = req.getParameter("newPassword");
+            String confirmPassword = req.getParameter("confirmPassword");
+
+            if (currentPassword == null || currentPassword.isBlank()
+                    || newPassword == null || newPassword.isBlank()
+                    || confirmPassword == null || confirmPassword.isBlank()) {
+                req.setAttribute("error", "Vui lòng điền đầy đủ tất cả các trường đổi mật khẩu");
+                doGet(req, resp);
+                return;
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                req.setAttribute("error", "Mật khẩu mới và xác nhận mật khẩu không khớp");
+                doGet(req, resp);
+                return;
+            }
+
+            try {
+                userService.changePassword(userId, currentPassword, newPassword);
+                resp.sendRedirect(req.getContextPath() + "/account?success=Đổi+mật+khẩu+thành+công");
+            } catch (Exception e) {
+                req.setAttribute("error", e.getMessage());
                 doGet(req, resp);
             }
         } else {
