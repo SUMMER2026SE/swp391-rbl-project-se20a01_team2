@@ -52,16 +52,22 @@ public class ExamController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
-        
+
         try {
             if ("create".equals(action)) {
-                Exam exam = new Exam();
-                // populate
-                // examService.createExam(exam);
+                Exam exam = buildFromRequest(req);
+                HttpSession session = req.getSession(false);
+                if (session != null && session.getAttribute("userId") != null) {
+                    exam.setMentorId((Integer) session.getAttribute("userId"));
+                }
+                examService.createExam(exam);
+
             } else if ("update".equals(action)) {
-                Exam exam = new Exam();
-                // populate
-                // examService.updateExam(exam);
+                int id = Integer.parseInt(req.getParameter("id"));
+                Exam exam = buildFromRequest(req);
+                exam.setExamId(id);
+                examService.updateExam(exam);
+
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
                 examService.deleteExam(id);
@@ -71,5 +77,18 @@ public class ExamController extends HttpServlet {
             req.setAttribute("error", e.getMessage());
             doGet(req, resp);
         }
+    }
+
+    private Exam buildFromRequest(HttpServletRequest req) {
+        Exam exam = new Exam();
+        exam.setTitle(req.getParameter("title"));
+        exam.setType(req.getParameter("type"));
+        String skill = req.getParameter("skill");
+        exam.setSkillFocus((skill == null || skill.isBlank()) ? "All" : skill);
+        String durationParam = req.getParameter("duration");
+        if (durationParam != null && !durationParam.isBlank()) {
+            exam.setDuration(Integer.parseInt(durationParam));
+        }
+        return exam;
     }
 }
