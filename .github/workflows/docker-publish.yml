@@ -82,4 +82,5 @@ jobs:
           script: |
             cd ${{ steps.dir_vars.outputs.DEPLOY_PATH }}
             sudo docker-compose pull
+            sudo docker-compose down
             sudo docker-compose up -d
