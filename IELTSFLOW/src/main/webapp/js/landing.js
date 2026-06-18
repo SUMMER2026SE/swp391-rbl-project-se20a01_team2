@@ -160,14 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.landingLogout = async function(e) {
         e.preventDefault();
-        try { await fetch('/IELTSFLOW/api/auth/logout', { method: 'POST' }); } catch(err) {}
+        try { await fetch(window.contextPath + '/api/auth/logout', { method: 'POST' }); } catch(err) {}
         window.location.href = 'jsp/auth.jsp';
     };
 
     // 6. Check Auth Status
     const checkAuthStatus = async () => {
         try {
-            const response = await fetch('/IELTSFLOW/api/user/me');
+            const response = await fetch(window.contextPath + '/api/user/me');
             if (response.ok) {
                 const result = await response.json();
                 if (result.success && result.data) {

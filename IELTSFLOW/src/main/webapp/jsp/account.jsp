@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T&#224;i kho&#7843;n - IELTSFlow</title>

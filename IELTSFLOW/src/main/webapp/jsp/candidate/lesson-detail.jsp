@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
     <title>Lesson Detail</title>
     <link rel="stylesheet" href="../../css/style.css">

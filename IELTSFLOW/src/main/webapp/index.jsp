@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IELTS Flow - Nền tảng luyện thi IELTS bằng AI</title>
@@ -759,7 +760,7 @@
             <div class="nav-links">
                 <a href="#features" class="nav-link">Tính năng</a>
                 <a href="#pricing" class="nav-link">Bảng giá</a>
-                <a href="/IELTSFLOW/subscription" class="nav-link">Gói Đăng Ký</a>
+                <a href="${pageContext.request.contextPath}/subscription" class="nav-link">Gói Đăng Ký</a>
                 <a href="#testimonials" class="nav-link">Đánh giá</a>
                 <a href="#" class="nav-link">Blog</a>
             </div>
@@ -771,12 +772,12 @@
                                 <span style="color: var(--color-primary-text); font-size: 14px; line-height: 1.2;">${sessionScope.fullName}</span>
                                 <span style="color: var(--color-secondary-text); font-size: 12px;">${sessionScope.userEmail}</span>
                             </div>
-                            <a href="/IELTSFLOW/account" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">H&#7891; s&#417;</a>
+                            <a href="${pageContext.request.contextPath}/account" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">H&#7891; s&#417;</a>
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <a href="/IELTSFLOW/auth" class="btn-ghost">&#272;&#259;ng nh&#7853;p</a>
-                        <a href="/IELTSFLOW/auth?tab=register" class="btn-cta">B&#7855;t &#273;&#7847;u mi&#7875;n ph&#237;</a>
+                        <a href="${pageContext.request.contextPath}/auth" class="btn-ghost">&#272;&#259;ng nh&#7853;p</a>
+                        <a href="${pageContext.request.contextPath}/auth?tab=register" class="btn-cta">B&#7855;t &#273;&#7847;u mi&#7875;n ph&#237;</a>
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -792,7 +793,7 @@
     <div class="mobile-menu" id="mobile-menu">
         <a href="#features" class="mobile-link">Tính năng</a>
         <a href="#pricing" class="mobile-link">Bảng giá</a>
-        <a href="/IELTSFLOW/subscription" class="mobile-link">Gói Đăng Ký</a>
+        <a href="${pageContext.request.contextPath}/subscription" class="mobile-link">Gói Đăng Ký</a>
         <a href="#testimonials" class="mobile-link">Đánh giá</a>
         <a href="#" class="mobile-link">Blog</a>
         <div id="mobile-nav-actions" style="display:flex; flex-direction:column; gap:10px;">
@@ -802,11 +803,11 @@
                         <div style="font-weight: 700; color: var(--color-primary-text);">${sessionScope.fullName}</div>
                         <div style="font-size: 13px; color: var(--color-secondary-text);">${sessionScope.userEmail}</div>
                     </div>
-                    <a href="/IELTSFLOW/account" class="btn-cta" style="text-align: center;">V&#224;o trang H&#7891; s&#417;</a>
+                    <a href="${pageContext.request.contextPath}/account" class="btn-cta" style="text-align: center;">V&#224;o trang H&#7891; s&#417;</a>
                 </c:when>
                 <c:otherwise>
-                    <a href="/IELTSFLOW/auth" class="btn-ghost">&#272;&#259;ng nh&#7853;p</a>
-                    <a href="/IELTSFLOW/auth?tab=register" class="btn-cta">B&#7855;t &#273;&#7847;u mi&#7875;n ph&#237;</a>
+                    <a href="${pageContext.request.contextPath}/auth" class="btn-ghost">&#272;&#259;ng nh&#7853;p</a>
+                    <a href="${pageContext.request.contextPath}/auth?tab=register" class="btn-cta">B&#7855;t &#273;&#7847;u mi&#7875;n ph&#237;</a>
                 </c:otherwise>
             </c:choose>
         </div>
@@ -821,7 +822,7 @@
                     <h1 class="hero-title">Chinh phục IELTS với Lộ trình AI Cá nhân hóa</h1>
                     <p class="hero-subtitle">Mọi công cụ bạn cần để luyện thi IELTS hiệu quả, tiết kiệm thời gian và đạt điểm mục tiêu nhanh chóng.</p>
                     <div class="hero-actions">
-                        <a href="/IELTSFLOW/auth?tab=register" class="btn-cta">Bắt đầu miễn phí →</a>
+                        <a href="${pageContext.request.contextPath}/auth?tab=register" class="btn-cta">Bắt đầu miễn phí →</a>
                         <a href="#features" class="btn-ghost">Xem giới thiệu ▶</a>
                     </div>
                 </div>
@@ -1150,7 +1151,7 @@
             
             <div style="margin-top: 40px; text-align: center;" class="scroll-reveal">
                 <p style="color: var(--color-secondary-text); font-size: 18px; margin-bottom: 24px;">Hệ thống cung cấp đa dạng gói luyện thi theo tháng, giúp bạn tiết kiệm chi phí và đạt hiệu quả tối ưu.</p>
-                <a href="/IELTSFLOW/subscription" class="btn-cta" style="font-size: 18px; padding: 14px 36px; display: inline-flex; align-items: center; gap: 8px;">
+                <a href="${pageContext.request.contextPath}/subscription" class="btn-cta" style="font-size: 18px; padding: 14px 36px; display: inline-flex; align-items: center; gap: 8px;">
                     Xem chi tiết Gói Đăng Ký
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                 </a>
@@ -1243,7 +1244,7 @@
         <div class="container scroll-reveal">
             <h2 class="section-title">Sẵn sàng chinh phục IELTS?</h2>
             <p class="hero-subtitle">Tham gia cùng hơn 50.000 học viên đã đạt điểm số mơ ước.</p>
-            <a href="/IELTSFLOW/auth?tab=register" class="btn-white">Bắt đầu miễn phí ngay</a>
+            <a href="${pageContext.request.contextPath}/auth?tab=register" class="btn-white">Bắt đầu miễn phí ngay</a>
         </div>
     </section>
 

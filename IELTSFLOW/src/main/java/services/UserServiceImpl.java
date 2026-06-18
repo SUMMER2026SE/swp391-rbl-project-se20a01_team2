@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User registerUser(String fullName, String email, String password) throws Exception {
+    public User registerUser(String fullName, String email, String password, String baseUrl) throws Exception {
         if (userDAO.emailExists(email)) {
             throw new Exception("Email đã được sử dụng!");
         }
@@ -67,20 +67,20 @@ public class UserServiceImpl implements UserService {
         user.setFullName(fullName);
         user.setEmail(email);
         user.setPasswordHash(hashedPassword);
-        user.setRoleId(2); // User
-        user.setStatus("Active"); // Bypass email verification for local development
+        user.setRoleId(userDAO.getCandidateRoleId()); // Candidate
+        user.setStatus("Inactive"); // Requires email verification
         user.setAuthProvider("Local");
 
         if (userDAO.create(user) <= 0) {
             throw new Exception("Lỗi cơ sở dữ liệu. Không thể tạo tài khoản.");
         }
 
-        // Gi OTP xA?c thc
+        // Gửi OTP xác thực
         String token = otpService.generateVerifyToken(email);
-        String verifyLink = "http://localhost:8080/IELTSFLOW/verify-email?token=" + token;
+        String verifyLink = baseUrl + "/verify-email?token=" + token;
         ResendUtil.sendMail(getSender(), email, "Xác nhận tài khoản IELTS FLOW", 
             "Chào " + fullName + ",<br><br>Vui lòng click vào link bên dưới để xác thực tài khoản:<br>" +
-            "<a href='" + verifyLink + "'>XÁC NHẬN TÀI KHOẢN</a>");
+            "<a href='" + verifyLink + "' style='background:#f97316;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;'>XÁC NHẬN TÀI KHOẢN</a>");
 
         return user;
     }
@@ -155,7 +155,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void resendVerification(String email) throws Exception {
+    public void resendVerification(String email, String baseUrl) throws Exception {
         Optional<User> userOpt = userDAO.findByEmail(email);
         if (userOpt.isEmpty()) {
             throw new Exception("Email khA'ng tA'n tAoi.");
@@ -166,7 +166,7 @@ public class UserServiceImpl implements UserService {
         }
         
         String token = otpService.generateVerifyToken(email);
-        String verifyLink = "http://localhost:8080/IELTSFLOW/verify-email?token=" + token;
+        String verifyLink = baseUrl + "/verify-email?token=" + token;
         ResendUtil.sendMail(getSender(), email, "Xác nhận tài khoản IELTS FLOW", 
             "Vui lòng click vào link bên dưới để xác thực tài khoản:<br><a href='" + verifyLink + "'>XÁC NHẬN</a>");
     }

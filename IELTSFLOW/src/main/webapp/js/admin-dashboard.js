@@ -122,7 +122,7 @@ function filterTable() {
 async function banUser(userId, action, name) {
   if (!confirm(`Bạn chắc chắn muốn ${action === 'ban' ? 'khóa' : 'mở khóa'} tài khoản của ${name}?`)) return;
   try {
-    const r = await fetch('/IELTSFLOW/api/admin/users/ban', {
+    const r = await fetch(window.contextPath + '/api/admin/users/ban', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, action })
@@ -155,9 +155,9 @@ function showSection(name, el) {
 async function confirmLogout() {
   if (!confirm('Bạn có chắc muốn đăng xuất?')) return;
   try {
-    await fetch('/IELTSFLOW/api/auth/logout', { method: 'POST' });
+    await fetch(window.contextPath + '/api/auth/logout', { method: 'POST' });
   } catch(e){}
-  location.href = '/IELTSFLOW/jsp/auth.jsp';
+  location.href = window.contextPath + '/jsp/auth.jsp';
 }
 
 // ── Toasts ────────────────────────────

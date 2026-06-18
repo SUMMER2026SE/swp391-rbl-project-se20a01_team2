@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
     <title>Lesson Library</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
