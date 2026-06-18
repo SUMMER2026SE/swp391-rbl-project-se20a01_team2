@@ -58,29 +58,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
-    needs: build-and-push
-    # Only run deploy on branch pushes or releases
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Determine Deployment Directory
-        id: dir_vars
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.event_name }}" == "release" ]]; then
-            echo "DEPLOY_PATH=/home/ubuntu/Project/IELTSFLOW" >> $GITHUB_OUTPUT
-          else
-            echo "DEPLOY_PATH=/home/ubuntu/code/IELTSFLOW" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ubuntu
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd ${{ steps.dir_vars.outputs.DEPLOY_PATH }}
-            sudo docker-compose pull
-            sudo docker-compose down
-            sudo docker-compose up -d
