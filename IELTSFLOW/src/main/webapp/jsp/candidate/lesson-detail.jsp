@@ -48,10 +48,10 @@
                 </div>
             </div>
             <nav class="nav-menu">
-                <a href="dashboard.jsp" class="nav-link">🏠 Dashboard</a>
-                <a href="weekly-plan.jsp" class="nav-link">📅 Weekly Plan</a>
-                <a href="lessons.jsp" class="nav-link active">📚 Library</a>
-                <a href="redo-exercises.jsp" class="nav-link">🔄 History & Redo</a>
+                <a href="dashboard.jsp" class="nav-link">🏠 Bảng điều khiển</a>
+                <a href="weekly-plan.jsp" class="nav-link">📅 Kế hoạch tuần</a>
+                <a href="lessons.jsp" class="nav-link active">📚 Thư viện</a>
+                <a href="redo-exercises.jsp" class="nav-link">🔄 Lịch sử & Làm lại</a>
             </nav>
         </aside>
 
@@ -65,7 +65,7 @@
                         <h1 id="lesson-title" style="margin-top: 15px; font-size: 2rem;">IELTS Listening - Section 1 Tips</h1>
                         <p style="color: var(--text-secondary); margin-top: 5px;">Mentor: John Doe • 15 mins</p>
                     </div>
-                    <button id="bookmark-btn" class="btn btn-glass" style="color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);" onclick="toggleBookmark()">❤️ Bookmark</button>
+                    <button id="bookmark-btn" class="btn btn-glass" style="color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);" onclick="toggleBookmark()">❤️ Lưu bài</button>
                 </div>
 
                 <!-- Fake Video Embed -->
@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="actions-bar">
-                    <button id="learn-btn" class="btn btn-primary" onclick="toggleLearned()">✓ Mark as Learned</button>
+                    <button id="learn-btn" class="btn btn-primary" onclick="toggleLearned()">✓ Đánh dấu đã học</button>
                     <button class="btn btn-glass" style="color: var(--accent-green); border-color: rgba(16, 185, 129, 0.3);">📄 Download Script (PDF)</button>
                 </div>
             </div>
