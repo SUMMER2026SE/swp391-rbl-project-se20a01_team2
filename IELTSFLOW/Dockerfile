@@ -15,11 +15,12 @@ RUN mvn clean package -DskipTests
 # Jakarta EE 10 requires Tomcat 10.1.x
 FROM tomcat:10.1-jdk21
 
-# Remove the default ROOT webapp to deploy our application at the root context path (/)
-RUN rm -rf /usr/local/tomcat/webapps/ROOT
+# Remove the default ROOT webapp and create an empty ROOT directory
+RUN rm -rf /usr/local/tomcat/webapps/ROOT && mkdir -p /usr/local/tomcat/webapps/ROOT
 
-# Copy the built WAR file from the builder stage and name it ROOT.war
-COPY --from=builder /app/target/IELTSFLOW-1.0.war /usr/local/tomcat/webapps/ROOT.war
+# Extract the built WAR file from the builder stage directly into ROOT
+COPY --from=builder /app/target/IELTSFLOW-1.0.war /tmp/ROOT.war
+RUN cd /usr/local/tomcat/webapps/ROOT && jar xf /tmp/ROOT.war && rm /tmp/ROOT.war
 
 # Default Environment Variables (from .env.example)
 ENV RESEND_API_KEY="your_resend_api_key_here" \
