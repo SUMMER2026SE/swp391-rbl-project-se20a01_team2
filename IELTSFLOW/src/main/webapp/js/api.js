@@ -71,15 +71,28 @@ function renderDashboardGrid() {
     list.innerHTML = html;
 }
 
-function renderLessonLibrary(filterSkill = 'All Skills', filterText = '') {
+function renderLessonLibrary(filterSkill = 'All Skills', filterText = '', filterType = 'All Types') {
     const list = document.getElementById('library-grid');
     if (!list) return;
+
+    let learnedList = JSON.parse(localStorage.getItem('learnedLessons') || '[]');
+    let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
 
     let html = '';
     const filteredLessons = MOCK_LESSONS.filter(l => {
         const matchSkill = filterSkill === 'All Skills' || l.skill === filterSkill;
         const matchText = filterText === '' || l.title.toLowerCase().includes(filterText.toLowerCase());
-        return matchSkill && matchText;
+        
+        let matchType = true;
+        if (filterType === 'Bookmark') {
+            matchType = bookmarks.includes(l.id);
+        } else if (filterType === 'Learned') {
+            matchType = learnedList.includes(l.id);
+        } else if (filterType === 'Unlearned') {
+            matchType = !learnedList.includes(l.id);
+        }
+
+        return matchSkill && matchText && matchType;
     });
 
     if (filteredLessons.length === 0) {
@@ -120,8 +133,9 @@ function renderLessonLibrary(filterSkill = 'All Skills', filterText = '') {
 
 function searchLessons() {
     const skillFilter = document.getElementById('skill-filter')?.value || 'All Skills';
+    const typeFilter = document.getElementById('type-filter')?.value || 'All Types';
     const searchInput = document.getElementById('search-input')?.value || '';
-    renderLessonLibrary(skillFilter, searchInput);
+    renderLessonLibrary(skillFilter, searchInput, typeFilter);
 }
 
 function loadLessonDetail() {
