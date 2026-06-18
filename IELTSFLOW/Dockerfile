@@ -13,7 +13,7 @@ RUN mvn clean package -DskipTests
 
 # Stage 2: Deploy the application using Tomcat
 # Jakarta EE 10 requires Tomcat 10.1.x
-FROM tomcat:10.1-jdk25
+FROM tomcat:10.1-jdk21
 
 # Remove the default ROOT webapp to deploy our application at the root context path (/)
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
