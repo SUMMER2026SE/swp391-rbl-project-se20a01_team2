@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - dev
-      - main
   workflow_dispatch: # Allows manual triggering from the Actions tab
   release:
     types: [published] # Triggers when a new release is published
