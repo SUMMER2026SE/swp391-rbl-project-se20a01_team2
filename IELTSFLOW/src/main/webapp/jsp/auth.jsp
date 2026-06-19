@@ -8,7 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác thực - IELTSFlow</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css">
-    <script>window.CONTEXT_PATH = '${pageContext.request.contextPath}';</script>
+    <script>
+        window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+        window.GOOGLE_CLIENT_ID = '<%= System.getProperty("GOOGLE_CLIENT_ID") != null ? System.getProperty("GOOGLE_CLIENT_ID") : "" %>';
+    </script>
     <script src="https://accounts.google.com/gsi/client" async defer onload="if(window.onGoogleLibraryLoad) window.onGoogleLibraryLoad();"></script>
     <style>
         :root { --grad-brand-dark: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }

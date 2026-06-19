@@ -72,10 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const textObj = document.getElementById('strengthText');
             if (textObj) {
-                if (val.length === 0) { textObj.textContent = 'Äá»™ máº¡nh máº­t kháº©u'; textObj.style.color = '#94a3b8'; }
-                else if (strength <= 2) { textObj.textContent = 'Yáº¿u'; textObj.style.color = '#ef4444'; }
-                else if (strength === 3) { textObj.textContent = 'Trung bÃ¬nh'; textObj.style.color = '#f59e0b'; }
-                else { textObj.textContent = 'Máº¡nh'; textObj.style.color = '#10b981'; }
+                if (val.length === 0) { textObj.textContent = 'Độ mạnh mật khẩu'; textObj.style.color = '#94a3b8'; }
+                else if (strength <= 2) { textObj.textContent = 'Yếu'; textObj.style.color = '#ef4444'; }
+                else if (strength === 3) { textObj.textContent = 'Trung bình'; textObj.style.color = '#f59e0b'; }
+                else { textObj.textContent = 'Mạnh'; textObj.style.color = '#10b981'; }
             }
         });
     }
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.onGoogleLibraryLoad = () => {
         if (window.google && window.google.accounts) {
             google.accounts.id.initialize({
-                client_id: '1025181632456-ioq6p3hghb8t161f22n9pg90qn0mvufc.apps.googleusercontent.com',
+                client_id: window.GOOGLE_CLIENT_ID,
                 callback: handleGoogleCredentialResponse,
                 auto_select: false,
                 cancel_on_tap_outside: true,
