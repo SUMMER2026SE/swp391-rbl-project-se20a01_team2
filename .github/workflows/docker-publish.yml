@@ -72,7 +72,7 @@ jobs:
             ENV_NAME="dev"
           fi
           
-          curl -X POST ${{ secrets.WEBHOOK_URL }} \
+          curl -X POST ${{ secrets.WEBHOOK_URL }}/hooks/deploy-ieltsflow \
                -H "Content-Type: application/json" \
-               -H "Authorization: Bearer ${{ secrets.WEBHOOK_SECRET }}" \
+               -H "X-Webhook-Token: ${{ secrets.WEBHOOK_SECRET }}" \
                -d "{\"env\": \"$ENV_NAME\"}"
