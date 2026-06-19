@@ -72,4 +72,5 @@ jobs:
             ENV_NAME="dev"
           fi
           
-          curl -X GET "${{ secrets.WEBHOOK_URL }}/hooks/deploy-ieltsflow?env=$ENV_NAME&token=${{ secrets.WEBHOOK_SECRET }}"
+          curl -X GET "${{ secrets.WEBHOOK_URL }}/hooks/deploy-ieltsflow?env=$ENV_NAME" \
+               -H "X-Webhook-Token: ${{ secrets.WEBHOOK_SECRET }}"
