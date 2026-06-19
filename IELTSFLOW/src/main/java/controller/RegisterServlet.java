@@ -74,7 +74,7 @@ public class RegisterServlet extends HttpServlet {
             String host = req.getHeader("X-Forwarded-Host");
             if (host == null) {
                 host = req.getServerName();
-                if host.contains("localhost") {
+                if (host.contains("localhost")) {
                     host += ":" + req.getServerPort();
                 }
             }

@@ -40,8 +40,6 @@ public class AppContextListener implements ServletContextListener {
             "DB_ENCRYPT",
             "DB_TRUST_SERVER_CERT",
             "DB_EXTRA_PARAMS",
-            "VNPAY_TMN_CODE",
-            "VNPAY_HASH_SECRET",
             "SPEECH_KEY",
             "SPEECH_REGION",
             "GEMINI_API_KEYS",
