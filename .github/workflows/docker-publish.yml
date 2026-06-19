@@ -58,3 +58,21 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  deploy:
+    needs: build-and-push
+    # Only run deploy on branch pushes or releases
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Deployment Webhook
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ github.event_name }}" == "release" ]]; then
+            ENV_NAME="release"
+          else
+            ENV_NAME="dev"
+          fi
+          
+          curl -X POST ${{ secrets.WEBHOOK_URL }} \
+               -H "Content-Type: application/json" \
+               -H "Authorization: Bearer ${{ secrets.WEBHOOK_SECRET }}" \
+               -d "{\"env\": \"$ENV_NAME\"}"
