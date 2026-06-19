@@ -35,6 +35,7 @@
                 <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Bảng điều khiển</a>
                 <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link active">📅 Kế hoạch tuần</a>
                 <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Thư viện</a>
+                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link">🎯 Bài thi</a>
                 <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 Lịch sử & Làm lại</a>
                 <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
                 <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
