@@ -1,6 +1,10 @@
 name: Build and Push Docker Image
 
 on:
+  push:
+    branches:
+      - dev
+      - main
   workflow_dispatch: # Allows manual triggering from the Actions tab
   release:
     types: [published] # Triggers when a new release is published
@@ -61,7 +65,7 @@ jobs:
   deploy:
     needs: build-and-push
     # Only run deploy on branch pushes or releases
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Deployment Webhook
