@@ -64,29 +64,24 @@ public class RegisterServlet extends HttpServlet {
         }
 
         try {
-            if (userDAO.emailExists(email.trim())) {
-                req.setAttribute("error", "Email này đã được đăng ký. Vui lòng đăng nhập.");
-                req.setAttribute("tab", "register");
-                req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
-                return;
+            services.UserService userService = new services.UserServiceImpl();
+            
+            // Xây dựng baseUrl động, hỗ trợ Nginx reverse proxy
+            String scheme = req.getHeader("X-Forwarded-Proto");
+            if (scheme == null) {
+                scheme = req.getScheme();
             }
+            String host = req.getHeader("X-Forwarded-Host");
+            if (host == null) {
+                host = req.getServerName();
+                if (host.contains("localhost")) {
+                    host += ":" + req.getServerPort();
+                }
+            }
+            String baseUrl = scheme + "://" + host + req.getContextPath();
 
-            String passwordHash = PasswordUtil.hashPassword(password);
-            int roleId = userDAO.getCandidateRoleId();
-
-            User newUser = new User(roleId, email.trim(), passwordHash, fullName.trim());
-            newUser.setStatus("Inactive");
-            newUser.setAuthProvider("Local");
-
-            int userId = userDAO.create(newUser);
-
-            // Gửi email xác thực
-            services.OtpService otpService = services.OtpService.getInstance();
-            String token = otpService.generateVerifyToken(email.trim());
-            String verifyLink = "http://localhost:8080/IELTSFLOW/verify-email?token=" + token;
-            util.ResendUtil.sendMail("IELTS Flow <noreply@email.tanmanh350.ovh>", email.trim(), "Xác nhận tài khoản IELTS FLOW", 
-                "Chào " + fullName.trim() + ",<br><br>Vui lòng click vào link bên dưới để xác nhận địa chỉ email của bạn:<br><br>" +
-                "<a href='" + verifyLink + "' style='background:#f97316;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;'>XÁC NHẬN TÀI KHOẢN</a>");
+            // Gọi service layer để xử lý logic đăng ký và gửi email
+            userService.registerUser(fullName.trim(), email.trim(), password, baseUrl);
 
             req.setAttribute("successMessage", "Đăng ký thành công! Vui lòng kiểm tra hộp thư email (kể cả mục Spam) để kích hoạt tài khoản.");
             req.setAttribute("tab", "login");
@@ -94,7 +89,7 @@ public class RegisterServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+            req.setAttribute("error", e.getMessage());
             req.setAttribute("tab", "register");
             req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
         }

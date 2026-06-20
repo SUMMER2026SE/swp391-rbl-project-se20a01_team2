@@ -43,6 +43,7 @@ public class AuthFilter implements Filter {
         "/account",
         "/change-password",
         "/checkout",
+        "/dashboard",
         "/candidate/dashboard",
         "/candidate/weekly-plan",
         "/candidate/lessons",
@@ -103,8 +104,8 @@ public class AuthFilter implements Filter {
                 redirectToLogin(resp, contextPath, "Vui lòng đăng nhập để tiếp tục");
                 return;
             }
-            if (roleId != 1) {
-                // Không phải Admin → Chuyển về trang chủ với thông báo
+            if (roleId != 1 && roleId != 2) {
+                // Không phải Admin hoặc Mentor → Chuyển về trang chủ với thông báo
                 resp.sendRedirect(contextPath + "/index.html?error=forbidden");
                 return;
             }

@@ -8,7 +8,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dao.UserDAO;
-import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -32,12 +31,9 @@ public class GoogleAuthServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        try {
-            String envPath = getServletContext().getRealPath("/WEB-INF");
-            Dotenv dotenv = Dotenv.configure().directory(envPath).load();
-            clientId = dotenv.get("GOOGLE_CLIENT_ID");
-        } catch (Exception e) {
-            System.out.println("No .env found or loaded for GoogleAuthServlet");
+        clientId = System.getProperty("GOOGLE_CLIENT_ID");
+        if (clientId == null || clientId.trim().isEmpty()) {
+            System.out.println("No GOOGLE_CLIENT_ID found or loaded for GoogleAuthServlet");
         }
     }
 

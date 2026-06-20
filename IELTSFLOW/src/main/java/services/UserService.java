@@ -18,7 +18,7 @@ public interface UserService {
      * @return User if successful
      * @throws Exception if registration fails (e.g. email exists)
      */
-    User registerUser(String fullName, String email, String password) throws Exception;
+    User registerUser(String fullName, String email, String password, String baseUrl) throws Exception;
     
     /**
      * Authenticate or register a user via Google OAuth
@@ -48,7 +48,7 @@ public interface UserService {
     /**
      * Resend verification email
      */
-    void resendVerification(String email) throws Exception;
+    void resendVerification(String email, String baseUrl) throws Exception;
     
     /**
      * Ban or unban a user
