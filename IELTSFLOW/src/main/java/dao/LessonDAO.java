@@ -79,4 +79,13 @@ public class LessonDAO {
             if (l != null) { l.setDeleted(true); em.merge(l); }
         });
     }
+    public List<Lesson> findByMentor(int mentorId) {
+        return JpaHelper.query(em ->
+                em.createQuery(
+                                "SELECT l FROM Lesson l WHERE l.createdBy = :mentorId AND l.deleted = false ORDER BY l.createdAt DESC",
+                                Lesson.class)
+                        .setParameter("mentorId", mentorId)
+                        .getResultList()
+        );
+    }
 }

@@ -1,69 +1,89 @@
 package model;
 
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * DTO: Câu hỏi trong đề thi (Questions JOIN Answers + QuestionResource).
- * Dùng cho Mock Test, Placement Test, Practice.
- */
+@Entity
+@Table(name = "Questions")
 public class Question {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "QuestionID")
     private int questionId;
+
+    @Column(name = "ResourceID")
     private Integer resourceId;
+
+    @Column(name = "Content", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String content;
-    private String questionType; // Multiple_Choice, Essay, Speaking, FillBlank
-    private String skill;        // Listening, Reading, Writing, Speaking
-    private String difficulty;   // Easy, Medium, Hard
+
+    @Column(name = "QuestionType", nullable = false)
+    private String questionType; // MultipleChoice, Matching, FillInBlanks
+
+    @Column(name = "Skill", nullable = false)
+    private String skill; // Listening, Reading, Writing, Speaking
+
+    @Column(name = "Difficulty")
+    private String difficulty; // Easy, Medium, Hard
+
+    @Column(name = "Explanation", columnDefinition = "NVARCHAR(MAX)")
     private String explanation;
+
+    @Column(name = "OrderInResource")
     private Integer orderInResource;
-    private String metadataJSON;
+
+    @Column(name = "contentJSON", nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    private String contentJson;
+
+    @Column(name = "CreatedBy")
     private Integer createdBy;
 
-    // Transient: danh sách đáp án
+    @Column(name = "Deleted")
+    private boolean deleted = false;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "QuestionID")
     private List<Answer> answers = new ArrayList<>();
 
-    // Transient: tài nguyên đính kèm (bài đọc / audio)
-    private String resourceText;
-    private String resourceAudioUrl;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "QuestionTags",
+            joinColumns = @JoinColumn(name = "QuestionID"),
+            inverseJoinColumns = @JoinColumn(name = "TagID")
+    )
+    private Set<Tag> tags = new HashSet<>();
+
+    public Set<Tag> getTags() { return tags; }
+    public void setTags(Set<Tag> tags) { this.tags = tags; }
 
     public Question() {}
 
-    public int getQuestionId()               { return questionId; }
-    public void setQuestionId(int v)         { this.questionId = v; }
-
-    public Integer getResourceId()           { return resourceId; }
-    public void setResourceId(Integer v)     { this.resourceId = v; }
-
-    public String getContent()               { return content; }
-    public void setContent(String v)         { this.content = v; }
-
-    public String getQuestionType()          { return questionType; }
-    public void setQuestionType(String v)    { this.questionType = v; }
-
-    public String getSkill()                 { return skill; }
-    public void setSkill(String v)           { this.skill = v; }
-
-    public String getDifficulty()            { return difficulty; }
-    public void setDifficulty(String v)      { this.difficulty = v; }
-
-    public String getExplanation()           { return explanation; }
-    public void setExplanation(String v)     { this.explanation = v; }
-
-    public Integer getOrderInResource()      { return orderInResource; }
-    public void setOrderInResource(Integer v){ this.orderInResource = v; }
-
-    public String getMetadataJSON()          { return metadataJSON; }
-    public void setMetadataJSON(String v)    { this.metadataJSON = v; }
-
-    public Integer getCreatedBy()            { return createdBy; }
-    public void setCreatedBy(Integer v)      { this.createdBy = v; }
-
-    public List<Answer> getAnswers()         { return answers; }
-    public void setAnswers(List<Answer> v)   { this.answers = v; }
-
-    public String getResourceText()          { return resourceText; }
-    public void setResourceText(String v)    { this.resourceText = v; }
-
-    public String getResourceAudioUrl()      { return resourceAudioUrl; }
-    public void setResourceAudioUrl(String v){ this.resourceAudioUrl = v; }
+    public int getQuestionId() { return questionId; }
+    public void setQuestionId(int questionId) { this.questionId = questionId; }
+    public Integer getResourceId() { return resourceId; }
+    public void setResourceId(Integer resourceId) { this.resourceId = resourceId; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+    public String getQuestionType() { return questionType; }
+    public void setQuestionType(String questionType) { this.questionType = questionType; }
+    public String getSkill() { return skill; }
+    public void setSkill(String skill) { this.skill = skill; }
+    public String getDifficulty() { return difficulty; }
+    public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
+    public String getExplanation() { return explanation; }
+    public void setExplanation(String explanation) { this.explanation = explanation; }
+    public Integer getOrderInResource() { return orderInResource; }
+    public void setOrderInResource(Integer orderInResource) { this.orderInResource = orderInResource; }
+    public String getContentJson() { return contentJson; }
+    public void setContentJson(String contentJson) { this.contentJson = contentJson; }
+    public Integer getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Integer createdBy) { this.createdBy = createdBy; }
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
+    public List<Answer> getAnswers() { return answers; }
+    public void setAnswers(List<Answer> answers) { this.answers = answers; }
 }

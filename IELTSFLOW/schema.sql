@@ -122,8 +122,10 @@ CREATE TABLE Answers (
 CREATE TABLE Tags (
     TagID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
-    Type NVARCHAR(50) -- Topic, Grammar, Vocabulary...
+    Type NVARCHAR(50), -- Topic, Grammar, Vocabulary...
+    Deleted BIT DEFAULT 0
 );
+
 
 CREATE TABLE QuestionTags (
     QuestionID INT NOT NULL,

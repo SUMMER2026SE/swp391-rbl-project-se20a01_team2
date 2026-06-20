@@ -1,32 +1,33 @@
 package model;
 
-/**
- * DTO: Đáp án của một câu hỏi (bảng Answers).
- */
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "Answers")
 public class Answer {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "AnswerID")
     private int answerId;
-    private int questionId;
+
+    @Column(name = "Content", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String content;
-    private boolean isCorrect;
+
+    @Column(name = "ContentJson", nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    private String contentJson;
+
+    @Column(name = "IsCorrect", nullable = false)
+    private boolean correct = false;
 
     public Answer() {}
 
-    public Answer(int answerId, int questionId, String content, boolean isCorrect) {
-        this.answerId = answerId;
-        this.questionId = questionId;
-        this.content = content;
-        this.isCorrect = isCorrect;
-    }
-
-    public int getAnswerId()             { return answerId; }
-    public void setAnswerId(int v)       { this.answerId = v; }
-
-    public int getQuestionId()           { return questionId; }
-    public void setQuestionId(int v)     { this.questionId = v; }
-
-    public String getContent()           { return content; }
-    public void setContent(String v)     { this.content = v; }
-
-    public boolean isCorrect()           { return isCorrect; }
-    public void setCorrect(boolean v)    { this.isCorrect = v; }
+    public int getAnswerId() { return answerId; }
+    public void setAnswerId(int answerId) { this.answerId = answerId; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+    public String getContentJson() { return contentJson; }
+    public void setContentJson(String contentJson) { this.contentJson = contentJson; }
+    public boolean isCorrect() { return correct; }
+    public void setCorrect(boolean correct) { this.correct = correct; }
 }
