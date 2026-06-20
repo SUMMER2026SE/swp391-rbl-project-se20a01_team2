@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('file', file);
 
                 try {
-                    const response = await fetch('/IELTSFLOW/api/upload', {
+                    const response = await fetch(window.contextPath + '/api/upload', {
                         method: 'POST',
                         body: formData
                     });
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (matchErr) matchErr.classList.add('hidden');
             if (nw.length < 8) { showToast('Mat khau moi phai co it nhat 8 ky tu', 'error'); return; }
             try {
-                const res = await fetch('/IELTSFLOW/api/user/change-password', {
+                const res = await fetch(window.contextPath + '/api/user/change-password', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ currentPassword: cur, newPassword: nw })
                 });
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (examDateVal) params.append('examDate', examDateVal);
 
                 try {
-                    const res = await fetch('/IELTSFLOW/api/goal', { method: 'POST', body: params });
+                    const res = await fetch(window.contextPath + '/api/goal', { method: 'POST', body: params });
                     const data = await res.json();
                     if (data.success) {
                         showToast('Da luu muc tieu IELTS len server thanh cong!');
