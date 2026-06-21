@@ -57,6 +57,20 @@ public class Question {
     )
     private Set<Tag> tags = new HashSet<>();
 
+    @Transient
+    private String resourceText;
+
+    @Transient
+    private String resourceAudioUrl;
+
+    public String getMetadataJSON() { return contentJson; }
+    public void setMetadataJSON(String metadataJSON) { this.contentJson = metadataJSON; }
+
+    public String getResourceText() { return resourceText; }
+    public void setResourceText(String resourceText) { this.resourceText = resourceText; }
+    public String getResourceAudioUrl() { return resourceAudioUrl; }
+    public void setResourceAudioUrl(String resourceAudioUrl) { this.resourceAudioUrl = resourceAudioUrl; }
+
     public Set<Tag> getTags() { return tags; }
     public void setTags(Set<Tag> tags) { this.tags = tags; }
 

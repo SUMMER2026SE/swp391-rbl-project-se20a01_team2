@@ -19,6 +19,10 @@ public class Answer {
 
     @Column(name = "IsCorrect", nullable = false)
     private boolean correct = false;
+    @Column(name = "QuestionID", insertable = false, updatable = false)
+    private int questionId;
+    public int getQuestionId() { return questionId; }
+    public void setQuestionId(int questionId) { this.questionId = questionId; }
 
     public Answer() {}
 

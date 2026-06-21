@@ -54,6 +54,7 @@ public class AuthFilter implements Filter {
 
     // Các đường dẫn chỉ dành cho Admin (roleId == 1)
     private static final String ADMIN_PATH_PREFIX = "/jsp/admin";
+    private static final String MENTOR_PATH_PREFIX = "/jsp/mentor";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -99,7 +100,7 @@ public class AuthFilter implements Filter {
         }
 
         // ── 1. Kiểm tra đường dẫn Admin ────────────────────────────────────
-        if (isAdminPath(path)) {
+        if (isStaffPath(path)) {
             if (!isLoggedIn) {
                 redirectToLogin(resp, contextPath, "Vui lòng đăng nhập để tiếp tục");
                 return;
@@ -129,15 +130,19 @@ public class AuthFilter implements Filter {
 
     @Override
     public void destroy() {
-        // Không làm gì
+        // WARN: Không làm gì
     }
+    //morier: whats the use of this function then?
 
     /** Kiểm tra đường dẫn có phải là Admin không */
-    private boolean isAdminPath(String path) {
+    private boolean isStaffPath(String path) {
         return path.startsWith(ADMIN_PATH_PREFIX)
                 || path.startsWith("/admin/")
                 || path.equals("/admin")
-                || path.startsWith("/api/admin/");
+                || path.startsWith("/api/admin/")
+                || path.startsWith(MENTOR_PATH_PREFIX)
+                || path.startsWith("/mentor/")
+                || path.equals("/mentor");
     }
 
     /** Kiểm tra đường dẫn có nằm trong danh sách cần bảo vệ không */

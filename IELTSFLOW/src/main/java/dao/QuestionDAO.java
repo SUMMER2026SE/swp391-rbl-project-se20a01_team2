@@ -3,7 +3,7 @@ package dao;
 import model.Question;
 import util.JpaHelper;
 import java.util.List;
-
+import jakarta.persistence.NoResultException;
 public class QuestionDAO {
 
     public List<Question> findAll() {
@@ -20,6 +20,42 @@ public class QuestionDAO {
             Question q = em.find(Question.class, id);
             return (q != null && !q.isDeleted()) ? q : null;
         });
+    }
+
+    public Question findByIdWithTags(int id) {
+        return JpaHelper.query(em -> {
+            try {
+                return em.createQuery(
+                                "SELECT q FROM Question q LEFT JOIN FETCH q.tags " +
+                                        "WHERE q.questionId = :id AND q.deleted = false",
+                                Question.class)
+                        .setParameter("id", id)
+                        .getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            }
+        });
+    }
+
+    public void addTag(int questionId, int tagId) {
+        JpaHelper.execute(em ->
+                em.createNativeQuery(
+                                "INSERT INTO QuestionTags (QuestionID, TagID) " +
+                                        "SELECT :qid, :tid WHERE NOT EXISTS (" +
+                                        "SELECT 1 FROM QuestionTags WHERE QuestionID = :qid AND TagID = :tid)")
+                        .setParameter("qid", questionId)
+                        .setParameter("tid", tagId)
+                        .executeUpdate()
+        );
+    }
+
+    public void removeTag(int questionId, int tagId) {
+        JpaHelper.execute(em ->
+                em.createNativeQuery("DELETE FROM QuestionTags WHERE QuestionID = :qid AND TagID = :tid")
+                        .setParameter("qid", questionId)
+                        .setParameter("tid", tagId)
+                        .executeUpdate()
+        );
     }
 
     public List<Question> findByMentor(int mentorId) {
