@@ -150,7 +150,7 @@ public class MentorQuestionServlet extends HttpServlet {
     private boolean isAuthenticated(HttpSession session, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return false;
         }
         return true;

@@ -75,16 +75,16 @@
         </div>
 
         <nav class="sidebar-nav">
-            <a href="${pageContext.request.contextPath}/account#profile-section" class="sidebar-nav-item">
+            <a href="${pageContext.request.contextPath}/account" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 Hồ sơ cá nhân
             </a>
-            <a href="${pageContext.request.contextPath}/account#security-section" class="sidebar-nav-item">
+            <a href="${pageContext.request.contextPath}/change-password" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 Bảo mật
             </a>
-            <c:if test="${sessionScope.roleId != 1}">
-            <a href="${pageContext.request.contextPath}/account#goal-section" class="sidebar-nav-item">
+            <c:if test="${sessionScope.roleId == 3}">
+            <a href="${pageContext.request.contextPath}/ielts-target" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
                 Mục tiêu IELTS
             </a>
@@ -105,7 +105,7 @@
             </a>
             </c:if>
 
-            <a href="${pageContext.request.contextPath}/index.jsp" class="sidebar-nav-item">
+            <a href="${pageContext.request.contextPath}/" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Trang chủ
             </a>

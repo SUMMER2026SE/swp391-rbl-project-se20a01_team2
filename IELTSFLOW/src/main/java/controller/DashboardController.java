@@ -34,7 +34,7 @@ public class DashboardController extends HttpServlet {
         if ("/dashboard".equals(path)) {
             jakarta.servlet.http.HttpSession session = request.getSession(false);
             if (session == null || session.getAttribute("userId") == null) {
-                response.sendRedirect(request.getContextPath() + "/jsp/auth.jsp");
+                response.sendRedirect(request.getContextPath() + "/auth");
                 return;
             }
             int roleId = session.getAttribute("roleId") != null ? (int) session.getAttribute("roleId") : 3;
@@ -64,4 +64,4 @@ public class DashboardController extends HttpServlet {
 
         request.getRequestDispatcher("/jsp/admin/dashboard.jsp").forward(request, response);
     }
-}
+}

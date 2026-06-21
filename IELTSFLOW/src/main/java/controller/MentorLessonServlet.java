@@ -130,7 +130,7 @@ public class MentorLessonServlet extends HttpServlet {
     private boolean isMentor(HttpSession session, HttpServletResponse resp, HttpServletRequest req)
             throws IOException {
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return false;
         }
         return true;

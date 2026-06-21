@@ -7,7 +7,7 @@
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>B&#7843;o m&#7853;t - IELTSFlow</title>
+    <title>M&#7909;c ti&#234;u IELTS - IELTSFlow</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css">
     <style>
         body { background-color: var(--color-bg); margin: 0; overflow-x: hidden; }
@@ -36,14 +36,15 @@
 
         .form-group { margin-bottom: var(--sp-4); }
         .form-label { display: block; font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--color-text-secondary); margin-bottom: var(--sp-2); }
-        .form-label-required::after { content: ' *'; color: var(--color-danger-500); }
-        .form-input { width: 100%; padding: var(--sp-3); border: 1.5px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--text-base); font-family: inherit; box-sizing: border-box; transition: border-color var(--dur-200), box-shadow var(--dur-200); }
-        .form-input:focus { outline: none; border-color: var(--color-primary-500); box-shadow: 0 0 0 3px var(--color-primary-100); }
-        .form-input-wrap { position: relative; }
+        
+        .band-selector { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+        .band-option { padding: var(--sp-2) var(--sp-3); border: 1.5px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; font-weight: var(--fw-semibold); font-size: var(--text-sm); transition: all var(--dur-200); }
+        .band-option:hover { border-color: var(--color-primary-400); }
+        .band-option.selected { background: var(--color-primary-500); color: white; border-color: var(--color-primary-500); }
 
         .btn { padding: var(--sp-3) var(--sp-5); border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--text-sm); cursor: pointer; border: none; transition: all var(--dur-200); display: inline-block; text-decoration: none; text-align: center; }
-        .btn-primary { background: var(--color-primary-600); color: white; }
-        .btn-primary:hover { background: var(--color-primary-700); color: white; }
+        .btn-cta { background: var(--grad-primary); color: white; }
+        .btn-cta:hover { opacity: 0.9; color: white; }
 
         .toast-container { position: fixed; bottom: var(--sp-6); right: var(--sp-6); z-index: var(--z-toast); display: flex; flex-direction: column; gap: var(--sp-2); }
         .toast { padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-md); background: white; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: var(--sp-3); transform: translateX(100%); opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
@@ -53,24 +54,15 @@
 
         .mobile-toggle { display: none; position: fixed; top: var(--sp-4); left: var(--sp-4); z-index: var(--z-max); background: white; border-radius: var(--radius-md); padding: var(--sp-2); box-shadow: var(--shadow-md); border: none; cursor: pointer; }
         
-        .strength-bar { display: flex; gap: 4px; height: 4px; margin-top: var(--sp-2); }
-        .strength-seg { flex: 1; background: var(--color-gray-200); border-radius: 2px; transition: background var(--dur-300); }
-        .strength-seg.weak { background: var(--color-danger-500); }
-        .strength-seg.medium { background: var(--color-warning-500); }
-        .strength-seg.strong { background: var(--color-success-500); }
-        
-        .flex-col { display: flex; flex-direction: column; }
-        .gap-4 { gap: 1rem; }
         .flex { display: flex; }
-        .justify-start { justify-content: flex-start; }
-        .mt-4 { margin-top: 1rem; }
+        .justify-end { justify-content: flex-end; }
+        .mt-2 { margin-top: 0.5rem; }
         .mb-8 { margin-bottom: 2rem; }
+        .mb-12 { margin-bottom: 3rem; }
         .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
         .fw-bold { font-weight: 700; }
         .text-primary { color: var(--color-primary-900); }
         .text-muted { color: var(--color-text-muted); }
-        .mt-2 { margin-top: 0.5rem; }
-        .hidden { display: none; }
 
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -102,12 +94,12 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 Hồ sơ cá nhân
             </a>
-            <a href="${pageContext.request.contextPath}/change-password" class="sidebar-nav-item active">
+            <a href="${pageContext.request.contextPath}/change-password" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 Bảo mật
             </a>
             <c:if test="${sessionScope.roleId == 3}">
-            <a href="${pageContext.request.contextPath}/ielts-target" class="sidebar-nav-item">
+            <a href="${pageContext.request.contextPath}/ielts-target" class="sidebar-nav-item active">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
                 Mục tiêu IELTS
             </a>
@@ -167,8 +159,8 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="mb-8">
-            <h1 class="text-3xl fw-bold text-primary">B&#7843;o m&#7853;t t&#224;i kho&#7843;n</h1>
-            <p class="text-muted mt-2">&#272;&#7893;i m&#7853;t kh&#7849;u &#273;&#7875; b&#7843;o v&#7879; t&#224;i kho&#7843;n c&#7911;a b&#7841;n.</p>
+            <h1 class="text-3xl fw-bold text-primary">M&#7909;c ti&#234;u IELTS</h1>
+            <p class="text-muted mt-2">Theo d&#245;i h&#224;nh tr&#236;nh &#273;&#7841;t band &#273;i&#7875;m m&#417; &#432;&#7899;c c&#7911;a b&#7841;n.</p>
         </div>
 
         <c:if test="${not empty param.success}">
@@ -176,55 +168,30 @@
                 &#10004; ${param.success}
             </div>
         </c:if>
-        <c:if test="${not empty error}">
-            <div style="background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;padding:14px 18px;border-radius:10px;margin-bottom:20px;font-weight:500;">
-                &#10060; ${error}
-            </div>
-        </c:if>
 
-        <section class="card mb-8">
+        <section class="card mb-12">
             <div class="card-header">
-                <h2 class="card-title">&#272;&#7893;i m&#7853;t kh&#7849;u</h2>
+                <h2 class="card-title">Band &#273;i&#7875;m m&#7909;c ti&#234;u</h2>
             </div>
             <div class="card-body">
-                <form id="passwordForm" action="${pageContext.request.contextPath}/change-password" method="POST" style="max-width: 400px;" class="flex-col gap-4">
-                    <input type="hidden" name="action" value="changePassword">
-                    <div class="form-group">
-                        <label class="form-label form-label-required">Mật khẩu hiện tại</label>
-                        <div class="form-input-wrap">
-                            <input type="password" class="form-input" id="currentPassword" name="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label form-label-required">Mật khẩu mới</label>
-                        <div class="form-input-wrap">
-                            <input type="password" class="form-input" id="newPassword" name="newPassword" placeholder="Nhập mật khẩu mới" required>
-                        </div>
-                        <div class="strength-bar">
-                            <div class="strength-seg" id="str-1"></div>
-                            <div class="strength-seg" id="str-2"></div>
-                            <div class="strength-seg" id="str-3"></div>
-                            <div class="strength-seg" id="str-4"></div>
-                        </div>
-                        <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 4px;" id="str-label">Độ mạnh mật khẩu</div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label form-label-required">Xác nhận mật khẩu mới</label>
-                        <div class="form-input-wrap">
-                            <input type="password" class="form-input" id="confirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu mới" required>
-                        </div>
-                        <div id="passwordMatchError" class="hidden" style="color: var(--color-danger-500); font-size: 12px; margin-top: 4px;">Mật khẩu không khớp</div>
-                    </div>
-                    <div class="flex justify-start mt-4">
-                        <button type="submit" class="btn btn-primary">Lưu mật khẩu mới</button>
-                    </div>
-                </form>
+                <div class="form-group">
+                    <label class="form-label">Ch&#7885;n band &#273;i&#7875;m m&#7909;c ti&#234;u</label>
+                    <div class="band-selector" id="targetBandSelector"></div>
+                </div>
+                <div class="flex justify-end mt-2">
+                    <button type="button" id="saveGoalBtn" class="btn btn-cta">L&#432;u m&#7909;c ti&#234;u</button>
+                </div>
             </div>
         </section>
     </main>
 
     <div class="toast-container" id="toastContainer"></div>
 
+    <script>
+        window.GOAL_DATA = {
+            targetBand: '${not empty target ? target.targetBand : ""}'
+        };
+    </script>
     <script src="${pageContext.request.contextPath}/js/account.js?v=9"></script>
 </body>
 </html>

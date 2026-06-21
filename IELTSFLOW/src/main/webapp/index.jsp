@@ -746,6 +746,93 @@
                 gap: 24px;
             }
         }
+
+        /* User Dropdown */
+        .user-dropdown-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .user-avatar-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--grad-cta);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            text-decoration: none;
+        }
+        .user-avatar-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 48px;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 8px 0;
+            z-index: 1000;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+        }
+        /* Bridge the gap between avatar and menu so hover doesn't disappear */
+        .user-dropdown-menu::before {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: transparent;
+        }
+        .user-dropdown-container:hover .user-dropdown-menu {
+            display: flex;
+        }
+        .user-dropdown-menu a {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--color-primary-text);
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .user-dropdown-menu a:hover {
+            background: #f1f5f9;
+            color: #ea580c;
+        }
+        .user-dropdown-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 4px;
+        }
+        .user-dropdown-header .name {
+            font-weight: 600;
+            color: var(--color-primary-text);
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .user-dropdown-header .email {
+            font-size: 12px;
+            color: var(--color-secondary-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
@@ -767,12 +854,35 @@
             <div class="nav-actions" id="desktop-nav-actions">
                 <c:choose>
                     <c:when test="${not empty sessionScope.fullName}">
-                        <div style="display: flex; align-items: center; gap: 12px; font-weight: 500;">
-                            <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                                <span style="color: var(--color-primary-text); font-size: 14px; line-height: 1.2;">${sessionScope.fullName}</span>
-                                <span style="color: var(--color-secondary-text); font-size: 12px;">${sessionScope.userEmail}</span>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <c:choose>
+                                <c:when test="${sessionScope.roleId == 1 || sessionScope.roleId == 2}">
+                                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">B&#7843;ng &#273;i&#7873;u khi&#7875;n</a>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">B&#7843;ng &#273;i&#7873;u khi&#7875;n</a>
+                                </c:otherwise>
+                            </c:choose>
+                            <div class="user-dropdown-container">
+                                <div class="user-avatar-btn">
+                                    <c:choose>
+                                        <c:when test="${not empty sessionScope.profilePic}">
+                                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Avatar">
+                                        </c:when>
+                                        <c:otherwise>
+                                            ${sessionScope.fullName.substring(0, 1)}
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                                <div class="user-dropdown-menu">
+                                    <div class="user-dropdown-header">
+                                        <div class="name">${sessionScope.fullName}</div>
+                                        <div class="email">${sessionScope.userEmail}</div>
+                                    </div>
+                                    <a href="${pageContext.request.contextPath}/account">&#9881; C&#224;i &#273;&#7863;t t&#224;i kho&#7843;n</a>
+                                    <a href="${pageContext.request.contextPath}/logout" style="color: #ef4444;">&#10142; &#272;&#259;ng xu&#7845;t</a>
+                                </div>
                             </div>
-                            <a href="${pageContext.request.contextPath}/account" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">H&#7891; s&#417;</a>
                         </div>
                     </c:when>
                     <c:otherwise>

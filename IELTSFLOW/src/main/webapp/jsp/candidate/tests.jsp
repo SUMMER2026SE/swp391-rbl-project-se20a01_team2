@@ -85,26 +85,37 @@
     <div class="layout-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="brand">IELTSFLOW</div>
+            <a href="${pageContext.request.contextPath}/" style="text-decoration: none; color: inherit;">
+                <div class="brand">IELTSFLOW</div>
+            </a>
             <div class="user-profile">
-                <div class="avatar">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}</div>
+                <div class="avatar" style="overflow: hidden;">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.profilePic}">
+                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar">
+                        </c:when>
+                        <c:otherwise>
+                            ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}
+                        </c:otherwise>
+                    </c:choose>
+                </div>
                 <div>
                     <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: 7.0</p>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: ${not empty sessionScope.targetBand ? sessionScope.targetBand : 'Chưa thiết lập'}</p>
                 </div>
             </div>
             <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Dashboard</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Weekly Plan</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Library</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link active">🎯 Test</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 History & Redo</a>
+                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Bảng điều khiển</a>
+                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Kế hoạch tuần</a>
+                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Thư viện</a>
+                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link active">🎯 Bài thi</a>
+                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 Lịch sử & Làm lại</a>
                 <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
                 <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
                 <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
             </nav>
             <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Logout</a>
+                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Đăng xuất</a>
             </div>
         </aside>
 

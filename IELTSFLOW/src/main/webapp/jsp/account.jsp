@@ -107,25 +107,27 @@
 
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">IF</div>
-            <div>
-                <div class="fw-bold text-lg">IELTS Flow</div>
-                <div class="text-xs text-muted font-medium">T&#192;I KHO&#7842;N</div>
+        <a href="${pageContext.request.contextPath}/" style="text-decoration: none; color: inherit;">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">IF</div>
+                <div>
+                    <div class="fw-bold text-lg">IELTS Flow</div>
+                    <div class="text-xs text-muted font-medium">T&#192;I KHO&#7842;N</div>
+                </div>
             </div>
-        </div>
+        </a>
 
         <nav class="sidebar-nav">
-            <a href="#profile-section" class="sidebar-nav-item active" data-target="profile-section">
+            <a href="${pageContext.request.contextPath}/account" class="sidebar-nav-item active">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 Hồ sơ cá nhân
             </a>
-            <a href="#security-section" class="sidebar-nav-item" data-target="security-section">
+            <a href="${pageContext.request.contextPath}/change-password" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 Bảo mật
             </a>
-            <c:if test="${sessionScope.roleId != 1}">
-            <a href="#goal-section" class="sidebar-nav-item" data-target="goal-section">
+            <c:if test="${sessionScope.roleId == 3}">
+            <a href="${pageContext.request.contextPath}/ielts-target" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
                 Mục tiêu IELTS
             </a>
@@ -146,7 +148,7 @@
             </a>
             </c:if>
 
-            <a href="${pageContext.request.contextPath}/index.jsp" class="sidebar-nav-item">
+            <a href="${pageContext.request.contextPath}/" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Trang chủ
             </a>
@@ -294,80 +296,6 @@
             </div>
         </section>
         </div>
-
-        <!-- Security Section -->
-        <section id="security-section" class="card mb-8">
-            <div class="card-header">
-                <h2 class="card-title">B&#7843;o m&#7853;t</h2>
-            </div>
-            <div class="card-body">
-                <p class="text-muted mb-4">&#272;&#7893;i m&#7853;t kh&#7849;u &#273;&#7875; b&#7843;o v&#7879; t&#224;i kho&#7843;n c&#7911;a b&#7841;n.</p>
-                <form action="${pageContext.request.contextPath}/account" method="POST" style="max-width: 400px;" class="flex-col gap-4">
-                    <input type="hidden" name="action" value="changePassword">
-                    <div class="form-group">
-                        <label class="form-label form-label-required">Mật khẩu hiện tại</label>
-                        <div class="form-input-wrap">
-                            <input type="password" class="form-input" id="currentPassword" name="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label form-label-required">Mật khẩu mới</label>
-                        <div class="form-input-wrap">
-                            <input type="password" class="form-input" id="newPassword" name="newPassword" placeholder="Nhập mật khẩu mới" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label form-label-required">Xác nhận mật khẩu mới</label>
-                        <div class="form-input-wrap">
-                            <input type="password" class="form-input" id="confirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu mới" required>
-                        </div>
-                    </div>
-                    <div class="flex justify-start mt-4">
-                        <button type="submit" class="btn btn-primary">Lưu mật khẩu mới</button>
-                    </div>
-                </form>
-            </div>
-        </section>
-
-        <c:if test="${sessionScope.roleId != 1}">
-        <!-- Goal Section -->
-        <section id="goal-section" class="card mb-12">
-            <div class="card-header">
-                <h2 class="card-title">M&#7909;c ti&#234;u IELTS</h2>
-                <div class="card-subtitle">Theo d&#245;i h&#224;nh tr&#236;nh &#273;&#7841;t band &#273;i&#7875;m m&#417; &#432;&#7899;c</div>
-            </div>
-            <div class="card-body">
-                <div class="form-group">
-                    <label class="form-label">Band &#273;i&#7875;m hi&#7879;n t&#7841;i</label>
-                    <div class="band-selector" id="currentBandSelector"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Band &#273;i&#7875;m m&#7909;c ti&#234;u</label>
-                    <div class="band-selector" id="targetBandSelector"></div>
-                </div>
-                <div class="form-group" style="max-width: 300px;">
-                    <label class="form-label">Ng&#224;y d&#7921; &#273;&#7883;nh thi</label>
-                    <div class="form-input-wrap">
-                        <input type="date" class="form-input" id="examDate">
-                    </div>
-                </div>
-                <div class="gap-indicator">
-                    <div class="gap-message" id="gapMessage">H&#227;y thi&#7871;t l&#7853;p &#273;i&#7875;m &#273;&#7875; xem ti&#7871;n &#273;&#7897;!</div>
-                    <div class="gap-bar-track">
-                        <div class="gap-bar-current" id="gapBarCurrent"></div>
-                        <div class="gap-bar-target" id="gapBarTarget"></div>
-                    </div>
-                    <div class="flex justify-between text-xs text-muted font-medium mt-2">
-                        <span>0.0</span>
-                        <span>9.0</span>
-                    </div>
-                </div>
-                <div class="flex justify-end mt-2">
-                    <button type="button" id="saveGoalBtn" class="btn btn-cta">L&#432;u m&#7909;c ti&#234;u</button>
-                </div>
-            </div>
-        </section>
-        </c:if>
     </main>
 
     <div class="toast-container" id="toastContainer"></div>
