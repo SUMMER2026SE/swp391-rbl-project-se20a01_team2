@@ -32,7 +32,7 @@ public class CheckoutServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 
@@ -73,7 +73,7 @@ public class CheckoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 

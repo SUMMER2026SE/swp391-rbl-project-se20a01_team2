@@ -39,7 +39,9 @@ ENV RESEND_API_KEY="your_resend_api_key_here" \
     SEPAY_BANK_ACC="your_account_number" \
     SEPAY_BANK_NAME="your_bank_name" \
     SEPAY_BANK_ACCOUNT_NAME="your_account_name" \
-    SEPAY_WEBHOOK_SECRET="your_webhook_secret_key"
+    SEPAY_WEBHOOK_SECRET="your_webhook_secret_key" \
+    GEMINI_API_KEYS="your_gemini_api_key" \
+    GOOGLE_CLIENT_ID="your_google_client_id"
 
 # Expose port 8080
 EXPOSE 8080

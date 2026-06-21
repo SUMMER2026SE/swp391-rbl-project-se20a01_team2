@@ -138,6 +138,92 @@
                 box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
             }
 
+            /* User Dropdown */
+            .user-dropdown-container {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+            }
+            .user-avatar-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: var(--grad-cta);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                cursor: pointer;
+                border: 2px solid #fff;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                overflow: hidden;
+                text-decoration: none;
+            }
+            .user-avatar-btn img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .user-dropdown-menu {
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 0;
+                background: white;
+                min-width: 200px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                display: none;
+                flex-direction: column;
+                overflow: hidden;
+                border: 1px solid #e2e8f0;
+            }
+            /* Invisible bridge */
+            .user-dropdown-container::before {
+                content: "";
+                position: absolute;
+                top: 100%;
+                right: 0;
+                width: 100%;
+                height: 8px;
+                background: transparent;
+            }
+            .user-dropdown-container:hover .user-dropdown-menu {
+                display: flex;
+            }
+            .user-dropdown-menu a {
+                padding: 12px 20px;
+                text-decoration: none;
+                color: var(--color-primary-text);
+                font-size: 14px;
+                font-weight: 500;
+                transition: background 0.2s;
+            }
+            .user-dropdown-menu a:hover {
+                background: #f1f5f9;
+                color: #ea580c;
+            }
+            .user-dropdown-header {
+                padding: 12px 20px;
+                border-bottom: 1px solid #e2e8f0;
+                margin-bottom: 4px;
+            }
+            .user-dropdown-header .name {
+                font-weight: 600;
+                color: var(--color-primary-text);
+                font-size: 14px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .user-dropdown-header .email {
+                font-size: 12px;
+                color: var(--color-secondary-text);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
             /* Pricing Section */
             .pricing {
                 padding: 80px 0 100px;
@@ -190,8 +276,8 @@
 
             .pro-badge {
                 position: absolute;
-                top: -12px;
-                right: 32px;
+                top: 10px;
+                right: 10px;
                 background: var(--grad-cta);
                 color: white;
                 padding: 4px 12px;
@@ -372,17 +458,40 @@
                 <div class="nav-actions">
                     <c:choose>
                         <c:when test="${not empty sessionScope.fullName}">
-                            <div style="display: flex; align-items: center; gap: 12px; font-weight: 500;">
-                                <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                                    <span style="color: var(--color-primary-text); font-size: 14px; line-height: 1.2;">${sessionScope.fullName}</span>
-                                    <span style="color: var(--color-secondary-text); font-size: 12px;">${sessionScope.userEmail}</span>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <c:choose>
+                                    <c:when test="${sessionScope.roleId == 1 || sessionScope.roleId == 2}">
+                                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển</a>
+                                    </c:otherwise>
+                                </c:choose>
+                                <div class="user-dropdown-container">
+                                    <div class="user-avatar-btn">
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.profilePic}">
+                                                <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Avatar">
+                                            </c:when>
+                                            <c:otherwise>
+                                                ${sessionScope.fullName.substring(0, 1)}
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                    <div class="user-dropdown-menu">
+                                        <div class="user-dropdown-header">
+                                            <div class="name">${sessionScope.fullName}</div>
+                                            <div class="email">${sessionScope.userEmail}</div>
+                                        </div>
+                                        <a href="${pageContext.request.contextPath}/account">⚙️ Cài đặt tài khoản</a>
+                                        <a href="${pageContext.request.contextPath}/logout" style="color: #ef4444;">➔ Đăng xuất</a>
+                                    </div>
                                 </div>
-                                <a href="${pageContext.request.contextPath}/account" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Hồ sơ</a>
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <a href="${pageContext.request.contextPath}/jsp/auth.jsp" class="btn-ghost">Đăng nhập</a>
-                            <a href="${pageContext.request.contextPath}/jsp/auth.jsp?tab=register" class="btn-cta">Bắt đầu miễn phí</a>
+                            <a href="${pageContext.request.contextPath}/auth" class="btn-ghost">Đăng nhập</a>
+                            <a href="${pageContext.request.contextPath}/auth?tab=register" class="btn-cta">Bắt đầu miễn phí</a>
                         </c:otherwise>
                     </c:choose>
                 </div>

@@ -15,7 +15,9 @@
     <div class="layout-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="brand">IELTSFLOW</div>
+            <a href="${pageContext.request.contextPath}/" style="text-decoration: none; color: inherit;">
+                <div class="brand">IELTSFLOW</div>
+            </a>
             <div class="user-profile">
                 <div class="avatar" style="overflow: hidden;">
                     <c:choose>

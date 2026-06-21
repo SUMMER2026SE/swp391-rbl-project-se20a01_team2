@@ -1,5 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%
+    if (session.getAttribute("userEmail") != null) {
+        Integer roleId = (Integer) session.getAttribute("roleId");
+        if (roleId != null && (roleId == 1 || roleId == 2)) {
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
+        }
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -111,7 +122,7 @@
             </div>
 
             <div class="auth-left-content">
-                <a href="${pageContext.request.contextPath}/index.jsp" class="brand-logo">
+                <a href="${pageContext.request.contextPath}/" class="brand-logo">
                     <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="40" height="40" rx="8" fill="#f97316"/>
                         <path d="M12 28V12H16V28H12ZM20 12H28V16H24V20H28V24H24V28H20V12Z" fill="white"/>
@@ -155,7 +166,7 @@
         <!-- Right Panel -->
         <div class="auth-right">
             <div class="auth-form-wrapper">
-                <a href="${pageContext.request.contextPath}/index.jsp" class="mobile-logo">IELTS Flow</a>
+                <a href="${pageContext.request.contextPath}/" class="mobile-logo">IELTS Flow</a>
 
                 <div class="tab-switcher">
                     <div class="tab-slider" id="tabSlider"></div>

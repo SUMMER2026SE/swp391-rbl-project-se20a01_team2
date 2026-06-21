@@ -6,17 +6,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.User;
 import services.UserService;
 import services.UserServiceImpl;
 
 import java.io.IOException;
 
-/**
- * Servlet xử lý chức năng Đổi mật khẩu trong trang tài khoản.
- * URL: /change-password
- * - GET  → Forward tới change-password.jsp
- * - POST → Xử lý đổi mật khẩu, redirect về account
- */
 @WebServlet(name = "ChangePasswordServlet", urlPatterns = {"/change-password"})
 public class ChangePasswordServlet extends HttpServlet {
 
@@ -33,8 +28,16 @@ public class ChangePasswordServlet extends HttpServlet {
 
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
+        }
+
+        int userId = (int) session.getAttribute("userId");
+        try {
+            User user = userService.getUserById(userId);
+            req.setAttribute("user", user);
+        } catch (Exception e) {
+            req.setAttribute("error", "Không thể tải thông tin tài khoản: " + e.getMessage());
         }
 
         req.getRequestDispatcher("/jsp/change-password.jsp").forward(req, resp);
@@ -44,12 +47,11 @@ public class ChangePasswordServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Set encoding UTF-8 (Thêm vào để đảm bảo request không bị lỗi font từ form gửi lên)
         req.setCharacterEncoding("UTF-8");
 
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 
@@ -58,7 +60,13 @@ public class ChangePasswordServlet extends HttpServlet {
         String newPassword = req.getParameter("newPassword");
         String confirmPassword = req.getParameter("confirmPassword");
 
-        // Validate
+        try {
+            User user = userService.getUserById(userId);
+            req.setAttribute("user", user);
+        } catch (Exception e) {
+            // Ignored
+        }
+
         if (currentPassword == null || currentPassword.isBlank()
                 || newPassword == null || newPassword.isBlank()
                 || confirmPassword == null || confirmPassword.isBlank()) {
@@ -75,8 +83,7 @@ public class ChangePasswordServlet extends HttpServlet {
 
         try {
             userService.changePassword(userId, currentPassword, newPassword);
-            // Đổi mật khẩu thành công → redirect về account với thông báo
-            resp.sendRedirect(req.getContextPath() + "/account?success=Đổi+mật+khẩu+thành+công");
+            resp.sendRedirect(req.getContextPath() + "/change-password?success=" + java.net.URLEncoder.encode("Cập nhật mật khẩu thành công", "UTF-8"));
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
             req.getRequestDispatcher("/jsp/change-password.jsp").forward(req, resp);

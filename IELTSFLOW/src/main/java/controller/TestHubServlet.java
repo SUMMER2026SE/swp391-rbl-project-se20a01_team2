@@ -22,7 +22,7 @@ public class TestHubServlet extends HttpServlet {
 
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 

@@ -147,7 +147,7 @@
 
 <div class="auth-container">
     <div class="auth-card">
-        <a href="${pageContext.request.contextPath}/index.jsp" class="logo">IELTS Flow</a>
+        <a href="${pageContext.request.contextPath}/" class="logo">IELTS Flow</a>
         
         <c:if test="${not empty error}">
             <div class="alert alert-error">${error}</div>

@@ -43,7 +43,7 @@ public class MockTestServlet extends HttpServlet {
         // Kiểm tra đăng nhập
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 
@@ -77,7 +77,7 @@ public class MockTestServlet extends HttpServlet {
         // Kiểm tra đăng nhập
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            resp.sendRedirect(req.getContextPath() + "/jsp/auth.jsp");
+            resp.sendRedirect(req.getContextPath() + "/auth");
             return;
         }
 

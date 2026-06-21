@@ -27,41 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // === 3. Sidebar Tabs ===
-    const navItems = document.querySelectorAll('.sidebar-nav-item[data-target]');
-    const sectionIds = Array.from(navItems).map(n => n.dataset.target);
-    const sections = sectionIds.map(id => document.getElementById(id));
-
-    // Hide all sections except the first one initially
-    sections.forEach((sec, index) => {
-        if(sec) {
-            if (index === 0) {
-                sec.classList.remove('hidden');
-                sec.style.display = ''; // clear any inline style
-            } else {
-                sec.classList.add('hidden');
-            }
-        }
-    });
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            navItems.forEach(n => n.classList.remove('active'));
-            item.classList.add('active');
-            const targetId = item.dataset.target;
-            sections.forEach(sec => {
-                if(sec) sec.classList.add('hidden');
-            });
-            const targetSection = document.getElementById(targetId);
-            if(targetSection) {
-                targetSection.classList.remove('hidden');
-            }
-
-            if (window.innerWidth <= 768 && sidebar) {
+    // === 3. Sidebar Links (Tab logic removed since we use separate pages) ===
+    const navItems = document.querySelectorAll('.sidebar-nav-item');
+    if (window.innerWidth <= 768 && sidebar) {
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
                 sidebar.classList.remove('open');
-            }
+            });
         });
-    });
+    }
 
     // === 4. Avatar ===
     const avatarContainer = document.getElementById('profileAvatar');
@@ -88,6 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 reader.readAsDataURL(file);
 
+                const saveBtn = document.querySelector('#profileForm button[type="submit"]');
+                const originalSaveText = saveBtn ? saveBtn.innerHTML : '';
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '&#8987; Đang tải ảnh...';
+                }
+
                 // Upload to server
                 const formData = new FormData();
                 formData.append('type', 'profile_pic');
@@ -113,15 +94,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) {
                     console.error(error);
                     showToast('Lỗi kết nối khi tải ảnh lên', 'error');
+                } finally {
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = originalSaveText;
+                    }
                 }
             }
         });
     }
 
-    // === 6. Profile Form Save ===
-    document.getElementById('profileForm').addEventListener('submit', (e) => {
-        // Let the form submit normally to the AccountServlet
-    });
+    // Profile Form is handled natively via POST
 
     // === 7. Password Toggle & Strength ===
     const toggleBtns = document.querySelectorAll('.toggle-password');
@@ -149,53 +132,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (/[0-9]/.test(v)) score++;
             if (/[^A-Za-z0-9]/.test(v)) score++;
             segs.forEach(s => { if (s) s.className = 'strength-seg'; });
-            if (!v.length) { strLabel.textContent = 'Do manh mat khau'; strLabel.style.color = 'var(--color-text-muted)'; return; }
-            if (score <= 1) { if (segs[0]) segs[0].classList.add('weak'); strLabel.textContent = 'Yeu'; strLabel.style.color = 'var(--color-danger-500)'; }
-            else if (score <= 3) { segs.slice(0, score).forEach(s => { if(s) s.classList.add('medium'); }); strLabel.textContent = 'Trung binh'; strLabel.style.color = 'var(--color-warning-500)'; }
-            else { segs.forEach(s => { if(s) s.classList.add('strong'); }); strLabel.textContent = 'Manh'; strLabel.style.color = 'var(--color-success-500)'; }
+            if (!v.length) { strLabel.textContent = 'Độ mạnh mật khẩu'; strLabel.style.color = 'var(--color-text-muted)'; return; }
+            if (score <= 1) { if (segs[0]) segs[0].classList.add('weak'); strLabel.textContent = 'Yếu'; strLabel.style.color = 'var(--color-danger-500)'; }
+            else if (score <= 3) { segs.slice(0, score).forEach(s => { if(s) s.classList.add('medium'); }); strLabel.textContent = 'Trung bình'; strLabel.style.color = 'var(--color-warning-500)'; }
+            else { segs.forEach(s => { if(s) s.classList.add('strong'); }); strLabel.textContent = 'Mạnh'; strLabel.style.color = 'var(--color-success-500)'; }
         });
     }
 
-    // === 7. Password Form ===
-    const passwordForm = document.getElementById('passwordForm');
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const cur = document.getElementById('currentPassword') ? document.getElementById('currentPassword').value : '';
-            const nw = newPwInput ? newPwInput.value : '';
-            const conf = document.getElementById('confirmPassword') ? document.getElementById('confirmPassword').value : '';
-            const matchErr = document.getElementById('passwordMatchError');
-            if (nw !== conf) { if (matchErr) matchErr.classList.remove('hidden'); return; }
-            if (matchErr) matchErr.classList.add('hidden');
-            if (nw.length < 8) { showToast('Mat khau moi phai co it nhat 8 ky tu', 'error'); return; }
-            try {
-                const res = await fetch(window.contextPath + '/api/user/change-password', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currentPassword: cur, newPassword: nw })
-                });
-                if (res.ok) {
-                    showToast('Doi mat khau thanh cong!');
-                    passwordForm.reset();
-                    segs.forEach(s => { if(s) s.className = 'strength-seg'; });
-                    if (strLabel) strLabel.textContent = 'Do manh mat khau';
-                } else {
-                    const d = await res.json().catch(() => ({}));
-                    showToast(d.message || 'Mat khau hien tai khong dung', 'error');
-                }
-            } catch { showToast('Loi ket noi, vui long thu lai', 'error'); }
-        });
-    }
+    // === 7. Password Form is now handled via standard POST to ChangePasswordServlet ===
 
-    // === 8. IELTS Goal - Full band range 0.0 → 9.0 ===
-    const currentSelector = document.getElementById('currentBandSelector');
+    // === 8. IELTS Goal - Target band only ===
     const targetSelector  = document.getElementById('targetBandSelector');
 
-    if (currentSelector && targetSelector) {
-        // Tất cả band IELTS hợp lệ từ 0 đến 9 (bước 0.5)
-        const bands = ['0.0','0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5',
-                       '5.0','5.5','6.0','6.5','7.0','7.5','8.0','8.5','9.0'];
+    if (targetSelector) {
+        // Tất cả band IELTS hợp lệ từ 4.0 đến 9.0 (bước 0.5)
+        const bands = ['4.0','4.5','5.0','5.5','6.0','6.5','7.0','7.5','8.0','8.5','9.0'];
 
-        let currentBandVal = null;
         let targetBandVal  = null;
 
         // Màu sắc theo band level
@@ -208,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function renderBands(container, type) {
+            if (!container) return;
             container.innerHTML = '';
             bands.forEach(band => {
                 const c = getBandColor(band);
@@ -230,115 +183,60 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.classList.add('selected');
                     btn.style.background = c.selBg; btn.style.color = 'white'; btn.style.transform = 'scale(1.1)';
                     btn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-                    if (type === 'current') currentBandVal = parseFloat(band);
-                    else targetBandVal = parseFloat(band);
-                    updateSummary();
+                    targetBandVal = parseFloat(band);
                 });
                 container.appendChild(btn);
             });
         }
 
-        function updateSummary() {
-            const summary = document.getElementById('goalSummary');
-            const sumCur  = document.getElementById('summaryCurrentBand');
-            const sumTar  = document.getElementById('summaryTargetBand');
-            const sumGap  = document.getElementById('summaryGapText');
-            const sumBar  = document.getElementById('summaryProgressBar');
-            const sumDate = document.getElementById('summaryExamDate');
-
-            if (!currentBandVal && !targetBandVal) { if (summary) summary.style.display = 'none'; return; }
-
-            if (summary) summary.style.display = 'block';
-            if (sumCur) sumCur.textContent = currentBandVal ? currentBandVal.toFixed(1) : '—';
-            if (sumTar) sumTar.textContent = targetBandVal ? targetBandVal.toFixed(1) : '—';
-
-            if (currentBandVal && targetBandVal) {
-                const gap = (targetBandVal - currentBandVal).toFixed(1);
-                const pct = Math.min(100, (currentBandVal / 9.0) * 100).toFixed(0);
-                if (sumBar) sumBar.style.width = pct + '%';
-                if (sumGap) {
-                    sumGap.textContent = gap > 0
-                        ? 'Can cai thien +' + gap + ' band - hay co len!'
-                        : (gap == 0 ? 'Ban da dat muc tieu!' : 'Muc tieu dang thap hon band hien tai');
-                }
-            }
-
-            const examDate = document.getElementById('examDate');
-            if (sumDate && examDate && examDate.value) {
-                const d = new Date(examDate.value);
-                const days = Math.ceil((d - new Date()) / 86400000);
-                sumDate.textContent = 'Ngay thi: ' + examDate.value + (days > 0 ? ' (con ' + days + ' ngay)' : ' (da qua)');
-            }
-        }
-
         function selectBand(container, value) {
-            if (!value) return;
+            if (!container || !value) return;
             const btn = container.querySelector('button[data-value="' + value + '"]');
             if (btn) {
                 btn.click(); // trigger the click event to apply styles
             }
         }
 
-        renderBands(currentSelector, 'current');
         renderBands(targetSelector, 'target');
 
         // Load data từ server (injected bởi JSP)
         const goalData = window.GOAL_DATA || {};
-        if (goalData.currentBand) {
-            const v = parseFloat(goalData.currentBand).toFixed(1);
-            currentBandVal = parseFloat(v);
-            selectBand(currentSelector, v);
-        }
         if (goalData.targetBand) {
             const v = parseFloat(goalData.targetBand).toFixed(1);
             targetBandVal = parseFloat(v);
             selectBand(targetSelector, v);
         }
-        if (goalData.examDate) {
-            const examDateEl = document.getElementById('examDate');
-            if (examDateEl) examDateEl.value = goalData.examDate;
-        }
-
-        updateSummary();
-
-        // Lắng nghe thay đổi ngày thi
-        const examDateEl = document.getElementById('examDate');
-        if (examDateEl) examDateEl.addEventListener('change', updateSummary);
 
         // Lưu lên server
         const saveGoalBtn = document.getElementById('saveGoalBtn');
         if (saveGoalBtn) {
             saveGoalBtn.addEventListener('click', async () => {
                 if (!targetBandVal) {
-                    showToast('Vui long chon band diem muc tieu', 'error');
+                    showToast('Vui lòng chọn band điểm mục tiêu', 'error');
                     return;
                 }
 
                 saveGoalBtn.disabled = true;
-                saveGoalBtn.textContent = 'Dang luu...';
+                saveGoalBtn.textContent = 'Đang lưu...';
 
                 const params = new URLSearchParams();
-                if (currentBandVal) params.append('currentBand', currentBandVal.toFixed(1));
                 params.append('targetBand', targetBandVal.toFixed(1));
-                const examDateVal = document.getElementById('examDate') ? document.getElementById('examDate').value : '';
-                if (examDateVal) params.append('examDate', examDateVal);
 
                 try {
                     const res = await fetch(window.contextPath + '/api/goal', { method: 'POST', body: params });
                     const data = await res.json();
                     if (data.success) {
-                        showToast('Da luu muc tieu IELTS len server thanh cong!');
+                        showToast('Đã lưu mục tiêu IELTS lên server thành công!');
                         const badge = document.getElementById('goalSavedBadge');
                         if (badge) { badge.style.display = 'block'; setTimeout(() => badge.style.display = 'none', 3000); }
-                        updateSummary();
                     } else {
-                        showToast('Luu that bai: ' + (data.error || 'Loi khong xac dinh'), 'error');
+                        showToast('Lưu thất bại: ' + (data.error || 'Lỗi không xác định'), 'error');
                     }
                 } catch (err) {
-                    showToast('Loi ket noi server', 'error');
+                    showToast('Lỗi kết nối server', 'error');
                 } finally {
                     saveGoalBtn.disabled = false;
-                    saveGoalBtn.innerHTML = '&#128190; Luu muc tieu';
+                    saveGoalBtn.innerHTML = '&#128190; Lưu mục tiêu';
                 }
             });
         }

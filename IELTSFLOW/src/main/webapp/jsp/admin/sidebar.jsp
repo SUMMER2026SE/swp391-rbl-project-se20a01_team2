@@ -1,9 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <aside class="sidebar">
-    <div class="brand"
-        style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text;">
-        IELTSFLOW Admin</div>
+    <a href="${pageContext.request.contextPath}/" style="text-decoration: none;">
+        <div class="brand"
+            style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text;">
+            IELTSFLOW Admin</div>
+    </a>
     <div class="user-profile">
         <div class="avatar" style="overflow: hidden; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white;">
             <c:choose>
