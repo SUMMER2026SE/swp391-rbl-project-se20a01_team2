@@ -22,7 +22,16 @@ import java.util.Optional;
 @WebServlet(name = "GoalApiServlet", urlPatterns = {"/api/goal"})
 public class GoalApiServlet extends HttpServlet {
 
-    private final CandidateTargetDAO dao = new CandidateTargetDAO();
+    private final CandidateTargetDAO dao;
+
+    public GoalApiServlet() {
+        this.dao = new CandidateTargetDAO();
+    }
+
+    // Constructor for testing
+    GoalApiServlet(CandidateTargetDAO dao) {
+        this.dao = dao;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -75,15 +84,31 @@ public class GoalApiServlet extends HttpServlet {
             }
 
             BigDecimal currentBand = (currentStr != null && !currentStr.isEmpty()) ? new BigDecimal(currentStr) : null;
-            BigDecimal targetBand  = new BigDecimal(targetStr);
-            LocalDate examDate     = (dateStr != null && !dateStr.isEmpty()) ? LocalDate.parse(dateStr) : null;
+            
+            BigDecimal targetBand;
+            try {
+                targetBand = new BigDecimal(targetStr);
+            } catch (NumberFormatException e) {
+                resp.setStatus(400);
+                out.print("{\"error\":\"targetBand must be a number\"}");
+                return;
+            }
+
+            if (targetBand.compareTo(new BigDecimal("4.0")) < 0 || targetBand.compareTo(new BigDecimal("9.0")) > 0) {
+                resp.setStatus(400);
+                out.print("{\"error\":\"Target band must be between 4.0 and 9.0\"}");
+                return;
+            }
+
+            LocalDate examDate = (dateStr != null && !dateStr.isEmpty()) ? LocalDate.parse(dateStr) : null;
 
             dao.saveOrUpdate(userId, currentBand, targetBand, examDate);
             out.print("{\"success\":true}");
 
         } catch (Exception e) {
+            e.printStackTrace();
             resp.setStatus(500);
-            out.print("{\"error\":\"" + e.getMessage().replace("\"", "'") + "\"}");
+            out.print("{\"error\":\"" + (e.getMessage() != null ? e.getMessage().replace("\"", "'") : "Unknown error") + "\"}");
         }
     }
 }
