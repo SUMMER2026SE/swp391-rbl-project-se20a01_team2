@@ -185,10 +185,9 @@
                                 </rule>
                             </rules>
                             <excludes>
-                                <exclude>**/dto/**</exclude>
-                                <exclude>**/entity/**</exclude>
-                                <exclude>**/config/**</exclude>
-                                <exclude>**/exception/**</exclude>
+                                <exclude>**/model/**</exclude>
+                                <exclude>**/filter/**</exclude>
+                                <exclude>**/listener/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
