@@ -14,7 +14,6 @@ import java.util.Date;
 
 @Entity
 @Table(name = "Transactions")
-@jakarta.persistence.EntityListeners(listener.AuditEntityListener.class)
 public class Transaction {
     
     @Id
