@@ -303,8 +303,7 @@
     <script>
         window.GOAL_DATA = {
             currentBand: '${not empty target ? target.currentBand : ""}',
-            targetBand: '${not empty target ? target.targetBand : ""}',
-            examDate: '${not empty target ? target.examDate : ""}'
+            targetBand: '${not empty target ? target.targetBand : ""}'
         };
     </script>
     <script src="${pageContext.request.contextPath}/js/account.js?v=5"></script>

@@ -2,7 +2,6 @@ package model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "CandidateTargets")
@@ -22,19 +21,15 @@ public class CandidateTarget {
     @Column(name = "CurrentBand", precision = 3, scale = 1)
     private BigDecimal currentBand;
 
-    @Column(name = "ExamDate")
-    private LocalDate examDate;
-
     @Column(name = "IsActive")
     private boolean isActive = true;
 
     public CandidateTarget() {}
 
-    public CandidateTarget(int userId, BigDecimal targetBand, BigDecimal currentBand, LocalDate examDate) {
+    public CandidateTarget(int userId, BigDecimal targetBand, BigDecimal currentBand) {
         this.userId = userId;
         this.targetBand = targetBand;
         this.currentBand = currentBand;
-        this.examDate = examDate;
         this.isActive = true;
     }
 
@@ -49,9 +44,6 @@ public class CandidateTarget {
 
     public BigDecimal getCurrentBand() { return currentBand; }
     public void setCurrentBand(BigDecimal currentBand) { this.currentBand = currentBand; }
-
-    public LocalDate getExamDate() { return examDate; }
-    public void setExamDate(LocalDate examDate) { this.examDate = examDate; }
 
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
