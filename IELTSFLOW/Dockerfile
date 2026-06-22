@@ -1,5 +1,5 @@
 # Stage 1: Build the application using Maven (Build on native architecture for speed/stability)
-FROM --platform=$BUILDPLATFORM maven:3.9.6-eclipse-temurin-11 AS builder
+FROM --platform=$BUILDPLATFORM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
 
 # Copy the pom.xml and download dependencies to cache them
