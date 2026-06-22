@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Exams")
-@jakarta.persistence.EntityListeners(listener.AuditEntityListener.class)
 public class Exam {
 
     @Id
