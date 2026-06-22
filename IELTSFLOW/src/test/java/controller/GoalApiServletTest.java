@@ -65,7 +65,7 @@ public class GoalApiServletTest {
         printWriter.flush();
 
         // Assert
-        verify(candidateTargetDAO, times(1)).saveOrUpdate(eq(1), any(), eq(new BigDecimal("6.5")), any());
+        verify(candidateTargetDAO, times(1)).saveOrUpdate(eq(1), any(), eq(new BigDecimal("6.5")));
         assertTrue(stringWriter.toString().contains("\"success\":true"));
     }
 
@@ -79,7 +79,7 @@ public class GoalApiServletTest {
         printWriter.flush();
 
         // Assert
-        verify(candidateTargetDAO, times(1)).saveOrUpdate(eq(1), any(), eq(new BigDecimal("4.0")), any());
+        verify(candidateTargetDAO, times(1)).saveOrUpdate(eq(1), any(), eq(new BigDecimal("4.0")));
         assertTrue(stringWriter.toString().contains("\"success\":true"));
     }
 
@@ -93,7 +93,7 @@ public class GoalApiServletTest {
         printWriter.flush();
 
         // Assert
-        verify(candidateTargetDAO, times(1)).saveOrUpdate(eq(1), any(), eq(new BigDecimal("9.0")), any());
+        verify(candidateTargetDAO, times(1)).saveOrUpdate(eq(1), any(), eq(new BigDecimal("9.0")));
         assertTrue(stringWriter.toString().contains("\"success\":true"));
     }
 
@@ -109,7 +109,7 @@ public class GoalApiServletTest {
         // Assert
         verify(response).setStatus(400);
         assertTrue(stringWriter.toString().contains("Target band must be between 4.0 and 9.0"));
-        verify(candidateTargetDAO, never()).saveOrUpdate(anyInt(), any(), any(), any());
+        verify(candidateTargetDAO, never()).saveOrUpdate(anyInt(), any(), any());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class GoalApiServletTest {
         // Assert
         verify(response).setStatus(400);
         assertTrue(stringWriter.toString().contains("Target band must be between 4.0 and 9.0"));
-        verify(candidateTargetDAO, never()).saveOrUpdate(anyInt(), any(), any(), any());
+        verify(candidateTargetDAO, never()).saveOrUpdate(anyInt(), any(), any());
     }
 
     @Test
@@ -139,7 +139,7 @@ public class GoalApiServletTest {
         // Assert
         verify(response).setStatus(400);
         assertTrue(stringWriter.toString().contains("targetBand is required"));
-        verify(candidateTargetDAO, never()).saveOrUpdate(anyInt(), any(), any(), any());
+        verify(candidateTargetDAO, never()).saveOrUpdate(anyInt(), any(), any());
     }
 
     @Test
@@ -154,6 +154,6 @@ public class GoalApiServletTest {
         // Assert
         verify(response).setStatus(400);
         assertTrue(stringWriter.toString().contains("targetBand must be a number"));
-        verify(candidateTargetDAO, never()).saveOrUpdate(anyInt(), any(), any(), any());
+        verify(candidateTargetDAO, never()).saveOrUpdate(anyInt(), any(), any());
     }
 }

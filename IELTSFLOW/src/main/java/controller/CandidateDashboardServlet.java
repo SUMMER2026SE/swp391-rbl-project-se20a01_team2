@@ -48,12 +48,6 @@ public class CandidateDashboardServlet extends HttpServlet {
             java.util.Optional<model.CandidateTarget> targetOpt = targetDAO.findActiveByUserId(userId);
             if (targetOpt.isPresent()) {
                 req.setAttribute("target", targetOpt.get());
-                java.time.LocalDate examLocalDate = targetOpt.get().getExamDate();
-                if (examLocalDate != null) {
-                    java.time.LocalDate today = java.time.LocalDate.now();
-                    long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, examLocalDate);
-                    req.setAttribute("daysRemaining", daysRemaining);
-                }
             }
 
             // Fetch real candidate stats from DB

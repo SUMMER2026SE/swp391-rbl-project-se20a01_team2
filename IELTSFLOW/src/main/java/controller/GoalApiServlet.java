@@ -51,10 +51,9 @@ public class GoalApiServlet extends HttpServlet {
         if (opt.isPresent()) {
             CandidateTarget t = opt.get();
             out.print("{\"currentBand\":" + t.getCurrentBand() +
-                      ",\"targetBand\":" + t.getTargetBand() +
-                      ",\"examDate\":\"" + (t.getExamDate() != null ? t.getExamDate().toString() : "") + "\"}");
+                      ",\"targetBand\":" + t.getTargetBand() + "\"}");
         } else {
-            out.print("{\"currentBand\":null,\"targetBand\":null,\"examDate\":\"\"}");
+            out.print("{\"currentBand\":null,\"targetBand\":null}");
         }
     }
 
@@ -75,7 +74,6 @@ public class GoalApiServlet extends HttpServlet {
         try {
             String currentStr = req.getParameter("currentBand");
             String targetStr  = req.getParameter("targetBand");
-            String dateStr    = req.getParameter("examDate");
 
             if (targetStr == null || targetStr.trim().isEmpty()) {
                 resp.setStatus(400);
@@ -100,9 +98,7 @@ public class GoalApiServlet extends HttpServlet {
                 return;
             }
 
-            LocalDate examDate = (dateStr != null && !dateStr.isEmpty()) ? LocalDate.parse(dateStr) : null;
-
-            dao.saveOrUpdate(userId, currentBand, targetBand, examDate);
+            dao.saveOrUpdate(userId, currentBand, targetBand);
             out.print("{\"success\":true}");
 
         } catch (Exception e) {
