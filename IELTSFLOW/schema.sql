@@ -31,13 +31,19 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE CandidateTargets (
+
     TargetID INT IDENTITY(1,1) PRIMARY KEY,
+
     UserID INT NOT NULL,
-    TargetBand DECIMAL(3,1) NOT NULL, -- Ví dụ: 6.5, 7.0
+
+    TargetBand DECIMAL(3,1) NOT NULL, \-- Ví dụ: 6.5, 7.0
+
     CurrentBand DECIMAL(3,1),
-    ExamDate DATE,
-    IsActive BIT DEFAULT 1, -- [CẬP NHẬT] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
+
+    IsActive BIT DEFAULT 1, \-- [CẬP NHẬT] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
+
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
+
 );
 
 -- ==========================================
@@ -58,7 +64,7 @@ CREATE TABLE Transactions (
     UserID INT NOT NULL,
     PackageID INT NOT NULL,
     Amount DECIMAL(18,2) NOT NULL,
-    PaymentMethod NVARCHAR(50), -- VNPay, MoMo, Stripe
+    PaymentMethod NVARCHAR(50), -- SePay
     GatewayTransactionID NVARCHAR(100) NULL, -- Mã đối soát từ Cổng thanh toán (TxnRef)
     GatewayPayload NVARCHAR(MAX) NULL, -- [CẬP NHẬT] Lưu trữ JSON payload gốc từ webhook để đối soát khi có lỗi
     Status NVARCHAR(50) DEFAULT 'Pending', -- Pending, Success, Failed
@@ -122,10 +128,8 @@ CREATE TABLE Answers (
 CREATE TABLE Tags (
     TagID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
-    Type NVARCHAR(50), -- Topic, Grammar, Vocabulary...
-    Deleted BIT DEFAULT 0
+    Type NVARCHAR(50) -- Topic, Grammar, Vocabulary...
 );
-
 
 CREATE TABLE QuestionTags (
     QuestionID INT NOT NULL,
@@ -348,7 +352,7 @@ CREATE TABLE UploadedFiles (
     FileID INT IDENTITY(1,1) PRIMARY KEY,
     OriginalName NVARCHAR(255) NOT NULL,
     SavedPath NVARCHAR(500) NOT NULL,
-    FileType NVARCHAR(50) NOT NULL,-- 'profile_pic', 'material', 'video', 'audio'
+    FileType NVARCHAR(50) NOT NULL, --  'profile_pic', 'material', ‘video’
     UploadedBy INT NOT NULL,
     UploadedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (UploadedBy) REFERENCES Users(UserID)

@@ -7,7 +7,6 @@ import model.CandidateTarget;
 import util.JpaHelper;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Optional;
 
 /**
@@ -26,17 +25,16 @@ public class CandidateTargetDAO {
      * Lưu hoặc cập nhật mục tiêu của user.
      * Nếu đã có bản ghi active thì update, chưa có thì insert mới.
      */
-    public void saveOrUpdate(int userId, BigDecimal currentBand, BigDecimal targetBand, LocalDate examDate) {
+    public void saveOrUpdate(int userId, BigDecimal currentBand, BigDecimal targetBand) {
         JpaHelper.execute(em -> {
             Optional<CandidateTarget> existing = findActiveByUserIdWithEm(em, userId);
             if (existing.isPresent()) {
                 CandidateTarget target = existing.get();
                 target.setCurrentBand(currentBand);
                 target.setTargetBand(targetBand);
-                target.setExamDate(examDate);
                 em.merge(target);
             } else {
-                CandidateTarget target = new CandidateTarget(userId, targetBand, currentBand, examDate);
+                CandidateTarget target = new CandidateTarget(userId, targetBand, currentBand);
                 em.persist(target);
             }
         });
@@ -53,7 +51,7 @@ public class CandidateTargetDAO {
                 t.setCurrentBand(newBand);
                 em.merge(t);
             } else {
-                CandidateTarget target = new CandidateTarget(userId, newBand, newBand, null);
+                CandidateTarget target = new CandidateTarget(userId, newBand, newBand);
                 em.persist(target);
             }
         });
