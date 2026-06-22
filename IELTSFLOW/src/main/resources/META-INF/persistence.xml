@@ -1,27 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
-    <persistence-unit name="IELTSFLOW">
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>models.User</class>
-        <class>models.Supplier</class>
-        <class>models.Product</class>
-        <class>models.Order</class>
-        <class>models.OrderDetail</class>
-        <class>models.RefundRequest</class>
-        <class>models.LoyaltyConfig</class>
-        <class>models.PointHistory</class>
-        <class>models.ProphetForecast</class>
-        <class>models.Province</class>
-        <class>models.UserAddress</class>
-
-        <properties>
-            <property name="jakarta.persistence.jdbc.driver"   value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-            <property name="jakarta.persistence.jdbc.url"      value="jdbc:sqlserver://localhost:1433;databaseName=IELTSFLOW;Encrypt=True;TrustServerCertificate=True;sendStringParametersAsUnicode=true;characterEncoding=UTF-8"/>
-            <property name="jakarta.persistence.jdbc.user"     value="sa"/>
-            <property name="jakarta.persistence.jdbc.password" value="change-me"/>
-            <property name="hibernate.dialect"                 value="org.hibernate.dialect.SQLServerDialect"/>
-            <property name="hibernate.show_sql"                value="true"/>
-            <property name="hibernate.hbm2ddl.auto"            value="update"/>
-        </properties>
-    </persistence-unit>
+<persistence version="3.0" 
+             xmlns="https://jakarta.ee/xml/ns/persistence" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence 
+https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+  <persistence-unit name="IELTSFLOW" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <class>model.CandidateTarget</class>
+    <class>model.SubscriptionPackage</class>
+    <class>model.SystemLog</class>
+    <class>model.Transaction</class>
+    <class>model.Exam</class>
+    <class>model.Lesson</class>
+    <class>model.Notification</class>
+    <class>model.Pathway</class>
+    <class>model.Ticket</class>
+    <class>model.TicketReply</class>
+    <class>model.User</class>
+    <class>model.UserLessonProgress</class>
+    <class>model.UserQuestionBookmark</class>
+    <class>model.WeeklyPlan</class>
+    <class>model.QuestionResource</class>
+    <class>model.Question</class>
+    <class>model.Answer</class>
+    <class>model.Tag</class>
+    <shared-cache-mode>NONE</shared-cache-mode>
+    <validation-mode>NONE</validation-mode>
+    <properties>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
+      <property name="hibernate.show_sql" value="true"/>
+    </properties>
+  </persistence-unit>
 </persistence>
