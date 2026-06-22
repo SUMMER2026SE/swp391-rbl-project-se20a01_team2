@@ -19,6 +19,11 @@ public class UserServiceImpl implements UserService {
         this.otpService = OtpService.getInstance();
     }
 
+    public UserServiceImpl(UserDAO userDAO, OtpService otpService) {
+        this.userDAO = userDAO;
+        this.otpService = otpService;
+    }
+
     private String getSender() {
         String domain = System.getProperty("RESEND_SEND_DOMAIN");
         if (domain == null || domain.trim().isEmpty()) {
@@ -118,6 +123,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void resetPassword(String resetToken, String newPassword) throws Exception {
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new Exception("Mật khẩu phải có ít nhất 8 ký tự.");
+        }
+        
         String email = otpService.consumeResetToken(resetToken);
         if (email == null) {
             throw new Exception("Token không hợp lệ hoặc đã hết hạn.");
@@ -259,6 +268,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(User user) {
+        if (user.getFullName() == null || user.getFullName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Họ và tên không được để trống");
+        }
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            throw new IllegalArgumentException("Email không hợp lệ");
+        }
+        if (user.getStatus() == null || user.getStatus().trim().isEmpty()) {
+            throw new IllegalArgumentException("Trạng thái không được để trống");
+        }
         if (userDAO.emailExists(user.getEmail()))
             throw new IllegalArgumentException("Email đã tồn tại: " + user.getEmail());
         if (user.getRoleId() == 0) user.setRoleId(ROLE_CANDIDATE);
