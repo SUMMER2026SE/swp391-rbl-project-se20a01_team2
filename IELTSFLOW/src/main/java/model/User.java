@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Users")
+@jakarta.persistence.EntityListeners(listener.AuditEntityListener.class)
 public class User {
 
     @Id
