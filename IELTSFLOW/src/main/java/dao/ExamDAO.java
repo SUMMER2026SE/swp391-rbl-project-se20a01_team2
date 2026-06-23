@@ -85,6 +85,16 @@ public class ExamDAO {
         JpaHelper.execute(em -> em.merge(exam));
     }
 
+    public List<Exam> findByMentor(int mentorId) {
+        return JpaHelper.query(em ->
+            em.createQuery(
+                "SELECT e FROM Exam e WHERE e.mentorId = :mentorId AND e.deleted = false ORDER BY e.createdAt DESC",
+                Exam.class)
+              .setParameter("mentorId", mentorId)
+              .getResultList()
+        );
+    }
+
     public void softDelete(int id) {
         JpaHelper.execute(em -> {
             Exam e = em.find(Exam.class, id);

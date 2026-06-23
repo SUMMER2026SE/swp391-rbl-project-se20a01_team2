@@ -446,13 +446,11 @@ CREATE TABLE CandidateTargets (
 
     UserID INT NOT NULL,
 
-    TargetBand DECIMAL(3,1) NOT NULL, \-- Ví dụ: 6.5, 7.0
+    TargetBand DECIMAL(3,1) NOT NULL, \\-- Ví dụ: 6.5, 7.0
 
     CurrentBand DECIMAL(3,1),
 
-    ExamDate DATE,
-
-    IsActive BIT DEFAULT 1, \-- \[CẬP NHẬT\] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
+    IsActive BIT DEFAULT 1, \\-- \[CẬP NHẬT\] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
 
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 
@@ -1114,3 +1112,12 @@ ALTER TABLE users
 ADD ProfilePic NVARCHAR(500) NULL;
 
 GO
+
+\# Cập nhật 21/6: Xóa cột ExamDate trong bảng CandidateTargets
+
+ALTER TABLE CandidateTargets
+
+DROP COLUMN ExamDate;
+
+GO
+
