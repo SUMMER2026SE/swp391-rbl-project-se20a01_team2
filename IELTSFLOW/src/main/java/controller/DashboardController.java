@@ -38,8 +38,10 @@ public class DashboardController extends HttpServlet {
                 return;
             }
             int roleId = session.getAttribute("roleId") != null ? (int) session.getAttribute("roleId") : 3;
-            if (roleId == 1 || roleId == 2) {
+            if (roleId == 1) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else if (roleId == 2) {
+                response.sendRedirect(request.getContextPath() + "/mentor/dashboard");
             } else {
                 response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
             }
