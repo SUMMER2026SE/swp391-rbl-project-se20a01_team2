@@ -57,7 +57,12 @@ formData.append("referenceText", "This is the text the candidate is supposed to 
 // formData.append("referenceText", textTuSTT);
 // formData.append("isUnscripted", "true");
 
-fetch('http://localhost:8080/IELTSFLOW/api/speech/assess', {
+// Khuyên dùng đường dẫn tương đối thay vì hardcode 'http://localhost:8080' 
+// Điều này giúp code không bị lỗi CORS hoặc lỗi kết nối khi deploy lên server thật (Vercel, AWS, Azure...)
+const API_URL = '/IELTSFLOW/api/speech/assess';
+// Hoặc an toàn hơn nếu deploy ở sub-path: const API_URL = window.location.origin + '/IELTSFLOW/api/speech/assess';
+
+fetch(API_URL, {
     method: 'POST',
     body: formData
 })
