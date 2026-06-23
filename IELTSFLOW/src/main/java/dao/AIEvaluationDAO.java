@@ -4,6 +4,8 @@ import jakarta.persistence.Query;
 import model.AIEvaluation;
 import util.JpaHelper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,4 +75,32 @@ public class AIEvaluationDAO {
             return false;
         }
     }
+
+    /**
+     * Lấy toàn bộ FeedbackJSON và Skill của các bài đã được AI chấm,
+     * thuộc các đề thi do mentor tạo.
+     * @return List of Object[]{feedbackJson (String), skill (String)}
+     */
+   public List<Object[]> getAllFeedbackByMentor(int mentorId) {
+    try {
+        return JpaHelper.query(em -> {
+            String sql =
+                "SELECT ae.FeedbackJSON, sd.Skill " +
+                "FROM AIEvaluations ae " +
+                "JOIN SubmissionDetails sd ON ae.DetailID = sd.DetailID " +
+                "JOIN TestSubmissions ts ON sd.SubmissionID = ts.SubmissionID " +
+                "JOIN Exams e ON ts.ExamID = e.ExamID " +
+                "WHERE e.MentorID = ?1 " +
+                "  AND e.Deleted = 0 " +
+                "  AND sd.Skill IN ('Writing', 'Speaking') " +
+                "  AND ae.FeedbackJSON IS NOT NULL";
+            return em.createNativeQuery(sql)
+                     .setParameter(1, mentorId)
+                     .getResultList();
+        });
+    } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Loi khi lay feedback theo mentorId " + mentorId, e);
+        return new ArrayList<>();
+    }
+}
 }

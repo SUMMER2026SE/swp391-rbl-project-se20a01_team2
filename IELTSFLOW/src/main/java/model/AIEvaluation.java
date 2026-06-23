@@ -1,7 +1,6 @@
 package model;
 
 import java.time.LocalDateTime;
-
 public class AIEvaluation {
     private int evaluationId;
     private int detailId;
