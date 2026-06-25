@@ -22,20 +22,20 @@ INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@PlacementExa
 DECLARE @PlacementSectionID INT = SCOPE_IDENTITY();
 
 -- Insert Questions for Placement Test
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON) VALUES ('What is the capital of France?', 'Multiple_Choice', 'Reading', 'Easy', '{}');
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, CreatedBy) VALUES ('What is the capital of France?', 'Multiple_Choice', 'Reading', 'Easy', '{}', 1);
 DECLARE @Q1 INT = SCOPE_IDENTITY();
 INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@Q1, 'Paris', 1, '{}'), (@Q1, 'London', 0, '{}'), (@Q1, 'Berlin', 0, '{}');
 
 INSERT INTO QuestionResource (ResourceAudioURL, Type) VALUES ('https://actions.google.com/sounds/v1/water/rain_on_roof.ogg', 'Audio');
 DECLARE @Res1 INT = SCOPE_IDENTITY();
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Listen and choose: The boy is going to...', 'Multiple_Choice', 'Listening', 'Easy', '{}', @Res1);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy) VALUES ('Listen and choose: The boy is going to...', 'Multiple_Choice', 'Listening', 'Easy', '{}', @Res1, 1);
 DECLARE @Q2 INT = SCOPE_IDENTITY();
 INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@Q2, 'The market', 1, '{}'), (@Q2, 'The school', 0, '{}'), (@Q2, 'The park', 0, '{}');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON) VALUES ('Write an essay about the importance of learning English.', 'Essay', 'Writing', 'Medium', '{}');
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, CreatedBy) VALUES ('Write an essay about the importance of learning English.', 'Essay', 'Writing', 'Medium', '{}', 1);
 DECLARE @Q3 INT = SCOPE_IDENTITY();
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON) VALUES ('Describe a memorable trip you had. You should say where you went, what you did, and why it is memorable.', 'Speaking', 'Speaking', 'Medium', '{}');
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, CreatedBy) VALUES ('Describe a memorable trip you had. You should say where you went, what you did, and why it is memorable.', 'Speaking', 'Speaking', 'Medium', '{}', 1);
 DECLARE @Q4 INT = SCOPE_IDENTITY();
 
 -- Map to ExamQuestions
@@ -47,20 +47,20 @@ INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@MockExamID, 
 DECLARE @MockSectionID INT = SCOPE_IDENTITY();
 
 -- Insert Questions for Mock Test
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON) VALUES ('Read the passage and answer: Global warming is caused by...', 'Multiple_Choice', 'Reading', 'Hard', '{}');
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, CreatedBy) VALUES ('Read the passage and answer: Global warming is caused by...', 'Multiple_Choice', 'Reading', 'Hard', '{}', 1);
 DECLARE @Q5 INT = SCOPE_IDENTITY();
 INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@Q5, 'Greenhouse gases', 1, '{}'), (@Q5, 'Solar radiation', 0, '{}'), (@Q5, 'Ocean currents', 0, '{}');
 
 INSERT INTO QuestionResource (ResourceAudioURL, Type) VALUES ('https://actions.google.com/sounds/v1/transportation/subway_train.ogg', 'Audio');
 DECLARE @Res2 INT = SCOPE_IDENTITY();
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Listen to the conversation: What time is the flight?', 'Multiple_Choice', 'Listening', 'Hard', '{}', @Res2);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy) VALUES ('Listen to the conversation: What time is the flight?', 'Multiple_Choice', 'Listening', 'Hard', '{}', @Res2, 1);
 DECLARE @Q6 INT = SCOPE_IDENTITY();
 INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@Q6, '9:00 AM', 1, '{}'), (@Q6, '10:00 AM', 0, '{}'), (@Q6, '11:00 AM', 0, '{}');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON) VALUES ('Task 1: Summarize the chart below.', 'Essay', 'Writing', 'Hard', '{}');
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, CreatedBy) VALUES ('Task 1: Summarize the chart below.', 'Essay', 'Writing', 'Hard', '{}', 1);
 DECLARE @Q7 INT = SCOPE_IDENTITY();
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON) VALUES ('Part 2: Describe a book that had a major influence on you.', 'Speaking', 'Speaking', 'Hard', '{}');
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, CreatedBy) VALUES ('Part 2: Describe a book that had a major influence on you.', 'Speaking', 'Speaking', 'Hard', '{}', 1);
 DECLARE @Q8 INT = SCOPE_IDENTITY();
 
 -- Map to ExamQuestions
