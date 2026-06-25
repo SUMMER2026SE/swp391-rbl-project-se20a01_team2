@@ -107,7 +107,7 @@ public class AuthFilter implements Filter {
             }
             if (roleId != 1) {
                 // Không phải Admin → Chuyển về trang chủ với thông báo
-                resp.sendRedirect(contextPath + "/index.html?error=forbidden");
+                resp.sendRedirect(contextPath + "/?error=forbidden");
                 return;
             }
             chain.doFilter(request, response);
@@ -122,7 +122,7 @@ public class AuthFilter implements Filter {
             }
             if (roleId != 1 && roleId != 2) {
                 // Không phải Admin hoặc Mentor → Chuyển về trang chủ với thông báo
-                resp.sendRedirect(contextPath + "/index.html?error=forbidden");
+                resp.sendRedirect(contextPath + "/?error=forbidden");
                 return;
             }
             chain.doFilter(request, response);

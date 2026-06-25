@@ -459,14 +459,15 @@
                     <c:choose>
                         <c:when test="${not empty sessionScope.fullName}">
                             <div style="display: flex; align-items: center; gap: 16px;">
-                                <c:choose>
-                                    <c:when test="${sessionScope.roleId == 1 || sessionScope.roleId == 2}">
-                                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển</a>
-                                    </c:otherwise>
-                                </c:choose>
+                                <c:if test="${sessionScope.roleId == 1}">
+                                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển (Admin)</a>
+                                </c:if>
+                                <c:if test="${sessionScope.roleId == 2}">
+                                    <a href="${pageContext.request.contextPath}/mentor/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển (Mentor)</a>
+                                </c:if>
+                                <c:if test="${sessionScope.roleId != 1 && sessionScope.roleId != 2}">
+                                    <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển</a>
+                                </c:if>
                                 <div class="user-dropdown-container">
                                     <div class="user-avatar-btn">
                                         <c:choose>

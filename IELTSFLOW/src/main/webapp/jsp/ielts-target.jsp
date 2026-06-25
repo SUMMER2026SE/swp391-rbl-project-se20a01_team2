@@ -123,10 +123,16 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Trang chủ
             </a>
-            <c:if test="${sessionScope.roleId == 1 || sessionScope.roleId == 2}">
+            <c:if test="${sessionScope.roleId == 1}">
             <a href="${pageContext.request.contextPath}/admin/dashboard" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                Hệ thống
+                Hệ thống (Admin)
+            </a>
+            </c:if>
+            <c:if test="${sessionScope.roleId == 2}">
+            <a href="${pageContext.request.contextPath}/mentor/dashboard" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Hệ thống (Mentor)
             </a>
             </c:if>
 
