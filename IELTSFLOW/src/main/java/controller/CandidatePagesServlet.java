@@ -112,7 +112,7 @@ public class CandidatePagesServlet extends HttpServlet {
 
             for (int i = 0; i < completed.size(); i++) {
                 TestSubmission s = completed.get(i);
-                labels.append("\"Bài ").append(i + 1).append("\"");
+                labels.append("\"#").append(s.getSubmissionId()).append("\"");
                 listeningArr.append(s.getListeningBand() != null ? s.getListeningBand() : "null");
                 readingArr  .append(s.getReadingBand()   != null ? s.getReadingBand()   : "null");
                 writingArr  .append(s.getWritingBand()   != null ? s.getWritingBand()   : "null");
