@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * MockTestServlet — Xử lý toàn bộ luồng Mock Test:
@@ -161,6 +162,8 @@ public class MockTestServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         int submissionId = (Integer) session.getAttribute("mt_currentSubmissionId");
         List<Question> questions = (List<Question>) session.getAttribute("mt_currentQuestions");
+        List<model.FeedbackWriting> writingFeedbacks = new ArrayList<>();
+        List<model.FeedbackSpeaking> speakingFeedbacks = new ArrayList<>();
 
         int correctReading = 0, totalReading = 0;
         int correctListening = 0, totalListening = 0;
@@ -192,16 +195,37 @@ public class MockTestServlet extends HttpServlet {
                     detail.setCandidateTranscript(req.getParameter("transcript_" + q.getQuestionId()));
                 }
                 int detailId = mockTestService.saveDetail(detail);
-                double aiScore = mockTestService.gradeSubjectiveAnswer(detailId, skill, answer);
-                if ("Writing".equals(skill))  { sumWriting  += aiScore; countWriting++;  }
-                if ("Speaking".equals(skill)) { sumSpeaking += aiScore; countSpeaking++; }
+                services.AIEvaluationService aiService = new services.AIEvaluationService();
+                if ("Writing".equals(skill)) {
+                    countWriting++;
+                    try {
+                        aiService.evaluateWritingAsync(detailId, q.getContent(), answer);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if ("Speaking".equals(skill)) {
+                    countSpeaking++;
+                    String azureScoreStr = req.getParameter("azure_" + q.getQuestionId());
+                    double azureScore = 0.0;
+                    if (azureScoreStr != null && !azureScoreStr.isEmpty()) {
+                        try { azureScore = Double.parseDouble(azureScoreStr); } catch (Exception ignored) {}
+                    }
+                    try {
+                        aiService.evaluateSpeakingAsync(detailId, q.getContent(), detail.getCandidateTranscript(), azureScore);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
 
         Double listeningBand = totalListening > 0 ? mockTestService.rawToBand(correctListening, totalListening) : null;
         Double readingBand   = totalReading   > 0 ? mockTestService.rawToBand(correctReading,   totalReading)   : null;
-        Double writingBand   = countWriting   > 0 ? (sumWriting  / countWriting)  : null;
-        Double speakingBand  = countSpeaking  > 0 ? (sumSpeaking / countSpeaking) : null;
+        
+        // Vì AI đang chấm ngầm, điểm ban đầu sẽ là null (Pending)
+        Double writingBand   = null;
+        Double speakingBand  = null;
+        
         Double overall = mockTestService.calcOverall(listeningBand, readingBand, writingBand, speakingBand);
 
         int violationCount = 0;
@@ -222,7 +246,11 @@ public class MockTestServlet extends HttpServlet {
         finalSub.setStatus(forcedSubmit ? "Abandoned" : "Completed");
         mockTestService.finaliseSubmission(finalSub);
 
-        // Dọn sạch session
+        req.setAttribute("writingFeedbacks", writingFeedbacks);
+        req.setAttribute("speakingFeedbacks", speakingFeedbacks);
+
+        // Fetch back full join Exam for result page
+        TestSubmission fullInfo = mockTestService.getSubmissionById(submissionId);
         session.removeAttribute("mt_currentExam");
         session.removeAttribute("mt_currentQuestions");
         session.removeAttribute("mt_currentSubmissionId");
@@ -277,6 +305,39 @@ public class MockTestServlet extends HttpServlet {
         }
 
         req.setAttribute("submission", sub);
+        
+        if (sub.getStartTime() != null && sub.getEndTime() != null) {
+            java.time.Duration duration = java.time.Duration.between(sub.getStartTime(), sub.getEndTime());
+            long totalSeconds = duration.getSeconds();
+            long h = totalSeconds / 3600;
+            long m = (totalSeconds % 3600) / 60;
+            long s = totalSeconds % 60;
+            String timeTaken = (h > 0 ? h + " giờ " : "") + (m > 0 ? m + " phút " : "") + s + " giây";
+            req.setAttribute("timeTaken", timeTaken);
+        }
+        
+        // --- Tích hợp giải nghĩa chi tiết AI Feedback ---
+        dao.AIEvaluationDAO aiDao = new dao.AIEvaluationDAO();
+        List<String> feedbackJsons = aiDao.getFeedbackJsonStringsBySubmissionId(subId);
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        List<model.FeedbackWriting> writingFeedbacks = new ArrayList<>();
+        List<model.FeedbackSpeaking> speakingFeedbacks = new ArrayList<>();
+        
+        for (String json : feedbackJsons) {
+            try {
+                if (json.contains("\"grammaticalRangeAndAccuracy\"")) {
+                    writingFeedbacks.add(mapper.readValue(json, model.FeedbackWriting.class));
+                } else if (json.contains("\"pronunciation\"")) {
+                    speakingFeedbacks.add(mapper.readValue(json, model.FeedbackSpeaking.class));
+                }
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger("MockTestServlet").log(java.util.logging.Level.SEVERE, "Lỗi parse Feedback JSON", e);
+            }
+        }
+        req.setAttribute("writingFeedbacks", writingFeedbacks);
+        req.setAttribute("speakingFeedbacks", speakingFeedbacks);
+        // ----------------------------------------------
+
         // Lấy lịch sử bài thi của user
         List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
         req.setAttribute("history", history);

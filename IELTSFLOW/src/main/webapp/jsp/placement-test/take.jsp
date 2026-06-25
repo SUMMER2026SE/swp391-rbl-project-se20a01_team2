@@ -644,14 +644,13 @@
                                                                             ⏹ Dừng thu âm
                                                                         </button>
                                                                     </div>
-                                                                    <div class="transcript-display"
-                                                                        id="transcript-${q.questionId}">
-                                                                        Transcript sẽ hiện tại đây sau khi bạn dừng thu
-                                                                        âm...
+                                                                    <div class="transcript-display" id="transcript-${q.questionId}" style="min-height: auto; text-align: center; padding: 0.75rem;">
+                                                                        Trạng thái: Chưa ghi âm
                                                                     </div>
                                                                     <input type="hidden"
                                                                         name="transcript_${q.questionId}"
                                                                         id="hidden-transcript-${q.questionId}">
+                                                                    <input type="hidden" name="azure_${q.questionId}" id="hidden-azure-${q.questionId}" value="0">
                                                                     <input type="hidden" name="q_${q.questionId}"
                                                                         value="">
                                                                 </div>
@@ -784,43 +783,66 @@
                         document.getElementById(counterId).textContent = words.length + ' từ';
                     }
 
-                    // ── SPEAKING — Web Speech API (Speech-To-Text) ────────────────────
-                    const recognitions = {};
+                    // ── SPEAKING — MediaRecorder & STT via Azure ────────────────────
+                    const mediaRecorders = {};
+                    const audioChunksMap = {};
                     const recTimers = {};
 
                     async function startRecording(qId) {
                         try {
-                            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                            if (!SpeechRecognition) {
-                                alert('Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng dùng Google Chrome hoặc Microsoft Edge.');
-                                return;
-                            }
-                            const recognition = new SpeechRecognition();
-                            recognition.lang = 'en-US';
-                            recognition.interimResults = true;
-                            recognition.continuous = true;
-                            let finalTranscript = '';
-                            document.getElementById('transcript-' + qId).textContent = 'Đang nghe... (Hãy nói một câu tiếng Anh)';
-                            document.getElementById('hidden-transcript-' + qId).value = '';
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            const mediaRecorder = new MediaRecorder(stream);
+                            audioChunksMap[qId] = [];
 
-                            recognition.onresult = (event) => {
-                                let interimTranscript = '';
-                                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + ' ';
-                                    else interimTranscript += event.results[i][0].transcript;
+                            mediaRecorder.ondataavailable = event => {
+                                if (event.data.size > 0) {
+                                    audioChunksMap[qId].push(event.data);
                                 }
-                                const currentText = finalTranscript + interimTranscript;
-                                document.getElementById('transcript-' + qId).textContent = currentText;
-                                document.getElementById('hidden-transcript-' + qId).value = currentText.trim();
                             };
-                            recognition.onerror = (event) => console.error('Lỗi nhận diện:', event.error);
-                            recognition.onend = () => {
-                                document.querySelector('[name="q_' + qId + '"]').value = 'recorded';
-                                if (document.getElementById('hidden-transcript-' + qId).value.trim() === '')
-                                    document.getElementById('transcript-' + qId).textContent = '(Không nghe thấy. Vui lòng thử lại)';
+
+                            mediaRecorder.onstop = async () => {
+                                document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Đang xử lý âm thanh với hệ thống...';
+                                const rawBlob = new Blob(audioChunksMap[qId], { type: 'audio/webm' });
+                                
+                                try {
+                                    const audioBlob = await convertBlobToWav(rawBlob);
+
+                                    const formData = new FormData();
+                                    formData.append('audioFile', audioBlob, 'speaking.wav');
+                                    formData.append('isUnscripted', 'true');
+
+                                    fetch('${pageContext.request.contextPath}/api/speech/assess', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if(data.success && data.data) {
+                                            document.getElementById('hidden-transcript-' + qId).value = data.data.recognizedText || '';
+                                            document.getElementById('hidden-azure-' + qId).value = data.data.pronunciationScore || 0;
+                                            document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Đã ghi âm và xử lý xong.';
+                                        } else {
+                                            document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi xử lý âm thanh (' + (data.error || 'Unknown') + ')';
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi kết nối đến máy chủ!';
+                                    });
+                                } catch(e) {
+                                    console.error('Lỗi khi convert sang WAV:', e);
+                                    document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi convert âm thanh!';
+                                }
+
+                                // Dọn dẹp stream
+                                stream.getTracks().forEach(track => track.stop());
                             };
-                            recognition.start();
-                            recognitions[qId] = recognition;
+
+                            mediaRecorder.start();
+                            mediaRecorders[qId] = mediaRecorder;
+                            
+                            document.querySelector('[name="q_' + qId + '"]').value = 'recorded';
+                            document.getElementById('transcript-' + qId).textContent = 'Đang ghi âm... (Vui lòng nói rõ ràng)';
                             document.getElementById('btn-rec-' + qId).style.display = 'none';
                             document.getElementById('btn-stop-' + qId).style.display = '';
 
@@ -828,17 +850,21 @@
                             document.getElementById('rec-timer-' + qId).textContent = '00:00';
                             recTimers[qId] = setInterval(() => {
                                 secs++;
-                                const m = Math.floor(secs / 60).toString().padStart(2, '0');
-                                const s = (secs % 60).toString().padStart(2, '0');
+                                const m = Math.floor(secs/60).toString().padStart(2,'0');
+                                const s = (secs%60).toString().padStart(2,'0');
                                 document.getElementById('rec-timer-' + qId).textContent = m + ':' + s;
                             }, 1000);
+                            
                         } catch (e) {
-                            alert('Có lỗi xảy ra khi bắt đầu thu âm: ' + e.message);
+                            alert('Có lỗi xảy ra khi bắt đầu thu âm (Mic access denied?): ' + e.message);
                         }
                     }
 
                     function stopRecording(qId) {
-                        if (recognitions[qId]) { recognitions[qId].stop(); delete recognitions[qId]; }
+                        if (mediaRecorders[qId]) { 
+                            mediaRecorders[qId].stop(); 
+                            delete mediaRecorders[qId]; 
+                        }
                         clearInterval(recTimers[qId]);
                         document.getElementById('btn-rec-' + qId).style.display = '';
                         document.getElementById('btn-stop-' + qId).style.display = 'none';
@@ -849,6 +875,56 @@
                         const ok = confirm('Bạn có chắc chắn muốn nộp bài? Hành động này không thể hoàn tác.');
                         if (ok) isExamStarted = false;
                         return ok;
+                    }
+
+                    // ── AUDIO CONVERT TO WAV ───────────────────────────────────────────
+                    async function convertBlobToWav(blob) {
+                        const arrayBuffer = await blob.arrayBuffer();
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                        return audioBufferToWav(audioBuffer);
+                    }
+
+                    function audioBufferToWav(buffer) {
+                        const numOfChan = buffer.numberOfChannels,
+                            length = buffer.length * numOfChan * 2 + 44,
+                            bufferWav = new ArrayBuffer(length),
+                            view = new DataView(bufferWav),
+                            channels = [],
+                            sampleRate = buffer.sampleRate;
+                        let offset = 0, pos = 0;
+
+                        setUint32(0x46464952);                         // "RIFF"
+                        setUint32(length - 8);                         // file length - 8
+                        setUint32(0x45564157);                         // "WAVE"
+                        setUint32(0x20746d66);                         // "fmt " chunk
+                        setUint32(16);                                 // length = 16
+                        setUint16(1);                                  // PCM
+                        setUint16(numOfChan);
+                        setUint32(sampleRate);
+                        setUint32(sampleRate * 2 * numOfChan);         // avg. bytes/sec
+                        setUint16(numOfChan * 2);                      // block-align
+                        setUint16(16);                                 // 16-bit
+                        setUint32(0x61746164);                         // "data" - chunk
+                        setUint32(length - pos - 4);                   // chunk length
+
+                        for (let i = 0; i < buffer.numberOfChannels; i++)
+                            channels.push(buffer.getChannelData(i));
+
+                        while (pos < length) {
+                            for (let i = 0; i < numOfChan; i++) {
+                                let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                                sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                                view.setInt16(pos, sample, true);
+                                pos += 2;
+                            }
+                            offset++;
+                        }
+
+                        return new Blob([bufferWav], { type: "audio/wav" });
+
+                        function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+                        function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
                     }
                 </script>
             </body>

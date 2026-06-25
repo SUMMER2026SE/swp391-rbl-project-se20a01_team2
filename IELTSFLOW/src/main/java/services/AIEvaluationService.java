@@ -86,12 +86,25 @@ public class AIEvaluationService {
             LOGGER.info("Bắt đầu chấm điểm Writing cho DetailID: " + detailId);
             String systemInstruction = "Role: Bạn là giám khảo chấm thi IELTS Writing chuyên nghiệp.\n" +
                                        "Objective: Đánh giá bài IELTS Writing dựa trên 4 tiêu chí chuẩn.\n" +
-                                       "Format: Trả về dữ liệu chính xác theo cấu trúc JSON được yêu cầu, KHÔNG giải thích thêm.";
+                                       "Lưu ý quan trọng: Nếu 'Bài làm' bị trống hoặc quá ngắn (dưới 10 từ), hãy chấm điểm 0 cho tất cả các tiêu chí, phần overallFeedback ghi 'Bài làm quá ngắn hoặc để trống, không đủ dữ kiện để chấm điểm.', và để danh sách lỗi (mistakes) rỗng. Tuyệt đối KHÔNG tự sáng tác thêm bài làm hay lấy Đề bài ra làm bài làm.\n" +
+                                       "Format: Trả về dữ liệu chính xác theo cấu trúc JSON được yêu cầu. TẤT CẢ các nhận xét, giải thích, lý do và feedback (ngoại trừ trích dẫn lỗi sai) PHẢI được viết bằng Tiếng Việt (Vietnamese). KHÔNG giải thích thêm ngoài JSON.";
             String userPrompt = "Đề bài: " + topic + "\nBài làm: " + essay;
             
             String jsonResult = geminiApiService.generateStructuredContent(systemInstruction, userPrompt, WRITING_SCHEMA);
             
             if (jsonResult != null) {
+                // Remove markdown code blocks if AI returns them
+                jsonResult = jsonResult.trim();
+                if (jsonResult.startsWith("```json")) {
+                    jsonResult = jsonResult.substring(7);
+                } else if (jsonResult.startsWith("```")) {
+                    jsonResult = jsonResult.substring(3);
+                }
+                if (jsonResult.endsWith("```")) {
+                    jsonResult = jsonResult.substring(0, jsonResult.length() - 3);
+                }
+                jsonResult = jsonResult.trim();
+                
                 try {
                     // Lưu DB
                     aiEvaluationDAO.insertAIEvaluation(detailId, jsonResult);
@@ -126,14 +139,27 @@ public class AIEvaluationService {
             LOGGER.info("Bắt đầu chấm điểm Speaking cho DetailID: " + detailId);
             String systemInstruction = "Role: Bạn là giám khảo chấm thi IELTS Speaking chuyên nghiệp.\n" +
                                        "Objective: Đánh giá transcript phần thi IELTS Speaking dựa trên 4 tiêu chí chuẩn (Fluency, Lexical, Grammar, Pronunciation).\n" +
-                                       "Lưu ý quan trọng: Điểm phát âm hệ thống đã chấm bằng công nghệ AI riêng biệt là " + azurePronunciationScore + "/100. " +
+                                       "Lưu ý quan trọng 1: Điểm phát âm hệ thống đã chấm bằng công nghệ AI riêng biệt là " + azurePronunciationScore + "/100. " +
                                        "Hãy dùng điểm số này để ước lượng điểm Pronunciation theo thang điểm IELTS (0-9). Sau đó tập trung đọc Transcript để chấm 3 tiêu chí còn lại.\n" +
-                                       "Format: Trả về dữ liệu chính xác theo cấu trúc JSON được yêu cầu, KHÔNG giải thích thêm.";
+                                       "Lưu ý quan trọng 2: Nếu 'Transcript' bị trống hoặc quá ngắn (dưới 5 từ), hãy chấm điểm 0 cho tất cả các tiêu chí, phần overallFeedback ghi 'Bạn chưa nói hoặc ghi âm quá ngắn, không đủ dữ kiện để chấm điểm.', và để danh sách lỗi (mistakes) rỗng. Tuyệt đối KHÔNG tự sáng tác thêm transcript.\n" +
+                                       "Format: Trả về dữ liệu chính xác theo cấu trúc JSON được yêu cầu. TẤT CẢ các nhận xét, giải thích, lý do và feedback (ngoại trừ trích dẫn lỗi sai) PHẢI được viết bằng Tiếng Việt (Vietnamese). KHÔNG giải thích thêm ngoài JSON.";
             String userPrompt = "Chủ đề: " + topic + "\nTranscript: " + transcript;
             
             String jsonResult = geminiApiService.generateStructuredContent(systemInstruction, userPrompt, SPEAKING_SCHEMA);
             
             if (jsonResult != null) {
+                // Remove markdown code blocks if AI returns them
+                jsonResult = jsonResult.trim();
+                if (jsonResult.startsWith("```json")) {
+                    jsonResult = jsonResult.substring(7);
+                } else if (jsonResult.startsWith("```")) {
+                    jsonResult = jsonResult.substring(3);
+                }
+                if (jsonResult.endsWith("```")) {
+                    jsonResult = jsonResult.substring(0, jsonResult.length() - 3);
+                }
+                jsonResult = jsonResult.trim();
+                
                 try {
                     // Lưu DB
                     aiEvaluationDAO.insertAIEvaluation(detailId, jsonResult);

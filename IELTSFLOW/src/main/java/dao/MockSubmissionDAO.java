@@ -94,8 +94,9 @@ public class MockSubmissionDAO {
                          "ListeningBand=:lb, ReadingBand=:rb, WritingBand=:wb, SpeakingBand=:sb, " +
                          "OverallBand=:ob, TotalScore=:ts, " +
                          "ViolationCount=:vc, IsCheated=:cheated, Status=:status " +
+                         (sub.getOverallAIFeedback() != null ? ", OverallAIFeedback=:fb " : "") +
                          "WHERE SubmissionID=:subId";
-            em.createNativeQuery(sql)
+            var q = em.createNativeQuery(sql)
                     .setParameter("endTime", sub.getEndTime() != null ? Timestamp.valueOf(sub.getEndTime()) : null)
                     .setParameter("lb", sub.getListeningBand())
                     .setParameter("rb", sub.getReadingBand())
@@ -106,8 +107,11 @@ public class MockSubmissionDAO {
                     .setParameter("vc", sub.getViolationCount())
                     .setParameter("cheated", sub.isCheated())
                     .setParameter("status", sub.getStatus())
-                    .setParameter("subId", sub.getSubmissionId())
-                    .executeUpdate();
+                    .setParameter("subId", sub.getSubmissionId());
+            if (sub.getOverallAIFeedback() != null) {
+                q.setParameter("fb", sub.getOverallAIFeedback());
+            }
+            q.executeUpdate();
         });
     }
 
@@ -153,7 +157,7 @@ public class MockSubmissionDAO {
             String sql = "SELECT ts.SubmissionID, ts.UserID, ts.ExamID, ts.StartTime, ts.EndTime, " +
                          "ts.ListeningBand, ts.ReadingBand, ts.WritingBand, ts.SpeakingBand, " +
                          "ts.OverallBand, ts.TotalScore, ts.ViolationCount, ts.IsCheated, ts.Status, " +
-                         "e.Title AS ExamTitle, e.Type AS ExamType, e.SkillFocus " +
+                         "e.Title AS ExamTitle, e.Type AS ExamType, e.SkillFocus, ts.OverallAIFeedback " +
                          "FROM TestSubmissions ts " +
                          "JOIN Exams e ON ts.ExamID = e.ExamID " +
                          "WHERE ts.SubmissionID = :id";
@@ -176,7 +180,7 @@ public class MockSubmissionDAO {
             String sql = "SELECT ts.SubmissionID, ts.UserID, ts.ExamID, ts.StartTime, ts.EndTime, " +
                          "ts.ListeningBand, ts.ReadingBand, ts.WritingBand, ts.SpeakingBand, " +
                          "ts.OverallBand, ts.TotalScore, ts.ViolationCount, ts.IsCheated, ts.Status, " +
-                         "e.Title AS ExamTitle, e.Type AS ExamType, e.SkillFocus " +
+                         "e.Title AS ExamTitle, e.Type AS ExamType, e.SkillFocus, ts.OverallAIFeedback " +
                          "FROM TestSubmissions ts " +
                          "JOIN Exams e ON ts.ExamID = e.ExamID " +
                          "WHERE ts.UserID = :userId " +
@@ -216,6 +220,9 @@ public class MockSubmissionDAO {
         s.setStatus(row[13] != null ? row[13].toString() : "InProgress");
         s.setExamTitle(row[14] != null ? row[14].toString() : "");
         s.setExamType(row[15] != null ? row[15].toString() : "");
+        if (row.length > 17 && row[17] != null) {
+            s.setOverallAIFeedback(row[17].toString());
+        }
         return s;
     }
 

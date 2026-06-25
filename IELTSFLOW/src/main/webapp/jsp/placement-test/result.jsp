@@ -156,9 +156,11 @@
                     Kết quả bài thi Placement Test •
                     <fmt:formatDate value="${submission.startTimeAsDate}" pattern="dd/MM/yyyy HH:mm" type="both"/>
                 </p>
+                <c:if test="${not empty timeTaken}">
+                    <p style="margin-top: 8px; color: var(--accent-blue); font-weight: 500;">⏱️ Thời gian làm bài thực tế: ${timeTaken}</p>
+                </c:if>
             </div>
 
-            <%-- Violation notice --%>
             <c:if test="${submission.cheated}">
                 <div class="violation-notice animate-fade-up" style="animation-delay:.05s;">
                     ⚠️
@@ -166,7 +168,6 @@
                 </div>
             </c:if>
 
-            <%-- Band Scores --%>
             <div class="band-grid animate-fade-up" style="animation-delay:.1s;">
                 <div class="band-card listening">
                     <div class="band-icon">🎧</div>
@@ -224,22 +225,144 @@
                 </div>
             </div>
 
-            <%-- Actions --%>
             <div class="result-actions animate-fade-up" style="animation-delay:.15s;">
-                <a href="${pageContext.request.contextPath}/candidate/placement-test"
-                   class="btn-result primary" id="btn-retake">
-                    🔄 Thi lại
-                </a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises"
-                   class="btn-result outline" id="btn-history">
-                    📋 Xem lịch sử
-                </a>
-                <a href="${pageContext.request.contextPath}/candidate/dashboard"
-                   class="btn-result outline" id="btn-dashboard">
-                    📊 Về Dashboard
-                </a>
+                <a href="${pageContext.request.contextPath}/candidate/placement-test" class="btn-result primary" id="btn-retake">🔄 Thi lại</a>
+                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="btn-result outline" id="btn-history">📋 Xem lịch sử</a>
+                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-result outline" id="btn-dashboard">📊 Về Dashboard</a>
+            </div>
+
+            <div class="chart-section animate-fade-up" style="animation-delay:.18s;">
+                <h2>🤖 Nhận xét & Phân tích chi tiết</h2>
+                
+                <!-- Tabs -->
+                <div class="feedback-tabs">
+                    <button class="tab-btn active" onclick="showFeedbackTab(event, 'listening')">🎧 Listening</button>
+                    <button class="tab-btn" onclick="showFeedbackTab(event, 'reading')">📖 Reading</button>
+                    <button class="tab-btn" onclick="showFeedbackTab(event, 'writing')">✍️ Writing</button>
+                    <button class="tab-btn" onclick="showFeedbackTab(event, 'speaking')">🗣️ Speaking</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div id="tab-listening" class="feedback-content" style="display: block;">
+                    <p style="color: var(--text-secondary); font-style: italic;">Phần thi Listening được hệ thống chấm điểm tự động dựa trên đáp án chuẩn. Không có nhận xét AI.</p>
+                </div>
+                
+                <div id="tab-reading" class="feedback-content" style="display: none;">
+                    <p style="color: var(--text-secondary); font-style: italic;">Phần thi Reading được hệ thống chấm điểm tự động dựa trên đáp án chuẩn. Không có nhận xét AI.</p>
+                </div>
+
+                <div id="tab-writing" class="feedback-content" style="display: none;">
+                    <c:choose>
+                        <c:when test="${not empty writingFeedbacks}">
+                            <c:forEach var="fw" items="${writingFeedbacks}" varStatus="st">
+                                <div style="background: rgba(245, 158, 11, 0.05); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid var(--accent-orange);">
+                                    <h4 style="margin-top: 0; margin-bottom: 10px; color: #d97706;">Task ${st.count}</h4>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; font-size: 0.95rem;">
+                                        <div><strong>Task Response:</strong> ${fw.taskResponse}</div>
+                                        <div><strong>Coherence & Cohesion:</strong> ${fw.coherenceAndCohesion}</div>
+                                        <div><strong>Lexical Resource:</strong> ${fw.lexicalResource}</div>
+                                        <div><strong>Grammar:</strong> ${fw.grammaticalRangeAndAccuracy}</div>
+                                    </div>
+                                    
+                                    <c:if test="${not empty fw.overallFeedback}">
+                                        <div style="margin-bottom: 12px; font-size: 0.95rem;">
+                                            <strong>Nhận xét chung:</strong>
+                                            <p style="margin-top: 4px; color: var(--text-secondary); line-height: 1.5;">${fw.overallFeedback}</p>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty fw.mistakes}">
+                                        <div style="margin-top: 10px; font-size: 0.95rem;">
+                                            <strong>Các lỗi cần sửa:</strong>
+                                            <ul style="padding-left: 20px; margin-top: 5px; color: var(--text-secondary);">
+                                            <c:forEach var="m" items="${fw.mistakes}">
+                                                <li style="margin-bottom: 6px;">
+                                                    Sai: <span style="color: #ef4444; text-decoration: line-through;">${m.mistake}</span> 
+                                                    &rarr; Sửa: <span style="color: #10b981;">${m.correction}</span> 
+                                                    (<i>${m.reason}</i>)
+                                                </li>
+                                            </c:forEach>
+                                            </ul>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <c:choose>
+                                <c:when test="${submission.writingBand == null}">
+                                    <p style="color: var(--text-secondary); font-style: italic;">Hệ thống AI đang chấm điểm phần thi này. Vui lòng tải lại trang (F5) sau ít phút để xem kết quả chi tiết.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <p style="color: var(--text-secondary); font-style: italic;">Bạn không có bài thi Writing hoặc không có nhận xét AI cho phần này.</p>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <div id="tab-speaking" class="feedback-content" style="display: none;">
+                    <c:choose>
+                        <c:when test="${not empty speakingFeedbacks}">
+                            <c:forEach var="fs" items="${speakingFeedbacks}" varStatus="st">
+                                <div style="background: rgba(236, 72, 153, 0.05); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid var(--accent-pink);">
+                                    <h4 style="margin-top: 0; margin-bottom: 10px; color: #db2777;">Phần ${st.count}</h4>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; font-size: 0.95rem;">
+                                        <div><strong>Fluency & Coherence:</strong> ${fs.fluencyAndCoherence}</div>
+                                        <div><strong>Lexical Resource:</strong> ${fs.lexicalResource}</div>
+                                        <div><strong>Grammar:</strong> ${fs.grammaticalRangeAndAccuracy}</div>
+                                        <div><strong>Pronunciation:</strong> ${fs.pronunciation}</div>
+                                    </div>
+                                    
+                                    <c:if test="${not empty fs.overallFeedback}">
+                                        <div style="margin-bottom: 12px; font-size: 0.95rem;">
+                                            <strong>Nhận xét chung:</strong>
+                                            <p style="margin-top: 4px; color: var(--text-secondary); line-height: 1.5;">${fs.overallFeedback}</p>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty fs.mistakes}">
+                                        <div style="margin-top: 10px; font-size: 0.95rem;">
+                                            <strong>Các lỗi cần sửa:</strong>
+                                            <ul style="padding-left: 20px; margin-top: 5px; color: var(--text-secondary);">
+                                            <c:forEach var="m" items="${fs.mistakes}">
+                                                <li style="margin-bottom: 6px;">
+                                                    Sai: <span style="color: #ef4444; text-decoration: line-through;">${m.mistake}</span> 
+                                                    &rarr; Sửa: <span style="color: #10b981;">${m.correction}</span> 
+                                                    (<i>${m.reason}</i>)
+                                                </li>
+                                            </c:forEach>
+                                            </ul>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <c:choose>
+                                <c:when test="${submission.speakingBand == null}">
+                                    <p style="color: var(--text-secondary); font-style: italic;">Hệ thống AI đang chấm điểm phần thi này. Vui lòng tải lại trang (F5) sau ít phút để xem kết quả chi tiết.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <p style="color: var(--text-secondary); font-style: italic;">Bạn không có bài thi Speaking hoặc không có nhận xét AI cho phần này.</p>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </div>
         </main>
     </div>
+    <script>
+        function showFeedbackTab(event, tabId) {
+            document.querySelectorAll('.feedback-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+    </script>
 </body>
 </html>

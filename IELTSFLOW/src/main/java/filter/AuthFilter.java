@@ -33,6 +33,7 @@ public class AuthFilter implements Filter {
         "/jsp/candidate/dashboard.jsp",
         "/jsp/candidate/weekly-plan.jsp",
         "/jsp/candidate/lessons.jsp",
+        "/jsp/candidate/lesson-detail.jsp",
         "/jsp/candidate/redo-exercises.jsp",
         "/jsp/candidate/notifications.jsp",
         "/jsp/candidate/tickets.jsp",
@@ -47,6 +48,7 @@ public class AuthFilter implements Filter {
         "/candidate/dashboard",
         "/candidate/weekly-plan",
         "/candidate/lessons",
+        "/candidate/lesson-detail",
         "/candidate/redo-exercises",
         "/candidate/notifications",
         "/candidate/tickets"

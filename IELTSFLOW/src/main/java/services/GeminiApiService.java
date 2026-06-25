@@ -48,45 +48,58 @@ public class GeminiApiService {
         String apiKey = getApiKey();
         if (apiKey == null) return null;
 
-        try {
-            // Build the JSON payload for Gemini API
-            String payload = "{\n" +
-                "  \"systemInstruction\": {\n" +
-                "    \"parts\": [{\"text\": " + objectMapper.writeValueAsString(systemInstruction) + "}]\n" +
-                "  },\n" +
-                "  \"contents\": [{\n" +
-                "    \"parts\": [{\"text\": " + objectMapper.writeValueAsString(userPrompt) + "}]\n" +
-                "  }],\n" +
-                "  \"generationConfig\": {\n" +
-                "    \"temperature\": 0.2,\n" +
-                "    \"responseMimeType\": \"application/json\",\n" +
-                "    \"responseSchema\": " + responseSchemaJson + "\n" +
-                "  }\n" +
-                "}";
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                String payload = "{\n" +
+                    "  \"systemInstruction\": {\n" +
+                    "    \"parts\": [{\"text\": " + objectMapper.writeValueAsString(systemInstruction) + "}]\n" +
+                    "  },\n" +
+                    "  \"contents\": [{\n" +
+                    "    \"parts\": [{\"text\": " + objectMapper.writeValueAsString(userPrompt) + "}]\n" +
+                    "  }],\n" +
+                    "  \"generationConfig\": {\n" +
+                    "    \"temperature\": 0.2,\n" +
+                    "    \"responseMimeType\": \"application/json\",\n" +
+                    "    \"responseSchema\": " + responseSchemaJson + "\n" +
+                    "  }\n" +
+                    "}";
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(API_URL + apiKey))
-                    .header("Content-Type", "application/json")
-                    .timeout(Duration.ofSeconds(60)) // Allow up to 60 seconds for AI processing
-                    .POST(HttpRequest.BodyPublishers.ofString(payload))
-                    .build();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(API_URL + apiKey))
+                        .header("Content-Type", "application/json")
+                        .timeout(Duration.ofSeconds(60))
+                        .POST(HttpRequest.BodyPublishers.ofString(payload))
+                        .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() == 200) {
-                // Parse response to extract the actual JSON text
-                var rootNode = objectMapper.readTree(response.body());
-                var candidates = rootNode.path("candidates");
-                if (candidates.isArray() && candidates.size() > 0) {
-                    var textNode = candidates.get(0).path("content").path("parts").get(0).path("text");
-                    return textNode.asText();
+                if (response.statusCode() == 200) {
+                    var rootNode = objectMapper.readTree(response.body());
+                    var candidates = rootNode.path("candidates");
+                    if (candidates.isArray() && candidates.size() > 0) {
+                        var textNode = candidates.get(0).path("content").path("parts").get(0).path("text");
+                        return textNode.asText();
+                    }
+                } else if (response.statusCode() == 429 || response.statusCode() >= 500) {
+                    LOGGER.warning("Gemini API Rate Limit or Server Error (Attempt " + attempt + "): " + response.statusCode());
+                    if (attempt < maxRetries) {
+                        Thread.sleep(5000 * attempt); // wait 5s, then 10s
+                        continue;
+                    } else {
+                        LOGGER.severe("Gemini API failed after " + maxRetries + " attempts: " + response.body());
+                    }
+                } else {
+                    LOGGER.severe("Gemini API Error: " + response.statusCode() + " - " + response.body());
+                    break;
                 }
-            } else {
-                LOGGER.severe("Gemini API Error: " + response.statusCode() + " - " + response.body());
-            }
 
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Exception calling Gemini API", e);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Exception calling Gemini API (Attempt " + attempt + ")", e);
+                if (attempt < maxRetries) {
+                    try { Thread.sleep(3000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                }
+            }
         }
         return null;
     }

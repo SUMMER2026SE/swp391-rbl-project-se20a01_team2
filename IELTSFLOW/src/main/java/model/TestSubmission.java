@@ -28,10 +28,14 @@ public class TestSubmission {
     private int violationCount;
     private boolean isCheated;
     private String status; // InProgress, Completed, Abandoned
+    private String overallAIFeedback;
 
     public TestSubmission() {}
 
     // --- Getters & Setters ---
+
+    public String getOverallAIFeedback() { return overallAIFeedback; }
+    public void setOverallAIFeedback(String overallAIFeedback) { this.overallAIFeedback = overallAIFeedback; }
 
     public int getSubmissionId() { return submissionId; }
     public void setSubmissionId(int submissionId) { this.submissionId = submissionId; }
@@ -53,6 +57,18 @@ public class TestSubmission {
 
     public LocalDateTime getEndTime() { return endTime; }
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+
+    public String getDurationString() {
+        if (startTime != null && endTime != null) {
+            java.time.Duration duration = java.time.Duration.between(startTime, endTime);
+            long totalSeconds = duration.getSeconds();
+            long h = totalSeconds / 3600;
+            long m = (totalSeconds % 3600) / 60;
+            long s = totalSeconds % 60;
+            return (h > 0 ? h + "h " : "") + (m > 0 ? m + "m " : "") + s + "s";
+        }
+        return "—";
+    }
 
     public Double getListeningBand() { return listeningBand; }
     public void setListeningBand(Double listeningBand) { this.listeningBand = listeningBand; }

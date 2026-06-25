@@ -7,7 +7,7 @@
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
     <title>Exam History – IELTSFLOW</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=${System.currentTimeMillis()}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         /* ── Stat Summary Cards ─────────────────────────── */
@@ -199,7 +199,8 @@
 
     <div class="layout-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="appSidebar">
+            <button class="toggle-sidebar-btn" onclick="toggleSidebar()">◀</button>
             <div class="brand">IELTSFLOW</div>
             <div class="user-profile">
                 <div class="avatar" style="overflow: hidden;">
@@ -218,22 +219,22 @@
                 </div>
             </div>
             <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Bảng điều khiển</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Kế hoạch tuần</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Thư viện</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link">🎯 Bài thi</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link active">🔄 Lịch sử & Làm lại</a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
+                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link" title="Bảng điều khiển">🏠 <span class="nav-text">Bảng điều khiển</span></a>
+                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link" title="Kế hoạch tuần">📅 <span class="nav-text">Kế hoạch tuần</span></a>
+                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link" title="Thư viện">📚 <span class="nav-text">Thư viện</span></a>
+                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link" title="Bài thi">🎯 <span class="nav-text">Bài thi</span></a>
+                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link active" title="Lịch sử & Làm lại">🔄 <span class="nav-text">Lịch sử & Làm lại</span></a>
+                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link" title="Thông báo">🔔 <span class="nav-text">Thông báo</span></a>
+                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link" title="Ticket hỗ trợ">🎫 <span class="nav-text">Ticket hỗ trợ</span></a>
+                <a href="${pageContext.request.contextPath}/account" class="nav-link" title="Cài đặt tài khoản">⚙️ <span class="nav-text">Cài đặt tài khoản</span></a>
             </nav>
             <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Đăng xuất</a>
+                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);" title="Đăng xuất">🚪 <span class="nav-text">Đăng xuất</span></a>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" id="appMainContent">
             <div class="animate-fade-up">
                 <h1 style="margin-bottom: 8px;">📊 Exam History</h1>
                 <p style="color: var(--text-secondary); margin-bottom: 30px;">
@@ -314,15 +315,17 @@
                 </div>
                 <c:choose>
                     <c:when test="${not empty submissions}">
-                        <table class="history-table">
+                        <div style="overflow-x: auto; width: 100%;">
+                            <table class="history-table" style="min-width: 900px;">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Đề thi</th>
-                                    <th>Ngày thi</th>
+                                    <th>Thời gian (Ngày & Thời lượng)</th>
                                     <th>L</th><th>R</th><th>W</th><th>S</th>
                                     <th>Overall</th>
                                     <th>Trạng thái</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -330,13 +333,25 @@
                                     <tr>
                                         <td style="color:var(--text-secondary);">#${st.count}</td>
                                         <td style="font-weight:600; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                            ${sub.examTitle}
+                                            <c:choose>
+                                                <c:when test="${sub.examType == 'Placement Test'}">
+                                                    <a href="${pageContext.request.contextPath}/candidate/placement-test?action=result&submissionId=${sub.submissionId}" style="color:var(--text-primary);text-decoration:none;" onmouseover="this.style.color='var(--accent-blue)'" onmouseout="this.style.color='var(--text-primary)'">
+                                                        ${sub.examTitle}
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a href="${pageContext.request.contextPath}/candidate/mock-test?action=result&submissionId=${sub.submissionId}" style="color:var(--text-primary);text-decoration:none;" onmouseover="this.style.color='var(--accent-blue)'" onmouseout="this.style.color='var(--text-primary)'">
+                                                        ${sub.examTitle}
+                                                    </a>
+                                                </c:otherwise>
+                                            </c:choose>
                                             <c:if test="${not empty sub.examType}">
                                                 <span class="badge badge-blue" style="margin-left:6px;font-size:0.7rem;">${sub.examType}</span>
                                             </c:if>
                                         </td>
-                                        <td style="color:var(--text-secondary);">
-                                            <fmt:formatDate value="${sub.startTimeAsDate}" pattern="dd/MM/yyyy"/>
+                                        <td style="color:var(--text-secondary); font-size: 0.8rem;">
+                                            <div><fmt:formatDate value="${sub.startTimeAsDate}" pattern="dd/MM/yyyy HH:mm"/></div>
+                                            <div style="color:var(--accent-blue); margin-top:4px;">⏱️ ${sub.durationString}</div>
                                         </td>
                                         <%-- Band chips: L R W S --%>
                                         <c:set var="bands" value="${[sub.listeningBand, sub.readingBand, sub.writingBand, sub.speakingBand]}"/>
@@ -366,10 +381,21 @@
                                                 <span title="Vi phạm" style="color:var(--accent-red);font-size:.75rem;margin-left:4px;">⚠️</span>
                                             </c:if>
                                         </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${sub.examType == 'Placement Test'}">
+                                                    <a href="${pageContext.request.contextPath}/candidate/placement-test?action=result&submissionId=${sub.submissionId}" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,0.1);color:var(--accent-blue);border-radius:6px;text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='var(--accent-blue)';this.style.color='#fff';" onmouseout="this.style.background='rgba(59,130,246,0.1)';this.style.color='var(--accent-blue)';">Xem chi tiết</a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a href="${pageContext.request.contextPath}/candidate/mock-test?action=result&submissionId=${sub.submissionId}" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,0.1);color:var(--accent-blue);border-radius:6px;text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='var(--accent-blue)';this.style.color='#fff';" onmouseout="this.style.background='rgba(59,130,246,0.1)';this.style.color='var(--accent-blue)';">Xem chi tiết</a>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                     </tr>
                                 </c:forEach>
                             </tbody>
                         </table>
+                        </div>
                     </c:when>
                     <c:otherwise>
                         <div class="empty-state">
@@ -454,6 +480,11 @@
             if (wrap) setTimeout(function() { wrap.scrollLeft = wrap.scrollWidth; }, 150);
         }
     })();
+    
+    function toggleSidebar() {
+        document.getElementById('appSidebar').classList.toggle('collapsed');
+        document.getElementById('appMainContent').classList.toggle('expanded');
+    }
     </script>
 </body>
 </html>

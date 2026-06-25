@@ -51,7 +51,7 @@ function renderDashboardGrid() {
         const bookmarkBadge = isBookmarked ? '<span class="badge badge-red" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">❤️ Bookmarked</span>' : '';
 
         html += `
-            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail.jsp?id=${l.id}'">
+            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail?id=${l.id}'">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="card-icon-wrapper" style="background: rgba(var(--accent-${l.color}-rgb), 0.2); border: 1px solid var(--accent-${l.color});">
                         ${l.icon}
@@ -112,7 +112,7 @@ function renderLessonLibrary(filterSkill = 'All Skills', filterText = '', filter
         const bookmarkBadge = isBookmarked ? '<span class="badge badge-red" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">❤️ Bookmarked</span>' : '';
 
         html += `
-            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail.jsp?id=${l.id}'">
+            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail?id=${l.id}'">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="card-icon-wrapper" style="background: rgba(255,255,255,0.05); font-size: 20px;">
                         ${l.icon}
