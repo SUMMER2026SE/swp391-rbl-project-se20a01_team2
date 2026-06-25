@@ -1118,3 +1118,20 @@ GO
 ALTER TABLE CandidateTargets
 DROP COLUMN ExamDate;
 GO
+
+
+# Cập nhật bổ sung (Tối ưu hóa Database cho hệ thống thi IELTS):
+
+```sql
+-- Thêm cột Skill vào ExamSections để phân biệt kỹ năng trong 1 Full Test (Listening/Reading/Writing/Speaking)
+ALTER TABLE ExamSections ADD Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening';
+
+-- Mở rộng ResourceImageURL để lưu JSON Array các URL ảnh (Cho Writing Task 1 có nhiều biểu đồ)
+ALTER TABLE QuestionResource ALTER COLUMN ResourceImageURL NVARCHAR(MAX);
+
+-- Thêm QuestionCount để biết 1 JSON của Questions tương đương bao nhiêu câu hỏi thực tế 
+ALTER TABLE Questions ADD QuestionCount INT DEFAULT 1;
+
+-- Bổ sung ràng buộc (Constraint) đảm bảo CandidateAnswer luôn lưu đúng định dạng JSON
+ALTER TABLE SubmissionDetails ADD CONSTRAINT CHK_CandidateAnswer CHECK (CandidateAnswer IS NULL OR ISJSON(CandidateAnswer) = 1);
+```
