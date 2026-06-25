@@ -26,6 +26,12 @@ public class MentorLessonServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
+                String action = req.getParameter("action");
+                if ("new".equals(action)) {
+                    req.getRequestDispatcher("/jsp/mentor/lesson-detail.jsp").forward(req, resp);
+                    return;
+                }
+
                 // List: show only this mentor's lessons, support keyword+skill filter
                 String keyword = req.getParameter("keyword");
                 String skill   = req.getParameter("skill");

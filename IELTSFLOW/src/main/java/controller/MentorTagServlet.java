@@ -24,6 +24,12 @@ public class MentorTagServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
+                String action = req.getParameter("action");
+                if ("new".equals(action)) {
+                    req.getRequestDispatcher("/jsp/mentor/tag-detail.jsp").forward(req, resp);
+                    return;
+                }
+
                 req.setAttribute("tags", tagService.getAllTags());
                 req.getRequestDispatcher("/jsp/mentor/tags.jsp").forward(req, resp);
             } else {

@@ -28,6 +28,13 @@ public class MentorQuestionServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
+                String action = req.getParameter("action");
+                if ("new".equals(action)) {
+                    req.setAttribute("allTags", questionService.getAllTags());
+                    req.getRequestDispatcher("/jsp/mentor/question-detail.jsp").forward(req, resp);
+                    return;
+                }
+
                 String keyword = req.getParameter("keyword");
                 String skill   = req.getParameter("skill");
                 boolean hasFilter = (keyword != null && !keyword.isBlank())

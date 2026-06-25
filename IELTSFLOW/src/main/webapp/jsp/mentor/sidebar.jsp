@@ -35,7 +35,7 @@
            class="nav-link ${param.active == 'lessons' ? 'active' : ''}">📚 Bài học</a>
         <a href="${pageContext.request.contextPath}/mentor/exams"
            class="nav-link ${param.active == 'exams' ? 'active' : ''}">📝 Đề thi</a>
-        <a href="${pageContext.request.contextPath}/tickets"
+        <a href="${pageContext.request.contextPath}/candidate/tickets"
            class="nav-link ${param.active == 'tickets' ? 'active' : ''}">🎫 Hỗ trợ học viên</a>
         <a href="${pageContext.request.contextPath}/mentor/tags"
            class="nav-link ${param.active == 'tags' ? 'active' : ''}">🏷️ Quản lý Tag</a>
