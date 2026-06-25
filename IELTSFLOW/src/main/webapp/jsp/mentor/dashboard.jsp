@@ -317,7 +317,7 @@
                        style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); box-shadow: 0 4px 15px rgba(139,92,246,0.3);">
                         <i class="fa-solid fa-plus"></i> Tạo đề thi mới
                     </a>
-                    <a id="btn-open-tickets" href="${pageContext.request.contextPath}/candidate/tickets?status=Open"
+                    <a id="btn-open-tickets" href="${pageContext.request.contextPath}/mentor/tickets?status=Open"
                        class="action-btn"
                        style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 15px rgba(245,158,11,0.3);">
                         <i class="fa-solid fa-ticket"></i> Xem ticket chưa trả lời
@@ -331,7 +331,7 @@
                     <h4 style="font-weight: 800; font-size: 1.15rem; margin: 0;">
                         🎫 Ticket đang chờ trả lời
                     </h4>
-                    <a href="${pageContext.request.contextPath}/candidate/tickets"
+                    <a href="${pageContext.request.contextPath}/mentor/tickets"
                        style="font-size: 0.85rem; font-weight: 600; color: var(--accent-blue); text-decoration: none;">
                         Xem tất cả <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
                     </a>
@@ -386,7 +386,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <a href="${pageContext.request.contextPath}/candidate/tickets?id=${ticket.ticketId}"
+                                                <a href="${pageContext.request.contextPath}/mentor/tickets?id=${ticket.ticketId}"
                                                    style="color: var(--accent-blue); text-decoration: none; font-weight: 600; font-size: 0.82rem;">
                                                     Trả lời <i class="fa-solid fa-reply" style="font-size: 0.75rem;"></i>
                                                 </a>

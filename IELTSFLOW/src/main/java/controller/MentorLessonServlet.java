@@ -40,7 +40,7 @@ public class MentorLessonServlet extends HttpServlet {
                 req.setAttribute("lessons",
                         hasFilter
                                 ? lessonService.searchLessons(keyword, skill)
-                                : lessonService.getLessonsByMentor(mentorId));
+                                : lessonService.getAllLessons());
                 req.getRequestDispatcher("/jsp/mentor/lessons.jsp").forward(req, resp);
 
             } else {
@@ -91,8 +91,6 @@ public class MentorLessonServlet extends HttpServlet {
                 Lesson existing = lessonService.getLessonById(id);
                 if (existing == null)
                     throw new Exception("Không tìm thấy bài học #" + id);
-                if (!existing.getCreatedBy().equals(mentorId))
-                    throw new Exception("Bạn không có quyền chỉnh sửa bài học này");
 
                 Lesson updated = buildFromRequest(req);
                 if (updated.getTitle() == null || updated.getTitle().isBlank())
@@ -108,8 +106,6 @@ public class MentorLessonServlet extends HttpServlet {
                 Lesson existing = lessonService.getLessonById(id);
                 if (existing == null)
                     throw new Exception("Không tìm thấy bài học #" + id);
-                if (!existing.getCreatedBy().equals(mentorId))
-                    throw new Exception("Bạn không có quyền xóa bài học này");
                 lessonService.deleteLesson(id);
                 resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=Xóa+bài+học+thành+công");
 

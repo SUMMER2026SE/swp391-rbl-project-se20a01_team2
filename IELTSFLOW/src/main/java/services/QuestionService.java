@@ -57,12 +57,10 @@ public class QuestionService {
         questionDAO.update(existing);
     }
 
-    public void deleteQuestion(int id, int mentorId) throws Exception {
+    public void deleteQuestion(int id) throws Exception {
         Question existing = questionDAO.findById(id);
         if (existing == null)
             throw new Exception("Không tìm thấy câu hỏi #" + id);
-        if (!existing.getCreatedBy().equals(mentorId))
-            throw new Exception("Bạn không có quyền xóa câu hỏi này");
         questionDAO.softDelete(id);
     }
 
@@ -89,21 +87,17 @@ public class QuestionService {
         return tagDAO.findAll();
     }
 
-    public void addTagToQuestion(int questionId, int tagId, int mentorId) throws Exception {
+    public void addTagToQuestion(int questionId, int tagId) throws Exception {
         Question q = questionDAO.findById(questionId);
         if (q == null) throw new Exception("Không tìm thấy câu hỏi #" + questionId);
-        if (!q.getCreatedBy().equals(mentorId))
-            throw new Exception("Bạn không có quyền gắn tag cho câu hỏi này");
         if (tagDAO.findById(tagId) == null)
             throw new Exception("Không tìm thấy tag #" + tagId);
         questionDAO.addTag(questionId, tagId);
     }
 
-    public void removeTagFromQuestion(int questionId, int tagId, int mentorId) throws Exception {
+    public void removeTagFromQuestion(int questionId, int tagId) throws Exception {
         Question q = questionDAO.findById(questionId);
         if (q == null) throw new Exception("Không tìm thấy câu hỏi #" + questionId);
-        if (!q.getCreatedBy().equals(mentorId))
-            throw new Exception("Bạn không có quyền xóa tag của câu hỏi này");
         questionDAO.removeTag(questionId, tagId);
     }
 }

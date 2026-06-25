@@ -16,8 +16,7 @@ public class MentorDashboardDAO {
     public long countQuestionsByMentor(int mentorId) {
         return JpaHelper.query(em -> {
             Number n = (Number) em.createNativeQuery(
-                    "SELECT COUNT(*) FROM Questions WHERE CreatedBy = ?1 AND Deleted = 0")
-                    .setParameter(1, mentorId)
+                    "SELECT COUNT(*) FROM Questions WHERE Deleted = 0")
                     .getSingleResult();
             return n != null ? n.longValue() : 0L;
         });
@@ -29,8 +28,7 @@ public class MentorDashboardDAO {
     public long countLessonsByMentor(int mentorId) {
         return JpaHelper.query(em -> {
             Number n = (Number) em.createNativeQuery(
-                    "SELECT COUNT(*) FROM Lessons WHERE CreatedBy = ?1 AND Deleted = 0")
-                    .setParameter(1, mentorId)
+                    "SELECT COUNT(*) FROM Lessons WHERE Deleted = 0")
                     .getSingleResult();
             return n != null ? n.longValue() : 0L;
         });
@@ -42,8 +40,7 @@ public class MentorDashboardDAO {
     public long countExamsByMentor(int mentorId) {
         return JpaHelper.query(em -> {
             Number n = (Number) em.createNativeQuery(
-                    "SELECT COUNT(*) FROM Exams WHERE MentorID = ?1 AND Deleted = 0")
-                    .setParameter(1, mentorId)
+                    "SELECT COUNT(*) FROM Exams WHERE Deleted = 0")
                     .getSingleResult();
             return n != null ? n.longValue() : 0L;
         });
@@ -57,8 +54,7 @@ public class MentorDashboardDAO {
             Number n = (Number) em.createNativeQuery(
                     "SELECT COUNT(*) FROM TestSubmissions ts " +
                     "JOIN Exams e ON ts.ExamID = e.ExamID " +
-                    "WHERE e.MentorID = ?1 AND e.Deleted = 0")
-                    .setParameter(1, mentorId)
+                    "WHERE e.Deleted = 0")
                     .getSingleResult();
             return n != null ? n.longValue() : 0L;
         });
