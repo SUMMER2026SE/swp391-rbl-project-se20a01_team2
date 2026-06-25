@@ -23,6 +23,10 @@ public class QuestionService {
         return questionDAO.findById(id);
     }
 
+    public List<Question> getQuestionsBySkill(String skill) {
+        return questionDAO.findBySkill(skill);
+    }
+
     public List<Question> searchQuestions(String keyword, String skill) {
         return questionDAO.searchByKeywordAndSkill(keyword, skill);
     }

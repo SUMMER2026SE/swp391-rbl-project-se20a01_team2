@@ -40,3 +40,5 @@ IELTSFLOW/GUIDE.md
 testcase.md
 IELTSFLOW/Accounts_Test_Cases.md
 goalapi_testcase.md
+
+*.py

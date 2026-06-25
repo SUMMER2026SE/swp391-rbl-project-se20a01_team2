@@ -36,11 +36,11 @@ CREATE TABLE CandidateTargets (
 
     UserID INT NOT NULL,
 
-    TargetBand DECIMAL(3,1) NOT NULL, \-- Ví dụ: 6.5, 7.0
+    TargetBand DECIMAL(3,1) NOT NULL, -- Ví dụ: 6.5, 7.0
 
     CurrentBand DECIMAL(3,1),
 
-    IsActive BIT DEFAULT 1, \-- [CẬP NHẬT] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
+    IsActive BIT DEFAULT 1, -- [CẬP NHẬT] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
 
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 
@@ -129,7 +129,8 @@ CREATE TABLE Answers (
 CREATE TABLE Tags (
     TagID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
-    Type NVARCHAR(50) -- Topic, Grammar, Vocabulary...
+    Type NVARCHAR(50), -- Topic, Grammar, Vocabulary...
+    Deleted BIT DEFAULT 0
 );
 
 CREATE TABLE QuestionTags (
@@ -195,7 +196,7 @@ CREATE TABLE Exams (
 CREATE TABLE ExamSections (
     SectionID INT IDENTITY(1,1) PRIMARY KEY,
     ExamID INT NOT NULL,
-    Skill NVARCHAR(20) NOT NULL, -- Listening, Reading, Writing, Speaking
+    Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening', -- Listening, Reading, Writing, Speaking
     SectionName NVARCHAR(100) NOT NULL, -- Ví dụ: "Reading - Passage 1", "Listening - Part 3"
     ResourceID INT NULL, -- Gắn Passage/Audio thẳng vào Section (nếu có)
     OrderIndex INT NOT NULL, 
@@ -366,3 +367,5 @@ INSERT INTO Roles (RoleName, Description) VALUES
     ('Mentor', N'Giảng viên / Mentor IELTS'),
     ('Candidate', N'Học viên luyện thi IELTS');
 GO
+
+ALTER TABLE Tags ADD Deleted BIT DEFAULT 0;

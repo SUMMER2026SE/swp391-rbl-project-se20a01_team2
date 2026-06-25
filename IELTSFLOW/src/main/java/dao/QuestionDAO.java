@@ -58,6 +58,16 @@ public class QuestionDAO {
         );
     }
 
+    public List<Question> findBySkill(String skill) {
+        return JpaHelper.query(em ->
+                em.createQuery(
+                                "SELECT q FROM Question q WHERE q.skill = :skill AND q.deleted = false ORDER BY q.questionId DESC",
+                                Question.class)
+                        .setParameter("skill", skill)
+                        .getResultList()
+        );
+    }
+
     public List<Question> findByMentor(int mentorId) {
         return JpaHelper.query(em ->
                 em.createQuery(

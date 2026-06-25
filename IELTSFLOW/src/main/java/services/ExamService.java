@@ -70,7 +70,43 @@ public class ExamService {
             throw new Exception("Tiêu đề không được để trống");
         if (exam.getType() == null || exam.getType().isBlank())
             throw new Exception("Loại đề thi không được để trống");
-        if (exam.getDuration() <= 0)
-            throw new Exception("Thời lượng phải lớn hơn 0");
+        if (exam.getDuration() < 0)
+            throw new Exception("Thời lượng không được âm");
+    }
+
+    // --- Section & Question Management ---
+    private final dao.ExamSectionDAO sectionDAO = new dao.ExamSectionDAO();
+    private final dao.ExamQuestionDAO examQuestionDAO = new dao.ExamQuestionDAO();
+
+    public List<model.ExamSection> getExamSections(int examId) {
+        List<model.ExamSection> sections = sectionDAO.findByExamId(examId);
+        for (model.ExamSection sec : sections) {
+            sec.setExamQuestions(examQuestionDAO.findBySectionId(sec.getSectionId()));
+        }
+        return sections;
+    }
+
+    public model.ExamSection getSectionById(int sectionId) {
+        return sectionDAO.findById(sectionId);
+    }
+
+    public void addSection(model.ExamSection section) {
+        sectionDAO.save(section);
+    }
+
+    public void deleteSection(int sectionId) {
+        sectionDAO.delete(sectionId);
+    }
+
+    public void addQuestionToSection(int sectionId, int questionId, int orderIndex) {
+        model.ExamQuestion eq = new model.ExamQuestion();
+        eq.setSectionId(sectionId);
+        eq.setQuestionId(questionId);
+        eq.setOrderIndex(orderIndex);
+        examQuestionDAO.save(eq);
+    }
+
+    public void removeQuestionFromSection(int sectionId, int questionId) {
+        examQuestionDAO.delete(sectionId, questionId);
     }
 }

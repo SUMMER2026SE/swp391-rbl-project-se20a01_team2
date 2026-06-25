@@ -8,99 +8,197 @@ VALUES
 (N'Reading Skill Focus Test', 'Practice', 'Reading', 60, 1, GETDATE(), 0),
 (N'Listening Full Practice Test', 'Practice', 'Listening', 40, 1, GETDATE(), 0);
 
-DECLARE @FullTest1ID INT = (SELECT ExamID FROM Exams WHERE Title = N'IELTS Full Practice Test 1');
-DECLARE @ReadingTestID INT = (SELECT ExamID FROM Exams WHERE Title = N'Reading Skill Focus Test');
-DECLARE @ListeningTestID INT = (SELECT ExamID FROM Exams WHERE Title = N'Listening Full Practice Test');
+IF OBJECT_ID('tempdb..#vars') IS NOT NULL DROP TABLE #vars;
+CREATE TABLE #vars (name VARCHAR(100), id INT);
+DELETE FROM #vars WHERE name='FullTest1ID';
+INSERT INTO #vars (name, id) SELECT 'FullTest1ID', (SELECT ExamID FROM Exams WHERE Title = N'IELTS Full Practice Test 1');
+DELETE FROM #vars WHERE name='ReadingTestID';
+INSERT INTO #vars (name, id) SELECT 'ReadingTestID', (SELECT ExamID FROM Exams WHERE Title = N'Reading Skill Focus Test');
+DELETE FROM #vars WHERE name='ListeningTestID';
+INSERT INTO #vars (name, id) SELECT 'ListeningTestID', (SELECT ExamID FROM Exams WHERE Title = N'Listening Full Practice Test');
 
 -- ==========================================
 -- IELTS Full Practice Test 1 Sections
 -- ==========================================
 
-INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@FullTest1ID, 'Listening Section', 1);
-DECLARE @FullTestListeningSectionID INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='FullTest1ID'), 'Listening', 'Listening Section', 1;
 
-INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@FullTest1ID, 'Reading Section', 2);
-DECLARE @FullTestReadingSectionID INT = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='FullTestListeningSectionID';
+INSERT INTO #vars (name, id) SELECT 'FullTestListeningSectionID', SCOPE_IDENTITY();
 
-INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@FullTest1ID, 'Writing Section', 3);
-DECLARE @FullTestWritingSectionID INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='FullTest1ID'), 'Reading', 'Reading Section', 2;
+
+DELETE FROM #vars WHERE name='FullTestReadingSectionID';
+INSERT INTO #vars (name, id) SELECT 'FullTestReadingSectionID', SCOPE_IDENTITY();
+
+INSERT INTO ExamSections (ExamID, Skill, SectionName, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='FullTest1ID'), 'Writing', 'Writing Section', 3;
+
+DELETE FROM #vars WHERE name='FullTestWritingSectionID';
+INSERT INTO #vars (name, id) SELECT 'FullTestWritingSectionID', SCOPE_IDENTITY();
 
 -- Listening Questions for Full Test
 INSERT INTO QuestionResource (ResourceAudioURL, Type) VALUES ('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg', 'Audio');
-DECLARE @ResListen1 INT = SCOPE_IDENTITY();
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy) VALUES ('What time does the speaker usually wake up?', 'Multiple_Choice', 'Listening', 'Medium', '{}', @ResListen1, 1);
-DECLARE @FQ1 INT = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@FQ1, '6:00 AM', 1, '{}'), (@FQ1, '7:00 AM', 0, '{}'), (@FQ1, '8:00 AM', 0, '{}'), (@FQ1, '6:30 AM', 0, '{}');
+DELETE FROM #vars WHERE name='ResListen1';
+INSERT INTO #vars (name, id) SELECT 'ResListen1', SCOPE_IDENTITY();
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy)
+SELECT 'What time does the speaker usually wake up?', 'Multiple_Choice', 'Listening', 'Medium', '{}', (SELECT id FROM #vars WHERE name='ResListen1'), 1;
+
+DELETE FROM #vars WHERE name='FQ1';
+INSERT INTO #vars (name, id) SELECT 'FQ1', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='FQ1'), '6:00 AM', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='FQ1'), '7:00 AM', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='FQ1'), '8:00 AM', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='FQ1'), '6:30 AM', 0, '{}';
+
 
 -- Reading Questions for Full Test
 INSERT INTO QuestionResource (ResourceText, Type) VALUES ('The history of chocolate dates back to the ancient Mayans, and even earlier to the ancient Olmecs of southern Mexico. The word chocolate may conjure up images of sweet candy bars and luscious truffles, but the chocolate of today is little like the chocolate of the past. Throughout much of history, chocolate was a revered but bitter beverage, not a sweet, edible treat.', 'Passage');
-DECLARE @ResRead1 INT = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='ResRead1';
+INSERT INTO #vars (name, id) SELECT 'ResRead1', SCOPE_IDENTITY();
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy) VALUES ('According to the text, what was chocolate primarily consumed as in the past?', 'Multiple_Choice', 'Reading', 'Medium', '{}', @ResRead1, 1);
-DECLARE @FQ2 INT = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@FQ2, 'A bitter beverage', 1, '{}'), (@FQ2, 'A sweet candy', 0, '{}'), (@FQ2, 'A medicine', 0, '{}'), (@FQ2, 'A spicy soup', 0, '{}');
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy)
+SELECT 'According to the text, what was chocolate primarily consumed as in the past?', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='ResRead1'), 1;
+
+DELETE FROM #vars WHERE name='FQ2';
+INSERT INTO #vars (name, id) SELECT 'FQ2', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='FQ2'), 'A bitter beverage', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='FQ2'), 'A sweet candy', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='FQ2'), 'A medicine', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='FQ2'), 'A spicy soup', 0, '{}';
+
 
 -- Writing Questions for Full Test
 INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, CreatedBy) VALUES ('Task 2: Some people think that in the modern world we are more dependent on each other, while others think that people have become more independent. Discuss both views and give your own opinion.', 'Essay', 'Writing', 'Hard', '{}', 1);
-DECLARE @FQ3 INT = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='FQ3';
+INSERT INTO #vars (name, id) SELECT 'FQ3', SCOPE_IDENTITY();
 
 -- Map to ExamQuestions
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@FullTestListeningSectionID, @FQ1, 1);
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@FullTestReadingSectionID, @FQ2, 1);
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@FullTestWritingSectionID, @FQ3, 1);
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='FullTestListeningSectionID'), (SELECT id FROM #vars WHERE name='FQ1'), 1;
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='FullTestReadingSectionID'), (SELECT id FROM #vars WHERE name='FQ2'), 1;
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='FullTestWritingSectionID'), (SELECT id FROM #vars WHERE name='FQ3'), 1;
+
 
 -- ==========================================
 -- Reading Skill Focus Test
 -- ==========================================
 
-INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@ReadingTestID, 'Reading Passage 1', 1);
-DECLARE @ReadingFocusSectionID INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ReadingTestID'), 'Reading', 'Reading Passage 1', 1;
+
+DELETE FROM #vars WHERE name='ReadingFocusSectionID';
+INSERT INTO #vars (name, id) SELECT 'ReadingFocusSectionID', SCOPE_IDENTITY();
 
 INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, CreatedBy) VALUES ('What is the main advantage of solar energy over fossil fuels?', 'Multiple_Choice', 'Reading', 'Easy', '{}', 1);
-DECLARE @RQ1 INT = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@RQ1, 'It is renewable', 1, '{}'), (@RQ1, 'It is cheaper to set up initially', 0, '{}'), (@RQ1, 'It can be used everywhere at night', 0, '{}');
+DELETE FROM #vars WHERE name='RQ1';
+INSERT INTO #vars (name, id) SELECT 'RQ1', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='RQ1'), 'It is renewable', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='RQ1'), 'It is cheaper to set up initially', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='RQ1'), 'It can be used everywhere at night', 0, '{}';
 
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@ReadingFocusSectionID, @RQ1, 1);
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ReadingFocusSectionID'), (SELECT id FROM #vars WHERE name='RQ1'), 1;
+
 
 -- ==========================================
 -- Listening Full Practice Test
 -- ==========================================
 
 -- Section 1
-INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@ListeningTestID, 'Section 1: Conversation', 1);
-DECLARE @ListenSec1 INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ListeningTestID'), 'Listening', 'Section 1: Conversation', 1;
+
+DELETE FROM #vars WHERE name='ListenSec1';
+INSERT INTO #vars (name, id) SELECT 'ListenSec1', SCOPE_IDENTITY();
 
 INSERT INTO QuestionResource (ResourceAudioURL, Type) VALUES ('https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg', 'Audio');
-DECLARE @ResListen2 INT = SCOPE_IDENTITY();
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy) VALUES ('Where did the person spend their holiday?', 'Multiple_Choice', 'Listening', 'Easy', '{}', @ResListen2, 1);
-DECLARE @LQ1 INT = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@LQ1, 'At the beach', 1, '{}'), (@LQ1, 'In the mountains', 0, '{}'), (@LQ1, 'In the city center', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@ListenSec1, @LQ1, 1);
+DELETE FROM #vars WHERE name='ResListen2';
+INSERT INTO #vars (name, id) SELECT 'ResListen2', SCOPE_IDENTITY();
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy)
+SELECT 'Where did the person spend their holiday?', 'Multiple_Choice', 'Listening', 'Easy', '{}', (SELECT id FROM #vars WHERE name='ResListen2'), 1;
+
+DELETE FROM #vars WHERE name='LQ1';
+INSERT INTO #vars (name, id) SELECT 'LQ1', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='LQ1'), 'At the beach', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='LQ1'), 'In the mountains', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='LQ1'), 'In the city center', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ListenSec1'), (SELECT id FROM #vars WHERE name='LQ1'), 1;
+
 
 -- Section 2
-INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@ListeningTestID, 'Section 2: Monologue', 2);
-DECLARE @ListenSec2 INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ListeningTestID'), 'Listening', 'Section 2: Monologue', 2;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy) VALUES ('What time does the museum close on Sundays?', 'Multiple_Choice', 'Listening', 'Medium', '{}', @ResListen2, 1);
-DECLARE @LQ2 INT = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@LQ2, '5:00 PM', 1, '{}'), (@LQ2, '6:00 PM', 0, '{}'), (@LQ2, '4:00 PM', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@ListenSec2, @LQ2, 1);
+DELETE FROM #vars WHERE name='ListenSec2';
+INSERT INTO #vars (name, id) SELECT 'ListenSec2', SCOPE_IDENTITY();
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy)
+SELECT 'What time does the museum close on Sundays?', 'Multiple_Choice', 'Listening', 'Medium', '{}', (SELECT id FROM #vars WHERE name='ResListen2'), 1;
+
+DELETE FROM #vars WHERE name='LQ2';
+INSERT INTO #vars (name, id) SELECT 'LQ2', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='LQ2'), '5:00 PM', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='LQ2'), '6:00 PM', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='LQ2'), '4:00 PM', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ListenSec2'), (SELECT id FROM #vars WHERE name='LQ2'), 1;
+
 
 -- Section 3
-INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@ListeningTestID, 'Section 3: Academic Discussion', 3);
-DECLARE @ListenSec3 INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ListeningTestID'), 'Listening', 'Section 3: Academic Discussion', 3;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy) VALUES ('Which aspect of the project did they find most difficult?', 'Multiple_Choice', 'Listening', 'Hard', '{}', @ResListen2, 1);
-DECLARE @LQ3 INT = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@LQ3, 'Data collection', 1, '{}'), (@LQ3, 'Data analysis', 0, '{}'), (@LQ3, 'Writing the report', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@ListenSec3, @LQ3, 1);
+DELETE FROM #vars WHERE name='ListenSec3';
+INSERT INTO #vars (name, id) SELECT 'ListenSec3', SCOPE_IDENTITY();
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy)
+SELECT 'Which aspect of the project did they find most difficult?', 'Multiple_Choice', 'Listening', 'Hard', '{}', (SELECT id FROM #vars WHERE name='ResListen2'), 1;
+
+DELETE FROM #vars WHERE name='LQ3';
+INSERT INTO #vars (name, id) SELECT 'LQ3', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='LQ3'), 'Data collection', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='LQ3'), 'Data analysis', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='LQ3'), 'Writing the report', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ListenSec3'), (SELECT id FROM #vars WHERE name='LQ3'), 1;
+
 
 -- Section 4
-INSERT INTO ExamSections (ExamID, SectionName, OrderIndex) VALUES (@ListeningTestID, 'Section 4: Academic Lecture', 4);
-DECLARE @ListenSec4 INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ListeningTestID'), 'Listening', 'Section 4: Academic Lecture', 4;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy) VALUES ('The lecture primarily discusses the impact of...', 'Multiple_Choice', 'Listening', 'Hard', '{}', @ResListen2, 1);
-DECLARE @LQ4 INT = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@LQ4, 'Climate change on agriculture', 1, '{}'), (@LQ4, 'Urbanization on wildlife', 0, '{}'), (@LQ4, 'Deforestation on local weather', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@ListenSec4, @LQ4, 1);
+DELETE FROM #vars WHERE name='ListenSec4';
+INSERT INTO #vars (name, id) SELECT 'ListenSec4', SCOPE_IDENTITY();
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID, CreatedBy)
+SELECT 'The lecture primarily discusses the impact of...', 'Multiple_Choice', 'Listening', 'Hard', '{}', (SELECT id FROM #vars WHERE name='ResListen2'), 1;
+
+DELETE FROM #vars WHERE name='LQ4';
+INSERT INTO #vars (name, id) SELECT 'LQ4', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='LQ4'), 'Climate change on agriculture', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='LQ4'), 'Urbanization on wildlife', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='LQ4'), 'Deforestation on local weather', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='ListenSec4'), (SELECT id FROM #vars WHERE name='LQ4'), 1;
+
 GO

@@ -201,4 +201,34 @@ public class AIEvaluationDAO {
             return new java.util.ArrayList<>(); // Trả về list rỗng thay vì throw exception
         }
     }
+
+    /**
+     * Lấy toàn bộ FeedbackJSON và Skill của các bài đã được AI chấm,
+     * thuộc các đề thi do mentor tạo.
+     * @return List of Object[]{feedbackJson (String), skill (String)}
+     */
+    public java.util.List<Object[]> getAllFeedbackByMentor(int mentorId) {
+        try {
+            return JpaHelper.query(em -> {
+                String sql =
+                    "SELECT ae.FeedbackJSON, sd.Skill " +
+                    "FROM AIEvaluations ae " +
+                    "JOIN SubmissionDetails sd ON ae.DetailID = sd.DetailID " +
+                    "JOIN TestSubmissions ts ON sd.SubmissionID = ts.SubmissionID " +
+                    "JOIN Exams e ON ts.ExamID = e.ExamID " +
+                    "WHERE e.MentorID = ?1 " +
+                    "  AND e.Deleted = 0 " +
+                    "  AND sd.Skill IN ('Writing', 'Speaking') " +
+                    "  AND ae.FeedbackJSON IS NOT NULL";
+                @SuppressWarnings("unchecked")
+                java.util.List<Object[]> result = em.createNativeQuery(sql)
+                         .setParameter(1, mentorId)
+                         .getResultList();
+                return result;
+            });
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy feedback theo mentorId " + mentorId, e);
+            return new java.util.ArrayList<>();
+        }
+    }
 }
