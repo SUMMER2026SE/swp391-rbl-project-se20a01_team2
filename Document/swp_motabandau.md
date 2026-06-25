@@ -227,7 +227,7 @@ Tôi đã phân tích và thực hiện một số tinh chỉnh so với mô t�
 
 ### **🌟 Những điểm THÊM VÀO (Để hệ thống hoàn chỉnh và thương mại hóa được):**
 
-1. **Thêm Cổng thanh toán (Payment Gateway):** Vì có các gói "Candidate Pro", hệ thống bắt buộc phải thiết kế luồng tích hợp với VNPay, MoMo hoặc Stripe. (Đã bổ sung vào phần Candidate/Admin).  
+1. **Thêm Cổng thanh toán (Payment Gateway):** Vì có các gói "Candidate Pro", hệ thống bắt buộc phải thiết kế luồng tích hợp với SePay (Đã bổ sung vào phần Candidate/Admin).  
 2. **Thêm hệ thống Ticket (Hỗ trợ Q\&A):** Thay vì Mentor và Candidate chat realtime (tốn resource, khó quản lý), tôi thiết kế thành "Hỗ trợ học viên qua Ticket/Comments" để Candidate để lại câu hỏi, Mentor vào trả lời sau.  
 3. **Chuẩn hóa Data AI (JSON Output):** Đã note rõ cho Dev Backend rằng kết quả trả về từ AI phải được ép kiểu về chuẩn JSON (thay vì Text tự do) để Frontend dễ dàng vẽ biểu đồ và highlight lỗi sai.
 
@@ -434,7 +434,9 @@ CREATE TABLE Users (
 
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID),
 
-    Deleted BIT DEFAULT 0
+    Deleted BIT DEFAULT 0,
+
+    ProfilePic NVARCHAR(500) NULL
 
 );
 
@@ -448,9 +450,7 @@ CREATE TABLE CandidateTargets (
 
     CurrentBand DECIMAL(3,1),
 
-    ExamDate DATE,
-
-    IsActive BIT DEFAULT 1, \-- \[CẬP NHẬT\] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
+    IsActive BIT DEFAULT 1, \-- [CẬP NHẬT] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
 
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 
@@ -488,7 +488,7 @@ CREATE TABLE Transactions (
 
     Amount DECIMAL(18,2) NOT NULL,
 
-    PaymentMethod NVARCHAR(50), \-- VNPay, MoMo, Stripe
+    PaymentMethod NVARCHAR(50), \-- SePay
 
     GatewayTransactionID NVARCHAR(100) NULL, \-- Mã đối soát từ Cổng thanh toán (TxnRef)
 
@@ -968,6 +968,32 @@ GO
 
 \-- \==========================================
 
+\-- BẢNG THEO DÕI FILE UPLOAD
+
+\-- \==========================================
+
+CREATE TABLE UploadedFiles (
+
+    FileID INT IDENTITY(1,1) PRIMARY KEY,
+
+    OriginalName NVARCHAR(255) NOT NULL,
+
+    SavedPath NVARCHAR(500) NOT NULL,
+
+    FileType NVARCHAR(50) NOT NULL, \--  'profile\_pic', 'material', ‘video’
+
+    UploadedBy INT NOT NULL,
+
+    UploadedAt DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (UploadedBy) REFERENCES Users(UserID)
+
+);
+
+GO
+
+\-- \==========================================
+
 \-- DỮ LIỆU MẶC ĐỊNH
 
 \-- \==========================================
@@ -1051,3 +1077,61 @@ GO
 
 PRINT N'Đã cập nhật cấu trúc bảng ExamSections và ExamQuestions thành công\!';
 
+# Cập nhật: 17/06: Thêm bảng phục vụ cho upload:
+
+# 
+
+\-- \==========================================
+
+\-- BẢNG THEO DÕI FILE UPLOAD
+
+\-- \==========================================
+
+CREATE TABLE UploadedFiles (
+
+    FileID INT IDENTITY(1,1) PRIMARY KEY,
+
+    OriginalName NVARCHAR(255) NOT NULL,
+
+    SavedPath NVARCHAR(500) NOT NULL,
+
+    FileType NVARCHAR(50) NOT NULL, \-- e.g., 'profile\_pic', 'material'
+
+    UploadedBy INT NOT NULL,
+
+    UploadedAt DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (UploadedBy) REFERENCES Users(UserID)
+
+);
+
+GO
+
+ALTER TABLE users
+
+ADD ProfilePic NVARCHAR(500) NULL;
+
+GO
+
+# Cập nhật: Xóa cột ExamDate trong bảng CandidateTargets
+
+ALTER TABLE CandidateTargets
+DROP COLUMN ExamDate;
+GO
+
+
+# Cập nhật bổ sung (Tối ưu hóa Database cho hệ thống thi IELTS):
+
+```sql
+-- Thêm cột Skill vào ExamSections để phân biệt kỹ năng trong 1 Full Test (Listening/Reading/Writing/Speaking)
+ALTER TABLE ExamSections ADD Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening';
+
+-- Mở rộng ResourceImageURL để lưu JSON Array các URL ảnh (Cho Writing Task 1 có nhiều biểu đồ)
+ALTER TABLE QuestionResource ALTER COLUMN ResourceImageURL NVARCHAR(MAX);
+
+-- Thêm QuestionCount để biết 1 JSON của Questions tương đương bao nhiêu câu hỏi thực tế 
+ALTER TABLE Questions ADD QuestionCount INT DEFAULT 1;
+
+-- Bổ sung ràng buộc (Constraint) đảm bảo CandidateAnswer luôn lưu đúng định dạng JSON
+ALTER TABLE SubmissionDetails ADD CONSTRAINT CHK_CandidateAnswer CHECK (CandidateAnswer IS NULL OR ISJSON(CandidateAnswer) = 1);
+```

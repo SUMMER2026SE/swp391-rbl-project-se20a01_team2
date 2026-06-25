@@ -23,7 +23,8 @@ import java.util.List;
 @WebServlet(name = "CandidatePagesServlet", urlPatterns = {
     "/candidate/weekly-plan",
     "/candidate/lessons",
-    "/candidate/redo-exercises"
+    "/candidate/redo-exercises",
+    "/candidate/lesson-detail"
 })
 public class CandidatePagesServlet extends HttpServlet {
 
@@ -62,6 +63,22 @@ public class CandidatePagesServlet extends HttpServlet {
             jspPath = "/jsp/candidate/weekly-plan.jsp";
         } else if ("/candidate/lessons".equals(path)) {
             jspPath = "/jsp/candidate/lessons.jsp";
+        } else if ("/candidate/lesson-detail".equals(path)) {
+            try {
+                int id = Integer.parseInt(req.getParameter("id"));
+                services.LessonService ls = new services.LessonService();
+                model.Lesson lesson = ls.getLessonById(id);
+                if (lesson != null) {
+                    req.setAttribute("lesson", lesson);
+                    jspPath = "/jsp/candidate/lesson-detail.jsp";
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/candidate/lessons");
+                    return;
+                }
+            } catch (Exception e) {
+                resp.sendRedirect(req.getContextPath() + "/candidate/lessons");
+                return;
+            }
         } else if ("/candidate/redo-exercises".equals(path)) {
             loadExamHistoryData(req, userId);
             jspPath = "/jsp/candidate/redo-exercises.jsp";
@@ -95,7 +112,7 @@ public class CandidatePagesServlet extends HttpServlet {
 
             for (int i = 0; i < completed.size(); i++) {
                 TestSubmission s = completed.get(i);
-                labels.append("\"Bài ").append(i + 1).append("\"");
+                labels.append("\"#").append(s.getSubmissionId()).append("\"");
                 listeningArr.append(s.getListeningBand() != null ? s.getListeningBand() : "null");
                 readingArr  .append(s.getReadingBand()   != null ? s.getReadingBand()   : "null");
                 writingArr  .append(s.getWritingBand()   != null ? s.getWritingBand()   : "null");

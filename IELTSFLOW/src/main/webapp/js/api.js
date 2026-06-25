@@ -51,7 +51,7 @@ function renderDashboardGrid() {
         const bookmarkBadge = isBookmarked ? '<span class="badge badge-red" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">❤️ Bookmarked</span>' : '';
 
         html += `
-            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail.jsp?id=${l.id}'">
+            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail?id=${l.id}'">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="card-icon-wrapper" style="background: rgba(var(--accent-${l.color}-rgb), 0.2); border: 1px solid var(--accent-${l.color});">
                         ${l.icon}
@@ -112,7 +112,7 @@ function renderLessonLibrary(filterSkill = 'All Skills', filterText = '', filter
         const bookmarkBadge = isBookmarked ? '<span class="badge badge-red" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">❤️ Bookmarked</span>' : '';
 
         html += `
-            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail.jsp?id=${l.id}'">
+            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail?id=${l.id}'">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="card-icon-wrapper" style="background: rgba(255,255,255,0.05); font-size: 20px;">
                         ${l.icon}
@@ -275,4 +275,69 @@ document.addEventListener('DOMContentLoaded', () => {
     renderLessonLibrary();
     renderRedoHistory();
     loadLessonDetail();
+    setupMobileLayout();
 });
+
+// --- Mobile Responsive Architecture ---
+function setupMobileLayout() {
+    // Determine the active sidebar (Candidate or Admin)
+    const sidebar = document.querySelector('.sidebar') || document.querySelector('.admin-sidebar');
+    const layoutWrapper = document.querySelector('.layout-wrapper');
+    
+    if (!sidebar || !layoutWrapper) return;
+
+    // Prevent duplicate injections
+    if (document.querySelector('.mobile-topbar')) return;
+
+    // 1. Create Mobile Topbar
+    const topbar = document.createElement('div');
+    topbar.className = 'mobile-topbar hidden-desktop';
+    
+    // Hamburger Button
+    const hamburgerBtn = document.createElement('button');
+    hamburgerBtn.className = 'mobile-menu-btn';
+    hamburgerBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>';
+    
+    // Brand Text
+    const brandContainer = document.createElement('div');
+    brandContainer.className = 'mobile-brand';
+    brandContainer.innerHTML = '<strong>IELTSFLOW</strong>';
+    
+    topbar.appendChild(hamburgerBtn);
+    topbar.appendChild(brandContainer);
+    
+    // 2. Create Overlay for Off-canvas menu
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    
+    // 3. Inject into DOM
+    layoutWrapper.insertBefore(topbar, layoutWrapper.firstChild);
+    document.body.appendChild(overlay);
+    
+    // 4. Interaction Logic
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        
+        // Body Scroll-Lock
+        if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    }
+    
+    hamburgerBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // 5. Auto-wrap tables for responsiveness
+    document.querySelectorAll('table').forEach(table => {
+        if (!table.parentElement.classList.contains('table-responsive')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-responsive';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        }
+    });
+}
+

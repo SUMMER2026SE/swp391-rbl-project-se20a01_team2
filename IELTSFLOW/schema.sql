@@ -93,7 +93,7 @@ CREATE TABLE QuestionResource (
     ResourceID INT IDENTITY(1,1) PRIMARY KEY,
     ResourceText NVARCHAR(MAX),
     ResourceAudioURL NVARCHAR(500),
-    ResourceImageURL NVARCHAR(500),
+    ResourceImageURL NVARCHAR(MAX),
     Type NVARCHAR(50) NOT NULL, -- Passage, Audio
     CreatedBy INT NULL, -- Theo dõi Mentor nào tạo
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
@@ -110,6 +110,7 @@ CREATE TABLE Questions (
     Explanation NVARCHAR(MAX),
     OrderInResource INT NULL, -- [CẬP NHẬT] Thứ tự câu hỏi đi theo 1 bài đọc (Passage) hoặc audio
     contentJSON NVARCHAR(MAX) NOT NULL, 
+    QuestionCount INT DEFAULT 1, -- Số lượng câu hỏi con (Ví dụ: 1 đoạn fill in the blank có 5 chỗ trống -> QuestionCount = 5)
     CreatedBy INT NULL, -- Theo dõi Mentor nào tạo
     FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID),
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
@@ -128,8 +129,7 @@ CREATE TABLE Answers (
 CREATE TABLE Tags (
     TagID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
-    Type NVARCHAR(50), -- Topic, Grammar, Vocabulary...
-    Deleted BIT DEFAULT 0
+    Type NVARCHAR(50) -- Topic, Grammar, Vocabulary...
 );
 
 CREATE TABLE QuestionTags (
@@ -193,21 +193,16 @@ CREATE TABLE Exams (
 );
 
 CREATE TABLE ExamSections (
-
     SectionID INT IDENTITY(1,1) PRIMARY KEY,
-
     ExamID INT NOT NULL,
-
+    Skill NVARCHAR(20) NOT NULL, -- Listening, Reading, Writing, Speaking
     SectionName NVARCHAR(100) NOT NULL, -- Ví dụ: "Reading - Passage 1", "Listening - Part 3"
-
     ResourceID INT NULL, -- Gắn Passage/Audio thẳng vào Section (nếu có)
-
     OrderIndex INT NOT NULL, 
 
     FOREIGN KEY (ExamID) REFERENCES Exams(ExamID) ON DELETE CASCADE,
 
     FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID)
-
 );
 
 CREATE TABLE ExamQuestions (
@@ -263,7 +258,8 @@ CREATE TABLE SubmissionDetails (
     Score DECIMAL(5,2),
     GradingStatus NVARCHAR(50) DEFAULT 'Graded', -- 'Pending_AI', 'Processing', 'Graded', 'Failed'
     FOREIGN KEY (SubmissionID) REFERENCES TestSubmissions(SubmissionID) ON DELETE CASCADE,
-    FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID)
+    FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID),
+    CONSTRAINT CHK_CandidateAnswer CHECK (CandidateAnswer IS NULL OR ISJSON(CandidateAnswer) = 1)
 );
 
 CREATE TABLE AIEvaluations (

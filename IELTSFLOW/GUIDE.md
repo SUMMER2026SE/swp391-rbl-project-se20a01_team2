@@ -73,3 +73,28 @@ mvn jacoco:report
 3. Bấm vào package `controller` -> Chọn `SpeechAssessmentServlet.java`. Hoặc package `services` -> Chọn `AzureSpeechService.java`
 4. Giao diện sẽ hiển thị các dòng lệnh đã được Test bao phủ (màu Xanh) và chưa bao phủ (màu Đỏ) để bạn báo cáo kết quả cho giáo viên.
 *(Lưu ý: Bỏ qua các cảnh báo đỏ ở Terminal do JaCoCo 0.8.11 chưa hỗ trợ hoàn toàn Java 25, chỉ cần chữ BUILD SUCCESS là được).*
+
+---
+
+## 6. Hướng dẫn chạy Integration Test cho Nhóm Thanh Toán (Payment & Package Registration)
+
+Chúng ta đã thiết lập thành công bài kiểm thử tích hợp (Integration Test) có kết nối tới Database H2 In-memory để kiểm thử luồng thanh toán và đăng ký gói.
+
+**Ý nghĩa file test đã tạo:**
+- **File:** `src/test/java/controller/PaymentIntegrationTest.java`
+- **Mục đích:** Kiểm thử toàn bộ quá trình từ lúc User nhấn nút Đăng ký gói (Checkout) cho tới khi hệ thống nhận thông báo giao dịch thành công từ cổng thanh toán (SePay Webhook) và tự động cấp gói Premium cho User.
+- **Tại sao lại dùng H2:** Thay vì mock DB, test này tạo một DB tạm thời trong RAM (H2), tự động tạo bảng (create-drop) qua file `persistence.xml` (tên Unit là `IELTSFLOW_TEST`). Việc này đảm bảo logic Entity và DAO chạy hoàn toàn trên database thực tế nhưng không làm hỏng dữ liệu hệ thống thật.
+
+**Các Test Case trong PaymentIntegrationTest:**
+1. `testCheckout_Success_ShouldCreateTransaction`: Kiểm tra endpoint `/checkout` có tạo thành công 1 Transaction trạng thái `Pending` trong DB không.
+2. `testWebhook_ExactAmount_ShouldUpdateToSuccess`: Giả lập SePay gửi webhook nạp đúng số tiền. DB phải cập nhật trạng thái Transaction thành `Success` và User được cấp quyền truy cập.
+3. `testWebhook_Underpaid_ShouldUpdateToFailedAndLog`: Giả lập nạp thiếu tiền. Hệ thống phải đánh dấu `Failed` và lưu lỗi vào `SystemLog`.
+
+**Cách chạy riêng Payment Integration Test:**
+1. Cài đặt biến môi trường Maven (nếu Terminal báo lỗi `mvn not recognized`, vui lòng chạy trực tiếp tính năng **Test** trên IDE NetBeans, hoặc cài đặt Maven vào System PATH của Windows).
+2. Lệnh chạy:
+```bash
+mvn test -Dtest=PaymentIntegrationTest jacoco:report
+```
+3. Sau khi chạy, hãy mở file `target/site/jacoco/index.html` như hướng dẫn ở phần 5 để xem độ phủ mã (Code Coverage) của `CheckoutServlet` và `SePayWebhookServlet`. 
+- **Mục tiêu Coverage của bạn:** > 60% tổng thể và các file Controller này sẽ đạt Line Coverage > 80%.
