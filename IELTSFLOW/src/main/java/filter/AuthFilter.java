@@ -100,7 +100,22 @@ public class AuthFilter implements Filter {
         }
 
         // ── 1. Kiểm tra đường dẫn Admin ────────────────────────────────────
-        if (isStaffPath(path)) {
+        if (isAdminPath(path)) {
+            if (!isLoggedIn) {
+                redirectToLogin(resp, contextPath, "Vui lòng đăng nhập để tiếp tục");
+                return;
+            }
+            if (roleId != 1) {
+                // Không phải Admin → Chuyển về trang chủ với thông báo
+                resp.sendRedirect(contextPath + "/index.html?error=forbidden");
+                return;
+            }
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // ── 1.1 Kiểm tra đường dẫn Mentor ────────────────────────────────────
+        if (isMentorPath(path)) {
             if (!isLoggedIn) {
                 redirectToLogin(resp, contextPath, "Vui lòng đăng nhập để tiếp tục");
                 return;
@@ -135,14 +150,19 @@ public class AuthFilter implements Filter {
     //morier: whats the use of this function then?
 
     /** Kiểm tra đường dẫn có phải là Admin không */
-    private boolean isStaffPath(String path) {
+    private boolean isAdminPath(String path) {
         return path.startsWith(ADMIN_PATH_PREFIX)
                 || path.startsWith("/admin/")
                 || path.equals("/admin")
-                || path.startsWith("/api/admin/")
-                || path.startsWith(MENTOR_PATH_PREFIX)
+                || path.startsWith("/api/admin/");
+    }
+
+    /** Kiểm tra đường dẫn có phải là Mentor không */
+    private boolean isMentorPath(String path) {
+        return path.startsWith(MENTOR_PATH_PREFIX)
                 || path.startsWith("/mentor/")
-                || path.equals("/mentor");
+                || path.equals("/mentor")
+                || path.startsWith("/api/mentor/");
     }
 
     /** Kiểm tra đường dẫn có nằm trong danh sách cần bảo vệ không */
