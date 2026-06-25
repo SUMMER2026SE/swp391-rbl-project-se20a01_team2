@@ -6,101 +6,217 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Service gọi Gemini API để chấm điểm Writing và Speaking.
+ *
+ * Các cải tiến:
+ *  - Sử dụng model gemini-2.5-flash (đã verify hoạt động)
+ *  - Key rotation dùng static AtomicInteger (single instance, shared across all calls)
+ *  - Khi gặp 429/503: rotate sang key mới và thử lại thay vì dùng lại key cũ
+ *  - Fallback hardcoded keys khi System.property chưa được load (Tomcat chưa restart)
+ *  - Timeout hợp lý: 30s connect, 90s request (Gemini 2.5 có thể chậm với long prompts)
+ */
 public class GeminiApiService {
+
     private static final Logger LOGGER = Logger.getLogger(GeminiApiService.class.getName());
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=";
-    private final HttpClient httpClient;
+
+    // Đã verify ngày 25/06/2026: gemini-2.5-flash hoạt động với structured output
+    private static final String MODEL_NAME = "gemini-2.5-flash";
+    private static final String BASE_URL   =
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            + MODEL_NAME + ":generateContent?key=";
+
+    // Fallback keys - hardcoded để hệ thống luôn hoạt động kể cả khi .env chưa load
+    private static final String[] FALLBACK_KEYS = {
+        "YOUR_GEMINI_API_KEY_HERE"
+    };
+
+    // Static để tất cả instances dùng chung 1 counter tránh key bị hammer cùng lúc
+    private static final AtomicInteger KEY_COUNTER = new AtomicInteger(0);
+
+    private final HttpClient  httpClient;
     private final ObjectMapper objectMapper;
 
     public GeminiApiService() {
         this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
+                .connectTimeout(Duration.ofSeconds(30))
                 .build();
         this.objectMapper = new ObjectMapper();
     }
 
-    private static final java.util.concurrent.atomic.AtomicInteger keyIndex = new java.util.concurrent.atomic.AtomicInteger(0);
-
-    private String getApiKey() {
+    /**
+     * Lấy tất cả API keys từ System property (load từ .env) hoặc fallback hardcoded.
+     */
+    private String[] getAllKeys() {
         String keysStr = System.getProperty("GEMINI_API_KEYS");
-        if (keysStr == null || keysStr.isBlank()) {
-            LOGGER.severe("GEMINI_API_KEYS is not set in environment or .env file.");
-            return null;
+        if (keysStr != null && !keysStr.isBlank()) {
+            String[] parsed = keysStr.split(",");
+            if (parsed.length > 0) {
+                return java.util.Arrays.stream(parsed)
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .toArray(String[]::new);
+            }
         }
-        String[] keys = keysStr.split(",");
-        if (keys.length == 0) return null;
-        
-        int index = (keyIndex.getAndIncrement() & Integer.MAX_VALUE) % keys.length;
-        return keys[index].trim();
+        // Fallback: Tomcat chưa restart hoặc .env chưa được load
+        LOGGER.warning("GEMINI_API_KEYS not in System properties. Using hardcoded fallback keys.");
+        return FALLBACK_KEYS;
     }
 
     /**
-     * Call Gemini API with structured output
-     * @param systemInstruction The system instruction (role, context)
-     * @param userPrompt The user prompt (text to evaluate)
-     * @param responseSchemaJson The JSON Schema string for structured output
-     * @return The JSON string of the extracted data
+     * Lấy key theo round-robin. index tăng dần, tự động quay vòng.
      */
-    public String generateStructuredContent(String systemInstruction, String userPrompt, String responseSchemaJson) {
-        String apiKey = getApiKey();
-        if (apiKey == null) return null;
+    private String getNextKey(String[] keys) {
+        int idx = (KEY_COUNTER.getAndIncrement() & Integer.MAX_VALUE) % keys.length;
+        return keys[idx];
+    }
 
-        int maxRetries = 3;
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+    /**
+     * Gọi Gemini API với structured JSON output.
+     *
+     * @param systemInstruction Vai trò và hướng dẫn cho AI
+     * @param userPrompt        Nội dung cần AI đánh giá
+     * @param responseSchemaJson JSON Schema string định dạng output
+     * @return Chuỗi JSON kết quả từ AI, hoặc null nếu thất bại hoàn toàn
+     */
+    public String generateStructuredContent(String systemInstruction,
+                                            String userPrompt,
+                                            String responseSchemaJson) {
+        String[] keys = getAllKeys();
+        int maxAttempts = keys.length * 2; // Thử tối đa 2 vòng key rotation
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            String apiKey = getNextKey(keys);
+            LOGGER.info(String.format("[Gemini] Attempt %d/%d - Key: ...%s",
+                    attempt, maxAttempts, apiKey.substring(Math.max(0, apiKey.length() - 8))));
             try {
-                String payload = "{\n" +
-                    "  \"systemInstruction\": {\n" +
-                    "    \"parts\": [{\"text\": " + objectMapper.writeValueAsString(systemInstruction) + "}]\n" +
-                    "  },\n" +
-                    "  \"contents\": [{\n" +
-                    "    \"parts\": [{\"text\": " + objectMapper.writeValueAsString(userPrompt) + "}]\n" +
-                    "  }],\n" +
-                    "  \"generationConfig\": {\n" +
-                    "    \"temperature\": 0.2,\n" +
-                    "    \"responseMimeType\": \"application/json\",\n" +
-                    "    \"responseSchema\": " + responseSchemaJson + "\n" +
-                    "  }\n" +
-                    "}";
+                // Build full JSON payload cho Gemini API request
+                String fullPayload = buildPayload(systemInstruction, userPrompt, responseSchemaJson);
 
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(API_URL + apiKey))
-                        .header("Content-Type", "application/json")
-                        .timeout(Duration.ofSeconds(60))
-                        .POST(HttpRequest.BodyPublishers.ofString(payload))
+                        .uri(URI.create(BASE_URL + apiKey))
+                        .header("Content-Type", "application/json; charset=UTF-8")
+                        .timeout(Duration.ofSeconds(90))
+                        .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
                         .build();
 
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = httpClient.send(request,
+                        HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8));
 
-                if (response.statusCode() == 200) {
-                    var rootNode = objectMapper.readTree(response.body());
-                    var candidates = rootNode.path("candidates");
-                    if (candidates.isArray() && candidates.size() > 0) {
-                        var textNode = candidates.get(0).path("content").path("parts").get(0).path("text");
-                        return textNode.asText();
-                    }
-                } else if (response.statusCode() == 429 || response.statusCode() >= 500) {
-                    LOGGER.warning("Gemini API Rate Limit or Server Error (Attempt " + attempt + "): " + response.statusCode());
-                    if (attempt < maxRetries) {
-                        Thread.sleep(5000 * attempt); // wait 5s, then 10s
-                        continue;
-                    } else {
-                        LOGGER.severe("Gemini API failed after " + maxRetries + " attempts: " + response.body());
-                    }
+                int status = response.statusCode();
+                LOGGER.info(String.format("[Gemini] Response status: %d for attempt %d", status, attempt));
+
+                if (status == 200) {
+                    return extractTextFromResponse(response.body());
+                } else if (status == 429 || status == 503 || status >= 500) {
+                    // Rate limit hoặc server overload: rotate key và thử lại sau delay
+                    LOGGER.warning(String.format("[Gemini] Status %d on attempt %d. Rotating key and retrying after delay.", status, attempt));
+                    int sleepMs = Math.min(3000 * attempt, 15000); // max 15s wait
+                    Thread.sleep(sleepMs);
+                    // Tiếp tục vòng lặp với key mới
                 } else {
-                    LOGGER.severe("Gemini API Error: " + response.statusCode() + " - " + response.body());
-                    break;
+                    // Lỗi client (400, 401, 403) - không retry vì retry sẽ không giúp ích
+                    LOGGER.severe(String.format("[Gemini] Fatal error %d: %s", status, response.body()));
+                    return null;
                 }
 
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                LOGGER.warning("[Gemini] Thread interrupted during retry sleep.");
+                return null;
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Exception calling Gemini API (Attempt " + attempt + ")", e);
-                if (attempt < maxRetries) {
-                    try { Thread.sleep(3000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                LOGGER.log(Level.WARNING,
+                        String.format("[Gemini] Exception on attempt %d: %s", attempt, e.getMessage()), e);
+                if (attempt < maxAttempts) {
+                    try { Thread.sleep(2000); } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return null;
+                    }
                 }
             }
         }
+
+        LOGGER.severe("[Gemini] All " + maxAttempts + " attempts exhausted. Returning null.");
         return null;
+    }
+
+    /**
+     * Build JSON payload cho Gemini API request.
+     */
+    private String buildPayload(String systemInstruction, String userPrompt, String responseSchemaJson) {
+        try {
+            String sysText = objectMapper.writeValueAsString(systemInstruction);
+            String userText = objectMapper.writeValueAsString(userPrompt);
+            return "{"
+                + "\"systemInstruction\":{\"parts\":[{\"text\":" + sysText + "}]},"
+                + "\"contents\":[{\"parts\":[{\"text\":" + userText + "}]}],"
+                + "\"generationConfig\":{"
+                + "\"temperature\":0.2,"
+                + "\"responseMimeType\":\"application/json\","
+                + "\"responseSchema\":" + responseSchemaJson
+                + "}"
+                + "}";
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to build Gemini payload", e);
+            return null;
+        }
+    }
+
+    /**
+     * Parse kết quả từ Gemini API response body.
+     * Gemini trả về text nằm trong candidates[0].content.parts[0].text
+     */
+    private String extractTextFromResponse(String responseBody) {
+        try {
+            var rootNode = objectMapper.readTree(responseBody);
+
+            // Check candidates array
+            var candidates = rootNode.path("candidates");
+            if (!candidates.isArray() || candidates.isEmpty()) {
+                LOGGER.warning("[Gemini] Response has no candidates: " + responseBody.substring(0, Math.min(200, responseBody.length())));
+                return null;
+            }
+
+            var firstCandidate = candidates.get(0);
+
+            // Check finishReason - nếu là SAFETY thì bị block
+            String finishReason = firstCandidate.path("finishReason").asText("");
+            if ("SAFETY".equals(finishReason) || "RECITATION".equals(finishReason)) {
+                LOGGER.warning("[Gemini] Response blocked by safety filter. finishReason: " + finishReason);
+                return null;
+            }
+
+            var parts = firstCandidate.path("content").path("parts");
+            if (!parts.isArray() || parts.isEmpty()) {
+                LOGGER.warning("[Gemini] No parts in response: " + responseBody.substring(0, Math.min(200, responseBody.length())));
+                return null;
+            }
+
+            String text = parts.get(0).path("text").asText();
+            if (text == null || text.isBlank()) {
+                LOGGER.warning("[Gemini] Empty text in response.");
+                return null;
+            }
+
+            // Gemini đôi khi bọc JSON trong ```json ... ``` dù đã set responseMimeType
+            text = text.trim();
+            if (text.startsWith("```json")) {
+                text = text.substring(7);
+            } else if (text.startsWith("```")) {
+                text = text.substring(3);
+            }
+            if (text.endsWith("```")) {
+                text = text.substring(0, text.length() - 3);
+            }
+
+            return text.trim();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "[Gemini] Failed to parse response body", e);
+            return null;
+        }
     }
 }

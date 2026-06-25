@@ -169,6 +169,15 @@ public class PlacementTestServlet extends HttpServlet {
         int correctListening = 0, totalListening = 0;
         double sumWriting = 0, sumSpeaking = 0;
         int countWriting = 0, countSpeaking = 0;
+        services.AIEvaluationService aiSvc = new services.AIEvaluationService();
+
+        java.util.List<int[]>    writingDetailIds    = new java.util.ArrayList<>();
+        java.util.List<String>   writingTopics       = new java.util.ArrayList<>();
+        java.util.List<String>   writingAnswers      = new java.util.ArrayList<>();
+        java.util.List<int[]>    speakingDetailIds   = new java.util.ArrayList<>();
+        java.util.List<String>   speakingTopics      = new java.util.ArrayList<>();
+        java.util.List<String>   speakingTranscripts = new java.util.ArrayList<>();
+        java.util.List<double[]> speakingScores      = new java.util.ArrayList<>();
 
         for (Question q : questions) {
             String skill  = q.getSkill()        != null ? q.getSkill().trim()        : "";
@@ -180,7 +189,7 @@ public class PlacementTestServlet extends HttpServlet {
             detail.setQuestionId(q.getQuestionId());
             detail.setCandidateAnswer(answer);
 
-            if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType)) {
+            if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) {
                 boolean correct = mockTestService.isAnswerCorrect(q, answer);
                 detail.setIsCorrect(correct);
                 detail.setScore(correct ? 1.0 : 0.0);
@@ -190,33 +199,53 @@ public class PlacementTestServlet extends HttpServlet {
                 mockTestService.saveDetail(detail);
             } else {
                 detail.setGradingStatus("Pending_AI");
+                String transcript = null;
+                double azureScore = 0.0;
                 if ("Speaking".equals(skill)) {
                     detail.setSpeakingUrl(req.getParameter("speaking_url_" + q.getQuestionId()));
-                    detail.setCandidateTranscript(req.getParameter("transcript_" + q.getQuestionId()));
+                    transcript = req.getParameter("transcript_" + q.getQuestionId());
+                    detail.setCandidateTranscript(transcript);
+                    String azureScoreStr = req.getParameter("azure_" + q.getQuestionId());
+                    if (azureScoreStr != null && !azureScoreStr.isEmpty()) {
+                        try { azureScore = Double.parseDouble(azureScoreStr); } catch (NumberFormatException ignored) {}
+                    }
                 }
                 int detailId = mockTestService.saveDetail(detail);
-                services.AIEvaluationService aiService = new services.AIEvaluationService();
+
                 if ("Writing".equals(skill)) {
                     countWriting++;
-                    try {
-                        aiService.evaluateWritingAsync(detailId, q.getContent(), answer);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    writingDetailIds.add(new int[]{detailId});
+                    writingTopics.add(q.getContent());
+                    writingAnswers.add(answer);
                 } else if ("Speaking".equals(skill)) {
                     countSpeaking++;
-                    String azureScoreStr = req.getParameter("azure_" + q.getQuestionId());
-                    double azureScore = 0.0;
-                    if (azureScoreStr != null && !azureScoreStr.isEmpty()) {
-                        try { azureScore = Double.parseDouble(azureScoreStr); } catch (Exception ignored) {}
-                    }
-                    try {
-                        aiService.evaluateSpeakingAsync(detailId, q.getContent(), detail.getCandidateTranscript(), azureScore);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    speakingDetailIds.add(new int[]{detailId});
+                    speakingTopics.add(q.getContent());
+                    speakingTranscripts.add(transcript);
+                    speakingScores.add(new double[]{azureScore});
                 }
             }
+        }
+
+        // Gộp tất cả Writing + Speaking vào 1 chain DUY NHẤT
+        java.util.concurrent.CompletableFuture<Void> allAiTasks =
+            java.util.concurrent.CompletableFuture.completedFuture(null);
+
+        for (int i = 0; i < writingDetailIds.size(); i++) {
+            final int detailId = writingDetailIds.get(i)[0];
+            final String topic = writingTopics.get(i);
+            final String essay = writingAnswers.get(i);
+            allAiTasks = allAiTasks.thenCompose(v ->
+                aiSvc.evaluateWritingAsync(detailId, topic, essay).thenApply(r -> null));
+        }
+
+        for (int i = 0; i < speakingDetailIds.size(); i++) {
+            final int detailId      = speakingDetailIds.get(i)[0];
+            final String topic      = speakingTopics.get(i);
+            final String transcript = speakingTranscripts.get(i);
+            final double azureScore = speakingScores.get(i)[0];
+            allAiTasks = allAiTasks.thenCompose(v ->
+                aiSvc.evaluateSpeakingAsync(detailId, topic, transcript, azureScore).thenApply(r -> null));
         }
 
         Double listeningBand = totalListening > 0 ? mockTestService.rawToBand(correctListening, totalListening) : null;
@@ -315,27 +344,41 @@ public class PlacementTestServlet extends HttpServlet {
             req.setAttribute("timeTaken", timeTaken);
         }
         
-        // --- Tích hợp giải nghĩa chi tiết AI Feedback ---
+        // --- AI Feedback ---
         dao.AIEvaluationDAO aiDao = new dao.AIEvaluationDAO();
         List<String> feedbackJsons = aiDao.getFeedbackJsonStringsBySubmissionId(subId);
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         List<model.FeedbackWriting> writingFeedbacks = new ArrayList<>();
         List<model.FeedbackSpeaking> speakingFeedbacks = new ArrayList<>();
-        
+
         for (String json : feedbackJsons) {
             try {
-                if (json.contains("\"grammaticalRangeAndAccuracy\"")) {
+                if (json.contains("\"taskResponse\"")) {
                     writingFeedbacks.add(mapper.readValue(json, model.FeedbackWriting.class));
                 } else if (json.contains("\"pronunciation\"")) {
                     speakingFeedbacks.add(mapper.readValue(json, model.FeedbackSpeaking.class));
                 }
             } catch (Exception e) {
-                java.util.logging.Logger.getLogger("PlacementTestServlet").log(java.util.logging.Level.SEVERE, "Lỗi parse Feedback JSON", e);
+                java.util.logging.Logger.getLogger("PlacementTestServlet").log(
+                    java.util.logging.Level.SEVERE, "Lỗi parse Feedback JSON", e);
             }
         }
         req.setAttribute("writingFeedbacks", writingFeedbacks);
         req.setAttribute("speakingFeedbacks", speakingFeedbacks);
-        // ----------------------------------------------
+
+        // --- Answer Review cho Reading/Listening ---
+        java.util.List<model.AnswerReviewItem> answerReview =
+            aiDao.getAnswerReviewBySubmissionId(subId);
+        java.util.List<model.AnswerReviewItem> listeningReview = new java.util.ArrayList<>();
+        java.util.List<model.AnswerReviewItem> readingReview   = new java.util.ArrayList<>();
+        for (model.AnswerReviewItem item : answerReview) {
+            if ("Listening".equals(item.getSkill())) listeningReview.add(item);
+            else readingReview.add(item);
+        }
+        req.setAttribute("listeningReview", listeningReview);
+        req.setAttribute("readingReview",   readingReview);
+        // -------------------------------------------
 
         // Lấy lịch sử bài thi của user
         List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
