@@ -150,9 +150,8 @@ public class ExamController extends HttpServlet {
                 int sectionId = Integer.parseInt(req.getParameter("sectionId"));
                 String[] qIds = req.getParameterValues("questionIds");
                 if (qIds != null) {
-                    int order = 1;
                     for (String qIdStr : qIds) {
-                        examService.addQuestionToSection(sectionId, Integer.parseInt(qIdStr), order++);
+                        examService.addQuestionToSection(sectionId, Integer.parseInt(qIdStr));
                     }
                 }
                 resp.sendRedirect(req.getContextPath() + redirectPrefix + "/" + examId);

@@ -1,17 +1,17 @@
 // API logic for new UI
-const MOCK_TODAY_LESSONS = [
+const MOCK_TODAY_LESSONS = window.MOCK_TODAY_LESSONS || [
     { id: 101, title: 'IELTS Listening - Section 1 Tips', type: 'Video', skill: 'Listening', time: '15 mins', color: 'blue', icon: '🎧' },
     { id: 102, title: 'Academic Vocabulary List 1', type: 'Document', skill: 'Vocabulary', time: '20 mins', color: 'purple', icon: '📚' }
 ];
 
-const MOCK_LESSONS = [
+const MOCK_LESSONS = window.MOCK_LESSONS || [
     { id: 101, title: 'IELTS Listening - Section 1 Tips', type: 'Video', skill: 'Listening', status: 'Unlearned', color: 'blue', icon: '🎧' },
     { id: 102, title: 'Academic Vocabulary List 1', type: 'Document', skill: 'Vocabulary', status: 'Learned', color: 'purple', icon: '📚' },
     { id: 103, title: 'Speaking Part 2: Describe a person', type: 'Video', skill: 'Speaking', status: 'Unlearned', color: 'orange', icon: '🎙️' },
     { id: 104, title: 'Writing Task 1 - Line Graph', type: 'Document', skill: 'Writing', status: 'Unlearned', color: 'green', icon: '✍️' }
 ];
 
-const MOCK_REDO_EXAMS = [
+const MOCK_REDO_EXAMS = window.MOCK_REDO_EXAMS || [
     { id: 1, title: 'Mock Test 1 - Full Exam', date: 'Oct 12, 2023', score: 6.5, maxScore: 9.0, type: 'Mock Test' },
     { id: 2, title: 'Reading Practice Test A', date: 'Sep 25, 2023', score: 7.0, maxScore: 9.0, type: 'Practice' },
     { id: 3, title: 'Placement Test', date: 'Sep 01, 2023', score: 5.5, maxScore: 9.0, type: 'Placement' }

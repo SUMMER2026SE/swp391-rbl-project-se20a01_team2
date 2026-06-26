@@ -46,7 +46,7 @@ public class Question {
     private boolean deleted = false;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "QuestionID")
+    @JoinColumn(name = "QuestionID", nullable = false)
     private List<Answer> answers = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)

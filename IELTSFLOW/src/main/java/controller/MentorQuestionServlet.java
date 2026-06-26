@@ -86,7 +86,7 @@ public class MentorQuestionServlet extends HttpServlet {
                 Question question = buildQuestionFromRequest(req);
                 question.setCreatedBy(mentorId);
                 questionService.createQuestion(question, buildAnswersFromRequest(req));
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=Tạo+câu+hỏi+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Tạo câu hỏi thành công", "UTF-8"));
 
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("questionId"));
@@ -96,24 +96,24 @@ public class MentorQuestionServlet extends HttpServlet {
                 Question question = buildQuestionFromRequest(req);
                 question.setQuestionId(id);
                 questionService.updateQuestion(question, buildAnswersFromRequest(req));
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=Cập+nhật+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("questionId"));
                 questionService.deleteQuestion(id);
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=Xóa+câu+hỏi+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Xóa câu hỏi thành công", "UTF-8"));
 
             } else if ("addTag".equals(action)) {
                 int questionId = Integer.parseInt(req.getParameter("questionId"));
                 int tagId      = Integer.parseInt(req.getParameter("tagId"));
                 questionService.addTagToQuestion(questionId, tagId);
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=Gắn+tag+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=" + java.net.URLEncoder.encode("Gắn tag thành công", "UTF-8"));
 
             } else if ("removeTag".equals(action)) {
                 int questionId = Integer.parseInt(req.getParameter("questionId"));
                 int tagId = Integer.parseInt(req.getParameter("tagId"));
                 questionService.removeTagFromQuestion(questionId, tagId);
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=Xóa+tag+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=" + java.net.URLEncoder.encode("Xóa tag thành công", "UTF-8"));
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions");
             }
