@@ -189,7 +189,7 @@
                 <div class="d-flex flex-wrap gap-2 mb-4">
                     <c:forEach var="tag" items="${question.tags}">
                         <div class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2 fs-6 rounded-pill d-flex align-items-center">
-                            ${tag.tagName}
+                            ${tag.name}
                             <form action="${pageContext.request.contextPath}/mentor/questions" method="POST" class="ms-2 d-inline">
                                 <input type="hidden" name="action" value="removeTag">
                                 <input type="hidden" name="questionId" value="${question.questionId}">

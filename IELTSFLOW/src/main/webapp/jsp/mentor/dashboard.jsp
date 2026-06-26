@@ -379,7 +379,7 @@
                                                                 background: linear-gradient(135deg, #3b82f6, #8b5cf6);
                                                                 color: white; display: flex; align-items: center;
                                                                 justify-content: center; font-size: 0.75rem; font-weight: 700;">
-                                                        ${not empty ticket.user.fullName ? ticket.user.fullName.substring(0, 1) : 'U'}
+                                                        ${ticket.user.fullName.substring(0,1)}
                                                     </div>
                                                     ${ticket.user.fullName}
                                                 </div>

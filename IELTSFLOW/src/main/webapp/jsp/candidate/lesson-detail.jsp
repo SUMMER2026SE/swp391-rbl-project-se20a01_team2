@@ -73,24 +73,82 @@
                     <button id="bookmark-btn" class="btn btn-glass" style="color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);" onclick="toggleBookmark()">❤️ Lưu bài</button>
                 </div>
 
-                <c:if test="${not empty lesson.videoUrl}">
+                <%
+                    model.Lesson l = (model.Lesson)request.getAttribute("lesson");
+                    
+                    boolean hasVideo = false;
+                    if (l.getVideoUrl() != null) {
+                        String v = l.getVideoUrl().trim();
+                        if (v.length() > 5 && (v.startsWith("http") || v.startsWith("/"))) {
+                            hasVideo = true;
+                        }
+                    }
+                    request.setAttribute("hasVideo", hasVideo);
+
+                    boolean hasDoc = false;
+                    String fileName = "Tài liệu đính kèm";
+                    if (l.getDocumentUrl() != null) {
+                        String d = l.getDocumentUrl().trim();
+                        if (d.length() > 5 && (d.startsWith("http") || d.startsWith("/"))) {
+                            hasDoc = true;
+                            if (d.contains("/")) {
+                                fileName = d.substring(d.lastIndexOf('/') + 1);
+                                // remove UUID prefix if exists (UUID is 36 chars long)
+                                if (fileName.length() > 37 && fileName.charAt(36) == '.') {
+                                    // Sometimes UUIDs are at the start
+                                    // Just show the raw file name
+                                }
+                            } else {
+                                fileName = d;
+                            }
+                        }
+                    }
+                    request.setAttribute("hasDoc", hasDoc);
+                    request.setAttribute("fileName", fileName);
+                %>
+
+                <% if (hasVideo) { %>
                     <div class="video-container">
                         <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
                             <source src="${pageContext.request.contextPath}${lesson.videoUrl}" type="video/mp4">
                             Your browser does not support HTML video.
                         </video>
                     </div>
-                </c:if>
+                <% } else { %>
+                    <div style="padding: 40px 20px; text-align: center; background: rgba(0,0,0,0.03); border-radius: 12px; margin-bottom: 20px; border: 1px dashed rgba(0,0,0,0.15); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="font-size: 2.2rem; opacity: 0.6; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">🎦</div>
+                        <div style="color: #64748b; font-style: italic; font-size: 0.95rem; font-weight: 500;">Không có video bài giảng cho bài học này</div>
+                    </div>
+                <% } %>
 
-                <div style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.85); min-height: 100px;">
+                <div style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.85); min-height: 100px; margin-bottom: 20px;">
                     ${lesson.content}
                 </div>
 
+                <% if (hasDoc) { %>
+                    <div style="margin-bottom: 30px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid var(--accent-green);">
+                        <span style="color: var(--text-secondary); margin-right: 10px;">Đính kèm:</span>
+                        <c:choose>
+                            <c:when test="${lesson.documentUrl.startsWith('http')}">
+                                <a href="${lesson.documentUrl}" target="_blank" style="color: var(--accent-green); text-decoration: underline; font-weight: 500;">
+                                    📄 ${lesson.documentUrl}
+                                </a>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="${pageContext.request.contextPath}${lesson.documentUrl}" download target="_blank" style="color: var(--accent-green); text-decoration: underline; font-weight: 500;">
+                                    📄 ${fileName}
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                <% } else { %>
+                    <div style="margin-bottom: 30px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border-left: 4px solid rgba(0,0,0,0.15); box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                        <span style="color: #64748b; font-style: italic; font-size: 0.95rem; font-weight: 500; text-shadow: 0 1px 2px rgba(255,255,255,0.5);">📄 Không có tài liệu đính kèm</span>
+                    </div>
+                <% } %>
+
                 <div class="actions-bar">
                     <button id="learn-btn" class="btn btn-primary" onclick="toggleLearned()">✓ Đánh dấu đã học</button>
-                    <c:if test="${not empty lesson.documentUrl}">
-                        <a href="${pageContext.request.contextPath}${lesson.documentUrl}" download target="_blank" class="btn btn-glass" style="color: var(--accent-green); border-color: rgba(16, 185, 129, 0.3); text-decoration: none;">📄 Tải tài liệu đính kèm</a>
-                    </c:if>
                 </div>
             </div>
         </main>
