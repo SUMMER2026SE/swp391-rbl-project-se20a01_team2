@@ -12,10 +12,84 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet">
     <style>
-        .table-custom th { background-color: var(--sidebar-bg); color: var(--text-secondary); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; border-bottom: 2px solid var(--border-color); }
-        .table-custom td { vertical-align: middle; border-bottom: 1px solid var(--border-color); }
-        .table-custom tbody tr:hover { background-color: rgba(59, 130, 246, 0.03); }
-        .truncate-text { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; }
+        /* GitHub Issues Style List */
+        .issues-container {
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            background: #ffffff;
+            margin-top: 20px;
+        }
+        .issues-header {
+            background-color: #f6f8fa;
+            border-bottom: 1px solid #d0d7de;
+            padding: 16px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #24292f;
+        }
+        .issues-header span { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .issues-header .text-muted { color: #57606a; font-weight: 400; }
+        
+        .issue-row {
+            display: flex;
+            padding: 12px 16px;
+            border-bottom: 1px solid #d0d7de;
+            transition: background 0.1s;
+        }
+        .issue-row:last-child { border-bottom: none; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
+        .issue-row:hover { background-color: #f6f8fa; }
+        .issue-icon {
+            margin-right: 8px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .issue-icon-open { color: #1a7f37; }
+        .issue-icon-closed { color: #8250df; }
+        
+        .issue-content { flex-grow: 1; }
+        .issue-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #24292f;
+            text-decoration: none;
+            margin-bottom: 4px;
+            display: inline-block;
+        }
+        .issue-title:hover { color: #0969da; text-decoration: none; }
+        .issue-meta {
+            font-size: 12px;
+            color: #57606a;
+        }
+        .issue-comments {
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+            color: #57606a;
+            font-size: 12px;
+            text-decoration: none;
+            margin-left: 16px;
+        }
+        .issue-comments:hover { color: #0969da; }
+
+        .label-badge {
+            display: inline-block;
+            padding: 0 7px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 18px;
+            border-radius: 2em;
+            border: 1px solid transparent;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .label-inprogress { background-color: #d4a72c; color: #fff; }
+        .label-resolved { background-color: #2da44e; color: #fff; }
+        
+        .empty-state { text-align: center; padding: 60px 20px; color: #57606a; }
     </style>
 </head>
 <body>
@@ -29,66 +103,88 @@
     </jsp:include>
 
     <main class="main-content">
-        <header class="main-header animate-fade-up" style="margin-bottom: 30px;">
-            <h1 class="page-title" style="font-size: 2rem; margin: 0;">Hỗ trợ học viên 🎫</h1>
-            <p class="text-secondary mt-2">Quản lý và phản hồi các yêu cầu hỗ trợ từ học viên</p>
+        <header class="main-header animate-fade-up">
+            <h1 style="font-size: 24px; font-weight: 600; color: #24292f; margin: 0;">Tickets</h1>
         </header>
         
         <c:if test="${not empty param.success}">
-            <div class="alert alert-success animate-fade-up">${param.success}</div>
+            <div style="background-color: #dafbe1; border: 1px solid #4ac26b; color: #1a7f37; padding: 12px 16px; border-radius: 6px; margin-top: 20px; font-size: 14px;"><i class="fa-solid fa-check-circle me-2"></i> ${param.success}</div>
         </c:if>
         <c:if test="${not empty error}">
-            <div class="alert alert-danger animate-fade-up">${error}</div>
+            <div style="background-color: #ffebe9; border: 1px solid #ff8182; color: #cf222e; padding: 12px 16px; border-radius: 6px; margin-top: 20px; font-size: 14px;"><i class="fa-solid fa-circle-exclamation me-2"></i> ${error}</div>
         </c:if>
 
-        <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 0; overflow: hidden;">
-            <div class="table-responsive">
-                <table class="table table-custom mb-0">
-                    <thead>
-                        <tr>
-                            <th class="ps-4">Ticket ID</th>
-                            <th>Tiêu đề</th>
-                            <th>Học viên</th>
-                            <th>Trạng thái</th>
-                            <th>Ngày tạo</th>
-                            <th class="text-center pe-4">Thao Tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="ticket" items="${tickets}">
-                            <tr>
-                                <td class="ps-4 text-secondary">#${ticket.ticketId}</td>
-                                <td class="fw-bold" style="color: var(--text-primary);">
-                                    <span class="truncate-text" title="${ticket.subject}">${ticket.subject}</span>
-                                </td>
-                                <td>${ticket.user.fullName}</td>
-                                <td>
-                                    <c:choose>
-                                        <c:when test="${ticket.status == 'Open'}"><span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1">Đang mở</span></c:when>
-                                        <c:when test="${ticket.status == 'Resolved'}"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Đã giải quyết</span></c:when>
-                                        <c:when test="${ticket.status == 'Closed'}"><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">Đã đóng</span></c:when>
-                                        <c:otherwise><span class="badge bg-secondary">${ticket.status}</span></c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td><fmt:formatDate value="${ticket.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                <td class="text-center pe-4">
-                                    <a href="${pageContext.request.contextPath}/mentor/tickets/${ticket.ticketId}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" style="font-size: 0.8rem;">
-                                        Xem & Trả lời <i class="fa-solid fa-arrow-right ms-1"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        <c:if test="${empty tickets}">
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">Không có ticket nào.</td>
-                            </tr>
-                        </c:if>
-                    </tbody>
-                </table>
+        <div class="animate-fade-up" style="animation-delay: 0.1s;">
+            <div class="issues-container">
+                <div class="issues-header">
+                    <span><i class="fa-regular fa-circle-dot"></i> Tickets</span>
+                </div>
+                
+                <c:choose>
+                    <c:when test="${empty tickets}">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-ticket" style="font-size: 24px; margin-bottom: 16px;"></i>
+                            <h4>No tickets found</h4>
+                            <p>There are currently no tickets requiring your attention.</p>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="ticket-list-body">
+                            <c:forEach var="t" items="${tickets}">
+                                <div class="issue-row">
+                                    <div class="issue-icon ${t.status == 'Closed' ? 'issue-icon-closed' : 'issue-icon-open'}">
+                                        <c:choose>
+                                            <c:when test="${t.status == 'Closed'}"><i class="fa-regular fa-circle-check"></i></c:when>
+                                            <c:otherwise><i class="fa-regular fa-circle-dot"></i></c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                    <div class="issue-content">
+                                        <a href="${pageContext.request.contextPath}/mentor/tickets/${t.ticketId}" class="issue-title">${t.subject}</a>
+                                        <c:if test="${t.status == 'InProgress'}"><span class="label-badge label-inprogress">in progress</span></c:if>
+                                        <c:if test="${t.status == 'Resolved'}"><span class="label-badge label-resolved">resolved</span></c:if>
+                                        <div class="issue-meta">
+                                            #${t.ticketId} opened <span class="time-ago" data-time="${t.createdAt}">${t.createdAt}</span> by ${t.user.fullName}
+                                        </div>
+                                    </div>
+                                    <c:if test="${t.replies.size() > 1}">
+                                        <a href="${pageContext.request.contextPath}/mentor/tickets/${t.ticketId}" class="issue-comments">
+                                            <i class="fa-regular fa-message"></i> ${t.replies.size() - 1}
+                                        </a>
+                                    </c:if>
+                                </div>
+                            </c:forEach>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval >= 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval >= 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval >= 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval >= 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval >= 1) return Math.floor(interval) + " minutes ago";
+            if (seconds < 0) return "just now";
+            return Math.floor(seconds) + " seconds ago";
+        }
+        document.querySelectorAll('.time-ago').forEach(el => {
+            const dateVal = el.getAttribute('data-time');
+            if (dateVal) el.textContent = timeAgo(dateVal);
+        });
+    });
+</script>
 </body>
 </html>

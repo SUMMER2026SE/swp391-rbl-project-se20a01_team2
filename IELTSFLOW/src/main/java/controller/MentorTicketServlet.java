@@ -63,10 +63,6 @@ public class MentorTicketServlet extends HttpServlet {
                 String replyContent = req.getParameter("content");
                 ticketService.replyTicket(ticketId, mentorId, replyContent);
                 resp.sendRedirect(req.getContextPath() + "/mentor/tickets/" + ticketId + "?success=Phản+hồi+thành+công");
-            } else if ("claim".equals(action)) {
-                int ticketId = Integer.parseInt(req.getParameter("ticketId"));
-                ticketService.claimTicket(ticketId, mentorId);
-                resp.sendRedirect(req.getContextPath() + "/mentor/tickets/" + ticketId + "?success=Đã+nhận+hỗ+trợ+ticket+này");
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/tickets");
             }
