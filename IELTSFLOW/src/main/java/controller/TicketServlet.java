@@ -57,11 +57,6 @@ public class TicketServlet extends HttpServlet {
                 // Danh sách ticket
                 List<Ticket> tickets = roleId == 2 ? ticketService.getAllTickets() : ticketService.getUserTickets(userId);
                 req.setAttribute("tickets", tickets);
-                
-                // Fetch mentors for optional assignment
-                List<model.User> mentors = new dao.UserDAO().findByRole(2);
-                req.setAttribute("mentors", mentors);
-                
                 req.getRequestDispatcher("/jsp/candidate/tickets.jsp").forward(req, resp);
             }
         } catch (Exception e) {
@@ -91,10 +86,7 @@ public class TicketServlet extends HttpServlet {
             if ("create".equals(action)) {
                 String subject = req.getParameter("subject");
                 String content = req.getParameter("content");
-                String mentorIdStr = req.getParameter("mentorId");
-                Integer mentorId = (mentorIdStr != null && !mentorIdStr.isEmpty()) ? Integer.parseInt(mentorIdStr) : null;
-                
-                Ticket ticket = ticketService.createTicket(userId, subject, content, mentorId);
+                Ticket ticket = ticketService.createTicket(userId, subject, content);
                 
                 // Đã sửa lại chuỗi thông báo tiếng Việt trên URL
                 resp.sendRedirect(req.getContextPath() + "/candidate/tickets?id=" + ticket.getTicketId() + "&success=" + java.net.URLEncoder.encode("Gửi ticket thành công", "UTF-8"));
