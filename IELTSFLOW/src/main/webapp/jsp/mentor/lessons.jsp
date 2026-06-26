@@ -44,6 +44,17 @@
             <div class="alert alert-danger animate-fade-up">${error}</div>
         </c:if>
 
+        <script>
+            if (window.history.replaceState) {
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('success') || url.searchParams.has('error')) {
+                    url.searchParams.delete('success');
+                    url.searchParams.delete('error');
+                    window.history.replaceState(null, '', url.toString() || window.location.pathname);
+                }
+            }
+        </script>
+
         <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 20px; margin-bottom: 20px;">
             <form action="${pageContext.request.contextPath}/mentor/lessons" method="GET" class="row g-2 align-items-center">
                 <input type="hidden" name="page" id="page-input" value="${not empty lessonsPage ? lessonsPage.currentPage : 1}">

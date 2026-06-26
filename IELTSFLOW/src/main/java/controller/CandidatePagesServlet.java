@@ -62,6 +62,8 @@ public class CandidatePagesServlet extends HttpServlet {
         if ("/candidate/weekly-plan".equals(path)) {
             jspPath = "/jsp/candidate/weekly-plan.jsp";
         } else if ("/candidate/lessons".equals(path)) {
+            services.LessonService ls = new services.LessonService();
+            req.setAttribute("lessonsJson", generateLessonsJson(ls.getAllLessons()));
             jspPath = "/jsp/candidate/lessons.jsp";
         } else if ("/candidate/lesson-detail".equals(path)) {
             try {
@@ -146,6 +148,25 @@ public class CandidatePagesServlet extends HttpServlet {
             req.setAttribute("chartSpeaking", "[]");
             req.setAttribute("chartOverall", "[]");
         }
+    }
+
+    private String generateLessonsJson(List<model.Lesson> lessons) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < lessons.size(); i++) {
+            model.Lesson l = lessons.get(i);
+            String type = (l.getVideoUrl() != null && !l.getVideoUrl().isEmpty()) ? "Video" : "Document";
+            String color = "blue";
+            String icon = "🎧";
+            if ("Reading".equals(l.getSkill())) { color = "green"; icon = "📚"; }
+            else if ("Writing".equals(l.getSkill())) { color = "orange"; icon = "✍️"; }
+            else if ("Speaking".equals(l.getSkill())) { color = "purple"; icon = "🎙️"; }
+            
+            sb.append(String.format("{\"id\":%d,\"title\":\"%s\",\"type\":\"%s\",\"skill\":\"%s\",\"color\":\"%s\",\"icon\":\"%s\"}",
+                l.getLessonId(), l.getTitle().replace("\"", "\\\"").replace("\n", ""), type, l.getSkill(), color, icon));
+            if (i < lessons.size() - 1) sb.append(",");
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }
 

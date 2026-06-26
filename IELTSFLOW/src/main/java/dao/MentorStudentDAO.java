@@ -24,9 +24,8 @@ public class MentorStudentDAO {
             String sql = "SELECT DISTINCT u.* FROM Users u " +
                          "LEFT JOIN TestSubmissions ts ON u.UserID = ts.UserID " +
                          "LEFT JOIN Exams e ON ts.ExamID = e.ExamID " +
-                         "LEFT JOIN Tickets t ON u.UserID = t.UserID " +
                          "WHERE u.RoleID = 3 AND u.Deleted = 0 " +
-                         "AND (e.MentorID = ?1 OR t.AssignedTo = ?1) " +
+                         "AND (e.MentorID = ?1) " +
                          "ORDER BY u.CreatedAt DESC";
             Query query = em.createNativeQuery(sql, User.class);
             query.setParameter(1, mentorId);

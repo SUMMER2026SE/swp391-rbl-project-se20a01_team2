@@ -38,6 +38,53 @@
             <div class="alert alert-danger animate-fade-up">${error}</div>
         </c:if>
 
+        <script>
+            if (window.history.replaceState) {
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('success') || url.searchParams.has('error')) {
+                    url.searchParams.delete('success');
+                    url.searchParams.delete('error');
+                    window.history.replaceState(null, '', url.toString() || window.location.pathname);
+                }
+            }
+
+            async function uploadMaterial(inputId, targetId) {
+                const fileInput = document.getElementById(inputId);
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert('Vui lòng chọn file trước khi tải lên.');
+                    return;
+                }
+                
+                const btn = fileInput.nextElementSibling;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
+                btn.disabled = true;
+
+                const formData = new FormData();
+                formData.append('type', 'material');
+                formData.append('file', fileInput.files[0]);
+
+                try {
+                    const response = await fetch(window.contextPath + '/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        document.getElementById(targetId).value = data.url;
+                        alert('Tải lên thành công!');
+                    } else {
+                        alert('Lỗi tải lên: ' + (data.error || 'Lỗi không xác định'));
+                    }
+                } catch (error) {
+                    alert('Lỗi mạng khi tải lên: ' + error.message);
+                } finally {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            }
+        </script>
+
         <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 30px;">
             <form action="${pageContext.request.contextPath}/mentor/lessons" method="POST">
                 <input type="hidden" name="action" value="${lesson == null ? 'create' : 'update'}">
@@ -70,19 +117,25 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">URL Video (Youtube/Vimeo)</label>
+                        <label class="form-label fw-bold">Video Bài Giảng (MP4/WebM)</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="fa-brands fa-youtube text-danger"></i></span>
-                            <input type="url" name="videoUrl" class="form-control" placeholder="https://..." value="${lesson.videoUrl}">
+                            <input type="file" id="videoUpload" class="form-control" accept=".mp4,.webm">
+                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('videoUpload', 'videoUrl')">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
+                            </button>
                         </div>
+                        <input type="text" name="videoUrl" id="videoUrl" class="form-control mt-2 bg-light" readonly placeholder="URL Video sau khi tải lên sẽ hiển thị ở đây..." value="${lesson.videoUrl}">
                     </div>
                     
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">URL Tài liệu (PDF/Doc)</label>
+                        <label class="form-label fw-bold">Tài Liệu Đính Kèm (PDF/Docx/Zip)</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-file-pdf text-primary"></i></span>
-                            <input type="url" name="documentUrl" class="form-control" placeholder="https://..." value="${lesson.documentUrl}">
+                            <input type="file" id="documentUpload" class="form-control" accept=".pdf,.doc,.docx,.zip,.rar">
+                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('documentUpload', 'documentUrl')">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
+                            </button>
                         </div>
+                        <input type="text" name="documentUrl" id="documentUrl" class="form-control mt-2 bg-light" readonly placeholder="URL Tài liệu sau khi tải lên sẽ hiển thị ở đây..." value="${lesson.documentUrl}">
                     </div>
                 </div>
 

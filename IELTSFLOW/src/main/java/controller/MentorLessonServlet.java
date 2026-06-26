@@ -88,7 +88,7 @@ public class MentorLessonServlet extends HttpServlet {
                 lesson.setCreatedAt(LocalDateTime.now());
                 lesson.setDeleted(false);
                 lessonService.createLesson(lesson);
-                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=Tạo+bài+học+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=" + java.net.URLEncoder.encode("Tạo bài học thành công", "UTF-8"));
 
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("lessonId"));
@@ -103,7 +103,7 @@ public class MentorLessonServlet extends HttpServlet {
                     throw new Exception("Kỹ năng không được để trống");
                 updated.setLessonId(id);
                 lessonService.updateLesson(updated);
-                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=Cập+nhật+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("lessonId"));
@@ -111,7 +111,7 @@ public class MentorLessonServlet extends HttpServlet {
                 if (existing == null)
                     throw new Exception("Không tìm thấy bài học #" + id);
                 lessonService.deleteLesson(id);
-                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=Xóa+bài+học+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=" + java.net.URLEncoder.encode("Xóa bài học thành công", "UTF-8"));
 
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/lessons");

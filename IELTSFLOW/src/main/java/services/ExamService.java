@@ -103,11 +103,15 @@ public class ExamService {
         sectionDAO.delete(sectionId);
     }
 
-    public void addQuestionToSection(int sectionId, int questionId, int orderIndex) {
+    public void addQuestionToSection(int sectionId, int questionId) {
+        if (examQuestionDAO.exists(sectionId, questionId)) {
+            return; // Ignore duplicates
+        }
+        int nextOrder = examQuestionDAO.getMaxOrderIndex(sectionId) + 1;
         model.ExamQuestion eq = new model.ExamQuestion();
         eq.setSectionId(sectionId);
         eq.setQuestionId(questionId);
-        eq.setOrderIndex(orderIndex);
+        eq.setOrderIndex(nextOrder);
         examQuestionDAO.save(eq);
     }
 

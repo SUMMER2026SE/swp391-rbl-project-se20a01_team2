@@ -38,6 +38,17 @@
             <div class="alert alert-danger animate-fade-up">${error}</div>
         </c:if>
 
+        <script>
+            if (window.history.replaceState) {
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('success') || url.searchParams.has('error')) {
+                    url.searchParams.delete('success');
+                    url.searchParams.delete('error');
+                    window.history.replaceState(null, '', url.toString() || window.location.pathname);
+                }
+            }
+        </script>
+
         <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 30px;">
             <form action="${pageContext.request.contextPath}/mentor/questions" method="POST">
                 <input type="hidden" name="action" value="${question == null ? 'create' : 'update'}">
@@ -198,7 +209,7 @@
                     <select name="tagId" class="form-select rounded-pill w-auto flex-grow-1" required>
                         <option value="">-- Chọn tag để thêm --</option>
                         <c:forEach var="t" items="${allTags}">
-                            <option value="${t.tagId}">${t.tagName}</option>
+                            <option value="${t.tagId}">${t.name}</option>
                         </c:forEach>
                     </select>
                     <button type="submit" class="btn btn-outline-success rounded-pill fw-bold"><i class="fa-solid fa-plus"></i> Thêm</button>
