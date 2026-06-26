@@ -13,6 +13,8 @@ public class SubmissionDetail {
     private Boolean isCorrect;
     private Double score;
     private String gradingStatus; // Pending_AI, Processing, Graded, Failed
+    private Double mentorScore;
+    private String mentorFeedback;
 
     // Transient: thông tin câu hỏi (JOIN để hiển thị kết quả)
     private String questionContent;
@@ -50,6 +52,12 @@ public class SubmissionDetail {
 
     public String getGradingStatus()                { return gradingStatus; }
     public void setGradingStatus(String v)          { this.gradingStatus = v; }
+
+    public Double getMentorScore()                  { return mentorScore; }
+    public void setMentorScore(Double v)            { this.mentorScore = v; }
+
+    public String getMentorFeedback()               { return mentorFeedback; }
+    public void setMentorFeedback(String v)         { this.mentorFeedback = v; }
 
     public String getQuestionContent()              { return questionContent; }
     public void setQuestionContent(String v)        { this.questionContent = v; }

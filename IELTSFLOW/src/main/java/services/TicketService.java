@@ -35,6 +35,13 @@ public class TicketService {
     }
 
     /**
+     * Lấy danh sách ticket cho Mentor
+     */
+    public List<Ticket> getTicketsForMentor(int mentorId) {
+        return ticketDAO.findTicketsForMentor(mentorId);
+    }
+
+    /**
      * Lấy chi tiết một ticket
      */
     public Ticket getTicketById(int ticketId, int userId) throws Exception {
@@ -52,6 +59,10 @@ public class TicketService {
      * Tạo ticket mới
      */
     public Ticket createTicket(int userId, String subject, String content) throws Exception {
+        return createTicket(userId, subject, content, null);
+    }
+
+    public Ticket createTicket(int userId, String subject, String content, Integer assignedMentorId) throws Exception {
         if (subject == null || subject.trim().isEmpty()) {
             throw new Exception("Tiêu đề không được để trống");
         }
@@ -63,6 +74,11 @@ public class TicketService {
             .orElseThrow(() -> new Exception("Không tìm thấy người dùng"));
 
         Ticket ticket = new Ticket(user, subject.trim());
+        if (assignedMentorId != null) {
+            User mentor = userDAO.findById(assignedMentorId).orElse(null);
+            ticket.setAssignedTo(mentor);
+        }
+
         int ticketId = ticketDAO.create(ticket);
         ticketDAO.addReply(ticketId, user, content.trim(), "Open");
         
@@ -70,22 +86,41 @@ public class TicketService {
     }
 
     /**
-     * Admin trả lời ticket
+     * Mentor/Admin trả lời ticket
      */
     public void replyTicket(int ticketId, int adminId, String reply) throws Exception {
         if (reply == null || reply.trim().isEmpty()) {
             throw new Exception("Nội dung phản hồi không được để trống");
         }
         User admin = userDAO.findById(adminId)
-            .orElseThrow(() -> new Exception("Không tìm thấy người dùng admin"));
+            .orElseThrow(() -> new Exception("Không tìm thấy người dùng admin/mentor"));
         Ticket ticket = ticketDAO.findById(ticketId)
             .orElseThrow(() -> new Exception("Không tìm thấy ticket #" + ticketId));
             
         if ("Closed".equals(ticket.getStatus())) {
             throw new Exception("Không thể phản hồi vì ticket đã đóng");
         }
+
+        // Tự động claim ticket nếu chưa ai nhận
+        if (ticket.getAssignedTo() == null && (admin.getRoleId() == 2 || admin.getRoleId() == 1)) {
+            ticketDAO.assignTicket(ticketId, adminId);
+        } else if (ticket.getAssignedTo() != null && ticket.getAssignedTo().getUserId() != adminId && admin.getRoleId() != 1) {
+            throw new Exception("Ticket này đã được nhận bởi Mentor khác.");
+        }
             
         ticketDAO.addReply(ticketId, admin, reply.trim(), "Resolved");
+    }
+
+    /**
+     * Mentor claim ticket (nhận hỗ trợ)
+     */
+    public void claimTicket(int ticketId, int mentorId) throws Exception {
+        Ticket ticket = ticketDAO.findById(ticketId)
+            .orElseThrow(() -> new Exception("Không tìm thấy ticket #" + ticketId));
+        if (ticket.getAssignedTo() != null && ticket.getAssignedTo().getUserId() != mentorId) {
+            throw new Exception("Ticket này đã được gán cho Mentor khác.");
+        }
+        ticketDAO.assignTicket(ticketId, mentorId);
     }
 
     /**

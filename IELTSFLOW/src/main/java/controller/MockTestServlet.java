@@ -372,6 +372,21 @@ public class MockTestServlet extends HttpServlet {
         }
         req.setAttribute("writingFeedbacks", writingFeedbacks);
         req.setAttribute("speakingFeedbacks", speakingFeedbacks);
+        
+        // Fetch submission details for mentor override info
+        dao.SubmissionDetailsDAO detailsDao = new dao.SubmissionDetailsDAO();
+        java.util.List<model.SubmissionDetail> details = detailsDao.getDetailsBySubmissionId(subId);
+        java.util.List<model.SubmissionDetail> writingDetails = new java.util.ArrayList<>();
+        java.util.List<model.SubmissionDetail> speakingDetails = new java.util.ArrayList<>();
+        for (model.SubmissionDetail d : details) {
+            if ("Writing".equalsIgnoreCase(d.getSkill())) {
+                writingDetails.add(d);
+            } else if ("Speaking".equalsIgnoreCase(d.getSkill())) {
+                speakingDetails.add(d);
+            }
+        }
+        req.setAttribute("writingDetails", writingDetails);
+        req.setAttribute("speakingDetails", speakingDetails);
 
         // --- Answer Review cho Reading/Listening ---
         java.util.List<model.AnswerReviewItem> answerReview =

@@ -1,7 +1,6 @@
 package model;
 
 import java.time.LocalDateTime;
-
 public class AIEvaluation {
     private int evaluationId;
     private int detailId;
@@ -49,4 +48,5 @@ public class AIEvaluation {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
 }

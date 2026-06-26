@@ -44,6 +44,23 @@ public class TicketDAO {
     }
 
     /**
+     * Lấy tất cả ticket dành cho một Mentor cụ thể (Chưa ai nhận hoặc do Mentor này nhận)
+     */
+    public List<Ticket> findTicketsForMentor(int mentorId) {
+        return JpaHelper.query(em -> {
+            List<Ticket> tickets = em.createQuery(
+                "SELECT t FROM Ticket t WHERE t.assignedTo IS NULL OR t.assignedTo.userId = :mentorId ORDER BY t.createdAt DESC",
+                Ticket.class)
+              .setParameter("mentorId", mentorId)
+              .getResultList();
+            for (Ticket t : tickets) {
+                t.getReplies().size(); // force init
+            }
+            return tickets;
+        });
+    }
+
+    /**
      * Tìm ticket theo ID
      */
     public Optional<Ticket> findById(int ticketId) {
@@ -73,6 +90,25 @@ public class TicketDAO {
             JpaHelper.execute(em -> {
                 Ticket ticket = em.find(Ticket.class, ticketId);
                 if (ticket != null) ticket.setStatus(status);
+            });
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Gán ticket cho Mentor
+     */
+    public boolean assignTicket(int ticketId, int mentorId) {
+        try {
+            JpaHelper.execute(em -> {
+                Ticket ticket = em.find(Ticket.class, ticketId);
+                model.User mentor = em.find(model.User.class, mentorId);
+                if (ticket != null && mentor != null) {
+                    ticket.setAssignedTo(mentor);
+                }
             });
             return true;
         } catch (Exception e) {

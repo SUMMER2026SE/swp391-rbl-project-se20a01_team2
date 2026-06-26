@@ -2,6 +2,7 @@ package dao;
 
 import model.Question;
 import util.JpaHelper;
+import util.PaginatedList;
 import java.util.List;
 import jakarta.persistence.NoResultException;
 public class QuestionDAO {
@@ -58,6 +59,16 @@ public class QuestionDAO {
         );
     }
 
+    public List<Question> findBySkill(String skill) {
+        return JpaHelper.query(em ->
+                em.createQuery(
+                                "SELECT q FROM Question q WHERE q.skill = :skill AND q.deleted = false ORDER BY q.questionId DESC",
+                                Question.class)
+                        .setParameter("skill", skill)
+                        .getResultList()
+        );
+    }
+
     public List<Question> findByMentor(int mentorId) {
         return JpaHelper.query(em ->
                 em.createQuery(
@@ -67,30 +78,61 @@ public class QuestionDAO {
                         .getResultList()
         );
     }
-
     public List<Question> searchByKeywordAndSkill(String keyword, String skill) {
-        String kw = "%" + keyword.toLowerCase() + "%";
-        boolean hasSkill = skill != null && !skill.isBlank();
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasSkill = skill != null && !skill.trim().isEmpty();
 
-        if (hasSkill) {
-            return JpaHelper.query(em ->
-                    em.createQuery(
-                                    "SELECT q FROM Question q WHERE q.deleted = false AND q.skill = :skill " +
-                                            "AND LOWER(q.content) LIKE :kw ORDER BY q.questionId DESC",
-                                    Question.class)
-                            .setParameter("skill", skill)
-                            .setParameter("kw", kw)
-                            .getResultList()
-            );
-        }
-        return JpaHelper.query(em ->
-                em.createQuery(
-                                "SELECT q FROM Question q WHERE q.deleted = false " +
-                                        "AND LOWER(q.content) LIKE :kw ORDER BY q.questionId DESC",
-                                Question.class)
-                        .setParameter("kw", kw)
-                        .getResultList()
-        );
+        StringBuilder queryStr = new StringBuilder("SELECT q FROM Question q WHERE q.deleted = false");
+        if (hasSkill) queryStr.append(" AND q.skill = :skill");
+        if (hasKeyword) queryStr.append(" AND LOWER(q.content) LIKE :kw");
+        queryStr.append(" ORDER BY q.questionId DESC");
+
+        return JpaHelper.query(em -> {
+            jakarta.persistence.TypedQuery<Question> query = em.createQuery(queryStr.toString(), Question.class);
+            if (hasSkill) query.setParameter("skill", skill);
+            if (hasKeyword) query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
+            return query.getResultList();
+        });
+    }
+
+    public PaginatedList<Question> searchQuestions(String keyword, String skill, String difficulty, String type, int page, int pageSize) {
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasSkill = skill != null && !skill.trim().isEmpty();
+        boolean hasDifficulty = difficulty != null && !difficulty.trim().isEmpty();
+        boolean hasType = type != null && !type.trim().isEmpty();
+
+        StringBuilder queryStr = new StringBuilder("SELECT q FROM Question q WHERE q.deleted = false");
+        StringBuilder countStr = new StringBuilder("SELECT COUNT(q) FROM Question q WHERE q.deleted = false");
+        
+        StringBuilder conditions = new StringBuilder();
+        if (hasSkill) conditions.append(" AND q.skill = :skill");
+        if (hasDifficulty) conditions.append(" AND q.difficulty = :difficulty");
+        if (hasType) conditions.append(" AND q.questionType = :type");
+        if (hasKeyword) conditions.append(" AND LOWER(q.content) LIKE :kw");
+
+        queryStr.append(conditions).append(" ORDER BY q.questionId DESC");
+        countStr.append(conditions);
+
+        return JpaHelper.query(em -> {
+            jakarta.persistence.TypedQuery<Long> countQuery = em.createQuery(countStr.toString(), Long.class);
+            jakarta.persistence.TypedQuery<Question> query = em.createQuery(queryStr.toString(), Question.class);
+
+            if (hasSkill) { countQuery.setParameter("skill", skill); query.setParameter("skill", skill); }
+            if (hasDifficulty) { countQuery.setParameter("difficulty", difficulty); query.setParameter("difficulty", difficulty); }
+            if (hasType) { countQuery.setParameter("type", type); query.setParameter("type", type); }
+            if (hasKeyword) {
+                String kw = "%" + keyword.toLowerCase() + "%";
+                countQuery.setParameter("kw", kw);
+                query.setParameter("kw", kw);
+            }
+
+            long totalItems = countQuery.getSingleResult();
+            
+            query.setFirstResult((page - 1) * pageSize);
+            query.setMaxResults(pageSize);
+            
+            return new PaginatedList<>(query.getResultList(), page, totalItems, pageSize);
+        });
     }
 
     public void save(Question question) {

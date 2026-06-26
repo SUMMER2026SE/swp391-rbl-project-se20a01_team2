@@ -26,4 +26,19 @@ public class DashboardServiceImpl implements DashboardService {
     public Long getTotalTestSubmissions() {
         return dashboardDAO.getTotalTestSubmissions();
     }
+
+    @Override
+    public Long getTotalLessonsByMentor(int mentorId) {
+        return dashboardDAO.getTotalLessonsByMentor(mentorId);
+    }
+
+    @Override
+    public Long getTotalQuestionsByMentor(int mentorId) {
+        return dashboardDAO.getTotalQuestionsByMentor(mentorId);
+    }
+
+    @Override
+    public Long getTotalExamsByMentor(int mentorId) {
+        return dashboardDAO.getTotalExamsByMentor(mentorId);
+    }
 }

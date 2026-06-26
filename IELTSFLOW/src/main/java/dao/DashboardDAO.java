@@ -91,4 +91,31 @@ public class DashboardDAO {
             return query.setMaxResults(limit).getResultList();
         });
     }
+
+    public Long getTotalLessonsByMentor(int mentorId) {
+        return JpaHelper.query(em -> {
+            Number count = (Number) em.createNativeQuery("SELECT COUNT(*) FROM Lessons WHERE CreatedBy = ? AND Deleted = 0")
+                                      .setParameter(1, mentorId)
+                                      .getSingleResult();
+            return count != null ? count.longValue() : 0L;
+        });
+    }
+
+    public Long getTotalQuestionsByMentor(int mentorId) {
+        return JpaHelper.query(em -> {
+            Number count = (Number) em.createNativeQuery("SELECT COUNT(*) FROM Questions WHERE CreatedBy = ? AND Deleted = 0")
+                                      .setParameter(1, mentorId)
+                                      .getSingleResult();
+            return count != null ? count.longValue() : 0L;
+        });
+    }
+
+    public Long getTotalExamsByMentor(int mentorId) {
+        return JpaHelper.query(em -> {
+            Number count = (Number) em.createNativeQuery("SELECT COUNT(*) FROM Exams WHERE MentorID = ? AND Deleted = 0")
+                                      .setParameter(1, mentorId)
+                                      .getSingleResult();
+            return count != null ? count.longValue() : 0L;
+        });
+    }
 }

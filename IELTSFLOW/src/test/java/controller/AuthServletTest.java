@@ -80,4 +80,3 @@ class AuthServletTest {
         verify(response).sendRedirect("/ieltsflow/auth");
     }
 }
-    

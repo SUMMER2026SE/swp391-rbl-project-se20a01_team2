@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const roleName = userData.roleId === 1 ? 'Admin' : 'Học viên';
                     const contextPath = window.location.pathname.split('/')[1] ? '/' + window.location.pathname.split('/')[1] : '';
-                    const dashboardLink = (userData.roleId === 1 || userData.roleId === 2) ? contextPath + '/admin/dashboard' : contextPath + '/candidate/dashboard';
+                    const dashboardLink = userData.roleId === 1 ? contextPath + '/admin/dashboard' : (userData.roleId === 2 ? contextPath + '/mentor/dashboard' : contextPath + '/candidate/dashboard');
                     
                     const authHtml = `
                         <a href="${dashboardLink}" class="btn-ghost" style="display: flex; flex-direction: column; align-items: flex-end; text-align: right; line-height: 1.2; padding: 0.25rem 1rem;">

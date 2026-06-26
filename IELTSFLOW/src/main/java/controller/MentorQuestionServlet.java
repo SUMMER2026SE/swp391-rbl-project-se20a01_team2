@@ -28,14 +28,27 @@ public class MentorQuestionServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
+                String action = req.getParameter("action");
+                if ("new".equals(action)) {
+                    req.setAttribute("allTags", questionService.getAllTags());
+                    req.getRequestDispatcher("/jsp/mentor/question-detail.jsp").forward(req, resp);
+                    return;
+                }
+
                 String keyword = req.getParameter("keyword");
                 String skill   = req.getParameter("skill");
-                boolean hasFilter = (keyword != null && !keyword.isBlank())
-                        || (skill   != null && !skill.isBlank());
-                req.setAttribute("questions",
-                        hasFilter
-                                ? questionService.searchQuestions(keyword, skill)
-                                : questionService.getQuestionsByMentor(mentorId));
+                String difficulty = req.getParameter("difficulty");
+                String type    = req.getParameter("type");
+
+                int page = 1;
+                int pageSize = 20;
+
+                try { if (req.getParameter("page") != null) page = Integer.parseInt(req.getParameter("page")); } catch (Exception ignored) {}
+                try { if (req.getParameter("limit") != null) pageSize = Integer.parseInt(req.getParameter("limit")); } catch (Exception ignored) {}
+
+                util.PaginatedList<model.Question> questionsPage = questionService.searchQuestions(keyword, skill, difficulty, type, page, pageSize);
+                req.setAttribute("questionsPage", questionsPage);
+                req.setAttribute("questions", questionsPage.getItems());
                 req.getRequestDispatcher("/jsp/mentor/questions.jsp").forward(req, resp);
             } else {
                 int id = Integer.parseInt(pathInfo.substring(1));
@@ -80,8 +93,6 @@ public class MentorQuestionServlet extends HttpServlet {
                 Question existing = questionService.getQuestionById(id);
                 if (existing == null)
                     throw new Exception("Không tìm thấy câu hỏi #" + id);
-                if (!existing.getCreatedBy().equals(mentorId))
-                    throw new Exception("Bạn không có quyền chỉnh sửa câu hỏi này");
                 Question question = buildQuestionFromRequest(req);
                 question.setQuestionId(id);
                 questionService.updateQuestion(question, buildAnswersFromRequest(req));
@@ -89,19 +100,19 @@ public class MentorQuestionServlet extends HttpServlet {
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("questionId"));
-                questionService.deleteQuestion(id, mentorId);
+                questionService.deleteQuestion(id);
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=Xóa+câu+hỏi+thành+công");
 
             } else if ("addTag".equals(action)) {
                 int questionId = Integer.parseInt(req.getParameter("questionId"));
                 int tagId      = Integer.parseInt(req.getParameter("tagId"));
-                questionService.addTagToQuestion(questionId, tagId, mentorId);
+                questionService.addTagToQuestion(questionId, tagId);
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=Gắn+tag+thành+công");
 
             } else if ("removeTag".equals(action)) {
                 int questionId = Integer.parseInt(req.getParameter("questionId"));
                 int tagId = Integer.parseInt(req.getParameter("tagId"));
-                questionService.removeTagFromQuestion(questionId, tagId, mentorId);
+                questionService.removeTagFromQuestion(questionId, tagId);
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=Xóa+tag+thành+công");
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions");
