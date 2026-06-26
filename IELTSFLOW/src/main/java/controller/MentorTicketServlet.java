@@ -62,7 +62,7 @@ public class MentorTicketServlet extends HttpServlet {
                 int ticketId = Integer.parseInt(req.getParameter("ticketId"));
                 String replyContent = req.getParameter("content");
                 ticketService.replyTicket(ticketId, mentorId, replyContent);
-                resp.sendRedirect(req.getContextPath() + "/mentor/tickets/" + ticketId + "?success=Phản+hồi+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/tickets/" + ticketId + "?success=" + java.net.URLEncoder.encode("Phản hồi thành công", "UTF-8"));
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/tickets");
             }

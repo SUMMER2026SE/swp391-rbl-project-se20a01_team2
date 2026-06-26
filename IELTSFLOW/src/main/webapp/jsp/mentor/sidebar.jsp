@@ -16,12 +16,12 @@
                          alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
                 </c:when>
                 <c:otherwise>
-                    ${sessionScope.user != null ? sessionScope.user.fullName.substring(0,1) : 'M'}
+                    ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0,1) : 'M'}
                 </c:otherwise>
             </c:choose>
         </div>
         <div>
-            <h4 style="font-size: 1rem;">${sessionScope.user != null ? sessionScope.user.fullName : 'Mentor'}</h4>
+            <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Mentor'}</h4>
             <span style="font-size: 0.75rem; color: var(--text-secondary);">Giảng viên / Mentor</span>
         </div>
     </div>
