@@ -98,8 +98,21 @@
                     
                     <div class="col-md-12">
                         <label class="form-label fw-bold">Dữ liệu nâng cao (JSON) <span class="text-danger">*</span></label>
-                        <textarea name="contentJson" class="form-control" rows="3" required placeholder="{}">${question.contentJson == null ? '{}' : question.contentJson}</textarea>
-                        <div class="form-text">Dùng để lưu metadata dạng JSON (VD: thông tin khoảng trống, vị trí map, v.v)</div>
+                        
+                        <!-- JSON Builder UI -->
+                        <div id="contentJsonBuilder" class="mb-2 p-3 bg-light rounded border">
+                            <div class="json-fields-container" id="contentJsonFields"></div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addJsonField('contentJsonFields')">
+                                <i class="fa-solid fa-plus"></i> Thêm trường dữ liệu
+                            </button>
+                        </div>
+                        
+                        <textarea name="contentJson" id="contentJson" class="form-control" rows="2" style="display: none;">${question.contentJson == null ? '{}' : question.contentJson}</textarea>
+                        
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="toggleRawContentJson" onchange="toggleRawJson('contentJson', 'contentJsonBuilder')">
+                            <label class="form-check-label text-muted" for="toggleRawContentJson">Hiển thị mã JSON thô</label>
+                        </div>
                     </div>
                 </div>
 
@@ -124,7 +137,20 @@
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold">Dữ liệu mở rộng đáp án (JSON)</label>
-                                    <input type="text" name="answerContentJson_${status.index}" class="form-control" value="${ans.contentJson}">
+                                    
+                                    <div id="ansJsonBuilder_${status.index}" class="mb-2 p-2 bg-light rounded border">
+                                        <div class="json-fields-container" id="ansJsonFields_${status.index}"></div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addJsonField('ansJsonFields_${status.index}')">
+                                            <i class="fa-solid fa-plus"></i> Thêm trường dữ liệu
+                                        </button>
+                                    </div>
+                                    
+                                    <textarea name="answerContentJson_${status.index}" id="ansJson_${status.index}" class="form-control" rows="2" style="display: none;">${ans.contentJson == null ? '{}' : ans.contentJson}</textarea>
+                                    
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="toggleRawAnsJson_${status.index}" onchange="toggleRawJson('ansJson_${status.index}', 'ansJsonBuilder_${status.index}')">
+                                        <label class="form-check-label text-muted" style="font-size: 0.85rem;" for="toggleRawAnsJson_${status.index}">Mã JSON thô</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -204,7 +230,17 @@
                     </div>
                     <div class="col-md-12">
                         <label class="form-label fw-bold">Dữ liệu mở rộng đáp án (JSON)</label>
-                        <input type="text" name="answerContentJson_` + answerIndex + `" class="form-control" value="{}">
+                        <div id="ansJsonBuilder_` + answerIndex + `" class="mb-2 p-2 bg-light rounded border">
+                            <div class="json-fields-container" id="ansJsonFields_` + answerIndex + `"></div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addJsonField('ansJsonFields_` + answerIndex + `')">
+                                <i class="fa-solid fa-plus"></i> Thêm trường dữ liệu
+                            </button>
+                        </div>
+                        <textarea name="answerContentJson_` + answerIndex + `" id="ansJson_` + answerIndex + `" class="form-control" rows="2" style="display: none;">{}</textarea>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="toggleRawAnsJson_` + answerIndex + `" onchange="toggleRawJson('ansJson_` + answerIndex + `', 'ansJsonBuilder_` + answerIndex + `')">
+                            <label class="form-check-label text-muted" style="font-size: 0.85rem;" for="toggleRawAnsJson_` + answerIndex + `">Mã JSON thô</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -222,6 +258,101 @@
         // So we just need answerCount to be at least the maximum index + 1.
         document.getElementById('answerCount').value = answerIndex;
     }
+    
+    // --- JSON BUILDER LOGIC ---
+    function toggleRawJson(textareaId, builderId) {
+        const textarea = document.getElementById(textareaId);
+        const builder = document.getElementById(builderId);
+        if (textarea.style.display === 'none') {
+            // Show raw, hide builder
+            textarea.style.display = 'block';
+            builder.style.display = 'none';
+        } else {
+            // Hide raw, show builder
+            textarea.style.display = 'none';
+            builder.style.display = 'block';
+            // Sync from textarea to builder
+            syncTextareaToBuilder(textareaId, builderId.replace('Builder', 'Fields'));
+        }
+    }
+
+    function addJsonField(containerId, key = '', value = '') {
+        const container = document.getElementById(containerId);
+        const row = document.createElement('div');
+        row.className = 'row g-2 mb-2 align-items-center json-field-row';
+        row.innerHTML = `
+            <div class="col-4">
+                <input type="text" class="form-control form-control-sm json-key" placeholder="Key (VD: blanks)" value="` + key.replace(/"/g, '&quot;') + `" onchange="syncBuilderToTextarea('` + containerId + `')">
+            </div>
+            <div class="col-7">
+                <input type="text" class="form-control form-control-sm json-value" placeholder="Value (Text, Number, hoặc JSON Array)" value="` + value.replace(/"/g, '&quot;') + `" onchange="syncBuilderToTextarea('` + containerId + `')">
+            </div>
+            <div class="col-1 text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.remove(); syncBuilderToTextarea('` + containerId + `')"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        `;
+        container.appendChild(row);
+    }
+
+    function syncBuilderToTextarea(containerId) {
+        const container = document.getElementById(containerId);
+        const rows = container.querySelectorAll('.json-field-row');
+        const obj = {};
+        
+        rows.forEach(row => {
+            const key = row.querySelector('.json-key').value.trim();
+            const val = row.querySelector('.json-value').value.trim();
+            if (key) {
+                // Try to parse val as JSON (for numbers, booleans, arrays, objects)
+                try {
+                    obj[key] = JSON.parse(val);
+                } catch (e) {
+                    obj[key] = val; // fallback to string
+                }
+            }
+        });
+        
+        // Find corresponding textarea
+        const textareaId = containerId.replace('Fields', ''); // 'contentJsonFields' -> 'contentJson', 'ansJsonFields_0' -> 'ansJson_0'
+        const textarea = document.getElementById(textareaId);
+        if (textarea) {
+            textarea.value = JSON.stringify(obj, null, 2);
+        }
+    }
+
+    function syncTextareaToBuilder(textareaId, containerId) {
+        const textarea = document.getElementById(textareaId);
+        const container = document.getElementById(containerId);
+        if (!textarea || !container) return;
+        
+        container.innerHTML = ''; // clear current
+        
+        try {
+            const obj = JSON.parse(textarea.value || '{}');
+            for (const [k, v] of Object.entries(obj)) {
+                let valStr = typeof v === 'object' ? JSON.stringify(v) : String(v);
+                addJsonField(containerId, k, valStr);
+            }
+        } catch (e) {
+            console.error("Invalid JSON in textarea", textareaId);
+            // If invalid, add an empty row
+            addJsonField(containerId);
+        }
+    }
+
+    // Initialize all existing JSON fields
+    document.addEventListener("DOMContentLoaded", function() {
+        // Main question JSON
+        syncTextareaToBuilder('contentJson', 'contentJsonFields');
+        
+        // Answer JSONs
+        const answerCount = document.getElementById('answerCount').value;
+        for (let i = 0; i < answerCount; i++) {
+            if (document.getElementById('ansJson_' + i)) {
+                syncTextareaToBuilder('ansJson_' + i, 'ansJsonFields_' + i);
+            }
+        }
+    });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

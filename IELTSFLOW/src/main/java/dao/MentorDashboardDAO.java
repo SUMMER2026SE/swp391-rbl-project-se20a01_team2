@@ -11,9 +11,9 @@ import java.util.List;
 public class MentorDashboardDAO {
 
     /**
-     * Đếm số câu hỏi do mentor tạo (chưa bị xóa).
+     * Đếm tổng số câu hỏi trong hệ thống (Ngân hàng câu hỏi dùng chung).
      */
-    public long countQuestionsByMentor(int mentorId) {
+    public long countTotalQuestions() {
         return JpaHelper.query(em -> {
             Number n = (Number) em.createNativeQuery(
                     "SELECT COUNT(*) FROM Questions WHERE Deleted = 0")
@@ -22,10 +22,20 @@ public class MentorDashboardDAO {
         });
     }
 
+    public long countPersonalQuestions(int mentorId) {
+        return JpaHelper.query(em -> {
+            Number n = (Number) em.createNativeQuery(
+                    "SELECT COUNT(*) FROM Questions WHERE Deleted = 0 AND CreatedBy = :mentorId")
+                    .setParameter("mentorId", mentorId)
+                    .getSingleResult();
+            return n != null ? n.longValue() : 0L;
+        });
+    }
+
     /**
-     * Đếm số bài học do mentor tạo (chưa bị xóa).
+     * Đếm tổng số bài học trong hệ thống.
      */
-    public long countLessonsByMentor(int mentorId) {
+    public long countTotalLessons() {
         return JpaHelper.query(em -> {
             Number n = (Number) em.createNativeQuery(
                     "SELECT COUNT(*) FROM Lessons WHERE Deleted = 0")
@@ -34,13 +44,33 @@ public class MentorDashboardDAO {
         });
     }
 
+    public long countPersonalLessons(int mentorId) {
+        return JpaHelper.query(em -> {
+            Number n = (Number) em.createNativeQuery(
+                    "SELECT COUNT(*) FROM Lessons WHERE Deleted = 0 AND CreatedBy = :mentorId")
+                    .setParameter("mentorId", mentorId)
+                    .getSingleResult();
+            return n != null ? n.longValue() : 0L;
+        });
+    }
+
     /**
-     * Đếm số đề thi do mentor tạo (chưa bị xóa).
+     * Đếm tổng số đề thi trong hệ thống.
      */
-    public long countExamsByMentor(int mentorId) {
+    public long countTotalExams() {
         return JpaHelper.query(em -> {
             Number n = (Number) em.createNativeQuery(
                     "SELECT COUNT(*) FROM Exams WHERE Deleted = 0")
+                    .getSingleResult();
+            return n != null ? n.longValue() : 0L;
+        });
+    }
+
+    public long countPersonalExams(int mentorId) {
+        return JpaHelper.query(em -> {
+            Number n = (Number) em.createNativeQuery(
+                    "SELECT COUNT(*) FROM Exams WHERE Deleted = 0 AND MentorID = :mentorId")
+                    .setParameter("mentorId", mentorId)
                     .getSingleResult();
             return n != null ? n.longValue() : 0L;
         });
@@ -54,7 +84,8 @@ public class MentorDashboardDAO {
             Number n = (Number) em.createNativeQuery(
                     "SELECT COUNT(*) FROM TestSubmissions ts " +
                     "JOIN Exams e ON ts.ExamID = e.ExamID " +
-                    "WHERE e.Deleted = 0")
+                    "WHERE e.Deleted = 0 AND e.MentorID = :mentorId")
+                    .setParameter("mentorId", mentorId)
                     .getSingleResult();
             return n != null ? n.longValue() : 0L;
         });
@@ -66,7 +97,7 @@ public class MentorDashboardDAO {
     public List<Ticket> getRecentOpenTickets(int limit) {
         return JpaHelper.query(em -> {
             List<Ticket> tickets = em.createQuery(
-                    "SELECT t FROM Ticket t WHERE t.status = 'Open' ORDER BY t.createdAt DESC",
+                    "SELECT t FROM Ticket t JOIN FETCH t.user WHERE t.status = 'Open' ORDER BY t.createdAt DESC",
                     Ticket.class)
                     .setMaxResults(limit)
                     .getResultList();

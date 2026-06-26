@@ -44,8 +44,8 @@
             <form method="GET" action="${pageContext.request.contextPath}/mentor/exams/${exam.examId}/sections/${section.sectionId}/add-questions" class="mb-4">
                 <div class="input-group" style="max-width: 480px;">
                     <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <input type="text" name="keyword" class="form-control" placeholder="Tìm câu hỏi..." value="${param.keyword}">
-                    <button type="submit" class="btn btn-outline-secondary">Tìm</button>
+                    <input type="text" name="keyword" class="form-control" placeholder="Tìm câu hỏi..." value="${param.keyword}" oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { ajaxSearch(this.form); }, 600);">
+                    <button type="submit" class="btn btn-outline-secondary d-none">Tìm</button>
                     <c:if test="${not empty param.keyword}">
                         <a href="${pageContext.request.contextPath}/mentor/exams/${exam.examId}/sections/${section.sectionId}/add-questions" class="btn btn-outline-danger"><i class="fa-solid fa-xmark"></i></a>
                     </c:if>
@@ -68,6 +68,7 @@
                     </button>
                 </div>
 
+                <div id="search-results">
                 <c:if test="${empty questions}">
                     <div class="text-center py-5 text-muted">
                         <i class="fa-solid fa-inbox fa-3x mb-3 d-block" style="opacity: 0.3;"></i>
@@ -114,7 +115,6 @@
                         </tbody>
                     </table>
                 </div>
-
             </form>
         </div>
 
@@ -123,12 +123,51 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.getElementById('selectAll').addEventListener('change', function(e) {
-        var checkboxes = document.querySelectorAll('.question-cb');
-        for (var cb of checkboxes) {
-            cb.checked = e.target.checked;
+    function bindSelectAll() {
+        const selectAll = document.getElementById('selectAll');
+        if(selectAll) {
+            selectAll.addEventListener('change', function(e) {
+                var checkboxes = document.querySelectorAll('.question-cb');
+                for (var cb of checkboxes) {
+                    cb.checked = e.target.checked;
+                }
+            });
         }
-    });
+    }
+    bindSelectAll();
+
+function ajaxSearch(form) {
+    const url = new URL(form.action || window.location.href);
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData) {
+        if(value) params.append(key, value);
+    }
+    url.search = params.toString();
+
+    const results = document.getElementById('search-results');
+    if (results) {
+        results.style.opacity = '0.5';
+        results.style.transition = 'opacity 0.2s';
+    }
+
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newResults = doc.getElementById('search-results');
+            if (newResults && results) {
+                results.innerHTML = newResults.innerHTML;
+                results.style.opacity = '1';
+                window.history.replaceState({}, '', url);
+                bindSelectAll();
+            } else {
+                form.submit();
+            }
+        })
+        .catch(err => form.submit());
+}
 </script>
 </body>
 </html>

@@ -37,12 +37,18 @@ public class MentorQuestionServlet extends HttpServlet {
 
                 String keyword = req.getParameter("keyword");
                 String skill   = req.getParameter("skill");
-                boolean hasFilter = (keyword != null && !keyword.isBlank())
-                        || (skill   != null && !skill.isBlank());
-                req.setAttribute("questions",
-                        hasFilter
-                                ? questionService.searchQuestions(keyword, skill)
-                                : questionService.getAllQuestions());
+                String difficulty = req.getParameter("difficulty");
+                String type    = req.getParameter("type");
+
+                int page = 1;
+                int pageSize = 20;
+
+                try { if (req.getParameter("page") != null) page = Integer.parseInt(req.getParameter("page")); } catch (Exception ignored) {}
+                try { if (req.getParameter("limit") != null) pageSize = Integer.parseInt(req.getParameter("limit")); } catch (Exception ignored) {}
+
+                util.PaginatedList<model.Question> questionsPage = questionService.searchQuestions(keyword, skill, difficulty, type, page, pageSize);
+                req.setAttribute("questionsPage", questionsPage);
+                req.setAttribute("questions", questionsPage.getItems());
                 req.getRequestDispatcher("/jsp/mentor/questions.jsp").forward(req, resp);
             } else {
                 int id = Integer.parseInt(pathInfo.substring(1));

@@ -45,12 +45,14 @@
         </c:if>
 
         <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 20px; margin-bottom: 20px;">
-            <form action="${pageContext.request.contextPath}/mentor/lessons" method="GET" class="row g-3 align-items-center">
+            <form action="${pageContext.request.contextPath}/mentor/lessons" method="GET" class="row g-2 align-items-center">
+                <input type="hidden" name="page" id="page-input" value="${not empty lessonsPage ? lessonsPage.currentPage : 1}">
+                
                 <div class="col-md-5">
-                    <input type="text" name="keyword" class="form-control rounded-pill" placeholder="Tìm kiếm tiêu đề bài học..." value="${param.keyword}">
+                    <input type="text" name="keyword" class="form-control rounded-pill" placeholder="Tìm kiếm tiêu đề bài học..." value="${param.keyword}" oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { document.getElementById('page-input').value = 1; ajaxSearch(this.form); }, 600);">
                 </div>
                 <div class="col-md-4">
-                    <select name="skill" class="form-select rounded-pill">
+                    <select name="skill" class="form-select rounded-pill" onchange="document.getElementById('page-input').value = 1; ajaxSearch(this.form);">
                         <option value="">-- Tất cả Kỹ Năng --</option>
                         <option value="Listening" ${param.skill == 'Listening' ? 'selected' : ''}>Listening</option>
                         <option value="Reading" ${param.skill == 'Reading' ? 'selected' : ''}>Reading</option>
@@ -59,12 +61,16 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary rounded-pill shadow-sm fw-bold w-100" style="background-color: var(--accent-green); border-color: var(--accent-green);">Lọc <i class="fa-solid fa-filter"></i></button>
+                    <select name="limit" class="form-select rounded-pill" onchange="document.getElementById('page-input').value = 1; ajaxSearch(this.form);">
+                        <option value="10" ${param.limit == '10' ? 'selected' : ''}>10 / trang</option>
+                        <option value="20" ${param.limit == '20' || empty param.limit ? 'selected' : ''}>20 / trang</option>
+                        <option value="50" ${param.limit == '50' ? 'selected' : ''}>50 / trang</option>
+                    </select>
                 </div>
             </form>
         </div>
 
-        <div class="glass-panel animate-fade-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
+        <div id="search-results" class="glass-panel animate-fade-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-custom mb-0">
                     <thead>
@@ -125,9 +131,67 @@
                     </tbody>
                 </table>
             </div>
+            
+            <c:if test="${lessonsPage != null && lessonsPage.totalPages > 1}">
+                <c:set var="startPage" value="${lessonsPage.currentPage - 2}" />
+                <c:if test="${startPage < 1}"><c:set var="startPage" value="1" /></c:if>
+                <c:set var="endPage" value="${lessonsPage.currentPage + 2}" />
+                <c:if test="${endPage > lessonsPage.totalPages}"><c:set var="endPage" value="${lessonsPage.totalPages}" /></c:if>
+
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination mb-0">
+                        <li class="page-item ${lessonsPage.currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link rounded-start-pill" href="javascript:void(0)" onclick="document.getElementById('page-input').value = ${lessonsPage.currentPage - 1}; ajaxSearch(document.querySelector('form'));"><i class="fa-solid fa-chevron-left"></i></a>
+                        </li>
+                        
+                        <c:forEach begin="${startPage}" end="${endPage}" var="p">
+                            <li class="page-item ${lessonsPage.currentPage == p ? 'active' : ''}">
+                                <a class="page-link" href="javascript:void(0)" onclick="document.getElementById('page-input').value = ${p}; ajaxSearch(document.querySelector('form'));">${p}</a>
+                            </li>
+                        </c:forEach>
+                        
+                        <li class="page-item ${lessonsPage.currentPage >= lessonsPage.totalPages ? 'disabled' : ''}">
+                            <a class="page-link rounded-end-pill" href="javascript:void(0)" onclick="document.getElementById('page-input').value = ${lessonsPage.currentPage + 1}; ajaxSearch(document.querySelector('form'));"><i class="fa-solid fa-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </c:if>
         </div>
     </main>
 </div>
 
 </body>
+<script>
+function ajaxSearch(form) {
+    const url = new URL(form.action || window.location.href);
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData) {
+        if(value) params.append(key, value);
+    }
+    url.search = params.toString();
+
+    const results = document.getElementById('search-results');
+    if (results) {
+        results.style.opacity = '0.5';
+        results.style.transition = 'opacity 0.2s';
+    }
+
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newResults = doc.getElementById('search-results');
+            if (newResults && results) {
+                results.innerHTML = newResults.innerHTML;
+                results.style.opacity = '1';
+                window.history.replaceState({}, '', url);
+            } else {
+                form.submit();
+            }
+        })
+        .catch(err => form.submit());
+}
+</script>
 </html>

@@ -258,6 +258,8 @@ CREATE TABLE SubmissionDetails (
     IsCorrect BIT,
     Score DECIMAL(5,2),
     GradingStatus NVARCHAR(50) DEFAULT 'Graded', -- 'Pending_AI', 'Processing', 'Graded', 'Failed'
+    MentorScore DECIMAL(5,2) NULL,
+    MentorFeedback NVARCHAR(MAX) NULL,
     FOREIGN KEY (SubmissionID) REFERENCES TestSubmissions(SubmissionID) ON DELETE CASCADE,
     FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID),
     CONSTRAINT CHK_CandidateAnswer CHECK (CandidateAnswer IS NULL OR ISJSON(CandidateAnswer) = 1)
@@ -305,8 +307,10 @@ CREATE TABLE Tickets (
     UserID INT NOT NULL,
     Subject NVARCHAR(255) NOT NULL,
     Status NVARCHAR(50) DEFAULT 'Open', 
+    AssignedTo INT NULL,
     CreatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (AssignedTo) REFERENCES Users(UserID)
 );
 
 CREATE TABLE TicketReplies (

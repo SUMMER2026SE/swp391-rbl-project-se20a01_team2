@@ -148,8 +148,11 @@
                     <div class="stat-icon" style="background:rgba(59,130,246,0.12); color:var(--accent-blue);">
                         <i class="fa-solid fa-circle-question"></i>
                     </div>
-                    <div class="stat-label">Câu hỏi đã tạo</div>
-                    <div class="stat-value">${questionCount}</div>
+                    <div class="stat-label">Tổng câu hỏi</div>
+                    <div class="stat-value">
+                        ${questionCountTotal}
+                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${questionCountPersonal} của bạn)</span>
+                    </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/questions">
                             Quản lý câu hỏi <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
@@ -162,8 +165,11 @@
                     <div class="stat-icon" style="background:rgba(16,185,129,0.12); color:var(--accent-green);">
                         <i class="fa-solid fa-book-open"></i>
                     </div>
-                    <div class="stat-label">Bài học đã tạo</div>
-                    <div class="stat-value">${lessonCount}</div>
+                    <div class="stat-label">Tổng bài học</div>
+                    <div class="stat-value">
+                        ${lessonCountTotal}
+                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${lessonCountPersonal} của bạn)</span>
+                    </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/lessons">
                             Quản lý bài học <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
@@ -176,8 +182,11 @@
                     <div class="stat-icon" style="background:rgba(139,92,246,0.12); color:var(--accent-purple);">
                         <i class="fa-solid fa-file-pen"></i>
                     </div>
-                    <div class="stat-label">Đề thi đã tạo</div>
-                    <div class="stat-value">${examCount}</div>
+                    <div class="stat-label">Tổng đề thi</div>
+                    <div class="stat-value">
+                        ${examCountTotal}
+                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${examCountPersonal} của bạn)</span>
+                    </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/exams">
                             Quản lý đề thi <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
@@ -370,7 +379,7 @@
                                                                 background: linear-gradient(135deg, #3b82f6, #8b5cf6);
                                                                 color: white; display: flex; align-items: center;
                                                                 justify-content: center; font-size: 0.75rem; font-weight: 700;">
-                                                        ${ticket.user.fullName.substring(0,1)}
+                                                        ${not empty ticket.user.fullName ? ticket.user.fullName.substring(0, 1) : 'U'}
                                                     </div>
                                                     ${ticket.user.fullName}
                                                 </div>

@@ -33,10 +33,16 @@ public class MentorStatisticsServlet extends HttpServlet {
         int mentorId = (int) session.getAttribute("userId");
 
         // --- Thống kê tổng quan ---
-        long questionCount   = mentorDashboardDAO.countQuestionsByMentor(mentorId);
-        long lessonCount     = mentorDashboardDAO.countLessonsByMentor(mentorId);
-        long examCount       = mentorDashboardDAO.countExamsByMentor(mentorId);
-        long submissionCount = mentorDashboardDAO.countSubmissionsForMentor(mentorId);
+        long questionCountTotal   = mentorDashboardDAO.countTotalQuestions();
+        long questionCountPersonal = mentorDashboardDAO.countPersonalQuestions(mentorId);
+        
+        long lessonCountTotal     = mentorDashboardDAO.countTotalLessons();
+        long lessonCountPersonal  = mentorDashboardDAO.countPersonalLessons(mentorId);
+        
+        long examCountTotal       = mentorDashboardDAO.countTotalExams();
+        long examCountPersonal    = mentorDashboardDAO.countPersonalExams(mentorId);
+        
+        long submissionCount      = mentorDashboardDAO.countSubmissionsForMentor(mentorId);
 
         // --- AI Skill Stats (Writing / Speaking) ---
         Map<String, MentorSkillStat> stats = aiEvaluationService.getMentorStats(mentorId);
@@ -44,11 +50,17 @@ public class MentorStatisticsServlet extends HttpServlet {
         // --- Top 5 Open Tickets ---
         req.setAttribute("recentTickets", mentorDashboardDAO.getRecentOpenTickets(5));
 
-        req.setAttribute("questionCount",   questionCount);
-        req.setAttribute("lessonCount",     lessonCount);
-        req.setAttribute("examCount",       examCount);
-        req.setAttribute("submissionCount", submissionCount);
-        req.setAttribute("stats",           stats);
+        req.setAttribute("questionCountTotal",   questionCountTotal);
+        req.setAttribute("questionCountPersonal", questionCountPersonal);
+        
+        req.setAttribute("lessonCountTotal",     lessonCountTotal);
+        req.setAttribute("lessonCountPersonal",  lessonCountPersonal);
+        
+        req.setAttribute("examCountTotal",       examCountTotal);
+        req.setAttribute("examCountPersonal",    examCountPersonal);
+        
+        req.setAttribute("submissionCount",      submissionCount);
+        req.setAttribute("stats",                stats);
 
         req.getRequestDispatcher("/jsp/mentor/dashboard.jsp").forward(req, resp);
     }

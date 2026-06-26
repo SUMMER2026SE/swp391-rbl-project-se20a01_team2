@@ -35,7 +35,16 @@ public class ExamController extends HttpServlet {
                 String keyword    = req.getParameter("keyword");
                 String skillFocus = req.getParameter("skill");
                 String type       = req.getParameter("type");
-                req.setAttribute("exams", examService.searchExams(keyword, skillFocus, type));
+                
+                int page = 1;
+                int pageSize = 20;
+
+                try { if (req.getParameter("page") != null) page = Integer.parseInt(req.getParameter("page")); } catch (Exception ignored) {}
+                try { if (req.getParameter("limit") != null) pageSize = Integer.parseInt(req.getParameter("limit")); } catch (Exception ignored) {}
+                
+                util.PaginatedList<model.Exam> examsPage = examService.searchExams(keyword, skillFocus, type, page, pageSize);
+                req.setAttribute("examsPage", examsPage);
+                req.setAttribute("exams", examsPage.getItems());
                 req.getRequestDispatcher(jspPath + "exams.jsp").forward(req, resp);
             } else {
                 String[] parts = pathInfo.split("/");

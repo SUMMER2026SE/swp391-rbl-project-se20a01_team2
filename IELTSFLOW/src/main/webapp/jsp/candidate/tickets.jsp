@@ -174,6 +174,15 @@
                                placeholder="T&#243;m t&#7855;t v&#7845;n &#273;&#7873; c&#7911;a b&#7841;n" required maxlength="200">
                     </div>
                     <div class="form-group">
+                        <label class="form-label" for="mentorId">G&#7917;i tr&#7921;c ti&#7871;p cho Mentor (T&#249;y ch&#7885;n)</label>
+                        <select id="mentorId" name="mentorId" class="form-input">
+                            <option value="">-- H&#7895; tr&#7907; chung --</option>
+                            <c:forEach var="mentor" items="${mentors}">
+                                <option value="${mentor.userId}">${mentor.fullName}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label" for="content">N&#7897;i dung *</label>
                         <textarea id="content" name="content" class="form-textarea"
                                   placeholder="M&#244; t&#7843; chi ti&#7871;t c&#226;u h&#7887;i ho&#7863;c v&#7845;n &#273;&#7873; b&#7841;n g&#7863;p ph&#7843;i..." required></textarea>

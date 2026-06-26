@@ -24,7 +24,8 @@ public class MentorTicketServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                req.setAttribute("tickets", ticketService.getAllTickets());
+                int mentorId = (int) session.getAttribute("userId");
+                req.setAttribute("tickets", ticketService.getTicketsForMentor(mentorId));
                 req.getRequestDispatcher("/jsp/mentor/tickets.jsp").forward(req, resp);
             } else {
                 int ticketId = Integer.parseInt(pathInfo.substring(1));
@@ -35,11 +36,13 @@ public class MentorTicketServlet extends HttpServlet {
             }
         } catch (NumberFormatException e) {
             req.setAttribute("error", "ID không hợp lệ");
-            req.setAttribute("tickets", ticketService.getAllTickets());
+            int mentorId = (int) session.getAttribute("userId");
+            req.setAttribute("tickets", ticketService.getTicketsForMentor(mentorId));
             req.getRequestDispatcher("/jsp/mentor/tickets.jsp").forward(req, resp);
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
-            req.setAttribute("tickets", ticketService.getAllTickets());
+            int mentorId = (int) session.getAttribute("userId");
+            req.setAttribute("tickets", ticketService.getTicketsForMentor(mentorId));
             req.getRequestDispatcher("/jsp/mentor/tickets.jsp").forward(req, resp);
         }
     }
@@ -60,6 +63,10 @@ public class MentorTicketServlet extends HttpServlet {
                 String replyContent = req.getParameter("content");
                 ticketService.replyTicket(ticketId, mentorId, replyContent);
                 resp.sendRedirect(req.getContextPath() + "/mentor/tickets/" + ticketId + "?success=Phản+hồi+thành+công");
+            } else if ("claim".equals(action)) {
+                int ticketId = Integer.parseInt(req.getParameter("ticketId"));
+                ticketService.claimTicket(ticketId, mentorId);
+                resp.sendRedirect(req.getContextPath() + "/mentor/tickets/" + ticketId + "?success=Đã+nhận+hỗ+trợ+ticket+này");
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/tickets");
             }

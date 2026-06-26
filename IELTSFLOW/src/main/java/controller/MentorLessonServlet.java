@@ -35,12 +35,16 @@ public class MentorLessonServlet extends HttpServlet {
                 // List: show only this mentor's lessons, support keyword+skill filter
                 String keyword = req.getParameter("keyword");
                 String skill   = req.getParameter("skill");
-                boolean hasFilter = (keyword != null && !keyword.isBlank())
-                        || (skill   != null && !skill.isBlank());
-                req.setAttribute("lessons",
-                        hasFilter
-                                ? lessonService.searchLessons(keyword, skill)
-                                : lessonService.getAllLessons());
+                
+                int page = 1;
+                int pageSize = 20;
+
+                try { if (req.getParameter("page") != null) page = Integer.parseInt(req.getParameter("page")); } catch (Exception ignored) {}
+                try { if (req.getParameter("limit") != null) pageSize = Integer.parseInt(req.getParameter("limit")); } catch (Exception ignored) {}
+                
+                util.PaginatedList<model.Lesson> lessonsPage = lessonService.searchLessons(keyword, skill, page, pageSize);
+                req.setAttribute("lessonsPage", lessonsPage);
+                req.setAttribute("lessons", lessonsPage.getItems());
                 req.getRequestDispatcher("/jsp/mentor/lessons.jsp").forward(req, resp);
 
             } else {

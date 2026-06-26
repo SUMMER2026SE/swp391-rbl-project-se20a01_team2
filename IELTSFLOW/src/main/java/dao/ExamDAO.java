@@ -2,6 +2,7 @@ package dao;
 
 import model.Exam;
 import util.JpaHelper;
+import util.PaginatedList;
 import java.util.List;
 
 public class ExamDAO {
@@ -38,31 +39,84 @@ public class ExamDAO {
 
     // Tìm kiếm đề thi theo keyword (#28)
     public List<Exam> searchByKeyword(String keyword) {
-        String kw = "%" + keyword.toLowerCase() + "%";
-        return JpaHelper.query(em ->
-            em.createQuery(
-                "SELECT e FROM Exam e WHERE e.deleted = false " +
-                "AND LOWER(e.title) LIKE :kw " +
-                "ORDER BY e.createdAt DESC",
-                Exam.class)
-              .setParameter("kw", kw)
-              .getResultList()
-        );
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        
+        StringBuilder queryStr = new StringBuilder("SELECT e FROM Exam e WHERE e.deleted = false");
+        if (hasKeyword) {
+            queryStr.append(" AND LOWER(e.title) LIKE :kw");
+        }
+        queryStr.append(" ORDER BY e.createdAt DESC");
+
+        return JpaHelper.query(em -> {
+            jakarta.persistence.TypedQuery<Exam> query = em.createQuery(queryStr.toString(), Exam.class);
+            if (hasKeyword) {
+                query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
+            }
+            return query.getResultList();
+        });
     }
 
     // Tìm kiếm đề thi theo keyword + skill (#28)
     public List<Exam> searchByKeywordAndSkill(String keyword, String skillFocus) {
-        String kw = "%" + keyword.toLowerCase() + "%";
-        return JpaHelper.query(em ->
-            em.createQuery(
-                "SELECT e FROM Exam e WHERE e.deleted = false AND e.skillFocus = :skill " +
-                "AND LOWER(e.title) LIKE :kw " +
-                "ORDER BY e.createdAt DESC",
-                Exam.class)
-              .setParameter("skill", skillFocus)
-              .setParameter("kw", kw)
-              .getResultList()
-        );
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasSkill = skillFocus != null && !skillFocus.trim().isEmpty();
+
+        StringBuilder queryStr = new StringBuilder("SELECT e FROM Exam e WHERE e.deleted = false");
+        if (hasSkill) {
+            queryStr.append(" AND e.skillFocus = :skill");
+        }
+        if (hasKeyword) {
+            queryStr.append(" AND LOWER(e.title) LIKE :kw");
+        }
+        queryStr.append(" ORDER BY e.createdAt DESC");
+
+        return JpaHelper.query(em -> {
+            jakarta.persistence.TypedQuery<Exam> query = em.createQuery(queryStr.toString(), Exam.class);
+            if (hasSkill) {
+                query.setParameter("skill", skillFocus);
+            }
+            if (hasKeyword) {
+                query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
+            }
+            return query.getResultList();
+        });
+    }
+
+    public PaginatedList<Exam> searchExams(String keyword, String skillFocus, String type, int page, int pageSize) {
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasSkill = skillFocus != null && !skillFocus.trim().isEmpty();
+        boolean hasType = type != null && !type.trim().isEmpty();
+
+        StringBuilder queryStr = new StringBuilder("SELECT e FROM Exam e WHERE e.deleted = false");
+        StringBuilder countStr = new StringBuilder("SELECT COUNT(e) FROM Exam e WHERE e.deleted = false");
+        
+        StringBuilder conditions = new StringBuilder();
+        if (hasSkill) conditions.append(" AND e.skillFocus = :skill");
+        if (hasType) conditions.append(" AND e.type = :type");
+        if (hasKeyword) conditions.append(" AND LOWER(e.title) LIKE :kw");
+
+        queryStr.append(conditions).append(" ORDER BY e.createdAt DESC");
+        countStr.append(conditions);
+
+        return JpaHelper.query(em -> {
+            jakarta.persistence.TypedQuery<Long> countQuery = em.createQuery(countStr.toString(), Long.class);
+            jakarta.persistence.TypedQuery<Exam> query = em.createQuery(queryStr.toString(), Exam.class);
+
+            if (hasSkill) { countQuery.setParameter("skill", skillFocus); query.setParameter("skill", skillFocus); }
+            if (hasType) { countQuery.setParameter("type", type); query.setParameter("type", type); }
+            if (hasKeyword) {
+                String kw = "%" + keyword.toLowerCase() + "%";
+                countQuery.setParameter("kw", kw);
+                query.setParameter("kw", kw);
+            }
+
+            long totalItems = countQuery.getSingleResult();
+            
+            query.setFirstResult((page - 1) * pageSize);
+            query.setMaxResults(pageSize);
+            
+            return new PaginatedList<>(query.getResultList(), page, totalItems, pageSize);
+        });
     }
 
     // Lọc theo skillFocus (#28)

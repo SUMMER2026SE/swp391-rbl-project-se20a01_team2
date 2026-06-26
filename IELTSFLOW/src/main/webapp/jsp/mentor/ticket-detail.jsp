@@ -83,6 +83,11 @@
                             </c:choose>
                         </div>
                     </div>
+                    <c:if test="${ticket.assignedTo != null}">
+                        <div class="mt-3">
+                            <span class="badge bg-info text-dark rounded-pill"><i class="fa-solid fa-user-check me-1"></i> Đã gán cho: ${ticket.assignedTo.fullName}</span>
+                        </div>
+                    </c:if>
                 </div>
 
                 <div class="chat-history animate-fade-up" style="animation-delay: 0.2s;">
@@ -109,21 +114,40 @@
                 </div>
 
                 <c:if test="${ticket.status != 'Closed'}">
-                    <div class="reply-form-box animate-fade-up" style="animation-delay: 0.3s;">
-                        <form method="POST" action="${pageContext.request.contextPath}/mentor/tickets">
-                            <input type="hidden" name="action" value="reply">
-                            <input type="hidden" name="ticketId" value="${ticket.ticketId}">
-                            <div class="mb-3">
-                                <label class="fw-bold mb-2">Phản hồi của bạn</label>
-                                <textarea name="content" class="form-textarea" placeholder="Nhập nội dung phản hồi cho học viên..." required></textarea>
+                    <c:choose>
+                        <c:when test="${ticket.assignedTo == null}">
+                            <div class="alert alert-warning text-center mt-4 animate-fade-up" style="animation-delay: 0.3s;">
+                                <p class="mb-3">Ticket này chưa có người nhận hỗ trợ. Bạn cần nhận ticket trước khi phản hồi.</p>
+                                <form method="POST" action="${pageContext.request.contextPath}/mentor/tickets">
+                                    <input type="hidden" name="action" value="claim">
+                                    <input type="hidden" name="ticketId" value="${ticket.ticketId}">
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold"><i class="fa-solid fa-hand-sparkles me-2"></i> Nhận Ticket Này</button>
+                                </form>
                             </div>
-                            <div class="text-end">
-                                <button type="submit" class="btn-submit">
-                                    <i class="fa-solid fa-paper-plane me-2"></i> Gửi phản hồi
-                                </button>
+                        </c:when>
+                        <c:when test="${ticket.assignedTo.userId != sessionScope.userId}">
+                            <div class="alert alert-info text-center mt-4 animate-fade-up" style="animation-delay: 0.3s;">
+                                Ticket này đã được gán cho <strong>${ticket.assignedTo.fullName}</strong>. Bạn không thể phản hồi.
                             </div>
-                        </form>
-                    </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="reply-form-box animate-fade-up" style="animation-delay: 0.3s;">
+                                <form method="POST" action="${pageContext.request.contextPath}/mentor/tickets">
+                                    <input type="hidden" name="action" value="reply">
+                                    <input type="hidden" name="ticketId" value="${ticket.ticketId}">
+                                    <div class="mb-3">
+                                        <label class="fw-bold mb-2">Phản hồi của bạn</label>
+                                        <textarea name="content" class="form-textarea" placeholder="Nhập nội dung phản hồi cho học viên..." required></textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" class="btn-submit">
+                                            <i class="fa-solid fa-paper-plane me-2"></i> Gửi phản hồi
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </c:if>
 
                 <c:if test="${ticket.status == 'Closed'}">

@@ -45,12 +45,14 @@
         </c:if>
 
         <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 20px; margin-bottom: 20px;">
-            <form action="${pageContext.request.contextPath}/mentor/exams" method="GET" class="row g-3 align-items-center">
-                <div class="col-md-4">
-                    <input type="text" name="keyword" class="form-control rounded-pill" placeholder="Tìm kiếm tiêu đề đề thi..." value="${param.keyword}">
+            <form action="${pageContext.request.contextPath}/mentor/exams" method="GET" class="row g-2 align-items-center">
+                <input type="hidden" name="page" id="page-input" value="${not empty examsPage ? examsPage.currentPage : 1}">
+                
+                <div class="col-md-3">
+                    <input type="text" name="keyword" class="form-control rounded-pill" placeholder="Tìm kiếm tiêu đề đề thi..." value="${param.keyword}" oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { document.getElementById('page-input').value = 1; ajaxSearch(this.form); }, 600);">
                 </div>
                 <div class="col-md-3">
-                    <select name="type" class="form-select rounded-pill">
+                    <select name="type" class="form-select rounded-pill" onchange="document.getElementById('page-input').value = 1; ajaxSearch(this.form);">
                         <option value="">-- Loại Đề --</option>
                         <option value="Mock Test" ${param.type == 'Mock Test' ? 'selected' : ''}>Mock Test</option>
                         <option value="Placement Test" ${param.type == 'Placement Test' ? 'selected' : ''}>Placement Test</option>
@@ -58,7 +60,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select name="skill" class="form-select rounded-pill">
+                    <select name="skill" class="form-select rounded-pill" onchange="document.getElementById('page-input').value = 1; ajaxSearch(this.form);">
                         <option value="">-- Kỹ Năng --</option>
                         <option value="All" ${param.skill == 'All' ? 'selected' : ''}>Full Test (All)</option>
                         <option value="Listening" ${param.skill == 'Listening' ? 'selected' : ''}>Listening</option>
@@ -67,13 +69,17 @@
                         <option value="Speaking" ${param.skill == 'Speaking' ? 'selected' : ''}>Speaking</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary rounded-pill shadow-sm fw-bold w-100" style="background-color: var(--accent-purple); border-color: var(--accent-purple);">Lọc <i class="fa-solid fa-filter"></i></button>
+                <div class="col-md-3">
+                    <select name="limit" class="form-select rounded-pill" onchange="document.getElementById('page-input').value = 1; ajaxSearch(this.form);">
+                        <option value="10" ${param.limit == '10' ? 'selected' : ''}>10 / trang</option>
+                        <option value="20" ${param.limit == '20' || empty param.limit ? 'selected' : ''}>20 / trang</option>
+                        <option value="50" ${param.limit == '50' ? 'selected' : ''}>50 / trang</option>
+                    </select>
                 </div>
             </form>
         </div>
 
-        <div class="glass-panel animate-fade-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
+        <div id="search-results" class="glass-panel animate-fade-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-custom mb-0">
                     <thead>
@@ -127,9 +133,67 @@
                     </tbody>
                 </table>
             </div>
+            
+            <c:if test="${examsPage != null && examsPage.totalPages > 1}">
+                <c:set var="startPage" value="${examsPage.currentPage - 2}" />
+                <c:if test="${startPage < 1}"><c:set var="startPage" value="1" /></c:if>
+                <c:set var="endPage" value="${examsPage.currentPage + 2}" />
+                <c:if test="${endPage > examsPage.totalPages}"><c:set var="endPage" value="${examsPage.totalPages}" /></c:if>
+
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination mb-0">
+                        <li class="page-item ${examsPage.currentPage <= 1 ? 'disabled' : ''}">
+                            <a class="page-link rounded-start-pill" href="javascript:void(0)" onclick="document.getElementById('page-input').value = ${examsPage.currentPage - 1}; ajaxSearch(document.querySelector('form'));"><i class="fa-solid fa-chevron-left"></i></a>
+                        </li>
+                        
+                        <c:forEach begin="${startPage}" end="${endPage}" var="p">
+                            <li class="page-item ${examsPage.currentPage == p ? 'active' : ''}">
+                                <a class="page-link" href="javascript:void(0)" onclick="document.getElementById('page-input').value = ${p}; ajaxSearch(document.querySelector('form'));">${p}</a>
+                            </li>
+                        </c:forEach>
+                        
+                        <li class="page-item ${examsPage.currentPage >= examsPage.totalPages ? 'disabled' : ''}">
+                            <a class="page-link rounded-end-pill" href="javascript:void(0)" onclick="document.getElementById('page-input').value = ${examsPage.currentPage + 1}; ajaxSearch(document.querySelector('form'));"><i class="fa-solid fa-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </c:if>
         </div>
     </main>
 </div>
 
 </body>
+<script>
+function ajaxSearch(form) {
+    const url = new URL(form.action || window.location.href);
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData) {
+        if(value) params.append(key, value);
+    }
+    url.search = params.toString();
+
+    const results = document.getElementById('search-results');
+    if (results) {
+        results.style.opacity = '0.5';
+        results.style.transition = 'opacity 0.2s';
+    }
+
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newResults = doc.getElementById('search-results');
+            if (newResults && results) {
+                results.innerHTML = newResults.innerHTML;
+                results.style.opacity = '1';
+                window.history.replaceState({}, '', url);
+            } else {
+                form.submit();
+            }
+        })
+        .catch(err => form.submit());
+}
+</script>
 </html>

@@ -2,6 +2,7 @@ package services;
 
 import dao.LessonDAO;
 import model.Lesson;
+import util.PaginatedList;
 import java.util.List;
 
 public class LessonService {
@@ -16,6 +17,10 @@ public class LessonService {
     // Xem chi tiết bài học (#22)
     public Lesson getLessonById(int id) {
         return lessonDAO.findById(id);
+    }
+
+    public PaginatedList<Lesson> searchLessons(String keyword, String skill, int page, int pageSize) {
+        return lessonDAO.searchLessons(keyword, skill, page, pageSize);
     }
 
     // Tìm kiếm bài học (#21) - hỗ trợ keyword, skill, hoặc kết hợp cả hai

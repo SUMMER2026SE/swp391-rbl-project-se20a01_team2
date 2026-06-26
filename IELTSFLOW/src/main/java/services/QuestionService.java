@@ -4,6 +4,7 @@ import dao.QuestionDAO;
 import model.Answer;
 import model.Question;
 import java.util.List;
+import util.PaginatedList;
 import dao.TagDAO;
 import model.Tag;
 
@@ -29,6 +30,10 @@ public class QuestionService {
 
     public List<Question> searchQuestions(String keyword, String skill) {
         return questionDAO.searchByKeywordAndSkill(keyword, skill);
+    }
+
+    public PaginatedList<Question> searchQuestions(String keyword, String skill, String difficulty, String type, int page, int pageSize) {
+        return questionDAO.searchQuestions(keyword, skill, difficulty, type, page, pageSize);
     }
 
     public void createQuestion(Question question, List<Answer> answers) throws Exception {

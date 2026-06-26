@@ -4,6 +4,7 @@ import dao.ExamDAO;
 import model.Exam;
 import java.time.LocalDateTime;
 import java.util.List;
+import util.PaginatedList;
 
 public class ExamService {
 
@@ -15,6 +16,10 @@ public class ExamService {
 
     public Exam getExamById(int id) {
         return examDAO.findById(id);
+    }
+
+    public PaginatedList<Exam> searchExams(String keyword, String skillFocus, String type, int page, int pageSize) {
+        return examDAO.searchExams(keyword, skillFocus, type, page, pageSize);
     }
 
     public List<Exam> searchExams(String keyword, String skillFocus, String type) {

@@ -380,6 +380,14 @@
                                             </ul>
                                         </div>
                                     </c:if>
+                                    
+                                    <c:if test="${not empty writingDetails[st.index].mentorScore}">
+                                        <div style="margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b;">
+                                            <h5 style="color: #d97706; margin-top: 0; margin-bottom: 8px;"><i class="fa-solid fa-user-tie"></i> Đánh giá từ Mentor</h5>
+                                            <p style="margin-bottom: 8px;"><strong>Điểm:</strong> <span style="font-size: 1.1em; font-weight: bold; color: #d97706;">${writingDetails[st.index].mentorScore}</span></p>
+                                            <p style="margin-bottom: 0;"><strong>Nhận xét:</strong> ${writingDetails[st.index].mentorFeedback}</p>
+                                        </div>
+                                    </c:if>
                                 </div>
                             </c:forEach>
                         </c:when>
@@ -429,6 +437,14 @@
                                                 </li>
                                             </c:forEach>
                                             </ul>
+                                        </div>
+                                    </c:if>
+                                    
+                                    <c:if test="${not empty speakingDetails[st.index].mentorScore}">
+                                        <div style="margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(236, 72, 153, 0.15); border: 1px solid #db2777;">
+                                            <h5 style="color: #be185d; margin-top: 0; margin-bottom: 8px;"><i class="fa-solid fa-user-tie"></i> Đánh giá từ Mentor</h5>
+                                            <p style="margin-bottom: 8px;"><strong>Điểm:</strong> <span style="font-size: 1.1em; font-weight: bold; color: #be185d;">${speakingDetails[st.index].mentorScore}</span></p>
+                                            <p style="margin-bottom: 0;"><strong>Nhận xét:</strong> ${speakingDetails[st.index].mentorFeedback}</p>
                                         </div>
                                     </c:if>
                                 </div>

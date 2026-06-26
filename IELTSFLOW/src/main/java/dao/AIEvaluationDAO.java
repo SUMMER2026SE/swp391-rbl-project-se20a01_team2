@@ -211,14 +211,15 @@ public class AIEvaluationDAO {
         try {
             return JpaHelper.query(em -> {
                 String sql =
-                    "SELECT ae.FeedbackJSON, sd.Skill " +
+                    "SELECT ae.FeedbackJSON, q.Skill " +
                     "FROM AIEvaluations ae " +
                     "JOIN SubmissionDetails sd ON ae.DetailID = sd.DetailID " +
+                    "JOIN Questions q ON sd.QuestionID = q.QuestionID " +
                     "JOIN TestSubmissions ts ON sd.SubmissionID = ts.SubmissionID " +
                     "JOIN Exams e ON ts.ExamID = e.ExamID " +
                     "WHERE e.MentorID = ?1 " +
                     "  AND e.Deleted = 0 " +
-                    "  AND sd.Skill IN ('Writing', 'Speaking') " +
+                    "  AND q.Skill IN ('Writing', 'Speaking') " +
                     "  AND ae.FeedbackJSON IS NOT NULL";
                 @SuppressWarnings("unchecked")
                 java.util.List<Object[]> result = em.createNativeQuery(sql)

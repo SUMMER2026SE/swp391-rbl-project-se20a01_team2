@@ -58,7 +58,7 @@
                         <c:forEach var="tag" items="${tags}">
                             <tr>
                                 <td class="ps-4 text-secondary">#${tag.tagId}</td>
-                                <td class="fw-bold" style="color: var(--text-primary);">${tag.tagName}</td>
+                                <td class="fw-bold" style="color: var(--text-primary);">${tag.name}</td>
                                 <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary">${tag.type}</span></td>
                                 <td class="text-center pe-4">
                                     <a href="${pageContext.request.contextPath}/mentor/tags/${tag.tagId}" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>

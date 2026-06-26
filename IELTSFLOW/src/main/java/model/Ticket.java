@@ -32,6 +32,10 @@ public class Ticket {
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "AssignedTo")
+    private User assignedTo;
+
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<TicketReply> replies = new java.util.ArrayList<>();
 
@@ -67,6 +71,9 @@ public class Ticket {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public User getAssignedTo() { return assignedTo; }
+    public void setAssignedTo(User assignedTo) { this.assignedTo = assignedTo; }
 
     public java.util.List<TicketReply> getReplies() { return replies; }
     public void setReplies(java.util.List<TicketReply> replies) { this.replies = replies; }
