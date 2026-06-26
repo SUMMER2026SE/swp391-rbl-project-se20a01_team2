@@ -261,8 +261,7 @@ CREATE TABLE SubmissionDetails (
     MentorScore DECIMAL(5,2) NULL,
     MentorFeedback NVARCHAR(MAX) NULL,
     FOREIGN KEY (SubmissionID) REFERENCES TestSubmissions(SubmissionID) ON DELETE CASCADE,
-    FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID),
-    CONSTRAINT CHK_CandidateAnswer CHECK (CandidateAnswer IS NULL OR ISJSON(CandidateAnswer) = 1)
+    FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID)
 );
 
 CREATE TABLE AIEvaluations (

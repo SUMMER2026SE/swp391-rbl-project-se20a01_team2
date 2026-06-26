@@ -1131,7 +1131,4 @@ ALTER TABLE QuestionResource ALTER COLUMN ResourceImageURL NVARCHAR(MAX);
 
 -- Thêm QuestionCount để biết 1 JSON của Questions tương đương bao nhiêu câu hỏi thực tế 
 ALTER TABLE Questions ADD QuestionCount INT DEFAULT 1;
-
--- Bổ sung ràng buộc (Constraint) đảm bảo CandidateAnswer luôn lưu đúng định dạng JSON
-ALTER TABLE SubmissionDetails ADD CONSTRAINT CHK_CandidateAnswer CHECK (CandidateAnswer IS NULL OR ISJSON(CandidateAnswer) = 1);
 ```
