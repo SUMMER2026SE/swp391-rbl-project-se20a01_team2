@@ -23,6 +23,53 @@ if (!initializedLearned) {
     localStorage.setItem('learnedLessons', JSON.stringify(initialLearned));
 }
 
+// Inline Toast Notification System
+function showToast(message, type = 'success') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'rgba(16, 185, 129, 0.95)' : (type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(59, 130, 246, 0.95)');
+    toast.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 0.95rem;
+        backdrop-filter: blur(8px);
+        transform: translateX(120%);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+    
+    container.appendChild(toast);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+    });
+
+    // Animate out and remove
+    setTimeout(() => {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+
 function renderDashboardGrid() {
     const list = document.getElementById('today-lessons-grid');
     if (!list) return;
@@ -197,7 +244,7 @@ function toggleBookmark() {
             btn.innerHTML = '❤️ Bookmark';
             btn.style.background = 'rgba(255, 255, 255, 0.05)';
         }
-        alert('Đã xoá khỏi danh sách Bookmark!');
+        showToast('Đã xoá khỏi danh sách Bookmark!', 'info');
     } else {
         // Add bookmark
         bookmarks.push(id);
@@ -205,7 +252,7 @@ function toggleBookmark() {
             btn.innerHTML = '❤️ Bookmarked';
             btn.style.background = 'rgba(239, 68, 68, 0.2)';
         }
-        alert('Đã thêm vào danh sách Bookmark thành công!');
+        showToast('Đã thêm vào danh sách Bookmark thành công!', 'success');
     }
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
 }
@@ -225,7 +272,7 @@ function toggleLearned() {
             btn.innerHTML = '✓ Mark as Learned';
             btn.style.background = ''; // default primary
         }
-        alert('Unmarked as learned!');
+        showToast('Đã bỏ đánh dấu hoàn thành!', 'info');
     } else {
         // Mark
         learnedList.push(id);
@@ -233,7 +280,7 @@ function toggleLearned() {
             btn.innerHTML = '❌ Unmark as Learned';
             btn.style.background = 'var(--accent-red)';
         }
-        alert('Marked as learned! Your progress is updated.');
+        showToast('Đã đánh dấu hoàn thành bài học!', 'success');
     }
     localStorage.setItem('learnedLessons', JSON.stringify(learnedList));
 }
@@ -263,7 +310,7 @@ function renderRedoHistory() {
                         <div class="progress-fill" style="width: ${percentage}%; background: ${scoreColor};"></div>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="alert('Starting retake...')">Retake Now</button>
+                <button class="btn btn-primary" onclick="showToast('Starting retake...', 'info')">Retake Now</button>
             </div>
         `;
     });

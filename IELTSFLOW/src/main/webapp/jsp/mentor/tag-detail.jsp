@@ -50,7 +50,7 @@
                 <div class="row g-4">
                     <div class="col-md-12">
                         <label class="form-label fw-bold">Tên Tag <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" value="${tag.tagName}" required placeholder="VD: Grammar, Vocabulary, Note Completion...">
+                        <input type="text" name="name" class="form-control" value="${tag.name}" required placeholder="VD: Grammar, Vocabulary, Note Completion...">
                     </div>
 
                     <div class="col-md-12">
