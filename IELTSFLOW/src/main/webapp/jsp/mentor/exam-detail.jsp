@@ -116,8 +116,11 @@
                                             <input type="hidden" name="action" value="deleteSection">
                                             <input type="hidden" name="examId" value="${exam.examId}">
                                             <input type="hidden" name="sectionId" value="${sec.sectionId}">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i> Xóa Section</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i> Xóa</button>
                                         </form>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editSectionModal${sec.sectionId}">
+                                            <i class="fa-solid fa-pen"></i> Sửa
+                                        </button>
                                         <a href="${pageContext.request.contextPath}/mentor/exams/${exam.examId}/sections/${sec.sectionId}/add-questions" class="btn btn-sm btn-primary" style="background-color: var(--accent-blue); border-color: var(--accent-blue);">
                                             <i class="fa-solid fa-plus"></i> Thêm câu hỏi
                                         </a>
@@ -126,6 +129,17 @@
                                     <c:if test="${empty sec.examQuestions}">
                                         <p class="text-muted small">Chưa có câu hỏi nào trong section này.</p>
                                     </c:if>
+
+                                    <!-- Inline Edit for Resource ID -->
+                                    <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="d-flex align-items-center mb-3 p-3" style="background-color: #f1f5f9; border-radius: 8px;">
+                                        <input type="hidden" name="action" value="updateSectionResource">
+                                        <input type="hidden" name="examId" value="${exam.examId}">
+                                        <input type="hidden" name="sectionId" value="${sec.sectionId}">
+                                        <label class="me-3 fw-bold text-secondary mb-0"><i class="fa-solid fa-link me-1"></i> Resource ID:</label>
+                                        <input type="number" name="resourceId" value="${sec.resourceId}" class="form-control form-control-sm me-2" style="width: 120px;" placeholder="Trống">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary fw-bold px-3">Lưu</button>
+                                        <small class="text-muted ms-3 d-none d-md-inline">(ID bài đọc/nghe chung cho toàn section)</small>
+                                    </form>
                                     
                                     <ul class="list-group">
                                         <c:forEach var="examQ" items="${sec.examQuestions}">
@@ -152,6 +166,45 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Modal Edit Section ${sec.sectionId} -->
+                        <div class="modal fade" id="editSectionModal${sec.sectionId}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="modal-content">
+                                    <input type="hidden" name="action" value="updateSection">
+                                    <input type="hidden" name="examId" value="${exam.examId}">
+                                    <input type="hidden" name="sectionId" value="${sec.sectionId}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Sửa Section</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Tên Section <span class="text-danger">*</span></label>
+                                            <input type="text" name="sectionName" class="form-control" required value="${sec.sectionName}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Kỹ năng <span class="text-danger">*</span></label>
+                                            <select name="skill" class="form-select" required>
+                                                <option value="Listening" ${sec.skill == 'Listening' ? 'selected' : ''}>Listening</option>
+                                                <option value="Reading" ${sec.skill == 'Reading' ? 'selected' : ''}>Reading</option>
+                                                <option value="Writing" ${sec.skill == 'Writing' ? 'selected' : ''}>Writing</option>
+                                                <option value="Speaking" ${sec.skill == 'Speaking' ? 'selected' : ''}>Speaking</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
+                                            <input type="number" name="orderIndex" class="form-control" required min="1" value="${sec.orderIndex}">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn btn-primary">Lưu</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                     </c:forEach>
                 </div>
             </div>
@@ -187,7 +240,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
                         <input type="number" name="orderIndex" class="form-control" value="1" required min="1">
-                    </div>
+                                        </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>

@@ -41,6 +41,8 @@
            class="nav-link ${param.active == 'students' ? 'active' : ''}">🎓 Tiến độ học viên</a>
         <a href="${pageContext.request.contextPath}/mentor/tags"
            class="nav-link ${param.active == 'tags' ? 'active' : ''}">🏷️ Quản lý Tag</a>
+        <a href="${pageContext.request.contextPath}/mentor/resources"
+           class="nav-link ${param.active == 'resources' ? 'active' : ''}">📚 Quản lý Tài nguyên</a>
     </nav>
 
     <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">

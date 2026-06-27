@@ -129,10 +129,12 @@ public class MockTestServlet extends HttpServlet {
 
         int submissionId = mockTestService.createSubmission(userId, exam.getExamId());
         List<Question> questions = mockTestService.getQuestionsForExam(exam.getExamId());
+        List<model.ExamSection> sections = mockTestService.getSectionsWithQuestionsForExam(exam.getExamId());
 
         HttpSession session = req.getSession();
         session.setAttribute("mt_currentExam", exam);
         session.setAttribute("mt_currentQuestions", questions);
+        session.setAttribute("mt_currentSections", sections);
         session.setAttribute("mt_currentSubmissionId", submissionId);
         session.setAttribute("mt_examStartTime", System.currentTimeMillis());
 
@@ -150,6 +152,7 @@ public class MockTestServlet extends HttpServlet {
         }
         req.setAttribute("exam", exam);
         req.setAttribute("questions", session.getAttribute("mt_currentQuestions"));
+        req.setAttribute("sections", session.getAttribute("mt_currentSections"));
         req.setAttribute("submissionId", session.getAttribute("mt_currentSubmissionId"));
         req.setAttribute("maxViolations", mockTestService.getMaxViolations());
         req.getRequestDispatcher("/jsp/mock-test/take.jsp").forward(req, resp);
