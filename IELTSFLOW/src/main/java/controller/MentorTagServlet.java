@@ -68,19 +68,19 @@ public class MentorTagServlet extends HttpServlet {
             if ("create".equals(action)) {
                 Tag tag = buildFromRequest(req);
                 tagService.createTag(tag);
-                resp.sendRedirect(req.getContextPath() + "/mentor/tags?success=Tạo+tag+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/tags?success=" + java.net.URLEncoder.encode("Tạo tag thành công", "UTF-8"));
 
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("tagId"));
                 Tag tag = buildFromRequest(req);
                 tag.setTagId(id);
                 tagService.updateTag(tag);
-                resp.sendRedirect(req.getContextPath() + "/mentor/tags?success=Cập+nhật+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/tags?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("tagId"));
                 tagService.deleteTag(id);
-                resp.sendRedirect(req.getContextPath() + "/mentor/tags?success=Xóa+tag+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/tags?success=" + java.net.URLEncoder.encode("Xóa tag thành công", "UTF-8"));
 
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/tags");

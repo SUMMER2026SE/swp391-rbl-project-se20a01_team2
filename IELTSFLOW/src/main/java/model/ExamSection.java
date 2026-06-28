@@ -29,6 +29,12 @@ public class ExamSection {
     @Transient
     private java.util.List<ExamQuestion> examQuestions = new java.util.ArrayList<>();
 
+    @Transient
+    private String resourceText;
+
+    @Transient
+    private String resourceAudioUrl;
+
     public ExamSection() {}
 
     public int getSectionId() { return sectionId; }
@@ -45,4 +51,8 @@ public class ExamSection {
     public void setOrderIndex(int orderIndex) { this.orderIndex = orderIndex; }
     public java.util.List<ExamQuestion> getExamQuestions() { return examQuestions; }
     public void setExamQuestions(java.util.List<ExamQuestion> examQuestions) { this.examQuestions = examQuestions; }
+    public String getResourceText() { return resourceText; }
+    public void setResourceText(String resourceText) { this.resourceText = resourceText; }
+    public String getResourceAudioUrl() { return resourceAudioUrl; }
+    public void setResourceAudioUrl(String resourceAudioUrl) { this.resourceAudioUrl = resourceAudioUrl; }
 }

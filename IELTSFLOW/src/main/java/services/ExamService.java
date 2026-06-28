@@ -99,6 +99,10 @@ public class ExamService {
         sectionDAO.save(section);
     }
 
+    public void updateSection(model.ExamSection section) {
+        sectionDAO.update(section);
+    }
+
     public void deleteSection(int sectionId) {
         sectionDAO.delete(sectionId);
     }

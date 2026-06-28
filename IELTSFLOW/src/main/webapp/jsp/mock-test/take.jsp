@@ -277,22 +277,43 @@
         <c:forEach var="sk" items="${skills}" varStatus="skSt">
             <div class="skill-section ${skSt.first ? 'active' : ''}" id="section-${sk}">
                 <c:set var="qNum" value="${0}"/>
-                <c:forEach var="q" items="${questions}">
-                    <c:if test="${q.skill == sk}">
-                        <c:set var="qNum" value="${qNum + 1}"/>
+                
+                <%-- Loop over sections for this skill --%>
+                <c:forEach var="sec" items="${sections}">
+                    <c:if test="${sec.skill == sk}">
+                        <div class="exam-section-container" style="margin-bottom: 2rem; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; background: #fff;">
+                            <h4 style="margin-bottom: 1rem; color: var(--text-primary);">${sec.sectionName}</h4>
+                            
+                            <%-- Section-level resource (Reading Passage or Audio for multiple questions) --%>
+                            <c:if test="${not empty sec.resourceText || not empty sec.resourceAudioUrl}">
+                                <div class="resource-box">
+                                    <c:if test="${not empty sec.resourceAudioUrl}">
+                                        <audio controls src="${sec.resourceAudioUrl}"></audio>
+                                    </c:if>
+                                    <c:if test="${not empty sec.resourceText}">
+                                        <p>${sec.resourceText}</p>
+                                    </c:if>
+                                </div>
+                            </c:if>
+                            
+                            <%-- Loop over questions in this section --%>
+                            <c:forEach var="eq" items="${sec.examQuestions}">
+                                <c:set var="q" value="${eq.question}"/>
+                                <c:set var="qNum" value="${qNum + 1}"/>
 
-                        <c:if test="${not empty q.resourceText || not empty q.resourceAudioUrl}">
-                            <div class="resource-box">
-                                <c:if test="${not empty q.resourceAudioUrl}">
-                                    <audio controls src="${q.resourceAudioUrl}"></audio>
+                                <%-- Individual question-level resource (if any) --%>
+                                <c:if test="${not empty q.resourceText || not empty q.resourceAudioUrl}">
+                                    <div class="resource-box" style="margin-top: 1rem;">
+                                        <c:if test="${not empty q.resourceAudioUrl}">
+                                            <audio controls src="${q.resourceAudioUrl}"></audio>
+                                        </c:if>
+                                        <c:if test="${not empty q.resourceText}">
+                                            <p>${q.resourceText}</p>
+                                        </c:if>
+                                    </div>
                                 </c:if>
-                                <c:if test="${not empty q.resourceText}">
-                                    <p>${q.resourceText}</p>
-                                </c:if>
-                            </div>
-                        </c:if>
 
-                        <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}">
+                                <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}">
                             <div>
                                 <span class="q-num">Câu ${qNum}</span>
                                 <span class="q-skill-badge ${q.skill}">${q.skill}</span>
@@ -358,7 +379,8 @@
                                 </c:otherwise>
                             </c:choose>
                         </div>
-                    </c:if>
+                    </c:forEach>
+                    </div>
                 </c:forEach>
             </div>
         </c:forEach>

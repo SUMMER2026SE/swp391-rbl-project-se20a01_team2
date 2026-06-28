@@ -130,6 +130,35 @@ public class ExamController extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + redirectPrefix + "/" + examId);
                 return;
 
+            } else if ("updateSection".equals(action)) {
+                int examId = Integer.parseInt(req.getParameter("examId"));
+                int sectionId = Integer.parseInt(req.getParameter("sectionId"));
+                model.ExamSection sec = examService.getSectionById(sectionId);
+                if (sec != null) {
+                    sec.setSectionName(req.getParameter("sectionName"));
+                    sec.setSkill(req.getParameter("skill"));
+                    sec.setOrderIndex(Integer.parseInt(req.getParameter("orderIndex")));
+                    examService.updateSection(sec);
+                }
+                resp.sendRedirect(req.getContextPath() + redirectPrefix + "/" + examId);
+                return;
+
+            } else if ("updateSectionResource".equals(action)) {
+                int examId = Integer.parseInt(req.getParameter("examId"));
+                int sectionId = Integer.parseInt(req.getParameter("sectionId"));
+                model.ExamSection sec = examService.getSectionById(sectionId);
+                if (sec != null) {
+                    String resourceIdStr = req.getParameter("resourceId");
+                    if (resourceIdStr != null && !resourceIdStr.trim().isEmpty()) {
+                        sec.setResourceId(Integer.parseInt(resourceIdStr));
+                    } else {
+                        sec.setResourceId(null);
+                    }
+                    examService.updateSection(sec);
+                }
+                resp.sendRedirect(req.getContextPath() + redirectPrefix + "/" + examId);
+                return;
+
             } else if ("deleteSection".equals(action)) {
                 int examId = Integer.parseInt(req.getParameter("examId"));
                 int sectionId = Integer.parseInt(req.getParameter("sectionId"));

@@ -124,6 +124,9 @@
                                         </div>
                                     </td>
                                     <td class="text-center pe-4">
+                                        <button type="button" class="btn btn-sm btn-outline-info rounded-pill me-1" title="Xem trước" data-bs-toggle="modal" data-bs-target="#previewLessonModal${lesson.lessonId}">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
                                         <a href="${pageContext.request.contextPath}/mentor/lessons/${lesson.lessonId}" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></a>
                                         <form action="${pageContext.request.contextPath}/mentor/lessons" method="POST" style="display:inline;">
                                             <input type="hidden" name="action" value="delete">
@@ -132,6 +135,46 @@
                                         </form>
                                     </td>
                                 </tr>
+
+                                <!-- Preview Modal for Lesson ${lesson.lessonId} -->
+                                <div class="modal fade" id="previewLessonModal${lesson.lessonId}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold">Xem Trước Bài Học: ${lesson.title}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body" style="background-color: #f8f9fa;">
+                                                <div class="container-fluid">
+                                                    <c:if test="${not empty lesson.videoUrl}">
+                                                        <div class="mb-4 bg-dark rounded shadow-sm overflow-hidden" style="position: relative; padding-top: 56.25%;">
+                                                            <iframe src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" 
+                                                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                                                                    frameborder="0" allowfullscreen>
+                                                            </iframe>
+                                                        </div>
+                                                    </c:if>
+
+                                                    <c:if test="${not empty lesson.documentUrl}">
+                                                        <div class="mb-4">
+                                                            <a href="${lesson.documentUrl}" target="_blank" class="btn btn-outline-primary w-100">
+                                                                <i class="fa-solid fa-file-pdf me-2"></i> Xem tài liệu đính kèm
+                                                            </a>
+                                                        </div>
+                                                    </c:if>
+
+                                                    <div class="bg-white p-4 border rounded shadow-sm" style="line-height: 1.8;">
+                                                        ${lesson.content}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </c:if>
                         </c:forEach>
                         <c:if test="${empty lessons}">
