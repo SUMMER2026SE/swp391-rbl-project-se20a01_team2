@@ -314,6 +314,11 @@ Khi hiển thị đề cho học viên, nguyên tắc tối thượng vẫn là 
 | :---- |
 
 **6.3. Đối với câu hỏi dạng Multiple Choise:**
+/////////////////////
+note thêm:
+đổi với dạng đề:
+- lableing a map/plan/diagram: sẽ sử dụng matching. trên ảnh sẽ đánh dấu sẵn (mentor) các vị trí cần nối. ở dưới sẽ hiện sắn các đáp án để nối với số tương ứng trên ảnh
+- drag and drop: tương tự: cũng sử dụng matching như trên
 
 ## **7\. Use case:**
 
@@ -560,7 +565,7 @@ CREATE TABLE Questions (
 
     Content NVARCHAR(MAX) NOT NULL,
 
-    QuestionType NVARCHAR(50) NOT NULL, \-- MultipleChoice, Matching, FillInBlanks. Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
+    QuestionType NVARCHAR(50) NOT NULL, \-- MultipleChoice, Matching, FillInBlanks,.... Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
 
     Skill NVARCHAR(20) NOT NULL, \-- Listening, Reading, Writing, Speaking
 
@@ -1132,3 +1137,8 @@ ALTER TABLE QuestionResource ALTER COLUMN ResourceImageURL NVARCHAR(MAX);
 -- Thêm QuestionCount để biết 1 JSON của Questions tương đương bao nhiêu câu hỏi thực tế 
 ALTER TABLE Questions ADD QuestionCount INT DEFAULT 1;
 ```
+6/26
+UPDATE: fix tag table:
+```
+ALTER TABLE Tags
+ADD Deleted BIT DEFAULT 0;
