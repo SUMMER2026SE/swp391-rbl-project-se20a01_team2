@@ -12,6 +12,10 @@ public class QuestionResourceService {
         return resourceDAO.findAll();
     }
 
+    public List<QuestionResource> searchResources(String keyword, String type) {
+        return resourceDAO.search(keyword, type);
+    }
+
     public QuestionResource getResourceById(int id) {
         return resourceDAO.findById(id);
     }
@@ -33,6 +37,7 @@ public class QuestionResourceService {
         }
         
         existing.setType(resource.getType());
+        existing.setResourceName(resource.getResourceName());
         existing.setResourceText(resource.getResourceText());
         existing.setResourceAudioUrl(resource.getResourceAudioUrl());
         existing.setResourceImageUrl(resource.getResourceImageUrl());

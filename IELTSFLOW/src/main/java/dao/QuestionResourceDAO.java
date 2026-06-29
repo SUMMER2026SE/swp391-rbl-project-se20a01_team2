@@ -13,6 +13,25 @@ public class QuestionResourceDAO {
         );
     }
 
+    public List<QuestionResource> search(String keyword, String type) {
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasType = type != null && !type.trim().isEmpty();
+
+        StringBuilder queryStr = new StringBuilder("SELECT r FROM QuestionResource r WHERE r.deleted = false");
+        if (hasType) queryStr.append(" AND r.type = :type");
+        if (hasKeyword) {
+            queryStr.append(" AND (LOWER(r.resourceName) LIKE :kw OR LOWER(r.resourceText) LIKE :kw)");
+        }
+        queryStr.append(" ORDER BY r.resourceId DESC");
+
+        return JpaHelper.query(em -> {
+            jakarta.persistence.TypedQuery<QuestionResource> query = em.createQuery(queryStr.toString(), QuestionResource.class);
+            if (hasType) query.setParameter("type", type);
+            if (hasKeyword) query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
+            return query.getResultList();
+        });
+    }
+
     public QuestionResource findById(int id) {
         return JpaHelper.query(em -> {
             QuestionResource r = em.find(QuestionResource.class, id);

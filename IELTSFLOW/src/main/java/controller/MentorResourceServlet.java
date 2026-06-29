@@ -30,7 +30,17 @@ public class MentorResourceServlet extends HttpServlet {
                     return;
                 }
 
-                req.setAttribute("resources", resourceService.getAllResources());
+                String keyword = req.getParameter("keyword");
+                String typeFilter = req.getParameter("typeFilter");
+                
+                if (keyword != null || (typeFilter != null && !typeFilter.isEmpty())) {
+                    req.setAttribute("resources", resourceService.searchResources(keyword, typeFilter));
+                } else {
+                    req.setAttribute("resources", resourceService.getAllResources());
+                }
+                
+                req.setAttribute("keyword", keyword);
+                req.setAttribute("typeFilter", typeFilter);
                 req.getRequestDispatcher("/jsp/mentor/resources.jsp").forward(req, resp);
             } else {
                 int id = Integer.parseInt(pathInfo.substring(1));
@@ -97,6 +107,7 @@ public class MentorResourceServlet extends HttpServlet {
     private QuestionResource buildFromRequest(HttpServletRequest req) {
         QuestionResource r = new QuestionResource();
         r.setType(req.getParameter("type")); // "Passage" or "Audio"
+        r.setResourceName(req.getParameter("resourceName"));
         
         String resourceText = req.getParameter("resourceText");
         r.setResourceText(resourceText != null && !resourceText.trim().isEmpty() ? resourceText : null);

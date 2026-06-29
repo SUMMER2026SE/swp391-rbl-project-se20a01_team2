@@ -17,18 +17,27 @@ public class MentorStudentDAO {
         });
     }
 
-    public List<User> getMyStudents(int mentorId) {
+    public List<User> searchStudents(String keyword, String sort) {
         return JpaHelper.query(em -> {
-            // My Students are candidates who have submitted a test for an exam created by this mentor
-            // OR assigned a ticket to this mentor
-            String sql = "SELECT DISTINCT u.* FROM Users u " +
-                         "LEFT JOIN TestSubmissions ts ON u.UserID = ts.UserID " +
-                         "LEFT JOIN Exams e ON ts.ExamID = e.ExamID " +
-                         "WHERE u.RoleID = 3 AND u.Deleted = 0 " +
-                         "AND (e.MentorID = ?1) " +
-                         "ORDER BY u.CreatedAt DESC";
+            boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+            String sql = "SELECT u.* FROM Users u WHERE u.RoleID = 3 AND u.Deleted = 0";
+            if (hasKeyword) {
+                sql += " AND (LOWER(u.FullName) LIKE :kw OR LOWER(u.Email) LIKE :kw)";
+            }
+            if ("oldest".equals(sort)) {
+                sql += " ORDER BY u.CreatedAt ASC";
+            } else if ("name_asc".equals(sort)) {
+                sql += " ORDER BY u.FullName ASC";
+            } else if ("name_desc".equals(sort)) {
+                sql += " ORDER BY u.FullName DESC";
+            } else {
+                sql += " ORDER BY u.CreatedAt DESC"; // default
+            }
+            
             Query query = em.createNativeQuery(sql, User.class);
-            query.setParameter(1, mentorId);
+            if (hasKeyword) {
+                query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
+            }
             @SuppressWarnings("unchecked")
             List<User> list = query.getResultList();
             return list;

@@ -65,7 +65,7 @@
                                     <form action="${pageContext.request.contextPath}/mentor/tags" method="POST" style="display:inline;">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="tagId" value="${tag.tagId}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Bạn có chắc chắn muốn xóa tag này?');"><i class="fa-solid fa-trash"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return customConfirm(event, this, 'Bạn có chắc chắn muốn xóa tag này?');"><i class="fa-solid fa-trash"></i></button>
                                     </form>
                                 </td>
                             </tr>

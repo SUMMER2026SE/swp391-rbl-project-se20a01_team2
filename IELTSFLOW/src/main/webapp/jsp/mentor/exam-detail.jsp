@@ -112,7 +112,7 @@
                             <div id="collapse${sec.sectionId}" class="accordion-collapse collapse ${status.first ? 'show' : ''}" aria-labelledby="heading${sec.sectionId}" data-bs-parent="#sectionsAccordion">
                                 <div class="accordion-body">
                                     <div class="d-flex justify-content-between mb-3">
-                                        <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa section này?');">
+                                        <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="d-inline" onsubmit="return customConfirm(event, this, 'Bạn có chắc chắn muốn xóa section này?');">
                                             <input type="hidden" name="action" value="deleteSection">
                                             <input type="hidden" name="examId" value="${exam.examId}">
                                             <input type="hidden" name="sectionId" value="${sec.sectionId}">
@@ -130,15 +130,31 @@
                                         <p class="text-muted small">Chưa có câu hỏi nào trong section này.</p>
                                     </c:if>
 
-                                    <!-- Inline Edit for Resource ID -->
-                                    <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="d-flex align-items-center mb-3 p-3" style="background-color: #f1f5f9; border-radius: 8px;">
+                                    <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" id="form-resource-${sec.sectionId}" class="d-flex align-items-center mb-3 p-3" style="background-color: #f1f5f9; border-radius: 8px;">
                                         <input type="hidden" name="action" value="updateSectionResource">
                                         <input type="hidden" name="examId" value="${exam.examId}">
                                         <input type="hidden" name="sectionId" value="${sec.sectionId}">
-                                        <label class="me-3 fw-bold text-secondary mb-0"><i class="fa-solid fa-link me-1"></i> Resource ID:</label>
-                                        <input type="number" name="resourceId" value="${sec.resourceId}" class="form-control form-control-sm me-2" style="width: 120px;" placeholder="Trống">
-                                        <button type="submit" class="btn btn-sm btn-outline-primary fw-bold px-3">Lưu</button>
-                                        <small class="text-muted ms-3 d-none d-md-inline">(ID bài đọc/nghe chung cho toàn section)</small>
+                                        <input type="hidden" name="resourceId" id="resourceId-${sec.sectionId}" value="${sec.resourceId}">
+                                        <label class="me-3 fw-bold text-secondary mb-0"><i class="fa-solid fa-link me-1"></i> Resource:</label>
+                                        <span class="me-3 fw-bold text-dark">
+                                            <c:choose>
+                                                <c:when test="${sec.resourceId != null && sec.resourceId > 0}">
+                                                    #${sec.resourceId}
+                                                    <c:forEach var="res" items="${allResources}">
+                                                        <c:if test="${res.resourceId == sec.resourceId}">
+                                                            - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                                        </c:if>
+                                                    </c:forEach>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-muted fst-italic">Trống</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </span>
+                                        <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-3" onclick="openResourcePicker(${sec.sectionId})">Chọn Resource</button>
+                                        <c:if test="${sec.resourceId != null && sec.resourceId > 0}">
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearResource(${sec.sectionId})" title="Bỏ chọn"><i class="fa-solid fa-xmark"></i></button>
+                                        </c:if>
                                     </form>
                                     
                                     <ul class="list-group">
@@ -153,7 +169,7 @@
                                                         </c:choose>
                                                     </span>
                                                 </div>
-                                                <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="d-inline" onsubmit="return confirm('Xóa câu hỏi khỏi section này?');">
+                                                <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="d-inline" onsubmit="return customConfirm(event, this, 'Xóa câu hỏi khỏi section này?');">
                                                     <input type="hidden" name="action" value="removeQuestion">
                                                     <input type="hidden" name="examId" value="${exam.examId}">
                                                     <input type="hidden" name="sectionId" value="${sec.sectionId}">
@@ -166,44 +182,6 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Modal Edit Section ${sec.sectionId} -->
-                        <div class="modal fade" id="editSectionModal${sec.sectionId}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="modal-content">
-                                    <input type="hidden" name="action" value="updateSection">
-                                    <input type="hidden" name="examId" value="${exam.examId}">
-                                    <input type="hidden" name="sectionId" value="${sec.sectionId}">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title fw-bold">Sửa Section</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Tên Section <span class="text-danger">*</span></label>
-                                            <input type="text" name="sectionName" class="form-control" required value="${sec.sectionName}">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Kỹ năng <span class="text-danger">*</span></label>
-                                            <select name="skill" class="form-select" required>
-                                                <option value="Listening" ${sec.skill == 'Listening' ? 'selected' : ''}>Listening</option>
-                                                <option value="Reading" ${sec.skill == 'Reading' ? 'selected' : ''}>Reading</option>
-                                                <option value="Writing" ${sec.skill == 'Writing' ? 'selected' : ''}>Writing</option>
-                                                <option value="Speaking" ${sec.skill == 'Speaking' ? 'selected' : ''}>Speaking</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
-                                            <input type="number" name="orderIndex" class="form-control" required min="1" value="${sec.orderIndex}">
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="submit" class="btn btn-primary">Lưu</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
 
                     </c:forEach>
                 </div>
@@ -212,8 +190,88 @@
 
     </main>
 
-    <!-- Modal Add Section -->
+    <!-- Modals that must be outside accordion due to Bootstrap overflow issues -->
     <c:if test="${exam != null}">
+        <!-- Edit Section Modals -->
+        <c:forEach var="sec" items="${sections}">
+            <div class="modal fade" id="editSectionModal${sec.sectionId}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="modal-content">
+                        <input type="hidden" name="action" value="updateSection">
+                        <input type="hidden" name="examId" value="${exam.examId}">
+                        <input type="hidden" name="sectionId" value="${sec.sectionId}">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">Sửa Section</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tên Section <span class="text-danger">*</span></label>
+                                <input type="text" name="sectionName" class="form-control" required value="${sec.sectionName}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Kỹ năng <span class="text-danger">*</span></label>
+                                <select name="skill" class="form-select" required>
+                                    <option value="Listening" ${sec.skill == 'Listening' ? 'selected' : ''}>Listening</option>
+                                    <option value="Reading" ${sec.skill == 'Reading' ? 'selected' : ''}>Reading</option>
+                                    <option value="Writing" ${sec.skill == 'Writing' ? 'selected' : ''}>Writing</option>
+                                    <option value="Speaking" ${sec.skill == 'Speaking' ? 'selected' : ''}>Speaking</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
+                                <input type="number" name="orderIndex" class="form-control" required min="1" value="${sec.orderIndex}">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary" style="background-color: var(--accent-blue); border-color: var(--accent-blue);">Lưu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </c:forEach>
+
+        <!-- Resource Picker Modal -->
+        <div class="modal fade" id="resourcePickerModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-primary">Chọn Resource cho Section</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" id="resourceSearchInput" class="form-control mb-3" placeholder="Tìm kiếm theo ID, tên..." onkeyup="filterResources()">
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-hover" id="resourceTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên</th>
+                                        <th>Loại</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="res" items="${allResources}">
+                                        <tr>
+                                            <td>#${res.resourceId}</td>
+                                            <td class="res-name fw-medium">${res.resourceName != null ? res.resourceName : ''}</td>
+                                            <td><span class="badge bg-secondary">${res.type}</span></td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-primary" onclick="selectResource(${res.resourceId})">Chọn</button>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Modal Add Section -->
     <div class="modal fade" id="addSectionModal" tabindex="-1" aria-labelledby="addSectionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="modal-content">
@@ -251,6 +309,50 @@
     </div>
     </c:if>
 </div>
+
+<script>
+    let currentSectionId = null;
+    let resourcePickerModalInstance = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalEl = document.getElementById('resourcePickerModal');
+        if (modalEl) {
+            resourcePickerModalInstance = new bootstrap.Modal(modalEl);
+        }
+    });
+
+    function openResourcePicker(sectionId) {
+        currentSectionId = sectionId;
+        const searchInput = document.getElementById('resourceSearchInput');
+        if (searchInput) searchInput.value = '';
+        filterResources();
+        if (resourcePickerModalInstance) {
+            resourcePickerModalInstance.show();
+        }
+    }
+
+    function selectResource(resourceId) {
+        if (!currentSectionId) return;
+        document.getElementById('resourceId-' + currentSectionId).value = resourceId;
+        document.getElementById('form-resource-' + currentSectionId).submit();
+    }
+
+    function clearResource(sectionId) {
+        document.getElementById('resourceId-' + sectionId).value = '';
+        document.getElementById('form-resource-' + sectionId).submit();
+    }
+
+    function filterResources() {
+        const input = document.getElementById('resourceSearchInput');
+        if (!input) return;
+        const query = input.value.toLowerCase();
+        const rows = document.querySelectorAll('#resourceTable tbody tr');
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+        });
+    }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

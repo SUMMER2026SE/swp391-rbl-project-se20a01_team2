@@ -23,20 +23,14 @@ public class MentorStudentProgressServlet extends HttpServlet {
         if (!isMentor(session, resp, req)) return;
 
         int mentorId = (int) session.getAttribute("userId");
-        String filter = req.getParameter("filter");
+        String keyword = req.getParameter("keyword");
+        String sort = req.getParameter("sort");
         
-        List<User> students;
-        if ("all".equals(filter)) {
-            students = studentDAO.getAllCandidates();
-        } else {
-            students = studentDAO.getMyStudents(mentorId);
-            filter = "my"; // default
-        }
+        List<User> students = studentDAO.searchStudents(keyword, sort);
         
         // Optionally attach recent submissions count or latest submission to each student for display
         // Currently we can just pass the list of students, and if a mentor clicks on a student, it shows their submissions.
         req.setAttribute("students", students);
-        req.setAttribute("currentFilter", filter);
         
         String studentIdStr = req.getParameter("studentId");
         if (studentIdStr != null && !studentIdStr.isEmpty()) {
