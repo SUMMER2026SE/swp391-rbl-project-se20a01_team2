@@ -1,17 +1,17 @@
 // API logic for new UI
-const MOCK_TODAY_LESSONS = [
+const MOCK_TODAY_LESSONS = window.MOCK_TODAY_LESSONS || [
     { id: 101, title: 'IELTS Listening - Section 1 Tips', type: 'Video', skill: 'Listening', time: '15 mins', color: 'blue', icon: '🎧' },
     { id: 102, title: 'Academic Vocabulary List 1', type: 'Document', skill: 'Vocabulary', time: '20 mins', color: 'purple', icon: '📚' }
 ];
 
-const MOCK_LESSONS = [
+const MOCK_LESSONS = window.MOCK_LESSONS || [
     { id: 101, title: 'IELTS Listening - Section 1 Tips', type: 'Video', skill: 'Listening', status: 'Unlearned', color: 'blue', icon: '🎧' },
     { id: 102, title: 'Academic Vocabulary List 1', type: 'Document', skill: 'Vocabulary', status: 'Learned', color: 'purple', icon: '📚' },
     { id: 103, title: 'Speaking Part 2: Describe a person', type: 'Video', skill: 'Speaking', status: 'Unlearned', color: 'orange', icon: '🎙️' },
     { id: 104, title: 'Writing Task 1 - Line Graph', type: 'Document', skill: 'Writing', status: 'Unlearned', color: 'green', icon: '✍️' }
 ];
 
-const MOCK_REDO_EXAMS = [
+const MOCK_REDO_EXAMS = window.MOCK_REDO_EXAMS || [
     { id: 1, title: 'Mock Test 1 - Full Exam', date: 'Oct 12, 2023', score: 6.5, maxScore: 9.0, type: 'Mock Test' },
     { id: 2, title: 'Reading Practice Test A', date: 'Sep 25, 2023', score: 7.0, maxScore: 9.0, type: 'Practice' },
     { id: 3, title: 'Placement Test', date: 'Sep 01, 2023', score: 5.5, maxScore: 9.0, type: 'Placement' }
@@ -21,6 +21,53 @@ let initializedLearned = localStorage.getItem('learnedLessons');
 if (!initializedLearned) {
     const initialLearned = MOCK_LESSONS.filter(l => l.status === 'Learned').map(l => l.id);
     localStorage.setItem('learnedLessons', JSON.stringify(initialLearned));
+}
+
+// Inline Toast Notification System
+function showToast(message, type = 'success') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'rgba(16, 185, 129, 0.95)' : (type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(59, 130, 246, 0.95)');
+    toast.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 0.95rem;
+        backdrop-filter: blur(8px);
+        transform: translateX(120%);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+    
+    container.appendChild(toast);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+    });
+
+    // Animate out and remove
+    setTimeout(() => {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
 }
 
 function renderDashboardGrid() {
@@ -197,7 +244,7 @@ function toggleBookmark() {
             btn.innerHTML = '❤️ Bookmark';
             btn.style.background = 'rgba(255, 255, 255, 0.05)';
         }
-        alert('Đã xoá khỏi danh sách Bookmark!');
+        showToast('Đã xoá khỏi danh sách Bookmark!', 'info');
     } else {
         // Add bookmark
         bookmarks.push(id);
@@ -205,7 +252,7 @@ function toggleBookmark() {
             btn.innerHTML = '❤️ Bookmarked';
             btn.style.background = 'rgba(239, 68, 68, 0.2)';
         }
-        alert('Đã thêm vào danh sách Bookmark thành công!');
+        showToast('Đã thêm vào danh sách Bookmark thành công!', 'success');
     }
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
 }
@@ -225,7 +272,7 @@ function toggleLearned() {
             btn.innerHTML = '✓ Mark as Learned';
             btn.style.background = ''; // default primary
         }
-        alert('Unmarked as learned!');
+        showToast('Đã bỏ đánh dấu hoàn thành!', 'info');
     } else {
         // Mark
         learnedList.push(id);
@@ -233,7 +280,7 @@ function toggleLearned() {
             btn.innerHTML = '❌ Unmark as Learned';
             btn.style.background = 'var(--accent-red)';
         }
-        alert('Marked as learned! Your progress is updated.');
+        showToast('Đã đánh dấu hoàn thành bài học!', 'success');
     }
     localStorage.setItem('learnedLessons', JSON.stringify(learnedList));
 }
@@ -263,7 +310,7 @@ function renderRedoHistory() {
                         <div class="progress-fill" style="width: ${percentage}%; background: ${scoreColor};"></div>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="alert('Starting retake...')">Retake Now</button>
+                <button class="btn btn-primary" onclick="showToast('Starting retake...', 'info')">Retake Now</button>
             </div>
         `;
     });

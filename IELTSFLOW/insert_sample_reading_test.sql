@@ -8,15 +8,20 @@ GO
 -- 1. TẠO MOCK TEST
 INSERT INTO Exams (Title, Type, SkillFocus, Duration, MentorID, CreatedAt, Deleted)
 VALUES (N'Sample IELTS Reading Mock Test', 'Mock Test', 'All', 60, 1, GETDATE(), 0);
-DECLARE @MockExamID INT = SCOPE_IDENTITY();
+IF OBJECT_ID('tempdb..#vars') IS NOT NULL DROP TABLE #vars;
+CREATE TABLE #vars (name VARCHAR(100), id INT);
+DELETE FROM #vars WHERE name='MockExamID';
+INSERT INTO #vars (name, id) SELECT 'MockExamID', SCOPE_IDENTITY();
 
 -- 2. TẠO PLACEMENT TEST (Theo yêu cầu: liên kết dữ liệu với placement test)
 INSERT INTO Exams (Title, Type, SkillFocus, Duration, MentorID, CreatedAt, Deleted)
 VALUES (N'Sample IELTS Reading Placement Test', 'Placement Test', 'All', 60, 1, GETDATE(), 0);
-DECLARE @PlacementExamID INT = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='PlacementExamID';
+INSERT INTO #vars (name, id) SELECT 'PlacementExamID', SCOPE_IDENTITY();
 
 -- Biến chung
-DECLARE @QID INT;
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', 0;
 
 -- =========================================================
 -- PASSAGE 1
@@ -33,81 +38,218 @@ C. M-Pesa''s is simple. There is no need for a new handset or SIM card. To send 
 D. Mobile phone growth in Kenya, as in most of Africa, has been remarkable, even among the rural poor. In June 1999, Kenya had 15,000 mobile subscribers. Today, it has nearly 8 million out of a population of 35 million, and the two operators'' networks are as extensive as the access to banks is limited. Safaricom says it is not so much competing with financial services companies as filling a void. In time, M-Pesa will allow people to borrow and repay money, and make purchases. Companies will be able to pay salaries directly into workers'' phones - something that has already attracted the interest of larger employers, such as the tea companies, whose workers often have to be paid in cash as they do not have bank accounts. There are concerns about security, but Safaricom insists that even if someone''s phone is stolen, the PIN system prevents unauthorised withdrawals. Mr. Joseph said the only danger is sending cash to the wrong mobile number and the recipient redeeming it straight away.
 
 E. The project is being watched closely by mobile operators around the world as a way of targeting the multibillion pound international cash transfer industry long dominated by companies such as Western Union and Moneygram. Remittances sent from nearly 200 million migrant workers to developing countries totalled £102 billion last year, according to the World Bank. The GSM Association, which represents more than 700 mobile operators worldwide, believes this could quadruple by 2012 if transfers by SMS become the norm. Vodafone has entered a partnership with Citigroup that will soon allow Kenyans in the UK to send money home via text message. The charge for sending £50 is expected to be about £3, less than a third of what some traditional services charge.', 'Passage');
-DECLARE @Res1 INT = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='Res1';
+INSERT INTO #vars (name, id) SELECT 'Res1', SCOPE_IDENTITY();
 
 -- Tạo Section cho cả 2 đề
-INSERT INTO ExamSections (ExamID, SectionName, ResourceID, OrderIndex) VALUES (@MockExamID, 'Reading Passage 1: Money Transfers by Mobile', @Res1, 1);
-DECLARE @MockSec1 INT = SCOPE_IDENTITY();
-INSERT INTO ExamSections (ExamID, SectionName, ResourceID, OrderIndex) VALUES (@PlacementExamID, 'Reading Passage 1: Money Transfers by Mobile', @Res1, 1);
-DECLARE @PlaceSec1 INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, ResourceID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockExamID'), 'Reading', 'Reading Passage 1: Money Transfers by Mobile', (SELECT id FROM #vars WHERE name='Res1'), 1;
+
+DELETE FROM #vars WHERE name='MockSec1';
+INSERT INTO #vars (name, id) SELECT 'MockSec1', SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, ResourceID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='PlacementExamID'), 'Reading', 'Reading Passage 1: Money Transfers by Mobile', (SELECT id FROM #vars WHERE name='Res1'), 1;
+
+DELETE FROM #vars WHERE name='PlaceSec1';
+INSERT INTO #vars (name, id) SELECT 'PlaceSec1', SCOPE_IDENTITY();
 
 -- Câu 1-4: Matching Information 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Which paragraph contains the following information: A possible security problem', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'A', 0, '{}'), (@QID, 'B', 0, '{}'), (@QID, 'C', 0, '{}'), (@QID, 'D', 1, '{}'), (@QID, 'E', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 1), (@PlaceSec1, @QID, 1);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Which paragraph contains the following information: A possible security problem', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res1');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Which paragraph contains the following information: The cost of M-Pesa', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'A', 0, '{}'), (@QID, 'B', 0, '{}'), (@QID, 'C', 1, '{}'), (@QID, 'D', 0, '{}'), (@QID, 'E', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 2), (@PlaceSec1, @QID, 2);
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'A', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'B', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'C', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'D', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'E', 0, '{}';
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Which paragraph contains the following information: An international service similar to M-Pesa', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'A', 0, '{}'), (@QID, 'B', 0, '{}'), (@QID, 'C', 0, '{}'), (@QID, 'D', 0, '{}'), (@QID, 'E', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 3), (@PlaceSec1, @QID, 3);
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 1
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 1;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Which paragraph contains the following information: The fact that most Kenyans do not have a bank account', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'A', 1, '{}'), (@QID, 'B', 0, '{}'), (@QID, 'C', 0, '{}'), (@QID, 'D', 0, '{}'), (@QID, 'E', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 4), (@PlaceSec1, @QID, 4);
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Which paragraph contains the following information: The cost of M-Pesa', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'A', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'B', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'C', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'D', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'E', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 2
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 2;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Which paragraph contains the following information: An international service similar to M-Pesa', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'A', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'B', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'C', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'D', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'E', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 3
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 3;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Which paragraph contains the following information: The fact that most Kenyans do not have a bank account', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'A', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'B', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'C', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'D', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'E', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 4
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 4;
+
 
 -- Câu 5-8: Fill In Blanks
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): Safaricom is the _____ mobile phone company in Kenya.', 'FillInBlanks', 'Reading', 'Easy', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'biggest', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 5), (@PlaceSec1, @QID, 5);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): Safaricom is the _____ mobile phone company in Kenya.', 'FillInBlanks', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res1');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): An M-Pesa account needs to be credited by _____.', 'FillInBlanks', 'Reading', 'Easy', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'a registered agent', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 6), (@PlaceSec1, @QID, 6);
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'biggest', 1, '{}';
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): _____ companies are particularly interested in using M-Pesa.', 'FillInBlanks', 'Reading', 'Easy', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'tea', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 7), (@PlaceSec1, @QID, 7);
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 5
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 5;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): Companies like Moneygram and Western Union have _____ the international money transfer market.', 'FillInBlanks', 'Reading', 'Medium', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'long dominated', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 8), (@PlaceSec1, @QID, 8);
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): An M-Pesa account needs to be credited by _____.', 'FillInBlanks', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'a registered agent', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 6
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 6;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): _____ companies are particularly interested in using M-Pesa.', 'FillInBlanks', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'tea', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 7
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 7;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): Companies like Moneygram and Western Union have _____ the international money transfer market.', 'FillInBlanks', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'long dominated', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 8
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 8;
+
 
 -- Câu 9-13: TRUE/FALSE/NOT GIVEN
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: Most Kenyans working in urban areas have relatives in rural areas.', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 0, '{}'), (@QID, 'FALSE', 0, '{}'), (@QID, 'NOT GIVEN', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 9), (@PlaceSec1, @QID, 9);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: Most Kenyans working in urban areas have relatives in rural areas.', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res1');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: So far, most of the people using M-Pesa have used it to send small amounts of money.', 'Multiple_Choice', 'Reading', 'Easy', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 1, '{}'), (@QID, 'FALSE', 0, '{}'), (@QID, 'NOT GIVEN', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 10), (@PlaceSec1, @QID, 10);
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 1, '{}';
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: M-Pesa can only be used by people using one phone network.', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 0, '{}'), (@QID, 'FALSE', 1, '{}'), (@QID, 'NOT GIVEN', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 11), (@PlaceSec1, @QID, 11);
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 9
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 9;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: M-Pesa can be used to buy products and services.', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 0, '{}'), (@QID, 'FALSE', 1, '{}'), (@QID, 'NOT GIVEN', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 12), (@PlaceSec1, @QID, 12);
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: The GSM Association is a consumer organisation.', 'Multiple_Choice', 'Reading', 'Easy', '{}', @Res1);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 0, '{}'), (@QID, 'FALSE', 1, '{}'), (@QID, 'NOT GIVEN', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec1, @QID, 13), (@PlaceSec1, @QID, 13);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: So far, most of the people using M-Pesa have used it to send small amounts of money.', 'Multiple_Choice', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 10
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 10;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: M-Pesa can only be used by people using one phone network.', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 11
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 11;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: M-Pesa can be used to buy products and services.', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 12
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 12;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: The GSM Association is a consumer organisation.', 'Multiple_Choice', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res1');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec1'), (SELECT id FROM #vars WHERE name='QID'), 13
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec1'), (SELECT id FROM #vars WHERE name='QID'), 13;
+
 
 
 -- =========================================================
@@ -127,91 +269,184 @@ E. Take the cost of public transport, for example. In London, the most expensive
 F. Streetcar, one of several "car clubs" with growing numbers of members, reckons that using its vehicles twice a week, every week, for a year, would cost you just £700. Streetcar''s model works very similarly to those of its main rivals, Citycarclub and Whizzgo. These three companies, which now operate in 20 of Britain''s towns and cities, charge their members a refundable deposit - £150 at Streetcar - and then provide them with an electronic smart card. This enables members to get into the vehicles, which are left parked in set locations, and the keys are then found in the glove compartment. Members pay an hourly rate for the car - £4.95 is the cost at Streetcar - and return it to the same spot, or to a different designated parking place.
 
 G. Car sharing is an increasingly popular option for people making the same journeys regularly - to and from work, for example. Many companies run schemes that help colleagues who live near to each other and work in the same place to contact each other so they can share the journey to work. Liftshare and Carshare are two national organisations that maintain online databases of people who would be prepared to team up. Other people may be able to replace part or all of their journey to work - or any journeys, for that matter - with low-cost transport such as a bicycle, or even by just walking. The more you can reduce your car use, however you gain access to it, the more you will save.', 'Passage');
-DECLARE @Res2 INT = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='Res2';
+INSERT INTO #vars (name, id) SELECT 'Res2', SCOPE_IDENTITY();
 
-INSERT INTO ExamSections (ExamID, SectionName, ResourceID, OrderIndex) VALUES (@MockExamID, 'Reading Passage 2: Park the Car Permanently', @Res2, 2);
-DECLARE @MockSec2 INT = SCOPE_IDENTITY();
-INSERT INTO ExamSections (ExamID, SectionName, ResourceID, OrderIndex) VALUES (@PlacementExamID, 'Reading Passage 2: Park the Car Permanently', @Res2, 2);
-DECLARE @PlaceSec2 INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, ResourceID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockExamID'), 'Reading', 'Reading Passage 2: Park the Car Permanently', (SELECT id FROM #vars WHERE name='Res2'), 2;
+
+DELETE FROM #vars WHERE name='MockSec2';
+INSERT INTO #vars (name, id) SELECT 'MockSec2', SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, ResourceID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='PlacementExamID'), 'Reading', 'Reading Passage 2: Park the Car Permanently', (SELECT id FROM #vars WHERE name='Res2'), 2;
+
+DELETE FROM #vars WHERE name='PlaceSec2';
+INSERT INTO #vars (name, id) SELECT 'PlaceSec2', SCOPE_IDENTITY();
 
 -- Câu 14-17: Matching Headings
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Which paragraph does the following heading best fit: Don''t wait!', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res2);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'A', 0, '{}'), (@QID, 'B', 1, '{}'), (@QID, 'C', 0, '{}'), (@QID, 'D', 0, '{}'), (@QID, 'E', 0, '{}'), (@QID, 'F', 0, '{}'), (@QID, 'G', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, 14), (@PlaceSec2, @QID, 14);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Which paragraph does the following heading best fit: Don''t wait!', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res2');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Which paragraph does the following heading best fit: Team up', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res2);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'A', 0, '{}'), (@QID, 'B', 0, '{}'), (@QID, 'C', 0, '{}'), (@QID, 'D', 0, '{}'), (@QID, 'E', 0, '{}'), (@QID, 'F', 0, '{}'), (@QID, 'G', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, 15), (@PlaceSec2, @QID, 15);
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'A', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'B', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'C', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'D', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'E', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'F', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'G', 0, '{}';
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Which paragraph does the following heading best fit: Join a club', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res2);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'A', 0, '{}'), (@QID, 'B', 0, '{}'), (@QID, 'C', 0, '{}'), (@QID, 'D', 0, '{}'), (@QID, 'E', 0, '{}'), (@QID, 'F', 1, '{}'), (@QID, 'G', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, 16), (@PlaceSec2, @QID, 16);
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), 14
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), 14;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Which paragraph does the following heading best fit: Use public transport', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res2);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'A', 0, '{}'), (@QID, 'B', 0, '{}'), (@QID, 'C', 0, '{}'), (@QID, 'D', 0, '{}'), (@QID, 'E', 1, '{}'), (@QID, 'F', 0, '{}'), (@QID, 'G', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, 17), (@PlaceSec2, @QID, 17);
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Which paragraph does the following heading best fit: Team up', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res2');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'A', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'B', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'C', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'D', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'E', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'F', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'G', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), 15
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), 15;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Which paragraph does the following heading best fit: Join a club', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res2');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'A', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'B', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'C', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'D', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'E', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'F', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'G', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), 16
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), 16;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Which paragraph does the following heading best fit: Use public transport', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res2');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'A', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'B', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'C', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'D', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'E', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'F', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'G', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), 17
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), 17;
+
 
 -- Câu 18-22: Choose 5 statements
-DECLARE @I INT = 18;
-WHILE @I <= 22
+DECLARE (SELECT id FROM #vars WHERE name='I') INT = 18;
+WHILE (SELECT id FROM #vars WHERE name='I') <= 22
 BEGIN
-    INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Choose one of the FIVE true statements from A-H (Options: A, B, C, F, G). Statement ' + CAST((@I-17) AS VARCHAR), 'Multiple_Choice', 'Reading', 'Hard', '{}', @Res2);
-    SET @QID = SCOPE_IDENTITY();
+    INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Choose one of the FIVE true statements from A-H (Options: A, B, C, F, G). Statement ' + CAST(((SELECT id FROM #vars WHERE name='I')-17) AS VARCHAR), 'Multiple_Choice', 'Reading', 'Hard', '{}', (SELECT id FROM #vars WHERE name='Res2');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
     INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-        (@QID, 'A. McCarthy claims people can become addicted to using cars.', CASE WHEN @I=18 THEN 1 ELSE 0 END, '{}'),
-        (@QID, 'B. The cost of using a car rose by over ten per cent last year.', CASE WHEN @I=19 THEN 1 ELSE 0 END, '{}'),
-        (@QID, 'C. Most British people borrow money to help buy cars.', CASE WHEN @I=20 THEN 1 ELSE 0 END, '{}'),
-        (@QID, 'D. Many people need cars to drive in London occasionally.', 0, '{}'),
-        (@QID, 'E. Streetcar operates in over 20 cities in Britain.', 0, '{}'),
-        (@QID, 'F. Streetcar''s cars must be left at specific locations.', CASE WHEN @I=21 THEN 1 ELSE 0 END, '{}'),
-        (@QID, 'G. Car sharing is becoming more popular with people who live and work near each other.', CASE WHEN @I=22 THEN 1 ELSE 0 END, '{}'),
-        (@QID, 'H. The government wants to encourage people to go to work on foot or by bicycle.', 0, '{}');
-    INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, @I), (@PlaceSec2, @QID, @I);
-    SET @I = @I + 1;
+        ((SELECT id FROM #vars WHERE name='QID'), 'A. McCarthy claims people can become addicted to using cars.', CASE WHEN (SELECT id FROM #vars WHERE name='I')=18 THEN 1 ELSE 0 END, '{}'),
+        ((SELECT id FROM #vars WHERE name='QID'), 'B. The cost of using a car rose by over ten per cent last year.', CASE WHEN (SELECT id FROM #vars WHERE name='I')=19 THEN 1 ELSE 0 END, '{}'),
+        ((SELECT id FROM #vars WHERE name='QID'), 'C. Most British people borrow money to help buy cars.', CASE WHEN (SELECT id FROM #vars WHERE name='I')=20 THEN 1 ELSE 0 END, '{}'),
+        ((SELECT id FROM #vars WHERE name='QID'), 'D. Many people need cars to drive in London occasionally.', 0, '{}'),
+        ((SELECT id FROM #vars WHERE name='QID'), 'E. Streetcar operates in over 20 cities in Britain.', 0, '{}'),
+        ((SELECT id FROM #vars WHERE name='QID'), 'F. Streetcar''s cars must be left at specific locations.', CASE WHEN (SELECT id FROM #vars WHERE name='I')=21 THEN 1 ELSE 0 END, '{}'),
+        ((SELECT id FROM #vars WHERE name='QID'), 'G. Car sharing is becoming more popular with people who live and work near each other.', CASE WHEN (SELECT id FROM #vars WHERE name='I')=22 THEN 1 ELSE 0 END, '{}'),
+        ((SELECT id FROM #vars WHERE name='QID'), 'H. The government wants to encourage people to go to work on foot or by bicycle.', 0, '{}');
+    INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), (SELECT id FROM #vars WHERE name='I')
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), (SELECT id FROM #vars WHERE name='I');
+
+    SET (SELECT id FROM #vars WHERE name='I') = (SELECT id FROM #vars WHERE name='I') + 1;
 END
 
 -- Câu 23-26: Multiple Choice
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('According to the information given in the text, the government has decided', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res2);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-    (@QID, 'A. not to follow protestors'' suggestions.', 0, '{}'),
-    (@QID, 'B. to become more democratic.', 0, '{}'),
-    (@QID, 'C. to go ahead with charging drivers to use roads.', 1, '{}'),
-    (@QID, 'D. Both A and C', 0, '{}'),
-    (@QID, 'E. Both B and C', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, 23), (@PlaceSec2, @QID, 23);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'According to the information given in the text, the government has decided', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res2');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Cars are often', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res2);
-SET @QID = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
 INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-    (@QID, 'A. relatively cheap in Britain.', 0, '{}'),
-    (@QID, 'B. relatively expensive to operate in Britain.', 0, '{}'),
-    (@QID, 'C. sold second-hand in Britain.', 0, '{}'),
-    (@QID, 'D. Both A and C', 1, '{}'),
-    (@QID, 'E. Both A and B', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, 24), (@PlaceSec2, @QID, 24);
+    ((SELECT id FROM #vars WHERE name='QID'), 'A. not to follow protestors'' suggestions.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'B. to become more democratic.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'C. to go ahead with charging drivers to use roads.', 1, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'D. Both A and C', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'E. Both B and C', 0, '{}');
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), 23
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), 23;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Fuel costs', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res2);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-    (@QID, 'A. make up about 20% of the cost of running a car.', 0, '{}'),
-    (@QID, 'B. are related to the amount drivers pay for their cars.', 0, '{}'),
-    (@QID, 'C. depend on how far you drive.', 1, '{}'),
-    (@QID, 'D. Both A and C', 0, '{}'),
-    (@QID, 'E. Both B and C', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, 25), (@PlaceSec2, @QID, 25);
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Using public transport', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res2);
-SET @QID = SCOPE_IDENTITY();
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Cars are often', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res2');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
 INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-    (@QID, 'A. will save money for British motorists, except in London.', 0, '{}'),
-    (@QID, 'B. and renting a car part of the time can save money.', 1, '{}'),
-    (@QID, 'C. costs Londoners about £1,700 a year.', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec2, @QID, 26), (@PlaceSec2, @QID, 26);
+    ((SELECT id FROM #vars WHERE name='QID'), 'A. relatively cheap in Britain.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'B. relatively expensive to operate in Britain.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'C. sold second-hand in Britain.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'D. Both A and C', 1, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'E. Both A and B', 0, '{}');
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), 24
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), 24;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Fuel costs', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res2');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
+    ((SELECT id FROM #vars WHERE name='QID'), 'A. make up about 20% of the cost of running a car.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'B. are related to the amount drivers pay for their cars.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'C. depend on how far you drive.', 1, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'D. Both A and C', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'E. Both B and C', 0, '{}');
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), 25
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), 25;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Using public transport', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res2');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
+    ((SELECT id FROM #vars WHERE name='QID'), 'A. will save money for British motorists, except in London.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'B. and renting a car part of the time can save money.', 1, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'C. costs Londoners about £1,700 a year.', 0, '{}');
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec2'), (SELECT id FROM #vars WHERE name='QID'), 26
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec2'), (SELECT id FROM #vars WHERE name='QID'), 26;
+
 
 -- =========================================================
 -- PASSAGE 3
@@ -227,96 +462,217 @@ The technology, which is not yet widely known in India, faces some scepticism he
 The lamps installed in nearly 300 homes by GSBF cost nearly half the price of other solar lighting systems. Jasjeet Singh Chaddha, the founder of the NGO, currently imports his LEDs from China. He wants to set up an LED manufacturing unit and a solar panel manufacturing unit in India. If manufactured locally, the cost of his LED lamp could plummet to $25. But because the Indian government charges a 32 per cent import duty on LED systems, the price remains high. "We just need $5 million for this," he says. Mr. Chaddha says he has also asked the government to exempt the lamps from such duties, but to no avail. An entrepreneur who made his money in plastics, Chaddha, has poured his own money into the project, providing the initial installations free of charge. As he looks to make the project self-sustainable, he recognises that it is only urban markets -which have also shown an avid interest in LED lighting - that can pay. The rural markets in India cannot afford it, he says, until the prices are brought down. The rural markets would be able to afford it, says Mr. Irvine-Halliday, if they had access to microcredit. He says that in Tembisa, a shanty town in Johannesburg, he found that almost 10,000 homes spent more than $60 each on candles and paraffin every year. As calculations revealed, these families can afford to purchase a solid state lighting system in just over a year of paying per week what they would normally spend on candles and paraffin - if they have access to microcredit. LUTW is in the process of creating such a microcredit facility for South Africa.
 
 In villages near Khadakwadi, the newly installed LED lamps are a subject of envy, even for those connected to the grid. Those connected to the grid have to face power cuts up to 6 or 7 hours a day. Constant energy shortages and blackouts are a common problem due to a lack of power plants, transmission, and distribution losses caused by old technology and illegal stealing of electricity from the grid. LED systems require far less maintenance, a longer life, and as villagers jokingly say, "no electricity bills". The lamps provided by GSBF have enough power to provide just four hours of light a day. However, that is enough for people to get their work done in the early hours of the night, and is more reliable than light generated off India''s electrical grid. Villagers are educated by GSBF officials to make the most of the new lamps. An official from GSBF instructs Jadhav and his family to clean the lamp regularly. "Its luminosity and life will diminish if you let the dust settle on it," he warns them.', 'Passage');
-DECLARE @Res3 INT = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='Res3';
+INSERT INTO #vars (name, id) SELECT 'Res3', SCOPE_IDENTITY();
 
-INSERT INTO ExamSections (ExamID, SectionName, ResourceID, OrderIndex) VALUES (@MockExamID, 'Reading Passage 3: Low-Cost Lamps Light Rural India', @Res3, 3);
-DECLARE @MockSec3 INT = SCOPE_IDENTITY();
-INSERT INTO ExamSections (ExamID, SectionName, ResourceID, OrderIndex) VALUES (@PlacementExamID, 'Reading Passage 3: Low-Cost Lamps Light Rural India', @Res3, 3);
-DECLARE @PlaceSec3 INT = SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, ResourceID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockExamID'), 'Reading', 'Reading Passage 3: Low-Cost Lamps Light Rural India', (SELECT id FROM #vars WHERE name='Res3'), 3;
+
+DELETE FROM #vars WHERE name='MockSec3';
+INSERT INTO #vars (name, id) SELECT 'MockSec3', SCOPE_IDENTITY();
+INSERT INTO ExamSections (ExamID, Skill, SectionName, ResourceID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='PlacementExamID'), 'Reading', 'Reading Passage 3: Low-Cost Lamps Light Rural India', (SELECT id FROM #vars WHERE name='Res3'), 3;
+
+DELETE FROM #vars WHERE name='PlaceSec3';
+INSERT INTO #vars (name, id) SELECT 'PlaceSec3', SCOPE_IDENTITY();
 
 -- Câu 27-30: Multiple Choice
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('The GSBF lamps', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-    (@QID, 'A. provide light for 100,000 Indian villages.', 0, '{}'),
-    (@QID, 'B. are very expensive to install.', 0, '{}'),
-    (@QID, 'C. are powered by the sun.', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 27), (@PlaceSec3, @QID, 27);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'The GSBF lamps', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('More than half of India''s population uses', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
 INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-    (@QID, 'A. kerosene as a cooking fuel.', 0, '{}'),
-    (@QID, 'B. biomass as a cooking fuel.', 1, '{}'),
-    (@QID, 'C. solar power as a cooking fuel.', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 28), (@PlaceSec3, @QID, 28);
+    ((SELECT id FROM #vars WHERE name='QID'), 'A. provide light for 100,000 Indian villages.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'B. are very expensive to install.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'C. are powered by the sun.', 1, '{}');
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 27
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 27;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('In India, the GSBF lamps are too expensive for most people', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-    (@QID, 'A. in rural areas.', 1, '{}'),
-    (@QID, 'B. in urban areas.', 0, '{}'),
-    (@QID, 'C. in all areas.', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 29), (@PlaceSec3, @QID, 29);
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('The GSBF lamps', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'More than half of India''s population uses', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
 INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
-    (@QID, 'A. are not as reliable as electricity from the national power grid.', 0, '{}'),
-    (@QID, 'B. require skill to use.', 0, '{}'),
-    (@QID, 'C. only provide four hours of light a day.', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 30), (@PlaceSec3, @QID, 30);
+    ((SELECT id FROM #vars WHERE name='QID'), 'A. kerosene as a cooking fuel.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'B. biomass as a cooking fuel.', 1, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'C. solar power as a cooking fuel.', 0, '{}');
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 28
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 28;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'In India, the GSBF lamps are too expensive for most people', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
+    ((SELECT id FROM #vars WHERE name='QID'), 'A. in rural areas.', 1, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'B. in urban areas.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'C. in all areas.', 0, '{}');
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 29
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 29;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'The GSBF lamps', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES 
+    ((SELECT id FROM #vars WHERE name='QID'), 'A. are not as reliable as electricity from the national power grid.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'B. require skill to use.', 0, '{}'),
+    ((SELECT id FROM #vars WHERE name='QID'), 'C. only provide four hours of light a day.', 1, '{}');
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 30
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 30;
+
 
 -- Câu 31-35: Fill In Blanks
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): Another example of cheap technology helping poor people in the countryside is _____.', 'FillInBlanks', 'Reading', 'Easy', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'cell phones', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 31), (@PlaceSec3, @QID, 31);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): Another example of cheap technology helping poor people in the countryside is _____.', 'FillInBlanks', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res3');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): Kerosene lamps and conventional bulbs give off less _____ than GSBF lamps.', 'FillInBlanks', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'useful light', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 32), (@PlaceSec3, @QID, 32);
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'cell phones', 1, '{}';
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): It is unlikely that the Indian government will achieve its aim of connecting 112,000 villages to electricity because many villages are _____.', 'FillInBlanks', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'remote', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 33), (@PlaceSec3, @QID, 33);
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 31
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 31;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): GSBF lamps would be cheaper if it weren''t for _____.', 'FillInBlanks', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'import duty', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 34), (@PlaceSec3, @QID, 34);
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('Complete the sentence (NO MORE THAN THREE WORDS): Users need to wipe _____ from the LED in order to keep it working well.', 'FillInBlanks', 'Reading', 'Easy', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'dust', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 35), (@PlaceSec3, @QID, 35);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): Kerosene lamps and conventional bulbs give off less _____ than GSBF lamps.', 'FillInBlanks', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'useful light', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 32
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 32;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): It is unlikely that the Indian government will achieve its aim of connecting 112,000 villages to electricity because many villages are _____.', 'FillInBlanks', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'remote', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 33
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 33;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): GSBF lamps would be cheaper if it weren''t for _____.', 'FillInBlanks', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'import duty', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 34
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 34;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'Complete the sentence (NO MORE THAN THREE WORDS): Users need to wipe _____ from the LED in order to keep it working well.', 'FillInBlanks', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'dust', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 35
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 35;
+
 
 -- Câu 36-40: TRUE/FALSE/NOT GIVEN
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: Ganpat Jadhav''s monthly ration of kerosene was insufficient.', 'Multiple_Choice', 'Reading', 'Easy', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 1, '{}'), (@QID, 'FALSE', 0, '{}'), (@QID, 'NOT GIVEN', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 36), (@PlaceSec3, @QID, 36);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: Ganpat Jadhav''s monthly ration of kerosene was insufficient.', 'Multiple_Choice', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res3');
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: Kerosene causes many fires in homes in developing countries.', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 0, '{}'), (@QID, 'FALSE', 0, '{}'), (@QID, 'NOT GIVEN', 1, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 37), (@PlaceSec3, @QID, 37);
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 0, '{}';
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: LED systems could solve the world''s energy problems.', 'Multiple_Choice', 'Reading', 'Easy', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 0, '{}'), (@QID, 'FALSE', 1, '{}'), (@QID, 'NOT GIVEN', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 38), (@PlaceSec3, @QID, 38);
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 36
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 36;
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: Chaddha has so far funded the GSBF lamp project himself.', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 1, '{}'), (@QID, 'FALSE', 0, '{}'), (@QID, 'NOT GIVEN', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 39), (@PlaceSec3, @QID, 39);
 
-INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID) VALUES ('TRUE/FALSE/NOT GIVEN: Microcredit would help to get more people to use LED lamps.', 'Multiple_Choice', 'Reading', 'Medium', '{}', @Res3);
-SET @QID = SCOPE_IDENTITY();
-INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson) VALUES (@QID, 'TRUE', 1, '{}'), (@QID, 'FALSE', 0, '{}'), (@QID, 'NOT GIVEN', 0, '{}');
-INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex) VALUES (@MockSec3, @QID, 40), (@PlaceSec3, @QID, 40);
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: Kerosene causes many fires in homes in developing countries.', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 1, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 37
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 37;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: LED systems could solve the world''s energy problems.', 'Multiple_Choice', 'Reading', 'Easy', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 38
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 38;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: Chaddha has so far funded the GSBF lamp project himself.', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 39
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 39;
+
+
+INSERT INTO Questions (Content, QuestionType, Skill, Difficulty, contentJSON, ResourceID)
+SELECT 'TRUE/FALSE/NOT GIVEN: Microcredit would help to get more people to use LED lamps.', 'Multiple_Choice', 'Reading', 'Medium', '{}', (SELECT id FROM #vars WHERE name='Res3');
+
+DELETE FROM #vars WHERE name='QID';
+INSERT INTO #vars (name, id) SELECT 'QID', SCOPE_IDENTITY();
+INSERT INTO Answers (QuestionID, Content, IsCorrect, ContentJson)
+SELECT (SELECT id FROM #vars WHERE name='QID'), 'TRUE', 1, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'FALSE', 0, '{}'
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='QID'), 'NOT GIVEN', 0, '{}';
+
+INSERT INTO ExamQuestions (SectionID, QuestionID, OrderIndex)
+SELECT (SELECT id FROM #vars WHERE name='MockSec3'), (SELECT id FROM #vars WHERE name='QID'), 40
+UNION ALL SELECT (SELECT id FROM #vars WHERE name='PlaceSec3'), (SELECT id FROM #vars WHERE name='QID'), 40;
+
 
 GO

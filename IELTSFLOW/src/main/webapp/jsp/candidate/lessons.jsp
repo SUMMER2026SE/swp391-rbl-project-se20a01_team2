@@ -75,6 +75,9 @@
         </main>
     </div>
 
+    <script>
+        window.MOCK_LESSONS = ${not empty lessonsJson ? lessonsJson : '[]'};
+    </script>
     <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

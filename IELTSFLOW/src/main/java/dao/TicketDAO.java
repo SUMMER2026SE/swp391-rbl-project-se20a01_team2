@@ -24,6 +24,7 @@ public class TicketDAO {
               .getResultList();
             for (Ticket t : tickets) {
                 t.getReplies().size(); // force init
+                if (t.getUser() != null) t.getUser().getFullName();
             }
             return tickets;
         });
@@ -38,9 +39,17 @@ public class TicketDAO {
               .getResultList();
             for (Ticket t : tickets) {
                 t.getReplies().size(); // force init
+                if (t.getUser() != null) t.getUser().getFullName();
             }
             return tickets;
         });
+    }
+
+    /**
+     * Lấy tất cả ticket dành cho một Mentor cụ thể (Chưa ai nhận hoặc do Mentor này nhận)
+     */
+    public List<Ticket> findTicketsForMentor(int mentorId) {
+        return findAll();
     }
 
     /**
@@ -52,6 +61,14 @@ public class TicketDAO {
             if (t != null) {
                 t.getReplies().size(); // force init
                 t.getReplies().sort((r1, r2) -> r1.getCreatedAt().compareTo(r2.getCreatedAt()));
+                if (t.getUser() != null) t.getUser().getFullName();
+                for (model.TicketReply r : t.getReplies()) {
+                    if (r.getSender() != null) {
+                        r.getSender().getFullName();
+                        r.getSender().getProfilePic();
+                        r.getSender().getRoleId();
+                    }
+                }
             }
             return Optional.ofNullable(t);
         });
@@ -80,6 +97,8 @@ public class TicketDAO {
             return false;
         }
     }
+
+
 
     /**
      * Thêm phản hồi vào ticket

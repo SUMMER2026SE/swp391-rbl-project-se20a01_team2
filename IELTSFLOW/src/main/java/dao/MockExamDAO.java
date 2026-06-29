@@ -51,7 +51,7 @@ public class MockExamDAO {
     }
 
     /**
-     * Lấy toàn bộ câu hỏi (kèm đáp án) của một đề thi, sau đó shuffle ngẫu nhiên.
+     * Lấy toàn bộ câu hỏi (kèm đáp án) của một đề thi. (Không shuffle để giữ thứ tự section)
      */
     public List<Question> getQuestionsForExam(int examId) {
         return JpaHelper.query(em -> {
@@ -62,7 +62,7 @@ public class MockExamDAO {
                          "JOIN ExamQuestions eq ON es.SectionID = eq.SectionID " +
                          "JOIN Questions q ON eq.QuestionID = q.QuestionID " +
                          "LEFT JOIN QuestionResource r ON q.ResourceID = r.ResourceID " +
-                         "WHERE es.ExamID = :examId";
+                         "WHERE es.ExamID = :examId ORDER BY es.OrderIndex, eq.OrderIndex";
 
             @SuppressWarnings("unchecked")
             List<Object[]> rows = em.createNativeQuery(sql)
@@ -72,12 +72,70 @@ public class MockExamDAO {
             List<Question> questions = new ArrayList<>();
             for (Object[] row : rows) {
                 Question q = mapQuestion(row);
-                // Load đáp án cho từng câu hỏi
                 q.setAnswers(getAnswersForQuestion(em, q.getQuestionId()));
                 questions.add(q);
             }
-            Collections.shuffle(questions);
             return questions;
+        });
+    }
+
+    /**
+     * Lấy toàn bộ Section của một đề thi, trong mỗi Section chứa danh sách câu hỏi.
+     */
+    public List<model.ExamSection> getSectionsWithQuestionsForExam(int examId) {
+        return JpaHelper.query(em -> {
+            // 1. Lấy danh sách sections (kèm resource)
+            String sqlSec = "SELECT s.SectionID, s.ExamID, s.Skill, s.SectionName, s.ResourceID, s.OrderIndex, " +
+                         "r.ResourceText, r.ResourceAudioUrl " +
+                         "FROM ExamSections s " +
+                         "LEFT JOIN QuestionResource r ON s.ResourceID = r.ResourceID " +
+                         "WHERE s.ExamID = :examId ORDER BY s.OrderIndex";
+            @SuppressWarnings("unchecked")
+            List<Object[]> rowsSec = em.createNativeQuery(sqlSec)
+                    .setParameter("examId", examId)
+                    .getResultList();
+
+            List<model.ExamSection> sections = new ArrayList<>();
+            for (Object[] row : rowsSec) {
+                model.ExamSection sec = new model.ExamSection();
+                sec.setSectionId(((Number) row[0]).intValue());
+                sec.setExamId(((Number) row[1]).intValue());
+                sec.setSkill(row[2] != null ? row[2].toString() : "");
+                sec.setSectionName(row[3] != null ? row[3].toString() : "");
+                if (row[4] != null) sec.setResourceId(((Number) row[4]).intValue());
+                sec.setOrderIndex(((Number) row[5]).intValue());
+                if (row[6] != null) sec.setResourceText(row[6].toString());
+                if (row[7] != null) sec.setResourceAudioUrl(row[7].toString());
+                sections.add(sec);
+            }
+
+            // 2. Lấy câu hỏi cho từng section
+            for (model.ExamSection sec : sections) {
+                String sqlQ = "SELECT q.QuestionID, q.ResourceID, q.Content, q.QuestionType, q.Skill, " +
+                              "       q.Difficulty, q.Explanation, q.OrderInResource, q.contentJSON, " +
+                              "       r.ResourceText, r.ResourceAudioURL " +
+                              "FROM ExamQuestions eq " +
+                              "JOIN Questions q ON eq.QuestionID = q.QuestionID " +
+                              "LEFT JOIN QuestionResource r ON q.ResourceID = r.ResourceID " +
+                              "WHERE eq.SectionID = :sectionId ORDER BY eq.OrderIndex";
+                @SuppressWarnings("unchecked")
+                List<Object[]> rowsQ = em.createNativeQuery(sqlQ)
+                        .setParameter("sectionId", sec.getSectionId())
+                        .getResultList();
+
+                List<model.ExamQuestion> examQuestions = new ArrayList<>();
+                for (Object[] row : rowsQ) {
+                    Question q = mapQuestion(row);
+                    q.setAnswers(getAnswersForQuestion(em, q.getQuestionId()));
+                    model.ExamQuestion eq = new model.ExamQuestion();
+                    eq.setSectionId(sec.getSectionId());
+                    eq.setQuestionId(q.getQuestionId());
+                    eq.setQuestion(q);
+                    examQuestions.add(eq);
+                }
+                sec.setExamQuestions(examQuestions);
+            }
+            return sections;
         });
     }
 

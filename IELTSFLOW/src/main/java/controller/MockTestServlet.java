@@ -129,10 +129,12 @@ public class MockTestServlet extends HttpServlet {
 
         int submissionId = mockTestService.createSubmission(userId, exam.getExamId());
         List<Question> questions = mockTestService.getQuestionsForExam(exam.getExamId());
+        List<model.ExamSection> sections = mockTestService.getSectionsWithQuestionsForExam(exam.getExamId());
 
         HttpSession session = req.getSession();
         session.setAttribute("mt_currentExam", exam);
         session.setAttribute("mt_currentQuestions", questions);
+        session.setAttribute("mt_currentSections", sections);
         session.setAttribute("mt_currentSubmissionId", submissionId);
         session.setAttribute("mt_examStartTime", System.currentTimeMillis());
 
@@ -150,6 +152,7 @@ public class MockTestServlet extends HttpServlet {
         }
         req.setAttribute("exam", exam);
         req.setAttribute("questions", session.getAttribute("mt_currentQuestions"));
+        req.setAttribute("sections", session.getAttribute("mt_currentSections"));
         req.setAttribute("submissionId", session.getAttribute("mt_currentSubmissionId"));
         req.setAttribute("maxViolations", mockTestService.getMaxViolations());
         req.getRequestDispatcher("/jsp/mock-test/take.jsp").forward(req, resp);
@@ -372,6 +375,21 @@ public class MockTestServlet extends HttpServlet {
         }
         req.setAttribute("writingFeedbacks", writingFeedbacks);
         req.setAttribute("speakingFeedbacks", speakingFeedbacks);
+        
+        // Fetch submission details for mentor override info
+        dao.SubmissionDetailsDAO detailsDao = new dao.SubmissionDetailsDAO();
+        java.util.List<model.SubmissionDetail> details = detailsDao.getDetailsBySubmissionId(subId);
+        java.util.List<model.SubmissionDetail> writingDetails = new java.util.ArrayList<>();
+        java.util.List<model.SubmissionDetail> speakingDetails = new java.util.ArrayList<>();
+        for (model.SubmissionDetail d : details) {
+            if ("Writing".equalsIgnoreCase(d.getSkill())) {
+                writingDetails.add(d);
+            } else if ("Speaking".equalsIgnoreCase(d.getSkill())) {
+                speakingDetails.add(d);
+            }
+        }
+        req.setAttribute("writingDetails", writingDetails);
+        req.setAttribute("speakingDetails", speakingDetails);
 
         // --- Answer Review cho Reading/Listening ---
         java.util.List<model.AnswerReviewItem> answerReview =

@@ -4,6 +4,7 @@ import dao.QuestionDAO;
 import model.Answer;
 import model.Question;
 import java.util.List;
+import util.PaginatedList;
 import dao.TagDAO;
 import model.Tag;
 
@@ -23,8 +24,16 @@ public class QuestionService {
         return questionDAO.findById(id);
     }
 
+    public List<Question> getQuestionsBySkill(String skill) {
+        return questionDAO.findBySkill(skill);
+    }
+
     public List<Question> searchQuestions(String keyword, String skill) {
         return questionDAO.searchByKeywordAndSkill(keyword, skill);
+    }
+
+    public PaginatedList<Question> searchQuestions(String keyword, String skill, String difficulty, String type, int page, int pageSize) {
+        return questionDAO.searchQuestions(keyword, skill, difficulty, type, page, pageSize);
     }
 
     public void createQuestion(Question question, List<Answer> answers) throws Exception {
@@ -57,12 +66,10 @@ public class QuestionService {
         questionDAO.update(existing);
     }
 
-    public void deleteQuestion(int id, int mentorId) throws Exception {
+    public void deleteQuestion(int id) throws Exception {
         Question existing = questionDAO.findById(id);
         if (existing == null)
             throw new Exception("Không tìm thấy câu hỏi #" + id);
-        if (!existing.getCreatedBy().equals(mentorId))
-            throw new Exception("Bạn không có quyền xóa câu hỏi này");
         questionDAO.softDelete(id);
     }
 
@@ -89,21 +96,17 @@ public class QuestionService {
         return tagDAO.findAll();
     }
 
-    public void addTagToQuestion(int questionId, int tagId, int mentorId) throws Exception {
+    public void addTagToQuestion(int questionId, int tagId) throws Exception {
         Question q = questionDAO.findById(questionId);
         if (q == null) throw new Exception("Không tìm thấy câu hỏi #" + questionId);
-        if (!q.getCreatedBy().equals(mentorId))
-            throw new Exception("Bạn không có quyền gắn tag cho câu hỏi này");
         if (tagDAO.findById(tagId) == null)
             throw new Exception("Không tìm thấy tag #" + tagId);
         questionDAO.addTag(questionId, tagId);
     }
 
-    public void removeTagFromQuestion(int questionId, int tagId, int mentorId) throws Exception {
+    public void removeTagFromQuestion(int questionId, int tagId) throws Exception {
         Question q = questionDAO.findById(questionId);
         if (q == null) throw new Exception("Không tìm thấy câu hỏi #" + questionId);
-        if (!q.getCreatedBy().equals(mentorId))
-            throw new Exception("Bạn không có quyền xóa tag của câu hỏi này");
         questionDAO.removeTag(questionId, tagId);
     }
 }

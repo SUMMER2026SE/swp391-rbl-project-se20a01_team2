@@ -40,6 +40,11 @@ public class MockTestService {
         return examDAO.getQuestionsForExam(examId);
     }
 
+    /** Lấy toàn bộ Section của một đề thi. */
+    public List<model.ExamSection> getSectionsWithQuestionsForExam(int examId) {
+        return examDAO.getSectionsWithQuestionsForExam(examId);
+    }
+
     // ──── Submission lifecycle ────────────────────────────────────────
 
     /** Tạo bài làm mới (bắt đầu thi). Trả về submissionId. */

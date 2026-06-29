@@ -446,13 +446,11 @@ CREATE TABLE CandidateTargets (
 
     UserID INT NOT NULL,
 
-    TargetBand DECIMAL(3,1) NOT NULL, \-- Ví dụ: 6.5, 7.0
+    TargetBand DECIMAL(3,1) NOT NULL, \\-- Ví dụ: 6.5, 7.0
 
     CurrentBand DECIMAL(3,1),
 
-    ExamDate DATE,
-
-    IsActive BIT DEFAULT 1, \-- \[CẬP NHẬT\] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
+    IsActive BIT DEFAULT 1, \\-- \[CẬP NHẬT\] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
 
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 
@@ -1133,7 +1131,4 @@ ALTER TABLE QuestionResource ALTER COLUMN ResourceImageURL NVARCHAR(MAX);
 
 -- Thêm QuestionCount để biết 1 JSON của Questions tương đương bao nhiêu câu hỏi thực tế 
 ALTER TABLE Questions ADD QuestionCount INT DEFAULT 1;
-
--- Bổ sung ràng buộc (Constraint) đảm bảo CandidateAnswer luôn lưu đúng định dạng JSON
-ALTER TABLE SubmissionDetails ADD CONSTRAINT CHK_CandidateAnswer CHECK (CandidateAnswer IS NULL OR ISJSON(CandidateAnswer) = 1);
 ```

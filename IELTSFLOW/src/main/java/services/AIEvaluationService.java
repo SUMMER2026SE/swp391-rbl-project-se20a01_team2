@@ -3,11 +3,19 @@ package services;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dao.AIEvaluationDAO;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import model.FeedbackMistake;
 import model.FeedbackWriting;
 import model.FeedbackSpeaking;
+import model.MentorSkillStat;
 
 /**
  * Service điều phối việc chấm điểm Writing và Speaking bằng Gemini AI.
@@ -235,5 +243,82 @@ public class AIEvaluationService {
                 return null;
             }
         });
+    }
+
+    private static final Map<String, String> REASON_KEYWORDS = new LinkedHashMap<>();
+    static {
+        REASON_KEYWORDS.put("Grammar",     "grammar|tense|verb|subject|agreement|clause|syntax|article");
+        REASON_KEYWORDS.put("Vocabulary",  "vocabulary|word choice|lexical|collocation|synonym|idiom|diction");
+        REASON_KEYWORDS.put("Coherence",   "coherence|cohesion|structure|paragraph|transition|organization|flow");
+        REASON_KEYWORDS.put("Pronunciation","pronunciation|sound|phoneme|intonation|stress|accent");
+        REASON_KEYWORDS.put("Fluency",     "fluency|hesitation|pace|pause|filler");
+    }
+
+    private String categorize(String reason) {
+        if (reason == null) return "Other";
+        String lower = reason.toLowerCase();
+        for (Map.Entry<String, String> entry : REASON_KEYWORDS.entrySet()) {
+            if (lower.matches(".*(" + entry.getValue() + ").*")) {
+                return entry.getKey();
+            }
+        }
+        return "Other";
+    }
+
+    public Map<String, MentorSkillStat> getMentorStats(int mentorId) {
+        Map<String, MentorSkillStat> statMap = new LinkedHashMap<>();
+        statMap.put("Writing", new MentorSkillStat());
+        statMap.get("Writing").setSkill("Writing");
+        statMap.put("Speaking", new MentorSkillStat());
+        statMap.get("Speaking").setSkill("Speaking");
+
+        List<Object[]> rows = aiEvaluationDAO.getAllFeedbackByMentor(mentorId);
+        Map<String, Double> bandSumMap = new HashMap<>();
+        bandSumMap.put("Writing", 0.0);
+        bandSumMap.put("Speaking", 0.0);
+
+        for (Object[] row : rows) {
+            String json  = (String) row[0];
+            String skill = (String) row[1];
+            if (json == null || skill == null) continue;
+
+            MentorSkillStat stat = statMap.get(skill);
+            if (stat == null) continue;
+
+            try {
+                List<FeedbackMistake> mistakes;
+                double band;
+                if ("Writing".equalsIgnoreCase(skill)) {
+                    FeedbackWriting fw = objectMapper.readValue(json, FeedbackWriting.class);
+                    mistakes = fw.getMistakes();
+                    band = fw.getOverallBand();
+                } else {
+                    FeedbackSpeaking fs = objectMapper.readValue(json, FeedbackSpeaking.class);
+                    mistakes = fs.getMistakes();
+                    band = fs.getOverallBand();
+                }
+                stat.setSubmissionCount(stat.getSubmissionCount() + 1);
+                bandSumMap.put(skill, bandSumMap.get(skill) + band);
+
+                if (mistakes != null) {
+                    stat.setTotalMistakes(stat.getTotalMistakes() + mistakes.size());
+                    for (FeedbackMistake m : mistakes) {
+                        String cat = categorize(m.getReason());
+                        stat.getMistakesByCategory().merge(cat, 1, Integer::sum);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Không parse được feedbackJson, bỏ qua.", e);
+            }
+        }
+
+        // Compute averages
+        for (String skill : statMap.keySet()) {
+            MentorSkillStat stat = statMap.get(skill);
+            if (stat.getSubmissionCount() > 0) {
+                stat.setAvgBand(bandSumMap.get(skill) / stat.getSubmissionCount());
+            }
+        }
+        return statMap;
     }
 }

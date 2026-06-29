@@ -26,15 +26,25 @@ public class MentorLessonServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
+                String action = req.getParameter("action");
+                if ("new".equals(action)) {
+                    req.getRequestDispatcher("/jsp/mentor/lesson-detail.jsp").forward(req, resp);
+                    return;
+                }
+
                 // List: show only this mentor's lessons, support keyword+skill filter
                 String keyword = req.getParameter("keyword");
                 String skill   = req.getParameter("skill");
-                boolean hasFilter = (keyword != null && !keyword.isBlank())
-                        || (skill   != null && !skill.isBlank());
-                req.setAttribute("lessons",
-                        hasFilter
-                                ? lessonService.searchLessons(keyword, skill)
-                                : lessonService.getLessonsByMentor(mentorId));
+                
+                int page = 1;
+                int pageSize = 20;
+
+                try { if (req.getParameter("page") != null) page = Integer.parseInt(req.getParameter("page")); } catch (Exception ignored) {}
+                try { if (req.getParameter("limit") != null) pageSize = Integer.parseInt(req.getParameter("limit")); } catch (Exception ignored) {}
+                
+                util.PaginatedList<model.Lesson> lessonsPage = lessonService.searchLessons(keyword, skill, page, pageSize);
+                req.setAttribute("lessonsPage", lessonsPage);
+                req.setAttribute("lessons", lessonsPage.getItems());
                 req.getRequestDispatcher("/jsp/mentor/lessons.jsp").forward(req, resp);
 
             } else {
@@ -78,15 +88,13 @@ public class MentorLessonServlet extends HttpServlet {
                 lesson.setCreatedAt(LocalDateTime.now());
                 lesson.setDeleted(false);
                 lessonService.createLesson(lesson);
-                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=Tạo+bài+học+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=" + java.net.URLEncoder.encode("Tạo bài học thành công", "UTF-8"));
 
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("lessonId"));
                 Lesson existing = lessonService.getLessonById(id);
                 if (existing == null)
                     throw new Exception("Không tìm thấy bài học #" + id);
-                if (!existing.getCreatedBy().equals(mentorId))
-                    throw new Exception("Bạn không có quyền chỉnh sửa bài học này");
 
                 Lesson updated = buildFromRequest(req);
                 if (updated.getTitle() == null || updated.getTitle().isBlank())
@@ -95,17 +103,15 @@ public class MentorLessonServlet extends HttpServlet {
                     throw new Exception("Kỹ năng không được để trống");
                 updated.setLessonId(id);
                 lessonService.updateLesson(updated);
-                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=Cập+nhật+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("lessonId"));
                 Lesson existing = lessonService.getLessonById(id);
                 if (existing == null)
                     throw new Exception("Không tìm thấy bài học #" + id);
-                if (!existing.getCreatedBy().equals(mentorId))
-                    throw new Exception("Bạn không có quyền xóa bài học này");
                 lessonService.deleteLesson(id);
-                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=Xóa+bài+học+thành+công");
+                resp.sendRedirect(req.getContextPath() + "/mentor/lessons?success=" + java.net.URLEncoder.encode("Xóa bài học thành công", "UTF-8"));
 
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/lessons");

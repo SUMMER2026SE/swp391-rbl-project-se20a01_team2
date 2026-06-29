@@ -53,10 +53,34 @@ public class CandidateDashboardServlet extends HttpServlet {
             // Fetch real candidate stats from DB
             java.util.Map<String, Object> stats = candidateDashboardDAO.getCandidateStats(userId);
             req.setAttribute("stats", stats);
+
+            // Fetch real lessons for the dashboard
+            services.LessonService ls = new services.LessonService();
+            java.util.List<model.Lesson> allLessons = ls.getAllLessons();
+            req.setAttribute("lessonsJson", generateLessonsJson(allLessons));
         } catch (Exception e) {
             req.setAttribute("error", "Không thể tải thông tin người dùng: " + e.getMessage());
         }
 
         req.getRequestDispatcher("/jsp/candidate/dashboard.jsp").forward(req, resp);
+    }
+
+    private String generateLessonsJson(java.util.List<model.Lesson> lessons) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < lessons.size(); i++) {
+            model.Lesson l = lessons.get(i);
+            String type = (l.getVideoUrl() != null && !l.getVideoUrl().isEmpty()) ? "Video" : "Document";
+            String color = "blue";
+            String icon = "🎧";
+            if ("Reading".equals(l.getSkill())) { color = "green"; icon = "📚"; }
+            else if ("Writing".equals(l.getSkill())) { color = "orange"; icon = "✍️"; }
+            else if ("Speaking".equals(l.getSkill())) { color = "purple"; icon = "🎙️"; }
+            
+            sb.append(String.format("{\"id\":%d,\"title\":\"%s\",\"type\":\"%s\",\"skill\":\"%s\",\"color\":\"%s\",\"icon\":\"%s\"}",
+                l.getLessonId(), l.getTitle().replace("\"", "\\\"").replace("\n", ""), type, l.getSkill(), color, icon));
+            if (i < lessons.size() - 1) sb.append(",");
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

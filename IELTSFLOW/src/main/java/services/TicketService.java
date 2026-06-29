@@ -35,6 +35,13 @@ public class TicketService {
     }
 
     /**
+     * Lấy danh sách ticket cho Mentor
+     */
+    public List<Ticket> getTicketsForMentor(int mentorId) {
+        return ticketDAO.findTicketsForMentor(mentorId);
+    }
+
+    /**
      * Lấy chi tiết một ticket
      */
     public Ticket getTicketById(int ticketId, int userId) throws Exception {
@@ -63,6 +70,7 @@ public class TicketService {
             .orElseThrow(() -> new Exception("Không tìm thấy người dùng"));
 
         Ticket ticket = new Ticket(user, subject.trim());
+
         int ticketId = ticketDAO.create(ticket);
         ticketDAO.addReply(ticketId, user, content.trim(), "Open");
         
@@ -70,14 +78,14 @@ public class TicketService {
     }
 
     /**
-     * Admin trả lời ticket
+     * Mentor/Admin trả lời ticket
      */
     public void replyTicket(int ticketId, int adminId, String reply) throws Exception {
         if (reply == null || reply.trim().isEmpty()) {
             throw new Exception("Nội dung phản hồi không được để trống");
         }
         User admin = userDAO.findById(adminId)
-            .orElseThrow(() -> new Exception("Không tìm thấy người dùng admin"));
+            .orElseThrow(() -> new Exception("Không tìm thấy người dùng admin/mentor"));
         Ticket ticket = ticketDAO.findById(ticketId)
             .orElseThrow(() -> new Exception("Không tìm thấy ticket #" + ticketId));
             
@@ -87,6 +95,8 @@ public class TicketService {
             
         ticketDAO.addReply(ticketId, admin, reply.trim(), "Resolved");
     }
+
+
 
     /**
      * User (Candidate) trả lời ticket
