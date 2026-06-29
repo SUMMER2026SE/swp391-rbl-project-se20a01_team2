@@ -97,6 +97,10 @@
                 <h5 class="fw-bold mb-4" style="color: var(--accent-purple);">Thông tin chung</h5>
                 
                 <div class="row g-4">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Tên Tài Nguyên (Tùy chọn)</label>
+                        <input type="text" name="resourceName" class="form-control" placeholder="Nhập tên gợi nhớ (VD: Cam 18 Test 1 Passage 1)" value="${resource.resourceName}">
+                    </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Loại Tài Nguyên <span class="text-danger">*</span></label>
                         <select name="type" id="resourceType" class="form-select" required onchange="toggleResourceFields()">

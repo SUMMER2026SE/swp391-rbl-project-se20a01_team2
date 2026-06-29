@@ -32,20 +32,29 @@ public class QuestionService {
         return questionDAO.searchByKeywordAndSkill(keyword, skill);
     }
 
+    public List<Question> searchQuestions(String keyword, String skill, Integer resourceId) {
+        return questionDAO.searchByKeywordSkillAndResource(keyword, skill, resourceId);
+    }
+
     public PaginatedList<Question> searchQuestions(String keyword, String skill, String difficulty, String type, int page, int pageSize) {
         return questionDAO.searchQuestions(keyword, skill, difficulty, type, page, pageSize);
     }
 
-    public void createQuestion(Question question, List<Answer> answers) throws Exception {
+    public void createQuestion(Question question, List<Answer> answers, List<Integer> tagIds) throws Exception {
         validate(question);
         if (answers == null || answers.isEmpty())
             throw new Exception("Câu hỏi phải có ít nhất một đáp án");
         question.setAnswers(answers);
         question.setDeleted(false);
         questionDAO.save(question);
+        if (tagIds != null && !tagIds.isEmpty()) {
+            for (Integer tagId : tagIds) {
+                questionDAO.addTag(question.getQuestionId(), tagId);
+            }
+        }
     }
 
-    public void updateQuestion(Question question, List<Answer> answers) throws Exception {
+    public void updateQuestion(Question question, List<Answer> answers, List<Integer> tagIds) throws Exception {
         Question existing = questionDAO.findById(question.getQuestionId());
         if (existing == null)
             throw new Exception("Không tìm thấy câu hỏi #" + question.getQuestionId());
@@ -64,6 +73,14 @@ public class QuestionService {
         existing.getAnswers().clear();
         existing.getAnswers().addAll(answers);
         questionDAO.update(existing);
+
+        // Update tags
+        questionDAO.removeAllTags(existing.getQuestionId());
+        if (tagIds != null && !tagIds.isEmpty()) {
+            for (Integer tagId : tagIds) {
+                questionDAO.addTag(existing.getQuestionId(), tagId);
+            }
+        }
     }
 
     public void deleteQuestion(int id) throws Exception {

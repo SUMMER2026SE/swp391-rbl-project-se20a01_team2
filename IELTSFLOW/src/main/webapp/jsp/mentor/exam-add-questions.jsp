@@ -42,12 +42,20 @@
 
             <%-- Search bar (GET form, preserves section in URL) --%>
             <form method="GET" action="${pageContext.request.contextPath}/mentor/exams/${exam.examId}/sections/${section.sectionId}/add-questions" class="mb-4">
-                <div class="input-group" style="max-width: 480px;">
+                <div class="input-group" style="max-width: 600px;">
                     <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
                     <input type="text" name="keyword" class="form-control" placeholder="Tìm câu hỏi..." value="${param.keyword}" oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { ajaxSearch(this.form); }, 600);">
+                    <select name="resourceId" class="form-select" onchange="this.form.submit()" style="max-width: 200px;">
+                        <option value="">Tất cả Resource</option>
+                        <c:forEach var="res" items="${allResources}">
+                            <option value="${res.resourceId}" ${param.resourceId == res.resourceId ? 'selected' : ''}>
+                                #${res.resourceId} - ${res.resourceName != null ? res.resourceName : 'Unnamed'}
+                            </option>
+                        </c:forEach>
+                    </select>
                     <button type="submit" class="btn btn-outline-secondary d-none">Tìm</button>
-                    <c:if test="${not empty param.keyword}">
-                        <a href="${pageContext.request.contextPath}/mentor/exams/${exam.examId}/sections/${section.sectionId}/add-questions" class="btn btn-outline-danger"><i class="fa-solid fa-xmark"></i></a>
+                    <c:if test="${not empty param.keyword || not empty param.resourceId}">
+                        <a href="${pageContext.request.contextPath}/mentor/exams/${exam.examId}/sections/${section.sectionId}/add-questions" class="btn btn-outline-danger"><i class="fa-solid fa-xmark"></i> Xóa lọc</a>
                     </c:if>
                 </div>
                 <small class="text-muted mt-1 d-block">Chỉ hiển thị câu hỏi thuộc kỹ năng <strong>${section.skill}</strong>.</small>
