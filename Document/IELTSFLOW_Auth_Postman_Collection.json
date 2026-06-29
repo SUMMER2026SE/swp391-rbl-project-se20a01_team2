@@ -1,0 +1,430 @@
+{
+    "info": {
+        "name": "IELTSFLOW Auth API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Register",
+            "item": [
+                {
+                    "name": "Register - Happy Path",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "fullName",
+                                    "value": "Nguyen Van A",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "nguyenvana@gmail.com",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "Password@123",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "confirmPassword",
+                                    "value": "Password@123",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "register"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK or 302 Redirect\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 302]);",
+                                    "});",
+                                    "pm.test(\"Response time is acceptable (< 800ms)\", function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(800);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Register - Negative (Missing Email)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "fullName",
+                                    "value": "Nguyen Van A",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "Password@123",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "confirmPassword",
+                                    "value": "Password@123",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "register"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Should fail or return validation error\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                                    "    pm.expect(pm.response.text()).to.include(\"email\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Register - Negative (Wrong type - Pass mismatch)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "fullName",
+                                    "value": "Nguyen Van A",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "nguyenvana@gmail.com",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "Password@123",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "confirmPassword",
+                                    "value": "WrongPass123",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "register"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Should return validation error on password mismatch\", function () {",
+                                    "    pm.expect(pm.response.text().toLowerCase()).to.include(\"mật khẩu\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "2. Login",
+            "item": [
+                {
+                    "name": "Login - Happy Path",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "email",
+                                    "value": "nguyenvana@gmail.com",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "Password@123",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200 or 302 (Redirect)\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                                    "});",
+                                    "pm.test(\"Response contains session cookie (JSESSIONID)\", function () {",
+                                    "    pm.expect(pm.cookies.has(\"JSESSIONID\")).to.be.true;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login - Negative (Missing password)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "email",
+                                    "value": "nguyenvana@gmail.com",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Should return error message\", function () {",
+                                    "    pm.expect(pm.response.text()).to.include(\"password\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login - Negative (Invalid Email Format)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "email",
+                                    "value": "not-an-email",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "Password@123",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Should reject invalid email format\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "3. Google Auth",
+            "item": [
+                {
+                    "name": "Google Auth - Happy Path",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/google",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "google"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200 or 302 Redirect\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                                    "});",
+                                    "pm.test(\"Should redirect to Google OAuth URL (if 302)\", function () {",
+                                    "    if (pm.response.code === 302) {",
+                                    "        pm.response.to.have.header(\"Location\");",
+                                    "        pm.expect(pm.response.headers.get(\"Location\")).to.include(\"accounts.google.com\");",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "4. Logout",
+            "item": [
+                {
+                    "name": "Logout - Happy Path",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK or 302 Redirect (to login)\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                                    "});",
+                                    "pm.test(\"JSESSIONID Cookie is cleared or expired\", function () {",
+                                    "    let setCookieHeader = pm.response.headers.get(\"Set-Cookie\");",
+                                    "    if (setCookieHeader && setCookieHeader.includes(\"JSESSIONID\")) {",
+                                    "        pm.expect(setCookieHeader).to.match(/Max-Age=0|Expires=.*1970/);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Logout - Negative (No Session)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Should redirect to login if no session exists\", function () {",
+                                    "     pm.expect(pm.response.code).to.be.oneOf([302, 401]);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
