@@ -319,6 +319,26 @@ note thêm:
 đổi với dạng đề:
 - lableing a map/plan/diagram: sẽ sử dụng matching. trên ảnh sẽ đánh dấu sẵn (mentor) các vị trí cần nối. ở dưới sẽ hiện sắn các đáp án để nối với số tương ứng trên ảnh
 - drag and drop: tương tự: cũng sử dụng matching như trên
+-Lưu câu hỏi lớn (như ) vào trong Explanation  bảng Questions
+
+Câu hỏi lớn (1 phần chung gồm vài câu hỏi cùng loại) sẽ có 1 phần hướng dẫn về dạng bài lưu trong explanation. Nếu dạng bài mới so với câu trước (khác question type) -> in ra giải thích dạng.
+vd: Giả sử: khi chương trình chạy 
+câu 1-7 dạng matching -> in giải thích về dạng matching lưu trong explanation (db question) của câu 1,hệ thống đọc câu 2 và thấy cùng QuestionType với câu 1,bỏ qua và check tiếp tới câu 3 
+câu 8-11: dạng fill in blank→hệ thống nhận thấy QuestionType của câu 8 khác với các câu trước sẽ thực hiện  in giải thích về dạng fill in blank lưu trong explanation (db question) của câu 8
+
+Format đề sẽ như sau:
+Question 1-7: (dạng matching)
+(giải thích về dạng) Hãy nối Bên A với bên B tương ứng
+1.
+2. 
+…
+7. 
+Question 8-11: (dạng yes/no) (đã đổi so với dạng trước đó là matching)
+(giải thích về dạng -> thêm cái này vào đầu mỗi dạng) Hãy chọn yes/no/NG
+8.
+9.
+…
+11.
 
 ## **7\. Use case:**
 
@@ -540,6 +560,8 @@ CREATE TABLE UserSubscriptions (
 CREATE TABLE QuestionResource (
 
     ResourceID INT IDENTITY(1,1) PRIMARY KEY,
+
+    ResourceName NVARCHAR(255),
 
     ResourceText NVARCHAR(MAX),
 
@@ -1139,6 +1161,13 @@ ALTER TABLE Questions ADD QuestionCount INT DEFAULT 1;
 ```
 6/26
 UPDATE: fix tag table:
-```
+```sql
 ALTER TABLE Tags
 ADD Deleted BIT DEFAULT 0;
+```
+29/6
+# Cập nhật bổ sung: Thêm cột ResourceName vào bảng QuestionResource
+```sql
+ALTER TABLE QuestionResource
+ADD ResourceName NVARCHAR(255);
+```

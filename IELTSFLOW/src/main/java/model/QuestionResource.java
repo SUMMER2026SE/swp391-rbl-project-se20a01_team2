@@ -11,6 +11,9 @@ public class QuestionResource {
     @Column(name = "ResourceID")
     private int resourceId;
 
+    @Column(name = "ResourceName")
+    private String resourceName;
+
     @Column(name = "ResourceText", columnDefinition = "NVARCHAR(MAX)")
     private String resourceText;
 
@@ -33,6 +36,8 @@ public class QuestionResource {
 
     public int getResourceId() { return resourceId; }
     public void setResourceId(int resourceId) { this.resourceId = resourceId; }
+    public String getResourceName() { return resourceName; }
+    public void setResourceName(String resourceName) { this.resourceName = resourceName; }
     public String getResourceText() { return resourceText; }
     public void setResourceText(String resourceText) { this.resourceText = resourceText; }
     public String getResourceAudioUrl() { return resourceAudioUrl; }

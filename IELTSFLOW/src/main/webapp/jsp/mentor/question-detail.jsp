@@ -92,14 +92,41 @@
                         </select>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Resource ID (Mã bài đọc/nghe)</label>
-                        <input type="number" name="resourceId" class="form-control" value="${question.resourceId}">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
+                        <select name="resourceId" id="resourceId" class="form-select" onchange="toggleOrderInResource()">
+                            <option value="">-- Không liên kết Resource --</option>
+                            <c:forEach var="res" items="${allResources}">
+                                <option value="${res.resourceId}" ${question.resourceId == res.resourceId ? 'selected' : ''}>
+                                    #${res.resourceId} - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                </option>
+                            </c:forEach>
+                        </select>
                     </div>
                     
-                    <div class="col-md-6">
+                    <div class="col-md-4" id="orderInResourceContainer">
                         <label class="form-label fw-bold">Thứ tự trong Resource</label>
                         <input type="number" name="orderInResource" class="form-control" value="${question.orderInResource}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Tags</label>
+                        <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto; background-color: var(--bg-surface);">
+                            <c:forEach var="tag" items="${allTags}">
+                                <c:set var="isSelected" value="false" />
+                                <c:if test="${question != null}">
+                                    <c:forEach var="qTag" items="${question.tags}">
+                                        <c:if test="${qTag.tagId == tag.tagId}"><c:set var="isSelected" value="true" /></c:if>
+                                    </c:forEach>
+                                </c:if>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="tagIds" value="${tag.tagId}" id="tag_${tag.tagId}" ${isSelected ? 'checked' : ''}>
+                                    <label class="form-check-label" for="tag_${tag.tagId}">
+                                        ${tag.name}
+                                    </label>
+                                </div>
+                            </c:forEach>
+                        </div>
                     </div>
 
                     <div class="col-md-12">
@@ -346,24 +373,35 @@
             }
         } catch (e) {
             console.error("Invalid JSON in textarea", textareaId);
-            // If invalid, add an empty row
             addJsonField(containerId);
         }
     }
 
-    // Initialize all existing JSON fields
-    document.addEventListener("DOMContentLoaded", function() {
-        // Main question JSON
-        syncTextareaToBuilder('contentJson', 'contentJsonFields');
-        
-        // Answer JSONs
-        const answerCount = document.getElementById('answerCount').value;
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleOrderInResource();
+        const contentJsonRaw = document.getElementById('contentJson').value;
+        const contentContainer = document.getElementById('contentJsonFields');
+        if (contentContainer) syncTextareaToBuilder('contentJson', 'contentJsonFields');
+
+        const answerCount = parseInt(document.getElementById('answerCount').value);
         for (let i = 0; i < answerCount; i++) {
             if (document.getElementById('ansJson_' + i)) {
                 syncTextareaToBuilder('ansJson_' + i, 'ansJsonFields_' + i);
             }
         }
     });
+
+    function toggleOrderInResource() {
+        const resourceIdInput = document.getElementById('resourceId');
+        const orderContainer = document.getElementById('orderInResourceContainer');
+        if (resourceIdInput && orderContainer) {
+            if (resourceIdInput.value.trim() === '') {
+                orderContainer.style.display = 'none';
+            } else {
+                orderContainer.style.display = 'block';
+            }
+        }
+    }
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

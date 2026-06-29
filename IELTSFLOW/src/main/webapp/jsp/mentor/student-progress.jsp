@@ -49,10 +49,21 @@
             <!-- Cột trái: Danh sách học viên -->
             <div class="col-md-4 mb-4">
                 <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; height: 100%;">
-                    <div class="filter-tabs">
-                        <a href="${pageContext.request.contextPath}/mentor/students?filter=my" class="filter-tab ${currentFilter == 'my' ? 'active' : ''}">Học viên của tôi</a>
-                        <a href="${pageContext.request.contextPath}/mentor/students?filter=all" class="filter-tab ${currentFilter == 'all' ? 'active' : ''}">Tất cả</a>
-                    </div>
+                    <form action="${pageContext.request.contextPath}/mentor/students" method="GET" class="mb-3">
+                        <c:if test="${not empty selectedStudentId}">
+                            <input type="hidden" name="studentId" value="${selectedStudentId}">
+                        </c:if>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text"><i class="fa-solid fa-search"></i></span>
+                            <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên, email..." value="${param.keyword}" oninput="clearTimeout(this.timer); this.timer = setTimeout(() => { this.form.submit(); }, 600);">
+                        </div>
+                        <select name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="newest" ${param.sort == 'newest' || empty param.sort ? 'selected' : ''}>Mới nhất</option>
+                            <option value="oldest" ${param.sort == 'oldest' ? 'selected' : ''}>Cũ nhất</option>
+                            <option value="name_asc" ${param.sort == 'name_asc' ? 'selected' : ''}>Tên A-Z</option>
+                            <option value="name_desc" ${param.sort == 'name_desc' ? 'selected' : ''}>Tên Z-A</option>
+                        </select>
+                    </form>
                     
                     <div class="student-list mt-3">
                         <c:choose>
@@ -61,7 +72,7 @@
                             </c:when>
                             <c:otherwise>
                                 <c:forEach var="stu" items="${students}">
-                                    <a href="${pageContext.request.contextPath}/mentor/students?filter=${currentFilter}&studentId=${stu.userId}" 
+                                    <a href="${pageContext.request.contextPath}/mentor/students?studentId=${stu.userId}&keyword=${param.keyword}&sort=${param.sort}" 
                                        class="student-item ${selectedStudentId == stu.userId ? 'active' : ''} mb-2">
                                         <div class="d-flex align-items-center">
                                             <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent-blue); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">
