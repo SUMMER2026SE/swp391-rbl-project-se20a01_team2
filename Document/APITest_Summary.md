@@ -9,38 +9,20 @@ Tài liệu này ghi nhận kết quả chạy test API bằng Postman cho hệ 
 
 | API / Endpoint | Method | Test Case (Happy/Negative) | Status (Pass/Fail/Pending) | Ghi chú / Lỗi gặp phải |
 | :--- | :---: | :--- | :---: | :--- |
-| `/register` | POST | Happy Path (Đăng ký thành công) | Pending | |
-| `/register` | POST | Negative: Missing Field (Thiếu Email) | Pending | |
-| `/register` | POST | Negative: Wrong Type (Pass không khớp) | Pending | |
-| `/api/auth/login` | POST | Happy Path (Đăng nhập đúng thông tin) | Pending | |
-| `/api/auth/login` | POST | Negative: Missing Field (Không nhập pass) | Pending | |
-| `/api/auth/login` | POST | Negative: Invalid Format (Sai email format) | Pending | |
-| `/api/auth/google` | GET | Happy Path (Chuyển hướng Google OAuth) | Pending | Yêu cầu test trên trình duyệt/cửa sổ thật |
-| `/api/auth/logout` | POST | Happy Path (Đăng xuất khi có Session) | Pending | Xác nhận đã Clear cookie JSESSIONID |
-| `/api/auth/logout` | POST | Negative: Không có Session | Pending | |
-
----
-
-## 2. Speech Assessment Endpoints (Chấm điểm phát âm)
-**Người thực hiện:** [Tên thành viên 2]
-
-| API / Endpoint | Method | Test Case (Happy/Negative) | Status (Pass/Fail/Pending) | Ghi chú / Lỗi gặp phải |
-| :--- | :---: | :--- | :---: | :--- |
-| `/api/speech/assess` | POST | Happy: Đánh giá có kịch bản (Reference text) | | |
-| `/api/speech/assess` | POST | Happy: Đánh giá tự do (Speech-to-text) | | |
-| `/api/speech/assess` | POST | Negative: ... (Bổ sung thêm) | | |
-
-*(Phần này chừa lại để các bạn khác tự bổ sung test cases tương ứng)*
-
----
-
-## 3. File Upload & Transaction Endpoints (Upload & Thanh toán)
-**Người thực hiện:** [Tên thành viên 3]
-
-| API / Endpoint | Method | Test Case (Happy/Negative) | Status (Pass/Fail/Pending) | Ghi chú / Lỗi gặp phải |
-| :--- | :---: | :--- | :---: | :--- |
-| `/api/upload` | POST | Happy: Upload ảnh/file thành công | | |
-| `/webhook/sepay` | POST | Happy: Webhook cập nhật giao dịch thành công | | |
-| `/api/transaction/status`| GET | ... (Bổ sung thêm) | | |
-
-*(Phần này chừa lại để các bạn khác tự bổ sung test cases tương ứng)*
+| `/register` | POST | Happy Path (Đăng ký thành công) | Pass | |
+| `/register` | POST | Negative: Missing Field (Thiếu Email) | Pass | |
+| `/register` | POST | Negative: Wrong Type (Pass không khớp) | Pass | |
+| `/api/auth/login` | POST | Happy Path (Đăng nhập đúng thông tin) | Pass | |
+| `/api/auth/login` | POST | Negative: Missing Field (Không nhập pass) | Pass | |
+| `/api/auth/login` | POST | Negative: Invalid Format (Sai email format) | Pass | |
+| `/api/auth/google` | POST | Negative: Token không hợp lệ | Pass | Cần Token thực để test Happy Path |
+| `/api/auth/logout` | POST | Happy Path (Đăng xuất khi có Session) | Pass | Xác nhận đã Clear cookie JSESSIONID |
+| `/api/auth/logout` | POST | Negative: Không có Session | Pass | |
+| `/forgot-password` | POST | Happy Path (Gửi OTP thành công) | Pass | |
+| `/forgot-password` | POST | Negative (Thiếu email) | Pass | |
+| `/change-password` | POST | Happy Path (Đổi mật khẩu thành công) | Pass | Cần login session |
+| `/change-password` | POST | Negative (Mật khẩu không khớp) | Pass | Cần login session |
+| `/verify-email` | GET | Happy Path (Xác thực email thành công) | Pass | Cần token hợp lệ |
+| `/verify-email` | GET | Negative (Thiếu token) | Pass | |
+| `/auth` | POST | Happy Path (Forward sang trang đăng nhập/đăng ký) | Pass | |
+| `/auth` | POST | Negative (Action không hợp lệ) | Pass | |
