@@ -31,6 +31,7 @@ public class MentorQuestionServlet extends HttpServlet {
                 String action = req.getParameter("action");
                 if ("new".equals(action)) {
                     req.setAttribute("allTags", questionService.getAllTags());
+                    req.setAttribute("allResources", new services.QuestionResourceService().getAllResources());
                     req.getRequestDispatcher("/jsp/mentor/question-detail.jsp").forward(req, resp);
                     return;
                 }
@@ -60,6 +61,7 @@ public class MentorQuestionServlet extends HttpServlet {
                 }
                 req.setAttribute("question", question);
                 req.setAttribute("allTags", questionService.getAllTags());
+                req.setAttribute("allResources", new services.QuestionResourceService().getAllResources());
                 req.getRequestDispatcher("/jsp/mentor/question-detail.jsp").forward(req, resp);
                 }
         } catch (NumberFormatException e) {
@@ -85,7 +87,7 @@ public class MentorQuestionServlet extends HttpServlet {
             if ("create".equals(action)) {
                 Question question = buildQuestionFromRequest(req);
                 question.setCreatedBy(mentorId);
-                questionService.createQuestion(question, buildAnswersFromRequest(req));
+                questionService.createQuestion(question, buildAnswersFromRequest(req), extractTagIds(req));
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Tạo câu hỏi thành công", "UTF-8"));
 
             } else if ("update".equals(action)) {
@@ -95,7 +97,7 @@ public class MentorQuestionServlet extends HttpServlet {
                     throw new Exception("Không tìm thấy câu hỏi #" + id);
                 Question question = buildQuestionFromRequest(req);
                 question.setQuestionId(id);
-                questionService.updateQuestion(question, buildAnswersFromRequest(req));
+                questionService.updateQuestion(question, buildAnswersFromRequest(req), extractTagIds(req));
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
 
             } else if ("delete".equals(action)) {
@@ -138,6 +140,19 @@ public class MentorQuestionServlet extends HttpServlet {
         if (orderStr != null && !orderStr.isBlank())
             q.setOrderInResource(Integer.parseInt(orderStr));
         return q;
+    }
+
+    private List<Integer> extractTagIds(HttpServletRequest req) {
+        List<Integer> tagIds = new ArrayList<>();
+        String[] ids = req.getParameterValues("tagIds");
+        if (ids != null) {
+            for (String id : ids) {
+                try {
+                    tagIds.add(Integer.parseInt(id));
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        return tagIds;
     }
 
     private List<Answer> buildAnswersFromRequest(HttpServletRequest req) {

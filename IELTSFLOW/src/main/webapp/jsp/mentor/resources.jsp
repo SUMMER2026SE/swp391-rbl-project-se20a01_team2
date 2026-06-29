@@ -32,7 +32,7 @@
     <main class="main-content">
         <header class="main-header animate-fade-up" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h1 class="page-title" style="font-size: 2rem; margin: 0;">Quản lý Tài nguyên 📚</h1>
+                <h1 class="page-title" style="font-size: 2rem; margin: 0;">Quản lý tài nguyên đề thi 📚</h1>
                 <p class="text-secondary mt-1 mb-0">Quản lý các đoạn văn (Passage) và tệp nghe (Audio) dùng chung cho nhiều câu hỏi.</p>
             </div>
             <div class="header-actions">
@@ -49,14 +49,36 @@
             <div class="alert alert-danger animate-fade-up">${error}</div>
         </c:if>
 
-        <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 0; overflow: hidden;">
+        <div class="glass-panel animate-fade-up mb-4 p-3" style="animation-delay: 0.1s;">
+            <form action="${pageContext.request.contextPath}/mentor/resources" method="GET" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" name="keyword" class="form-control" placeholder="Tìm kiếm theo ID, tên, nội dung..." value="${param.keyword}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="typeFilter" class="form-select">
+                        <option value="">Tất cả loại</option>
+                        <option value="Passage" ${param.typeFilter == 'Passage' ? 'selected' : ''}>Passage (Đoạn văn)</option>
+                        <option value="Audio" ${param.typeFilter == 'Audio' ? 'selected' : ''}>Audio (Bài nghe)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary fw-bold" style="background-color: var(--accent-blue); border-color: var(--accent-blue);">Lọc & Tìm kiếm</button>
+                    <a href="${pageContext.request.contextPath}/mentor/resources" class="btn btn-outline-secondary ms-2">Bỏ lọc</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="glass-panel animate-fade-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-custom mb-0">
                     <thead>
                         <tr>
                             <th class="ps-4">Resource ID</th>
+                            <th>Tên Tài Nguyên</th>
                             <th>Loại</th>
-                            <th>Trích dẫn nội dung</th>
                             <th class="text-center pe-4">Thao Tác</th>
                         </tr>
                     </thead>
@@ -64,20 +86,11 @@
                         <c:forEach var="res" items="${resources}">
                             <tr>
                                 <td class="ps-4 fw-bold" style="color: var(--accent-purple);">#${res.resourceId}</td>
+                                <td class="fw-bold text-dark">${res.resourceName != null ? res.resourceName : '<span class="text-muted fst-italic">Chưa đặt tên</span>'}</td>
                                 <td>
                                     <span class="type-badge ${res.type eq 'Passage' ? 'type-passage' : 'type-audio'}">
                                         <i class="fa-solid ${res.type eq 'Passage' ? 'fa-book-open' : 'fa-headphones'} me-1"></i> ${res.type}
                                     </span>
-                                </td>
-                                <td class="text-secondary" style="max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    <c:choose>
-                                        <c:when test="${res.type eq 'Passage'}">
-                                            <c:out value="${res.resourceText.replaceAll('<[^>]*>', ' ')}"/>
-                                        </c:when>
-                                        <c:when test="${res.type eq 'Audio'}">
-                                            <i class="fa-solid fa-link"></i> ${res.resourceAudioUrl}
-                                        </c:when>
-                                    </c:choose>
                                 </td>
                                 <td class="text-center pe-4">
                                     <button type="button" class="btn btn-sm btn-outline-info rounded-pill me-1" title="Xem trước" data-bs-toggle="modal" data-bs-target="#previewResourceModal${res.resourceId}">
@@ -87,7 +100,7 @@
                                     <form action="${pageContext.request.contextPath}/mentor/resources" method="POST" style="display:inline;">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="resourceId" value="${res.resourceId}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Bạn có chắc chắn muốn xóa tài nguyên này? Các câu hỏi dùng tài nguyên này sẽ bị ảnh hưởng.');"><i class="fa-solid fa-trash"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return customConfirm(event, this, 'Bạn có chắc chắn muốn xóa tài nguyên này? Các câu hỏi dùng tài nguyên này sẽ bị ảnh hưởng.');"><i class="fa-solid fa-trash"></i></button>
                                     </form>
                                 </td>
                             </tr>

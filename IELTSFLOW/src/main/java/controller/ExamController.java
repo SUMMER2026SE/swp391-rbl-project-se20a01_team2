@@ -64,19 +64,22 @@ public class ExamController extends HttpServlet {
                         return;
                     }
                     String keyword = req.getParameter("keyword");
+                    String resourceIdStr = req.getParameter("resourceId");
+                    Integer resourceId = (resourceIdStr != null && !resourceIdStr.isBlank()) ? Integer.parseInt(resourceIdStr) : null;
+                    
                     services.QuestionService qs = new services.QuestionService();
-                    java.util.List<model.Question> questions = (keyword != null && !keyword.isBlank())
-                        ? qs.searchQuestions(keyword, section.getSkill())
-                        : qs.getQuestionsBySkill(section.getSkill());
+                    java.util.List<model.Question> questions = qs.searchQuestions(keyword, section.getSkill(), resourceId);
                     req.setAttribute("exam", exam);
                     req.setAttribute("section", section);
                     req.setAttribute("questions", questions);
+                    req.setAttribute("allResources", new services.QuestionResourceService().getAllResources());
                     req.getRequestDispatcher(jspPath + "exam-add-questions.jsp").forward(req, resp);
                     return;
                 }
 
                 req.setAttribute("exam", exam);
                 req.setAttribute("sections", examService.getExamSections(id));
+                req.setAttribute("allResources", new services.QuestionResourceService().getAllResources());
                 req.getRequestDispatcher(jspPath + "exam-detail.jsp").forward(req, resp);
             }
         } catch (NumberFormatException e) {

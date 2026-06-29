@@ -31,6 +31,8 @@
            class="nav-link ${param.active == 'dashboard' ? 'active' : ''}">📊 Tổng quan</a>
         <a href="${pageContext.request.contextPath}/mentor/questions"
            class="nav-link ${param.active == 'questions' ? 'active' : ''}">❓ Ngân hàng câu hỏi</a>
+        <a href="${pageContext.request.contextPath}/mentor/resources"
+           class="nav-link ${param.active == 'resources' ? 'active' : ''}">📚 Quản lý Tài nguyên đề thi</a>
         <a href="${pageContext.request.contextPath}/mentor/lessons"
            class="nav-link ${param.active == 'lessons' ? 'active' : ''}">📚 Bài học</a>
         <a href="${pageContext.request.contextPath}/mentor/exams"
@@ -41,8 +43,6 @@
            class="nav-link ${param.active == 'students' ? 'active' : ''}">🎓 Tiến độ học viên</a>
         <a href="${pageContext.request.contextPath}/mentor/tags"
            class="nav-link ${param.active == 'tags' ? 'active' : ''}">🏷️ Quản lý Tag</a>
-        <a href="${pageContext.request.contextPath}/mentor/resources"
-           class="nav-link ${param.active == 'resources' ? 'active' : ''}">📚 Quản lý Tài nguyên</a>
     </nav>
 
     <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
@@ -52,3 +52,53 @@
            style="color: var(--accent-red);">🚪 Đăng xuất</a>
     </div>
 </aside>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function customConfirm(event, element, message) {
+        event.preventDefault(); // Prevent default action (form submission or link navigation)
+        Swal.fire({
+            title: 'Xác nhận',
+            text: message,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // If the element is a form, submit it
+                if (element.tagName && element.tagName.toLowerCase() === 'form') {
+                    // Temporarily remove onsubmit to prevent infinite loop
+                    const oldOnSubmit = element.onsubmit;
+                    element.onsubmit = null;
+                    element.submit();
+                    element.onsubmit = oldOnSubmit;
+                } 
+                // If it's a button inside a form with onclick="return customConfirm(...)"
+                else if (element.form) {
+                    const form = element.form;
+                    // Append hidden input if it's a specific submit button with name/value
+                    if (element.name) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = element.name;
+                        input.value = element.value;
+                        form.appendChild(input);
+                    }
+                    const oldOnSubmit = form.onsubmit;
+                    form.onsubmit = null;
+                    form.submit();
+                    form.onsubmit = oldOnSubmit;
+                }
+                // If it's an anchor tag
+                else if (element.tagName && element.tagName.toLowerCase() === 'a') {
+                    window.location.href = element.href;
+                }
+            }
+        });
+        return false;
+    }
+</script>
+

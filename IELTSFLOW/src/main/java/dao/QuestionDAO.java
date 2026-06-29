@@ -59,6 +59,14 @@ public class QuestionDAO {
         );
     }
 
+    public void removeAllTags(int questionId) {
+        JpaHelper.execute(em ->
+                em.createNativeQuery("DELETE FROM QuestionTags WHERE QuestionID = :qid")
+                        .setParameter("qid", questionId)
+                        .executeUpdate()
+        );
+    }
+
     public List<Question> findBySkill(String skill) {
         return JpaHelper.query(em ->
                 em.createQuery(
@@ -91,6 +99,26 @@ public class QuestionDAO {
             jakarta.persistence.TypedQuery<Question> query = em.createQuery(queryStr.toString(), Question.class);
             if (hasSkill) query.setParameter("skill", skill);
             if (hasKeyword) query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
+            return query.getResultList();
+        });
+    }
+
+    public List<Question> searchByKeywordSkillAndResource(String keyword, String skill, Integer resourceId) {
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasSkill = skill != null && !skill.trim().isEmpty();
+        boolean hasResource = resourceId != null;
+
+        StringBuilder queryStr = new StringBuilder("SELECT q FROM Question q WHERE q.deleted = false");
+        if (hasSkill) queryStr.append(" AND q.skill = :skill");
+        if (hasKeyword) queryStr.append(" AND LOWER(q.content) LIKE :kw");
+        if (hasResource) queryStr.append(" AND q.resourceId = :resourceId");
+        queryStr.append(" ORDER BY q.questionId DESC");
+
+        return JpaHelper.query(em -> {
+            jakarta.persistence.TypedQuery<Question> query = em.createQuery(queryStr.toString(), Question.class);
+            if (hasSkill) query.setParameter("skill", skill);
+            if (hasKeyword) query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
+            if (hasResource) query.setParameter("resourceId", resourceId);
             return query.getResultList();
         });
     }
