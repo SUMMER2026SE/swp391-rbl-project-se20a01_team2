@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI Interactions ---
     const loginFormArea = document.getElementById('loginFormArea');
     const registerFormArea = document.getElementById('registerFormArea');
-    const tabLogin = document.getElementById('tabLogin');
-    const tabRegister = document.getElementById('tabRegister');
+    const tabLogin = document.getElementById('tabLoginBtn');
+    const tabRegister = document.getElementById('tabRegisterBtn');
     const formWrapper = document.querySelector('.auth-form-wrapper');
 
     function switchTab(tab) {
@@ -11,16 +11,19 @@ document.addEventListener('DOMContentLoaded', () => {
         formWrapper.style.transform = 'translateY(10px) scale(0.98)';
         
         setTimeout(() => {
+            const slider = document.getElementById('tabSlider');
             if (tab === 'login') {
                 loginFormArea.classList.add('active');
                 registerFormArea.classList.remove('active');
                 tabLogin.classList.add('active');
                 tabRegister.classList.remove('active');
+                if (slider) slider.style.transform = 'translateX(0)';
             } else {
                 loginFormArea.classList.remove('active');
                 registerFormArea.classList.add('active');
                 tabLogin.classList.remove('active');
                 tabRegister.classList.add('active');
+                if (slider) slider.style.transform = 'translateX(100%)';
             }
             formWrapper.style.opacity = '1';
             formWrapper.style.transform = 'translateY(0) scale(1)';

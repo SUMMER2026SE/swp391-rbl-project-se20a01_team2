@@ -12,7 +12,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <!-- Design System CSS -->
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css?v=<%= System.currentTimeMillis() %>">
 
         <style>
             :root {
@@ -277,14 +277,29 @@
                 text-align: center;
             }
 
+            /* Mobile Hamburger Button */
+            .mobile-menu-btn {
+                display: none;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 8px;
+                color: var(--color-primary-text);
+            }
+
             @media (max-width: 768px) {
-                .checkout-container {
-                    flex-direction: column;
-                }
+                .nav-links { display: none; }
+                .nav-actions { display: none; }
+                .mobile-menu-btn { display: flex; align-items: center; }
+                .checkout-container { flex-direction: column; }
                 .checkout-col-left {
                     border-right: none;
                     border-bottom: 1px solid #E2E8F0;
                 }
+                .checkout-col { padding: 20px; }
+                .checkout-header { font-size: 15px; padding: 14px; }
+                .footer-content { flex-direction: column; gap: 24px; text-align: center; }
+                .footer-links { justify-content: center; flex-wrap: wrap; }
             }
 
             /* Footer */
@@ -717,5 +732,8 @@
             // Start polling initially
             startPolling();
         </script>
-    </body>
+        <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+</body>
 </html>
+
+

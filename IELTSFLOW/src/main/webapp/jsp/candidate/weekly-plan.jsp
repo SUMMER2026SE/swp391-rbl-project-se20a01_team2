@@ -1,12 +1,13 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Weekly Plan</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=<%= System.currentTimeMillis() %>">
 </head>
 <body>
     <div class="bg-blob blob-2"></div>
@@ -49,12 +50,12 @@
         <main class="main-content">
             <div class="animate-fade-up" style="margin-bottom: 40px;">
                 <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Your Pathway 🚀</h1>
-                <div style="display: flex; gap: 20px;">
-                    <div style="padding: 10px 20px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
+                <div class="flex-mobile-col" style="display: flex; gap: 20px;">
+                    <div class="w-full-mobile" style="padding: 10px 20px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
                         <span style="color: var(--text-secondary); font-size: 0.85rem;">Target Band</span>
                         <div style="color: var(--accent-green); font-size: 1.5rem; font-weight: 700;">7.0</div>
                     </div>
-                    <div style="padding: 10px 20px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
+                    <div class="w-full-mobile" style="padding: 10px 20px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
                         <span style="color: var(--text-secondary); font-size: 0.85rem;">Current Band</span>
                         <div style="color: var(--accent-blue); font-size: 1.5rem; font-weight: 700;">6.0</div>
                     </div>
@@ -208,13 +209,13 @@
                 <div class="timeline-node">
                     <div class="timeline-dot" style="border-color: var(--accent-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);"></div>
                     <div class="glass-panel" style="padding: 30px; transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                        <div class="flex-mobile-col text-center-mobile" style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
                             <div>
                                 <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Phase Đã hoàn thành (3 Months)</span>
                                 <h2 style="margin: 15px 0 10px; color: var(--accent-red); font-size: 1.8rem;">Time for a Re-test! 🎯</h2>
                                 <p style="color: black; font-size: 1rem; line-height: 1.6;">You've reached the end of the 12-week study phase. To continue your journey and let our AI build the next personalized pathway, a re-evaluation is required.</p>
                             </div>
-                            <button class="btn btn-primary" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); white-space: nowrap; padding: 15px 30px; font-size: 1.1rem; border-radius: 12px; cursor: pointer;">
+                            <button class="btn btn-primary w-full-mobile" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); white-space: nowrap; padding: 15px 30px; font-size: 1.1rem; border-radius: 12px; cursor: pointer;">
                                 Take Re-test Now →
                             </button>
                         </div>
@@ -225,5 +226,9 @@
     </div>
 
     <script src="${pageContext.request.contextPath}/js/api.js"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
 </body>
 </html>
+
+
+
