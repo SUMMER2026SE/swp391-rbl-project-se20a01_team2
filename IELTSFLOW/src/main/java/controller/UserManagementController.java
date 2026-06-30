@@ -170,12 +170,7 @@ public class UserManagementController extends HttpServlet {
                     for (String s : userIdsStr) userIds.add(Integer.parseInt(s));
                     userService.bulkAction(adminId, actionType, userIds);
                 }
-            } else if ("delete".equals(action)) {
-                int id = Integer.parseInt(req.getParameter("id"));
-                User oldUser = userService.getUserById(id);
-                userService.deleteUser(id);
-                systemLogDAO.createSystemLog(new SystemLog(adminId, "DELETE", "User", "Xóa tài khoản: " + oldUser.getEmail()));
->>>>>>> 159db0cb6fd3d9656709f17346f8285e5b492953
+
             } else if ("assign_mentor".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
                 User oldUser = userService.getUserById(id);
