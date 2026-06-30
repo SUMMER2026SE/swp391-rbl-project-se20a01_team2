@@ -17,22 +17,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // === 2. Mobile Sidebar ===
-    const mobileToggle = document.getElementById('mobileToggle');
     const sidebar = document.getElementById('sidebar');
-    if (mobileToggle && sidebar) {
-        mobileToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    
+    if (sidebar) {
+        // Close sidebar when clicking outside
         document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !mobileToggle.contains(e.target))
+            if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target)) {
                 sidebar.classList.remove('open');
+            }
         });
     }
 
-    // === 3. Sidebar Links (Tab logic removed since we use separate pages) ===
+    // === 3. Sidebar Links ===
     const navItems = document.querySelectorAll('.sidebar-nav-item');
-    if (window.innerWidth <= 768 && sidebar) {
+    if (sidebar) {
         navItems.forEach(item => {
             item.addEventListener('click', () => {
-                sidebar.classList.remove('open');
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                }
             });
         });
     }

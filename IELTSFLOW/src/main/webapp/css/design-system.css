@@ -1913,3 +1913,110 @@ h1, h2, h3, h4, h5, h6 { font-weight: var(--fw-bold); line-height: var(--lh-tigh
 .bg-tiktok { background: #000; }
 .bg-facebook { background: #1877F2; }
 .bg-zalo { background: #0068FF; }
+
+/* ================================================================
+   10. MOBILE ARCHITECTURE (Unified)
+   ================================================================ */
+.mobile-topbar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    box-shadow: var(--shadow-sm);
+}
+
+.mobile-menu-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    padding: var(--sp-2);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-menu-btn:active {
+    background: var(--color-bg-alt);
+}
+
+.mobile-brand strong {
+    font-size: var(--text-lg);
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: var(--fw-bold);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: var(--z-dropdown);
+    opacity: 0;
+    transition: opacity var(--dur-300);
+}
+
+@media (max-width: 768px) {
+    .hidden-desktop {
+        display: flex !important;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+        box-shadow: var(--shadow-xl);
+        z-index: var(--z-overlay);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        padding: var(--sp-4) !important;
+        width: 100%;
+    }
+    
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+}
+
+
+/* ================================================================
+   26. STANDALONE LAYOUT (Sidebar & Main Content)
+   ================================================================ */
+/* Sidebar Base */
+.sidebar { width: 260px; position: fixed; top: 0; left: 0; height: 100vh; background: var(--color-surface); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; z-index: var(--z-sticky); transition: transform var(--dur-300) var(--ease-out); }
+.sidebar-header { padding: var(--sp-6); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--sp-3); }
+.sidebar-logo { width: 32px; height: 32px; background: var(--grad-primary); color: white; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: var(--fw-bold); font-size: var(--text-lg); }
+.sidebar-nav { padding: var(--sp-4) var(--sp-3); flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: var(--sp-1); }
+.nav-divider { height: 1px; background: var(--color-border); margin: var(--sp-4) 0; }
+.sidebar-footer { padding: var(--sp-4); border-top: 1px solid var(--color-border); }
+.user-mini-card { display: flex; align-items: center; gap: var(--sp-3); }
+.user-avatar-small { width: 36px; height: 36px; border-radius: 50%; background: var(--grad-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: var(--fw-bold); font-size: var(--text-sm); flex-shrink: 0; }
+.user-info-small { min-width: 0; flex: 1; }
+
+/* Main Content Base */
+.main-content { margin-left: 260px; padding: var(--sp-8); max-width: 1024px; }
+.card { background: var(--color-surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); }
+.card-header { padding: var(--sp-6); border-bottom: 1px solid var(--color-border); }
+.card-title { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 0; }
+.card-subtitle { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--sp-1); }
+.card-body { padding: var(--sp-6); }
+
+
+@media (max-width: 768px) {
+    .main-content { margin-left: 0 !important; padding: var(--sp-12) var(--sp-4) var(--sp-4) !important; }
+}
+

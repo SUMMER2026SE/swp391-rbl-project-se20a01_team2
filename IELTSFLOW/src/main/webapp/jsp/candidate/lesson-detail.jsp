@@ -4,6 +4,7 @@
 <head>
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lesson Detail</title>
     <link rel="stylesheet" href="../../css/style.css">
     <style>
@@ -90,5 +91,7 @@
         </main>
     </div>
     <script src="../../js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
 </body>
 </html>
+
