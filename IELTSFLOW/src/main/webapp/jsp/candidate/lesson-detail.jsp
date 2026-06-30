@@ -151,7 +151,7 @@
                             </div>
                         <% } else if (isOffice) { %>
                             <div style="width: 100%; height: 800px; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: #fff;">
-                                <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=<%= finalDocUrl.startsWith("http") ? finalDocUrl : "https://ieltsflow.tanmanh350.ovh" + finalDocUrl %>" width="100%" height="100%" style="border: none;"></iframe>
+                                <iframe src="https://docs.google.com/viewer?embedded=true&url=<%= finalDocUrl.startsWith("http") ? finalDocUrl : "https://ieltsflow.tanmanh350.ovh" + finalDocUrl %>" width="100%" height="100%" style="border: none;"></iframe>
                             </div>
                         <% } %>
                     </div>
