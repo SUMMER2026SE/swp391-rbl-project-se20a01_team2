@@ -92,10 +92,23 @@ public interface UserService {
     void lockUser(int id);
 
     void updateUserStatus(int id, String status);
+    
+    // New methods with Audit Logging
+    void adminUpdateUserStatus(int adminId, int targetUserId, String status);
 
     void assignMentorRole(int userId);
 
     void revokeMentorRole(int userId);
 
     void deleteUser(int id);
+    
+    void adminDeleteUser(int adminId, int targetUserId);
+    
+    void adminChangePassword(int adminId, int targetUserId, String newPassword);
+    
+    void bulkAction(int adminId, String actionType, List<Integer> userIds);
+    
+    List<User> findUsers(int page, int limit, String search, String roleFilter, String statusFilter, String sortBy, String sortOrder);
+    
+    long countUsers(String search, String roleFilter, String statusFilter);
 }

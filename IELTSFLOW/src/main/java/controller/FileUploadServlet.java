@@ -61,8 +61,8 @@ import java.util.UUID;
 @WebServlet(name = "FileUploadServlet", urlPatterns = {"/api/upload"})
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-        maxFileSize = 1024 * 1024 * 50,      // 400MB
-        maxRequestSize = 1024 * 1024 * 100   // 500MB
+        maxFileSize = 1024 * 1024 * 500,     // 500MB
+        maxRequestSize = 1024 * 1024 * 600   // 600MB
 )
 public class FileUploadServlet extends HttpServlet {
 

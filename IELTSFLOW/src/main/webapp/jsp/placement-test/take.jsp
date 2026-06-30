@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
             <!DOCTYPE html>
@@ -6,6 +6,7 @@
 
             <head>
                 <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Đang thi – IELTSFLOW</title>
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
                 <style>
@@ -560,6 +561,14 @@
                         .nav-panel { display: none; } /* Hide on smaller screens */
                         .main { margin-right: auto; }
                     }
+                
+                    @media (max-width: 768px) {
+                        .top-bar { flex-direction: column; align-items: stretch; padding: 0.5rem; text-align: center; gap: 0.5rem; }
+                        .exam-title { font-size: 0.9rem; }
+                        .timer { justify-content: center; font-size: 1.2rem; }
+                        .violation-bar { justify-content: center; }
+                        .main { margin-top: 100px; padding: 1rem; }
+                    }
                 </style>
             </head>
 
@@ -1095,6 +1104,10 @@
                         function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
                     }
                 </script>
-            </body>
+                <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+</body>
 
             </html>
+
+
+
