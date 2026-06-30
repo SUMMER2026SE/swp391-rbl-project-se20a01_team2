@@ -332,7 +332,7 @@
                             <tbody>
                                 <c:forEach var="sub" items="${submissions}" varStatus="st">
                                     <tr>
-                                        <td style="color:var(--text-secondary);">#${st.count}</td>
+                                        <td style="color:var(--text-secondary);">#${sub.submissionId}</td>
                                         <td style="font-weight:600; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                                             <c:choose>
                                                 <c:when test="${sub.examType == 'Placement Test'}">

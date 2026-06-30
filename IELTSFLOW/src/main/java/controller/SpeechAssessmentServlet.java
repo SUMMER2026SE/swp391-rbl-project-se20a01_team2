@@ -158,9 +158,15 @@ public class SpeechAssessmentServlet extends HttpServlet {
             }
 
             String transcript = speechService.speechToText(tempAudioFile);
-            
+
+            // Trả về đúng format mà JS đang đọc: data.data.recognizedText và data.data.pronunciationScore
+            Map<String, Object> dataPayload = new HashMap<>();
+            dataPayload.put("recognizedText", transcript != null ? transcript : "");
+            dataPayload.put("pronunciationScore", 0); // STT tự do không có pronunciation score
+            dataPayload.put("transcript", transcript != null ? transcript : ""); // Backward compat
+
             responseData.put("success", true);
-            responseData.put("data", Map.of("transcript", transcript));
+            responseData.put("data", dataPayload);
             resp.setStatus(200);
 
         } catch (Exception e) {

@@ -118,6 +118,10 @@
         </main>
     </div>
 
+    <script>
+        window.MOCK_LESSONS = ${not empty lessonsJson ? lessonsJson : '[]'};
+        window.MOCK_TODAY_LESSONS = window.MOCK_LESSONS.slice(0, 4); // Show top 4 lessons as today's
+    </script>
     <script src="${pageContext.request.contextPath}/js/api.js?v=${System.currentTimeMillis()}"></script>
     <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
 </body>

@@ -129,10 +129,12 @@ public class MockTestServlet extends HttpServlet {
 
         int submissionId = mockTestService.createSubmission(userId, exam.getExamId());
         List<Question> questions = mockTestService.getQuestionsForExam(exam.getExamId());
+        List<model.ExamSection> sections = mockTestService.getSectionsWithQuestionsForExam(exam.getExamId());
 
         HttpSession session = req.getSession();
         session.setAttribute("mt_currentExam", exam);
         session.setAttribute("mt_currentQuestions", questions);
+        session.setAttribute("mt_currentSections", sections);
         session.setAttribute("mt_currentSubmissionId", submissionId);
         session.setAttribute("mt_examStartTime", System.currentTimeMillis());
 
@@ -150,6 +152,7 @@ public class MockTestServlet extends HttpServlet {
         }
         req.setAttribute("exam", exam);
         req.setAttribute("questions", session.getAttribute("mt_currentQuestions"));
+        req.setAttribute("sections", session.getAttribute("mt_currentSections"));
         req.setAttribute("submissionId", session.getAttribute("mt_currentSubmissionId"));
         req.setAttribute("maxViolations", mockTestService.getMaxViolations());
         req.getRequestDispatcher("/jsp/mock-test/take.jsp").forward(req, resp);
@@ -169,6 +172,18 @@ public class MockTestServlet extends HttpServlet {
         int correctListening = 0, totalListening = 0;
         double sumWriting = 0, sumSpeaking = 0;
         int countWriting = 0, countSpeaking = 0;
+        // Dùng 1 instance duy nhất để tận dụng key rotation static counter
+        services.AIEvaluationService aiSvc = new services.AIEvaluationService();
+
+        // Thu thập các tác vụ AI cần chấm TRƯỚC, sau đó chạy tuần tự tránh rate-limit
+        // Format: int[]{detailId}, String topic, String answer/transcript, double azureScore
+        java.util.List<int[]>    writingDetailIds   = new java.util.ArrayList<>();
+        java.util.List<String>   writingTopics      = new java.util.ArrayList<>();
+        java.util.List<String>   writingAnswers     = new java.util.ArrayList<>();
+        java.util.List<int[]>    speakingDetailIds  = new java.util.ArrayList<>();
+        java.util.List<String>   speakingTopics     = new java.util.ArrayList<>();
+        java.util.List<String>   speakingTranscripts = new java.util.ArrayList<>();
+        java.util.List<double[]> speakingScores     = new java.util.ArrayList<>();
 
         for (Question q : questions) {
             String skill  = q.getSkill()        != null ? q.getSkill().trim()        : "";
@@ -180,7 +195,7 @@ public class MockTestServlet extends HttpServlet {
             detail.setQuestionId(q.getQuestionId());
             detail.setCandidateAnswer(answer);
 
-            if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType)) {
+            if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) {
                 boolean correct = mockTestService.isAnswerCorrect(q, answer);
                 detail.setIsCorrect(correct);
                 detail.setScore(correct ? 1.0 : 0.0);
@@ -190,33 +205,55 @@ public class MockTestServlet extends HttpServlet {
                 mockTestService.saveDetail(detail);
             } else {
                 detail.setGradingStatus("Pending_AI");
+                String transcript = null;
+                double azureScore = 0.0;
                 if ("Speaking".equals(skill)) {
                     detail.setSpeakingUrl(req.getParameter("speaking_url_" + q.getQuestionId()));
-                    detail.setCandidateTranscript(req.getParameter("transcript_" + q.getQuestionId()));
+                    transcript = req.getParameter("transcript_" + q.getQuestionId());
+                    detail.setCandidateTranscript(transcript);
+                    String azureScoreStr = req.getParameter("azure_" + q.getQuestionId());
+                    if (azureScoreStr != null && !azureScoreStr.isEmpty()) {
+                        try { azureScore = Double.parseDouble(azureScoreStr); } catch (NumberFormatException ignored) {}
+                    }
                 }
                 int detailId = mockTestService.saveDetail(detail);
-                services.AIEvaluationService aiService = new services.AIEvaluationService();
+
                 if ("Writing".equals(skill)) {
                     countWriting++;
-                    try {
-                        aiService.evaluateWritingAsync(detailId, q.getContent(), answer);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    writingDetailIds.add(new int[]{detailId});
+                    writingTopics.add(q.getContent());
+                    writingAnswers.add(answer);
                 } else if ("Speaking".equals(skill)) {
                     countSpeaking++;
-                    String azureScoreStr = req.getParameter("azure_" + q.getQuestionId());
-                    double azureScore = 0.0;
-                    if (azureScoreStr != null && !azureScoreStr.isEmpty()) {
-                        try { azureScore = Double.parseDouble(azureScoreStr); } catch (Exception ignored) {}
-                    }
-                    try {
-                        aiService.evaluateSpeakingAsync(detailId, q.getContent(), detail.getCandidateTranscript(), azureScore);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    speakingDetailIds.add(new int[]{detailId});
+                    speakingTopics.add(q.getContent());
+                    speakingTranscripts.add(transcript);
+                    speakingScores.add(new double[]{azureScore});
                 }
             }
+        }
+
+        // Chạy Writing tuần tự (chained) - tránh rate-limit khi nhiều task cùng lúc
+        // QUAN TRỌNG: Gộp tất cả Writing + Speaking vào 1 chain DUY NHẤT
+        // để tránh rate-limit khi 2 chain chạy song song cùng lúc
+        java.util.concurrent.CompletableFuture<Void> allAiTasks =
+            java.util.concurrent.CompletableFuture.completedFuture(null);
+
+        for (int i = 0; i < writingDetailIds.size(); i++) {
+            final int detailId = writingDetailIds.get(i)[0];
+            final String topic = writingTopics.get(i);
+            final String essay = writingAnswers.get(i);
+            allAiTasks = allAiTasks.thenCompose(v ->
+                aiSvc.evaluateWritingAsync(detailId, topic, essay).thenApply(r -> null));
+        }
+
+        for (int i = 0; i < speakingDetailIds.size(); i++) {
+            final int detailId      = speakingDetailIds.get(i)[0];
+            final String topic      = speakingTopics.get(i);
+            final String transcript = speakingTranscripts.get(i);
+            final double azureScore = speakingScores.get(i)[0];
+            allAiTasks = allAiTasks.thenCompose(v ->
+                aiSvc.evaluateSpeakingAsync(detailId, topic, transcript, azureScore).thenApply(r -> null));
         }
 
         Double listeningBand = totalListening > 0 ? mockTestService.rawToBand(correctListening, totalListening) : null;
@@ -316,27 +353,56 @@ public class MockTestServlet extends HttpServlet {
             req.setAttribute("timeTaken", timeTaken);
         }
         
-        // --- Tích hợp giải nghĩa chi tiết AI Feedback ---
+        // --- AI Feedback ---
         dao.AIEvaluationDAO aiDao = new dao.AIEvaluationDAO();
         List<String> feedbackJsons = aiDao.getFeedbackJsonStringsBySubmissionId(subId);
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         List<model.FeedbackWriting> writingFeedbacks = new ArrayList<>();
         List<model.FeedbackSpeaking> speakingFeedbacks = new ArrayList<>();
-        
+
         for (String json : feedbackJsons) {
             try {
-                if (json.contains("\"grammaticalRangeAndAccuracy\"")) {
+                if (json.contains("\"taskResponse\"")) {
                     writingFeedbacks.add(mapper.readValue(json, model.FeedbackWriting.class));
                 } else if (json.contains("\"pronunciation\"")) {
                     speakingFeedbacks.add(mapper.readValue(json, model.FeedbackSpeaking.class));
                 }
             } catch (Exception e) {
-                java.util.logging.Logger.getLogger("MockTestServlet").log(java.util.logging.Level.SEVERE, "Lỗi parse Feedback JSON", e);
+                java.util.logging.Logger.getLogger("MockTestServlet").log(
+                    java.util.logging.Level.SEVERE, "Lỗi parse Feedback JSON", e);
             }
         }
         req.setAttribute("writingFeedbacks", writingFeedbacks);
         req.setAttribute("speakingFeedbacks", speakingFeedbacks);
-        // ----------------------------------------------
+        
+        // Fetch submission details for mentor override info
+        dao.SubmissionDetailsDAO detailsDao = new dao.SubmissionDetailsDAO();
+        java.util.List<model.SubmissionDetail> details = detailsDao.getDetailsBySubmissionId(subId);
+        java.util.List<model.SubmissionDetail> writingDetails = new java.util.ArrayList<>();
+        java.util.List<model.SubmissionDetail> speakingDetails = new java.util.ArrayList<>();
+        for (model.SubmissionDetail d : details) {
+            if ("Writing".equalsIgnoreCase(d.getSkill())) {
+                writingDetails.add(d);
+            } else if ("Speaking".equalsIgnoreCase(d.getSkill())) {
+                speakingDetails.add(d);
+            }
+        }
+        req.setAttribute("writingDetails", writingDetails);
+        req.setAttribute("speakingDetails", speakingDetails);
+
+        // --- Answer Review cho Reading/Listening ---
+        java.util.List<model.AnswerReviewItem> answerReview =
+            aiDao.getAnswerReviewBySubmissionId(subId);
+        java.util.List<model.AnswerReviewItem> listeningReview = new java.util.ArrayList<>();
+        java.util.List<model.AnswerReviewItem> readingReview   = new java.util.ArrayList<>();
+        for (model.AnswerReviewItem item : answerReview) {
+            if ("Listening".equals(item.getSkill())) listeningReview.add(item);
+            else readingReview.add(item);
+        }
+        req.setAttribute("listeningReview", listeningReview);
+        req.setAttribute("readingReview",   readingReview);
+        // -------------------------------------------
 
         // Lấy lịch sử bài thi của user
         List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);

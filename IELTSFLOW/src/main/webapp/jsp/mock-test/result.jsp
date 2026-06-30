@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -241,13 +242,108 @@
                 </div>
 
                 <!-- Tab Contents -->
+                <%-- TAB: LISTENING ANSWER REVIEW --%>
                 <div id="tab-listening" class="feedback-content" style="display: block;">
-                    <p style="color: var(--text-secondary); font-style: italic;">Phần thi Listening được hệ thống chấm điểm tự động dựa trên đáp án chuẩn. Không có nhận xét AI.</p>
+                    <c:choose>
+                        <c:when test="${not empty listeningReview}">
+                            <%-- Score summary --%>
+                            <c:set var="listenCorrect" value="0"/>
+                            <c:forEach var="item" items="${listeningReview}">
+                                <c:if test="${item.correct}"><c:set var="listenCorrect" value="${listenCorrect + 1}"/></c:if>
+                            </c:forEach>
+                            <div style="background: rgba(99,179,237,0.1); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 2rem; font-weight: 700; color: var(--accent-blue);">${listenCorrect}/${fn:length(listeningReview)}</span>
+                                <span style="color: var(--text-secondary);">câu đúng</span>
+                            </div>
+                            <%-- Question list --%>
+                            <c:forEach var="item" items="${listeningReview}" varStatus="st">
+                                <div style="display:flex; gap:12px; padding:12px; border-radius:10px; margin-bottom:10px;
+                                            background: ${item.correct ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)'};
+                                            border-left: 4px solid ${item.correct ? '#10b981' : '#ef4444'};">
+                                    <div style="font-size:1.4rem; margin-top:2px;">${item.correct ? '✅' : '❌'}</div>
+                                    <div style="flex:1;">
+                                        <div style="font-weight:600; margin-bottom:6px; font-size:0.95rem;">${st.count}. ${item.questionContent}</div>
+                                        <c:if test="${not empty item.options}">
+                                            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                                                <c:forEach var="opt" items="${item.options}">
+                                                    <span style="padding: 2px 10px; border-radius: 20px; font-size:0.85rem;
+                                                        background: ${opt == item.correctAnswer ? 'rgba(16,185,129,0.2)' : (opt == item.candidateAnswer && !item.correct ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.05)')};
+                                                        border: 1px solid ${opt == item.correctAnswer ? '#10b981' : (opt == item.candidateAnswer && !item.correct ? '#ef4444' : 'transparent')};">
+                                                        ${opt}
+                                                        <c:if test="${opt == item.correctAnswer}"> ✓</c:if>
+                                                    </span>
+                                                </c:forEach>
+                                            </div>
+                                        </c:if>
+                                        <div style="font-size:0.88rem; display:flex; gap:16px; flex-wrap:wrap;">
+                                            <span>Bạn trả lời: <strong style="color:${item.correct ? '#10b981' : '#ef4444'};">${empty item.candidateAnswer ? '(bỏ trống)' : item.candidateAnswer}</strong></span>
+                                            <c:if test="${!item.correct}">
+                                                <span>Đáp án đúng: <strong style="color:#10b981;">${item.correctAnswer}</strong></span>
+                                            </c:if>
+                                        </div>
+                                        <c:if test="${not empty item.explanation}">
+                                            <div style="margin-top:6px; font-size:0.85rem; color:var(--text-secondary); font-style:italic;">${item.explanation}</div>
+                                        </c:if>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <p style="color:var(--text-secondary); font-style:italic;">Bạn không có câu hỏi Listening trong bài thi này.</p>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
-                
+
+                <%-- TAB: READING ANSWER REVIEW --%>
                 <div id="tab-reading" class="feedback-content" style="display: none;">
-                    <p style="color: var(--text-secondary); font-style: italic;">Phần thi Reading được hệ thống chấm điểm tự động dựa trên đáp án chuẩn. Không có nhận xét AI.</p>
+                    <c:choose>
+                        <c:when test="${not empty readingReview}">
+                            <c:set var="readCorrect" value="0"/>
+                            <c:forEach var="item" items="${readingReview}">
+                                <c:if test="${item.correct}"><c:set var="readCorrect" value="${readCorrect + 1}"/></c:if>
+                            </c:forEach>
+                            <div style="background: rgba(52,211,153,0.1); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 2rem; font-weight: 700; color: #10b981;">${readCorrect}/${fn:length(readingReview)}</span>
+                                <span style="color: var(--text-secondary);">câu đúng</span>
+                            </div>
+                            <c:forEach var="item" items="${readingReview}" varStatus="st">
+                                <div style="display:flex; gap:12px; padding:12px; border-radius:10px; margin-bottom:10px;
+                                            background: ${item.correct ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)'};
+                                            border-left: 4px solid ${item.correct ? '#10b981' : '#ef4444'};">
+                                    <div style="font-size:1.4rem; margin-top:2px;">${item.correct ? '✅' : '❌'}</div>
+                                    <div style="flex:1;">
+                                        <div style="font-weight:600; margin-bottom:6px; font-size:0.95rem;">${st.count}. ${item.questionContent}</div>
+                                        <c:if test="${not empty item.options}">
+                                            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                                                <c:forEach var="opt" items="${item.options}">
+                                                    <span style="padding: 2px 10px; border-radius: 20px; font-size:0.85rem;
+                                                        background: ${opt == item.correctAnswer ? 'rgba(16,185,129,0.2)' : (opt == item.candidateAnswer && !item.correct ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.05)')};
+                                                        border: 1px solid ${opt == item.correctAnswer ? '#10b981' : (opt == item.candidateAnswer && !item.correct ? '#ef4444' : 'transparent')};">
+                                                        ${opt}
+                                                        <c:if test="${opt == item.correctAnswer}"> ✓</c:if>
+                                                    </span>
+                                                </c:forEach>
+                                            </div>
+                                        </c:if>
+                                        <div style="font-size:0.88rem; display:flex; gap:16px; flex-wrap:wrap;">
+                                            <span>Bạn trả lời: <strong style="color:${item.correct ? '#10b981' : '#ef4444'};">${empty item.candidateAnswer ? '(bỏ trống)' : item.candidateAnswer}</strong></span>
+                                            <c:if test="${!item.correct}">
+                                                <span>Đáp án đúng: <strong style="color:#10b981;">${item.correctAnswer}</strong></span>
+                                            </c:if>
+                                        </div>
+                                        <c:if test="${not empty item.explanation}">
+                                            <div style="margin-top:6px; font-size:0.85rem; color:var(--text-secondary); font-style:italic;">${item.explanation}</div>
+                                        </c:if>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <p style="color:var(--text-secondary); font-style:italic;">Bạn không có câu hỏi Reading trong bài thi này.</p>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
+
 
                 <div id="tab-writing" class="feedback-content" style="display: none;">
                     <c:choose>
@@ -282,6 +378,14 @@
                                                 </li>
                                             </c:forEach>
                                             </ul>
+                                        </div>
+                                    </c:if>
+                                    
+                                    <c:if test="${not empty writingDetails[st.index].mentorScore}">
+                                        <div style="margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b;">
+                                            <h5 style="color: #d97706; margin-top: 0; margin-bottom: 8px;"><i class="fa-solid fa-user-tie"></i> Đánh giá từ Mentor</h5>
+                                            <p style="margin-bottom: 8px;"><strong>Điểm:</strong> <span style="font-size: 1.1em; font-weight: bold; color: #d97706;">${writingDetails[st.index].mentorScore}</span></p>
+                                            <p style="margin-bottom: 0;"><strong>Nhận xét:</strong> ${writingDetails[st.index].mentorFeedback}</p>
                                         </div>
                                     </c:if>
                                 </div>
@@ -333,6 +437,14 @@
                                                 </li>
                                             </c:forEach>
                                             </ul>
+                                        </div>
+                                    </c:if>
+                                    
+                                    <c:if test="${not empty speakingDetails[st.index].mentorScore}">
+                                        <div style="margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(236, 72, 153, 0.15); border: 1px solid #db2777;">
+                                            <h5 style="color: #be185d; margin-top: 0; margin-bottom: 8px;"><i class="fa-solid fa-user-tie"></i> Đánh giá từ Mentor</h5>
+                                            <p style="margin-bottom: 8px;"><strong>Điểm:</strong> <span style="font-size: 1.1em; font-weight: bold; color: #be185d;">${speakingDetails[st.index].mentorScore}</span></p>
+                                            <p style="margin-bottom: 0;"><strong>Nhận xét:</strong> ${speakingDetails[st.index].mentorFeedback}</p>
                                         </div>
                                     </c:if>
                                 </div>

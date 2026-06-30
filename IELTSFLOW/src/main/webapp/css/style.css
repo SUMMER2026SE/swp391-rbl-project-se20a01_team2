@@ -65,7 +65,7 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 100;
-    overflow-y: visible; /* changed from auto so toggle button shows */
+    overflow-y: auto;
     transition: width 0.3s ease;
 }
 
@@ -97,7 +97,7 @@ body {
 .toggle-sidebar-btn {
     position: absolute;
     top: 30px;
-    right: -15px;
+    right: 10px;
     background: var(--accent-blue);
     color: white;
     border: none;

@@ -6,81 +6,107 @@
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi ti&#7871;t Ticket - IELTSFlow</title>
+    <title>Issue Detail - IELTSFlow</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .back-link {
-            display: inline-flex; align-items: center; gap: 6px; color: #64748b;
+            display: inline-flex; align-items: center; gap: 6px; color: #0969da;
             text-decoration: none; font-size: 14px; margin-bottom: 24px;
-            transition: color 0.2s;
         }
-        .back-link:hover { color: #f97316; }
+        .back-link:hover { text-decoration: underline; }
 
-        .ticket-box {
-            background: white; border-radius: 14px; padding: 30px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 20px;
-        }
-        .ticket-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-        .ticket-id { font-size: 12px; color: #94a3b8; font-weight: 600; margin-bottom: 6px; }
-        .ticket-subject { font-size: 1.3rem; font-weight: 700; color: #1e293b; margin: 0; }
-        .status-badge {
-            padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap;
-        }
-        .badge-Open { background: #dbeafe; color: #1d4ed8; }
-        .badge-InProgress { background: #fef3c7; color: #b45309; }
-        .badge-Resolved { background: #dcfce7; color: #15803d; }
-        .badge-Closed { background: #f1f5f9; color: #64748b; }
-
-        .ticket-content { color: #475569; line-height: 1.7; white-space: pre-wrap; }
-        .ticket-date { font-size: 12px; color: #94a3b8; margin-top: 16px; }
-
-        .reply-box {
-            border-radius: 14px; padding: 24px;
-            margin-bottom: 20px;
-        }
-        .user-reply {
-            background: white; border: 1px solid #e2e8f0;
-        }
-        .user-reply .reply-title { color: #334155; }
+        .issue-header-container { border-bottom: 1px solid #d0d7de; padding-bottom: 16px; margin-bottom: 24px; }
+        .issue-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .issue-title { font-size: 32px; font-weight: 400; color: #24292f; margin: 0; line-height: 1.125; }
+        .issue-number { font-size: 32px; font-weight: 300; color: #57606a; margin: 0; }
         
-        .mentor-reply {
-            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
-            border: 1px solid #bfdbfe;
-        }
-        .mentor-reply .reply-title { font-weight: 700; color: #1e40af; }
-        
-        .reply-title { font-weight: 700; margin: 0 0 12px; font-size: 0.9rem; }
-        .reply-content { color: #1e293b; line-height: 1.7; white-space: pre-wrap; }
-        .reply-date { font-size: 12px; color: #64748b; margin-top: 10px; }
-        
-        .reply-form-box {
-            background: white; border-radius: 14px; padding: 20px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 20px;
-        }
-        .form-textarea {
-            width: 100%; padding: 12px; border: 1px solid #e2e8f0;
-            border-radius: 8px; font-family: inherit; font-size: 14px;
-            resize: vertical; min-height: 100px; box-sizing: border-box;
-        }
-        .form-textarea:focus { outline: none; border-color: #f97316; }
-        .btn-submit {
-            background: #f97316; color: white; border: none; padding: 10px 20px;
-            border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s;
-        }
-        .btn-submit:hover { background: #ea580c; }
-
-        .pending-box {
-            background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 20px;
-            text-align: center; color: #92400e; margin-bottom: 20px;
-        }
-
-        .btn-close {
+        .issue-meta-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #57606a; }
+        .state-badge {
             display: inline-flex; align-items: center; gap: 6px;
-            background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
-            padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500;
-            cursor: pointer; transition: all 0.2s;
+            padding: 5px 12px; border-radius: 2em; font-size: 14px; font-weight: 500;
+            color: #fff;
         }
-        .btn-close:hover { background: #e2e8f0; }
+        .state-open { background-color: #2da44e; }
+        .state-closed { background-color: #8250df; }
+
+        .layout-grid { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+        @media(max-width:768px) { .layout-grid { grid-template-columns: 1fr; } }
+
+        .timeline-item { display: flex; gap: 16px; margin-bottom: 24px; }
+        .timeline-avatar {
+            width: 40px; height: 40px; border-radius: 50%; background-color: #f6f8fa;
+            border: 1px solid #d0d7de; display: flex; align-items: center; justify-content: center;
+            font-weight: 600; color: #57606a; flex-shrink: 0; overflow: hidden;
+        }
+        .timeline-content {
+            flex-grow: 1; border: 1px solid #d0d7de; border-radius: 6px;
+            background-color: #fff; min-width: 0;
+            position: relative;
+        }
+        .timeline-content::before {
+            content: ""; position: absolute; top: 11px; left: -16px;
+            border-style: solid; border-width: 8px; border-color: transparent #d0d7de transparent transparent;
+        }
+        .timeline-content::after {
+            content: ""; position: absolute; top: 12px; left: -14px;
+            border-style: solid; border-width: 7px; border-color: transparent #f6f8fa transparent transparent;
+        }
+        
+        .timeline-header {
+            background-color: #f6f8fa; border-bottom: 1px solid #d0d7de;
+            padding: 8px 16px; border-top-left-radius: 6px; border-top-right-radius: 6px;
+            font-size: 14px; color: #57606a;
+        }
+        .timeline-header strong { color: #24292f; }
+        .mentor-badge {
+            border: 1px solid #d0d7de; border-radius: 2em; padding: 2px 8px;
+            font-size: 12px; font-weight: 500; margin-left: 8px; color: #57606a;
+        }
+        
+        .timeline-body { padding: 16px; font-size: 14px; color: #24292f; line-height: 1.5; }
+
+        /* Comment Form */
+        .comment-form-container { display: flex; gap: 16px; margin-top: 24px; border-top: 2px solid #e1e4e8; padding-top: 24px; }
+        .comment-form {
+            flex-grow: 1; border: 1px solid #d0d7de; border-radius: 6px;
+            background-color: #fff;
+        }
+        .comment-form-header {
+            background-color: #f6f8fa; border-bottom: 1px solid #d0d7de;
+            padding: 8px 16px; border-top-left-radius: 6px; border-top-right-radius: 6px;
+            font-weight: 600; font-size: 14px;
+        }
+        .comment-textarea {
+            width: 100%; border: none; padding: 16px; min-height: 120px;
+            font-size: 14px; font-family: monospace; resize: vertical; box-sizing: border-box;
+            background-color: #f6f8fa;
+        }
+        .comment-textarea:focus { outline: none; background-color: #fff; }
+        .comment-form-footer {
+            padding: 8px 16px; display: flex; justify-content: flex-end; gap: 8px;
+            background-color: #f6f8fa; border-top: 1px dashed #d0d7de; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px;
+        }
+
+        .btn { padding: 5px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid transparent; }
+        .btn-primary { background-color: #2da44e; color: #fff; border-color: rgba(27,31,36,0.15); }
+        .btn-primary:hover { background-color: #2c974b; }
+        .btn-default { background-color: #f6f8fa; color: #24292f; border-color: rgba(27,31,36,0.15); }
+        .btn-default:hover { background-color: #f3f4f6; border-color: rgba(27,31,36,0.15); }
+        .btn-danger-outline { background-color: #f6f8fa; color: #cf222e; border-color: rgba(27,31,36,0.15); }
+        .btn-danger-outline:hover { background-color: #ffebe9; }
+
+        /* Sidebar */
+        .sidebar-section { border-bottom: 1px solid #d0d7de; padding-bottom: 16px; margin-bottom: 16px; }
+        .sidebar-title { font-size: 12px; font-weight: 600; color: #57606a; margin-bottom: 8px; display: block; }
+        .sidebar-value { font-size: 14px; color: #24292f; }
+
+        /* Markdown Styles */
+        .markdown-body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+        .markdown-body pre { background-color: #f6f8fa; padding: 16px; border-radius: 6px; overflow: auto; }
+        .markdown-body code { background-color: rgba(175,184,193,0.2); padding: 0.2em 0.4em; border-radius: 6px; font-family: monospace; font-size: 85%; }
+        .markdown-body p { margin-top: 0; margin-bottom: 16px; }
+        .markdown-body p:last-child { margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -123,90 +149,166 @@
         <main class="main-content">
     <div class="animate-fade-up">
     <a href="${pageContext.request.contextPath}/candidate/tickets" class="back-link">
-        &larr; Quay l&#7841;i danh s&#225;ch
+        <i class="fa-solid fa-arrow-left"></i> Back to issues
     </a>
 
     <c:if test="${not empty param.success}">
-        <div class="alert alert-success" style="background: #dcfce7; border: 1px solid #86efac; color: #15803d; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">&#9989; ${param.success}</div>
+        <div style="background-color: #dafbe1; border: 1px solid #4ac26b; color: #1a7f37; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;"><i class="fa-solid fa-check-circle me-2"></i> ${param.success}</div>
     </c:if>
     <c:if test="${not empty error}">
-        <div class="alert alert-error" style="background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">&#10060; ${error}</div>
+        <div style="background-color: #ffebe9; border: 1px solid #ff8182; color: #cf222e; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;"><i class="fa-solid fa-circle-exclamation me-2"></i> ${error}</div>
     </c:if>
 
     <c:choose>
         <c:when test="${empty ticket}">
-            <div style="text-align:center;padding:60px;color:#94a3b8;">
-                <p>Kh&#244;ng t&#236;m th&#7845;y ticket n&#224;y.</p>
+            <div style="text-align:center;padding:60px;color:#57606a;">
+                <p>Issue not found.</p>
             </div>
         </c:when>
         <c:otherwise>
-            <!-- N&#7897;i dung ticket -->
-            <div class="ticket-box">
-                <div class="ticket-header">
-                    <div>
-                        <div class="ticket-id">TICKET #${ticket.ticketId}</div>
-                        <div class="ticket-subject">${ticket.subject}</div>
-                    </div>
-                    <span class="status-badge badge-${ticket.status}">
-                        <c:choose>
-                            <c:when test="${ticket.status == 'Open'}">M&#7903;</c:when>
-                            <c:when test="${ticket.status == 'InProgress'}">&#272;ang x&#7917; l&#253;</c:when>
-                            <c:when test="${ticket.status == 'Resolved'}">&#272;&#227; gi&#7843;i quy&#7871;t</c:when>
-                            <c:otherwise>&#272;&#227; &#273;&#243;ng</c:otherwise>
-                        </c:choose>
+            <!-- Header -->
+            <div class="issue-header-container">
+                <div class="issue-title-row">
+                    <h1 class="issue-title">${ticket.subject}</h1>
+                    <span class="issue-number">#${ticket.ticketId}</span>
+                </div>
+                <div class="issue-meta-row">
+                    <c:choose>
+                        <c:when test="${ticket.status == 'Closed'}">
+                            <span class="state-badge state-closed"><i class="fa-regular fa-circle-check"></i> Closed</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="state-badge state-open"><i class="fa-regular fa-circle-dot"></i> Open</span>
+                        </c:otherwise>
+                    </c:choose>
+                    <span>
+                        <strong>${ticket.user.fullName}</strong> opened this issue <span class="time-ago" data-time="${ticket.createdAt}">${ticket.createdAt}</span> &middot; ${ticket.replies.size()} comments
                     </span>
                 </div>
             </div>
 
-            <!-- Tin nh&#7855;n chat -->
-            <div class="chat-history">
-                <c:forEach var="reply" items="${ticket.replies}">
-                    <c:choose>
-                        <c:when test="${reply.sender.userId == sessionScope.userId}">
-                            <!-- Tin nh&#7855;n c&#7911;a candidate -->
-                            <div class="reply-box user-reply">
-                                <div class="reply-title">&#128100; B&#7841;n</div>
-                                <div class="reply-content">${reply.message}</div>
-                                <div class="reply-date">${reply.createdAt}</div>
+            <div class="layout-grid">
+                <!-- Timeline -->
+                <div class="timeline-container">
+                    <c:forEach var="reply" items="${ticket.replies}">
+                        <div class="timeline-item">
+                            <div class="timeline-avatar">
+                                <c:choose>
+                                    <c:when test="${not empty reply.sender.profilePic}">
+                                        <img src="${pageContext.request.contextPath}${reply.sender.profilePic}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </c:when>
+                                    <c:otherwise>${reply.sender.fullName.substring(0, 1)}</c:otherwise>
+                                </c:choose>
                             </div>
-                        </c:when>
-                        <c:otherwise>
-                            <!-- Tin nh&#7855;n c&#7911;a Mentor -->
-                            <div class="reply-box mentor-reply">
-                                <div class="reply-title">&#128172; Mentor (${reply.sender.fullName})</div>
-                                <div class="reply-content">${reply.message}</div>
-                                <div class="reply-date">${reply.createdAt}</div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <strong>${reply.sender.fullName}</strong> commented <span class="time-ago" data-time="${reply.createdAt}">${reply.createdAt}</span>
+                                    <c:if test="${reply.sender.roleId == 1}">
+                                        <span class="mentor-badge">Admin</span>
+                                    </c:if>
+                                    <c:if test="${reply.sender.roleId == 2}">
+                                        <span class="mentor-badge">Mentor</span>
+                                    </c:if>
+                                </div>
+                                <div class="timeline-body markdown-body raw-markdown" style="display:none;">${reply.message}</div>
+                                <div class="timeline-body markdown-body rendered-markdown"></div>
                             </div>
-                        </c:otherwise>
-                    </c:choose>
-                </c:forEach>
-            </div>
+                        </div>
+                    </c:forEach>
 
-            <!-- Form reply n&#7871;u ch&#432;a close -->
-            <c:if test="${ticket.status != 'Closed'}">
-                <div class="reply-form-box">
-                    <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
-                        <input type="hidden" name="action" value="reply">
-                        <input type="hidden" name="ticketId" value="${ticket.ticketId}">
-                        <textarea name="replyContent" class="form-textarea" placeholder="Nh&#7853;p n&#7897;i dung ph&#7843;n h&#7891;i..." required></textarea>
-                        <button type="submit" class="btn-submit" style="margin-top: 10px;">G&#7917;i ph&#7843;n h&#7891;i</button>
-                    </form>
+                    <!-- Form reply n&#7871;u ch&#432;a close -->
+                    <c:if test="${ticket.status != 'Closed'}">
+                        <div class="comment-form-container">
+                            <div class="timeline-avatar">
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.profilePic}">
+                                        <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </c:when>
+                                    <c:otherwise>${sessionScope.fullName.substring(0, 1)}</c:otherwise>
+                                </c:choose>
+                            </div>
+                            <div class="comment-form">
+                                <div class="comment-form-header">Write a comment</div>
+                                <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
+                                    <input type="hidden" name="action" value="reply">
+                                    <input type="hidden" name="ticketId" value="${ticket.ticketId}">
+                                    <textarea name="replyContent" class="comment-textarea" placeholder="Leave a comment (Markdown is supported)"></textarea>
+                                    <div class="comment-form-footer">
+                                        <button type="submit" class="btn btn-primary">Comment</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                            <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
+                                <input type="hidden" name="action" value="close">
+                                <input type="hidden" name="ticketId" value="${ticket.ticketId}">
+                                <button type="submit" class="btn btn-danger-outline"><i class="fa-regular fa-circle-check"></i> Close issue</button>
+                            </form>
+                        </div>
+                    </c:if>
                 </div>
-            </c:if>
 
-            <!-- N&#250;t &#273;&#243;ng ticket -->
-            <c:if test="${ticket.status == 'Open' || ticket.status == 'Resolved'}">
-                <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
-                    <input type="hidden" name="action" value="close">
-                    <input type="hidden" name="ticketId" value="${ticket.ticketId}">
-                    <button type="submit" class="btn-close">&#10005; &#272;&#243;ng ticket</button>
-                </form>
-            </c:if>
+                <!-- Sidebar -->
+                <div class="issue-sidebar">
+
+                    
+                    <div class="sidebar-section">
+                        <span class="sidebar-title">Labels</span>
+                        <c:choose>
+                            <c:when test="${ticket.status == 'InProgress'}">
+                                <span class="label-badge label-inprogress">in progress</span>
+                            </c:when>
+                            <c:when test="${ticket.status == 'Resolved'}">
+                                <span class="label-badge label-resolved">resolved</span>
+                            </c:when>
+                            <c:otherwise>
+                                <span style="color:#57606a; font-size:14px;">None yet</span>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </div>
         </c:otherwise>
     </c:choose>
     </div>
         </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rawEls = document.querySelectorAll('.raw-markdown');
+            const renderedEls = document.querySelectorAll('.rendered-markdown');
+            for(let i=0; i<rawEls.length; i++) {
+                const rawText = rawEls[i].textContent;
+                const html = DOMPurify.sanitize(marked.parse(rawText));
+                renderedEls[i].innerHTML = html;
+            }
+
+            function timeAgo(dateString) {
+                const date = new Date(dateString);
+                const seconds = Math.floor((new Date() - date) / 1000);
+                let interval = seconds / 31536000;
+                if (interval >= 1) return Math.floor(interval) + " years ago";
+                interval = seconds / 2592000;
+                if (interval >= 1) return Math.floor(interval) + " months ago";
+                interval = seconds / 86400;
+                if (interval >= 1) return Math.floor(interval) + " days ago";
+                interval = seconds / 3600;
+                if (interval >= 1) return Math.floor(interval) + " hours ago";
+                interval = seconds / 60;
+                if (interval >= 1) return Math.floor(interval) + " minutes ago";
+                if (seconds < 0) return "just now";
+                return Math.floor(seconds) + " seconds ago";
+            }
+            document.querySelectorAll('.time-ago').forEach(el => {
+                const dateVal = el.getAttribute('data-time');
+                if (dateVal) el.textContent = timeAgo(dateVal);
+            });
+        });
+    </script>
     <script src="${pageContext.request.contextPath}/js/api.js?v=${System.currentTimeMillis()}"></script>
     <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
 </body>

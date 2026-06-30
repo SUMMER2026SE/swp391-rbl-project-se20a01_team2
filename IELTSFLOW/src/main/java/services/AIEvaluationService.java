@@ -1,210 +1,324 @@
 package services;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dao.AIEvaluationDAO;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import model.FeedbackMistake;
 import model.FeedbackWriting;
 import model.FeedbackSpeaking;
+import model.MentorSkillStat;
 
+/**
+ * Service điều phối việc chấm điểm Writing và Speaking bằng Gemini AI.
+ *
+ * Luồng hoạt động:
+ *   1. Nhận bài làm từ Servlet (Writing essay hoặc Speaking transcript)
+ *   2. Gọi bất đồng bộ GeminiApiService.generateStructuredContent()
+ *   3. Parse JSON kết quả thành FeedbackWriting / FeedbackSpeaking
+ *   4. Lưu JSON gốc vào bảng AIEvaluations
+ *   5. Cập nhật điểm Band và OverallBand vào TestSubmissions
+ */
 public class AIEvaluationService {
-    private static final Logger LOGGER = Logger.getLogger(AIEvaluationService.class.getName());
-    
-    private final GeminiApiService geminiApiService;
-    private final AIEvaluationDAO aiEvaluationDAO;
-    private final ObjectMapper objectMapper;
-    
-    private static final String WRITING_SCHEMA = "{" +
-            "  \"type\": \"OBJECT\"," +
-            "  \"properties\": {" +
-            "    \"taskResponse\": { \"type\": \"NUMBER\", \"description\": \"Score for Task Response (0-9)\" }," +
-            "    \"coherenceAndCohesion\": { \"type\": \"NUMBER\", \"description\": \"Score for Coherence and Cohesion (0-9)\" }," +
-            "    \"lexicalResource\": { \"type\": \"NUMBER\", \"description\": \"Score for Lexical Resource (0-9)\" }," +
-            "    \"grammaticalRangeAndAccuracy\": { \"type\": \"NUMBER\", \"description\": \"Score for Grammatical Range and Accuracy (0-9)\" }," +
-            "    \"overallBand\": { \"type\": \"NUMBER\", \"description\": \"Overall Band Score (0-9)\" }," +
-            "    \"overallFeedback\": { \"type\": \"STRING\", \"description\": \"General feedback and comments\" }," +
-            "    \"mistakes\": {" +
-            "      \"type\": \"ARRAY\"," +
-            "      \"description\": \"List of mistakes found\"," +
-            "      \"items\": {" +
-            "        \"type\": \"OBJECT\"," +
-            "        \"properties\": {" +
-            "          \"mistake\": { \"type\": \"STRING\", \"description\": \"The incorrect text\" }," +
-            "          \"reason\": { \"type\": \"STRING\", \"description\": \"Why it is incorrect\" }," +
-            "          \"correction\": { \"type\": \"STRING\", \"description\": \"Suggested correction\" }" +
-            "        }," +
-            "        \"required\": [\"mistake\", \"reason\", \"correction\"]" +
-            "      }" +
-            "    }" +
-            "  }," +
-            "  \"required\": [\"taskResponse\", \"coherenceAndCohesion\", \"lexicalResource\", \"grammaticalRangeAndAccuracy\", \"overallBand\", \"overallFeedback\", \"mistakes\"]" +
-            "}";
 
-    private static final String SPEAKING_SCHEMA = "{" +
-            "  \"type\": \"OBJECT\"," +
-            "  \"properties\": {" +
-            "    \"fluencyAndCoherence\": { \"type\": \"NUMBER\", \"description\": \"Score for Fluency and Coherence (0-9)\" }," +
-            "    \"lexicalResource\": { \"type\": \"NUMBER\", \"description\": \"Score for Lexical Resource (0-9)\" }," +
-            "    \"grammaticalRangeAndAccuracy\": { \"type\": \"NUMBER\", \"description\": \"Score for Grammatical Range and Accuracy (0-9)\" }," +
-            "    \"pronunciation\": { \"type\": \"NUMBER\", \"description\": \"Score for Pronunciation (0-9).\" }," +
-            "    \"overallBand\": { \"type\": \"NUMBER\", \"description\": \"Overall Band Score (0-9)\" }," +
-            "    \"overallFeedback\": { \"type\": \"STRING\", \"description\": \"General feedback and comments\" }," +
-            "    \"mistakes\": {" +
-            "      \"type\": \"ARRAY\"," +
-            "      \"description\": \"List of mistakes found\"," +
-            "      \"items\": {" +
-            "        \"type\": \"OBJECT\"," +
-            "        \"properties\": {" +
-            "          \"mistake\": { \"type\": \"STRING\", \"description\": \"The incorrect text\" }," +
-            "          \"reason\": { \"type\": \"STRING\", \"description\": \"Why it is incorrect\" }," +
-            "          \"correction\": { \"type\": \"STRING\", \"description\": \"Suggested correction\" }" +
-            "        }," +
-            "        \"required\": [\"mistake\", \"reason\", \"correction\"]" +
-            "      }" +
-            "    }" +
-            "  }," +
-            "  \"required\": [\"fluencyAndCoherence\", \"lexicalResource\", \"grammaticalRangeAndAccuracy\", \"pronunciation\", \"overallBand\", \"overallFeedback\", \"mistakes\"]" +
-            "}";
-            
+    private static final Logger LOGGER = Logger.getLogger(AIEvaluationService.class.getName());
+
+    private final GeminiApiService geminiApiService;
+    private final AIEvaluationDAO  aiEvaluationDAO;
+    private final ObjectMapper     objectMapper;
+
+    // =========================================================================
+    // JSON Schema cho Writing (4 tiêu chí IELTS chuẩn)
+    // =========================================================================
+    private static final String WRITING_SCHEMA =
+        "{"
+        + "\"type\":\"OBJECT\","
+        + "\"properties\":{"
+        +   "\"taskResponse\":{\"type\":\"NUMBER\",\"description\":\"Score for Task Response (0-9)\"},"
+        +   "\"coherenceAndCohesion\":{\"type\":\"NUMBER\",\"description\":\"Score for Coherence and Cohesion (0-9)\"},"
+        +   "\"lexicalResource\":{\"type\":\"NUMBER\",\"description\":\"Score for Lexical Resource (0-9)\"},"
+        +   "\"grammaticalRangeAndAccuracy\":{\"type\":\"NUMBER\",\"description\":\"Score for Grammatical Range and Accuracy (0-9)\"},"
+        +   "\"overallBand\":{\"type\":\"NUMBER\",\"description\":\"Overall Band Score (0-9)\"},"
+        +   "\"overallFeedback\":{\"type\":\"STRING\",\"description\":\"General feedback and comments in Vietnamese\"},"
+        +   "\"mistakes\":{"
+        +     "\"type\":\"ARRAY\","
+        +     "\"items\":{"
+        +       "\"type\":\"OBJECT\","
+        +       "\"properties\":{"
+        +         "\"mistake\":{\"type\":\"STRING\"},"
+        +         "\"reason\":{\"type\":\"STRING\"},"
+        +         "\"correction\":{\"type\":\"STRING\"}"
+        +       "},"
+        +       "\"required\":[\"mistake\",\"reason\",\"correction\"]"
+        +     "}"
+        +   "}"
+        + "},"
+        + "\"required\":[\"taskResponse\",\"coherenceAndCohesion\",\"lexicalResource\","
+        +              "\"grammaticalRangeAndAccuracy\",\"overallBand\",\"overallFeedback\",\"mistakes\"]"
+        + "}";
+
+    // =========================================================================
+    // JSON Schema cho Speaking (4 tiêu chí IELTS chuẩn)
+    // =========================================================================
+    private static final String SPEAKING_SCHEMA =
+        "{"
+        + "\"type\":\"OBJECT\","
+        + "\"properties\":{"
+        +   "\"fluencyAndCoherence\":{\"type\":\"NUMBER\",\"description\":\"Score for Fluency and Coherence (0-9)\"},"
+        +   "\"lexicalResource\":{\"type\":\"NUMBER\",\"description\":\"Score for Lexical Resource (0-9)\"},"
+        +   "\"grammaticalRangeAndAccuracy\":{\"type\":\"NUMBER\",\"description\":\"Score for Grammatical Range and Accuracy (0-9)\"},"
+        +   "\"pronunciation\":{\"type\":\"NUMBER\",\"description\":\"Score for Pronunciation (0-9)\"},"
+        +   "\"overallBand\":{\"type\":\"NUMBER\",\"description\":\"Overall Band Score (0-9)\"},"
+        +   "\"overallFeedback\":{\"type\":\"STRING\",\"description\":\"General feedback and comments in Vietnamese\"},"
+        +   "\"mistakes\":{"
+        +     "\"type\":\"ARRAY\","
+        +     "\"items\":{"
+        +       "\"type\":\"OBJECT\","
+        +       "\"properties\":{"
+        +         "\"mistake\":{\"type\":\"STRING\"},"
+        +         "\"reason\":{\"type\":\"STRING\"},"
+        +         "\"correction\":{\"type\":\"STRING\"}"
+        +       "},"
+        +       "\"required\":[\"mistake\",\"reason\",\"correction\"]"
+        +     "}"
+        +   "}"
+        + "},"
+        + "\"required\":[\"fluencyAndCoherence\",\"lexicalResource\",\"grammaticalRangeAndAccuracy\","
+        +              "\"pronunciation\",\"overallBand\",\"overallFeedback\",\"mistakes\"]"
+        + "}";
+
     public AIEvaluationService() {
         this.geminiApiService = new GeminiApiService();
-        this.aiEvaluationDAO = new AIEvaluationDAO();
-        this.objectMapper = new ObjectMapper();
+        this.aiEvaluationDAO  = new AIEvaluationDAO();
+        // FAIL_ON_UNKNOWN_PROPERTIES=false: tránh lỗi nếu AI trả về field lạ
+        this.objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
-    
+
+    // =========================================================================
+    // WRITING EVALUATION
+    // =========================================================================
+
     /**
-     * Chạy ngầm (Asynchronous) việc chấm điểm Writing
+     * Chạy bất đồng bộ việc chấm điểm Writing.
      *
-     * @param detailId ID chi tiết bài làm
-     * @param topic Đề bài
-     * @param essay Bài làm của Candidate
-     * @return CompletableFuture chứa kết quả FeedbackWriting
+     * @param detailId  ID của SubmissionDetails row
+     * @param topic     Đề bài Writing
+     * @param essay     Bài làm của thí sinh
+     * @return CompletableFuture với kết quả FeedbackWriting (null nếu thất bại)
      */
     public CompletableFuture<FeedbackWriting> evaluateWritingAsync(int detailId, String topic, String essay) {
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.info("Bắt đầu chấm điểm Writing cho DetailID: " + detailId);
-            String systemInstruction = "Role: Bạn là giám khảo chấm thi IELTS Writing chuyên nghiệp.\n" +
-                                       "Objective: Đánh giá bài IELTS Writing dựa trên 4 tiêu chí chuẩn.\n" +
-                                       "Lưu ý quan trọng: Nếu 'Bài làm' bị trống hoặc quá ngắn (dưới 10 từ), hãy chấm điểm 0 cho tất cả các tiêu chí, phần overallFeedback ghi 'Bài làm quá ngắn hoặc để trống, không đủ dữ kiện để chấm điểm.', và để danh sách lỗi (mistakes) rỗng. Tuyệt đối KHÔNG tự sáng tác thêm bài làm hay lấy Đề bài ra làm bài làm.\n" +
-                                       "Format: Trả về dữ liệu chính xác theo cấu trúc JSON được yêu cầu. TẤT CẢ các nhận xét, giải thích, lý do và feedback (ngoại trừ trích dẫn lỗi sai) PHẢI được viết bằng Tiếng Việt (Vietnamese). KHÔNG giải thích thêm ngoài JSON.";
-            String userPrompt = "Đề bài: " + topic + "\nBài làm: " + essay;
-            
-            String jsonResult = geminiApiService.generateStructuredContent(systemInstruction, userPrompt, WRITING_SCHEMA);
-            
-            if (jsonResult != null) {
-                // Remove markdown code blocks if AI returns them
-                jsonResult = jsonResult.trim();
-                if (jsonResult.startsWith("```json")) {
-                    jsonResult = jsonResult.substring(7);
-                } else if (jsonResult.startsWith("```")) {
-                    jsonResult = jsonResult.substring(3);
-                }
-                if (jsonResult.endsWith("```")) {
-                    jsonResult = jsonResult.substring(0, jsonResult.length() - 3);
-                }
-                jsonResult = jsonResult.trim();
-                
-                try {
-                    // Lưu DB
-                    aiEvaluationDAO.insertAIEvaluation(detailId, jsonResult);
-                    
-                    // Parse thành object để có thể trả về cho Frontend nếu cần
-                    FeedbackWriting feedback = objectMapper.readValue(jsonResult, FeedbackWriting.class);
-                    
-                    // Cập nhật điểm Band và Feedback lên bảng TestSubmissions
-                    aiEvaluationDAO.updateTestSubmissionBand(detailId, feedback.getOverallBand(), "Writing", feedback.getOverallFeedback());
-                    
-                    LOGGER.info("Hoàn tất chấm điểm Writing cho DetailID: " + detailId);
-                    return feedback;
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Lỗi khi parse JSON FeedbackWriting", e);
-                }
+            LOGGER.info("[Writing] Starting evaluation for DetailID: " + detailId);
+
+            // Nghỉ 3 giây trước mỗi call để tránh rate-limit khi nhiều task chạy tuần tự
+            try { Thread.sleep(3000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); return null; }
+
+            // Xử lý bài làm null/rỗng
+            String safeEssay = (essay == null || essay.isBlank()) ? "" : essay.trim();
+
+            String systemInstruction =
+                "Bạn là giám khảo chấm thi IELTS Writing chuyên nghiệp với 20 năm kinh nghiệm.\n"
+                + "NHIỆM VỤ: Đánh giá bài IELTS Writing dựa trên 4 tiêu chí chuẩn của British Council.\n"
+                + "QUY TẮC BẮT BUỘC:\n"
+                + "1. Nếu bài làm trống hoặc dưới 10 từ: chấm 0 điểm tất cả, overallFeedback = 'Bài làm trống hoặc quá ngắn.', mistakes = []\n"
+                + "2. KHÔNG tự sáng tác bài làm từ đề bài.\n"
+                + "3. TẤT CẢ nhận xét viết bằng Tiếng Việt (trừ khi trích dẫn lỗi sai tiếng Anh).\n"
+                + "4. Trả về ĐÚNG format JSON được yêu cầu, KHÔNG thêm text ngoài JSON.";
+
+            String userPrompt = "ĐỀ BÀI:\n" + topic + "\n\nBÀI LÀM:\n" + safeEssay;
+
+            String jsonResult = geminiApiService.generateStructuredContent(
+                    systemInstruction, userPrompt, WRITING_SCHEMA);
+
+            if (jsonResult == null) {
+                LOGGER.severe("[Writing] Gemini returned null for DetailID: " + detailId
+                        + ". Check GeminiApiService logs for API errors.");
+                return null;
             }
-            return null;
-        });
-    }
-    
-    /**
-     * Chạy ngầm (Asynchronous) việc chấm điểm Speaking
-     *
-     * @param detailId ID chi tiết bài làm
-     * @param topic Chủ đề nói
-     * @param transcript Bản dịch Speech-to-Text
-     * @param azurePronunciationScore Điểm phát âm từ hệ thống Azure (thang 100)
-     * @return CompletableFuture chứa kết quả FeedbackSpeaking
-     */
-    public CompletableFuture<FeedbackSpeaking> evaluateSpeakingAsync(int detailId, String topic, String transcript, double azurePronunciationScore) {
-        return CompletableFuture.supplyAsync(() -> {
-            LOGGER.info("Bắt đầu chấm điểm Speaking cho DetailID: " + detailId);
-            String systemInstruction = "Role: Bạn là giám khảo chấm thi IELTS Speaking chuyên nghiệp.\n" +
-                                       "Objective: Đánh giá transcript phần thi IELTS Speaking dựa trên 4 tiêu chí chuẩn (Fluency, Lexical, Grammar, Pronunciation).\n" +
-                                       "Lưu ý quan trọng 1: Điểm phát âm hệ thống đã chấm bằng công nghệ AI riêng biệt là " + azurePronunciationScore + "/100. " +
-                                       "Hãy dùng điểm số này để ước lượng điểm Pronunciation theo thang điểm IELTS (0-9). Sau đó tập trung đọc Transcript để chấm 3 tiêu chí còn lại.\n" +
-                                       "Lưu ý quan trọng 2: Nếu 'Transcript' bị trống hoặc quá ngắn (dưới 5 từ), hãy chấm điểm 0 cho tất cả các tiêu chí, phần overallFeedback ghi 'Bạn chưa nói hoặc ghi âm quá ngắn, không đủ dữ kiện để chấm điểm.', và để danh sách lỗi (mistakes) rỗng. Tuyệt đối KHÔNG tự sáng tác thêm transcript.\n" +
-                                       "Format: Trả về dữ liệu chính xác theo cấu trúc JSON được yêu cầu. TẤT CẢ các nhận xét, giải thích, lý do và feedback (ngoại trừ trích dẫn lỗi sai) PHẢI được viết bằng Tiếng Việt (Vietnamese). KHÔNG giải thích thêm ngoài JSON.";
-            String userPrompt = "Chủ đề: " + topic + "\nTranscript: " + transcript;
-            
-            String jsonResult = geminiApiService.generateStructuredContent(systemInstruction, userPrompt, SPEAKING_SCHEMA);
-            
-            if (jsonResult != null) {
-                // Remove markdown code blocks if AI returns them
-                jsonResult = jsonResult.trim();
-                if (jsonResult.startsWith("```json")) {
-                    jsonResult = jsonResult.substring(7);
-                } else if (jsonResult.startsWith("```")) {
-                    jsonResult = jsonResult.substring(3);
-                }
-                if (jsonResult.endsWith("```")) {
-                    jsonResult = jsonResult.substring(0, jsonResult.length() - 3);
-                }
-                jsonResult = jsonResult.trim();
-                
-                try {
-                    // Lưu DB
-                    aiEvaluationDAO.insertAIEvaluation(detailId, jsonResult);
-                    
-                    // Parse thành object
-                    FeedbackSpeaking feedback = objectMapper.readValue(jsonResult, FeedbackSpeaking.class);
-                    
-                    // Cập nhật điểm Band và Feedback lên bảng TestSubmissions
-                    aiEvaluationDAO.updateTestSubmissionBand(detailId, feedback.getOverallBand(), "Speaking", feedback.getOverallFeedback());
-                    
-                    LOGGER.info("Hoàn tất chấm điểm Speaking cho DetailID: " + detailId);
-                    return feedback;
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Lỗi khi parse JSON FeedbackSpeaking", e);
-                }
+
+            LOGGER.info("[Writing] Gemini returned result for DetailID: " + detailId
+                    + " - Preview: " + jsonResult.substring(0, Math.min(100, jsonResult.length())));
+
+            try {
+                FeedbackWriting feedback = objectMapper.readValue(jsonResult, FeedbackWriting.class);
+
+                // Lưu JSON gốc vào AIEvaluations
+                aiEvaluationDAO.insertAIEvaluation(detailId, jsonResult);
+
+                // Cập nhật điểm vào TestSubmissions
+                aiEvaluationDAO.updateTestSubmissionBand(
+                        detailId, feedback.getOverallBand(), "Writing", feedback.getOverallFeedback());
+
+                LOGGER.info("[Writing] Completed for DetailID: " + detailId
+                        + " | Band: " + feedback.getOverallBand());
+                return feedback;
+
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE,
+                        "[Writing] Failed to parse JSON for DetailID: " + detailId
+                        + " | JSON was: " + jsonResult.substring(0, Math.min(300, jsonResult.length())), e);
+                return null;
             }
-            return null;
         });
     }
 
-    // Hàm main để test thử luồng AI (Verification)
-    public static void main(String[] args) throws Exception {
-        // MOCK KEY CHO TEST
-        System.setProperty("GEMINI_API_KEYS", "MOCK_KEY_1,MOCK_KEY_2");
-        
-        AIEvaluationService service = new AIEvaluationService();
-        System.out.println("=== TEST WRITING EVALUATION ===");
-        CompletableFuture<FeedbackWriting> future = service.evaluateWritingAsync(
-                999, 
-                "Some people believe that unpaid community service should be a compulsory part of high school programmes. To what extent do you agree or disagree?", 
-                "I completely agree that high school students should do unpaid community service. It helps them build character and learn real-world skills."
-        );
-        
-        // Block main thread to wait for result during testing
-        try {
-            FeedbackWriting result = future.join();
-            if (result != null) {
-                System.out.println("Overall Band: " + result.getOverallBand());
-                System.out.println("Feedback: " + result.getOverallFeedback());
-                System.out.println("Mistakes count: " + (result.getMistakes() != null ? result.getMistakes().size() : 0));
-            } else {
-                System.out.println("Evaluation returned null. Check API Key or logs.");
+    // =========================================================================
+    // SPEAKING EVALUATION
+    // =========================================================================
+
+    /**
+     * Chạy bất đồng bộ việc chấm điểm Speaking.
+     *
+     * @param detailId             ID của SubmissionDetails row
+     * @param topic                Câu hỏi/chủ đề Speaking
+     * @param transcript           Bản text từ Speech-to-Text
+     * @param azurePronScore       Điểm phát âm từ Azure (thang 0-100)
+     * @return CompletableFuture với kết quả FeedbackSpeaking (null nếu thất bại)
+     */
+    public CompletableFuture<FeedbackSpeaking> evaluateSpeakingAsync(
+            int detailId, String topic, String transcript, double azurePronScore) {
+
+        return CompletableFuture.supplyAsync(() -> {
+            LOGGER.info("[Speaking] Starting evaluation for DetailID: " + detailId);
+
+            // Nghỉ 3 giây trước mỗi call để tránh rate-limit khi nhiều task chạy tuần tự
+            try { Thread.sleep(3000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); return null; }
+
+            // Xử lý transcript null/rỗng
+            String safeTranscript = (transcript == null || transcript.isBlank()) ? "" : transcript.trim();
+
+            String systemInstruction =
+                "Bạn là giám khảo chấm thi IELTS Speaking chuyên nghiệp với 20 năm kinh nghiệm.\n"
+                + "NHIỆM VỤ: Đánh giá phần thi IELTS Speaking dựa trên 4 tiêu chí chuẩn của British Council.\n"
+                + "THÔNG TIN PHÁT ÂM: Hệ thống Azure AI đã chấm điểm phát âm: "
+                + String.format("%.1f", azurePronScore) + "/100. "
+                + "Quy đổi điểm này sang thang IELTS 0-9 để điền vào tiêu chí 'pronunciation'.\n"
+                + "QUY TẮC BẮT BUỘC:\n"
+                + "1. Nếu transcript trống hoặc dưới 5 từ: chấm 0 điểm tất cả, overallFeedback = 'Thí sinh chưa nói hoặc ghi âm quá ngắn.', mistakes = []\n"
+                + "2. KHÔNG tự sáng tác transcript.\n"
+                + "3. TẤT CẢ nhận xét viết bằng Tiếng Việt (trừ khi trích dẫn lỗi sai tiếng Anh).\n"
+                + "4. Trả về ĐÚNG format JSON được yêu cầu, KHÔNG thêm text ngoài JSON.";
+
+            String userPrompt = "CÂU HỎI:\n" + topic + "\n\nLỜI NÓI (TRANSCRIPT):\n" + safeTranscript;
+
+            String jsonResult = geminiApiService.generateStructuredContent(
+                    systemInstruction, userPrompt, SPEAKING_SCHEMA);
+
+            if (jsonResult == null) {
+                LOGGER.severe("[Speaking] Gemini returned null for DetailID: " + detailId
+                        + ". Check GeminiApiService logs for API errors.");
+                return null;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            LOGGER.info("[Speaking] Gemini returned result for DetailID: " + detailId
+                    + " - Preview: " + jsonResult.substring(0, Math.min(100, jsonResult.length())));
+
+            try {
+                FeedbackSpeaking feedback = objectMapper.readValue(jsonResult, FeedbackSpeaking.class);
+
+                // Lưu JSON gốc vào AIEvaluations
+                aiEvaluationDAO.insertAIEvaluation(detailId, jsonResult);
+
+                // Cập nhật điểm vào TestSubmissions
+                aiEvaluationDAO.updateTestSubmissionBand(
+                        detailId, feedback.getOverallBand(), "Speaking", feedback.getOverallFeedback());
+
+                LOGGER.info("[Speaking] Completed for DetailID: " + detailId
+                        + " | Band: " + feedback.getOverallBand());
+                return feedback;
+
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE,
+                        "[Speaking] Failed to parse JSON for DetailID: " + detailId
+                        + " | JSON was: " + jsonResult.substring(0, Math.min(300, jsonResult.length())), e);
+                return null;
+            }
+        });
+    }
+
+    private static final Map<String, String> REASON_KEYWORDS = new LinkedHashMap<>();
+    static {
+        REASON_KEYWORDS.put("Grammar",     "grammar|tense|verb|subject|agreement|clause|syntax|article");
+        REASON_KEYWORDS.put("Vocabulary",  "vocabulary|word choice|lexical|collocation|synonym|idiom|diction");
+        REASON_KEYWORDS.put("Coherence",   "coherence|cohesion|structure|paragraph|transition|organization|flow");
+        REASON_KEYWORDS.put("Pronunciation","pronunciation|sound|phoneme|intonation|stress|accent");
+        REASON_KEYWORDS.put("Fluency",     "fluency|hesitation|pace|pause|filler");
+    }
+
+    private String categorize(String reason) {
+        if (reason == null) return "Other";
+        String lower = reason.toLowerCase();
+        for (Map.Entry<String, String> entry : REASON_KEYWORDS.entrySet()) {
+            if (lower.matches(".*(" + entry.getValue() + ").*")) {
+                return entry.getKey();
+            }
         }
+        return "Other";
+    }
+
+    public Map<String, MentorSkillStat> getMentorStats(int mentorId) {
+        Map<String, MentorSkillStat> statMap = new LinkedHashMap<>();
+        statMap.put("Writing", new MentorSkillStat());
+        statMap.get("Writing").setSkill("Writing");
+        statMap.put("Speaking", new MentorSkillStat());
+        statMap.get("Speaking").setSkill("Speaking");
+
+        List<Object[]> rows = aiEvaluationDAO.getAllFeedbackByMentor(mentorId);
+        Map<String, Double> bandSumMap = new HashMap<>();
+        bandSumMap.put("Writing", 0.0);
+        bandSumMap.put("Speaking", 0.0);
+
+        for (Object[] row : rows) {
+            String json  = (String) row[0];
+            String skill = (String) row[1];
+            if (json == null || skill == null) continue;
+
+            MentorSkillStat stat = statMap.get(skill);
+            if (stat == null) continue;
+
+            try {
+                List<FeedbackMistake> mistakes;
+                double band;
+                if ("Writing".equalsIgnoreCase(skill)) {
+                    FeedbackWriting fw = objectMapper.readValue(json, FeedbackWriting.class);
+                    mistakes = fw.getMistakes();
+                    band = fw.getOverallBand();
+                } else {
+                    FeedbackSpeaking fs = objectMapper.readValue(json, FeedbackSpeaking.class);
+                    mistakes = fs.getMistakes();
+                    band = fs.getOverallBand();
+                }
+                stat.setSubmissionCount(stat.getSubmissionCount() + 1);
+                bandSumMap.put(skill, bandSumMap.get(skill) + band);
+
+                if (mistakes != null) {
+                    stat.setTotalMistakes(stat.getTotalMistakes() + mistakes.size());
+                    for (FeedbackMistake m : mistakes) {
+                        String cat = categorize(m.getReason());
+                        stat.getMistakesByCategory().merge(cat, 1, Integer::sum);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Không parse được feedbackJson, bỏ qua.", e);
+            }
+        }
+
+        // Compute averages
+        for (String skill : statMap.keySet()) {
+            MentorSkillStat stat = statMap.get(skill);
+            if (stat.getSubmissionCount() > 0) {
+                stat.setAvgBand(bandSumMap.get(skill) / stat.getSubmissionCount());
+            }
+        }
+        return statMap;
     }
 }

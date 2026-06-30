@@ -34,12 +34,14 @@ public class DashboardController extends HttpServlet {
         if ("/dashboard".equals(path)) {
             jakarta.servlet.http.HttpSession session = request.getSession(false);
             if (session == null || session.getAttribute("userId") == null) {
-                response.sendRedirect(request.getContextPath() + "/auth");
+                response.sendRedirect(request.getContextPath() + "/jsp/auth.jsp");
                 return;
             }
             int roleId = session.getAttribute("roleId") != null ? (int) session.getAttribute("roleId") : 3;
-            if (roleId == 1 || roleId == 2) {
+            if (roleId == 1) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else if (roleId == 2) {
+                response.sendRedirect(request.getContextPath() + "/mentor/dashboard");
             } else {
                 response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
             }

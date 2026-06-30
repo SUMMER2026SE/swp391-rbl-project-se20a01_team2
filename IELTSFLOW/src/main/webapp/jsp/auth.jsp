@@ -3,8 +3,14 @@
 <%
     if (session.getAttribute("userEmail") != null) {
         Integer roleId = (Integer) session.getAttribute("roleId");
-        if (roleId != null && (roleId == 1 || roleId == 2)) {
-            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+        if (roleId != null) {
+            if (roleId == 1) {
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else if (roleId == 2) {
+                response.sendRedirect(request.getContextPath() + "/mentor/dashboard");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
+            }
         } else {
             response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
         }
