@@ -35,6 +35,39 @@ public class MentorQuestionServlet extends HttpServlet {
                     req.getRequestDispatcher("/jsp/mentor/question-detail.jsp").forward(req, resp);
                     return;
                 }
+                
+                if ("ajax-next-order".equals(action)) {
+                    int resourceId = Integer.parseInt(req.getParameter("resourceId"));
+                    int nextOrder = questionService.getNextOrderInResource(resourceId);
+                    resp.setContentType("application/json");
+                    resp.getWriter().write("{\"nextOrder\": " + nextOrder + "}");
+                    return;
+                }
+                
+                if ("ajax-get-questions-by-resource".equals(action)) {
+                    int resourceId = Integer.parseInt(req.getParameter("resourceId"));
+                    List<Question> questions = questionService.getQuestionsByResourceId(resourceId);
+                    resp.setContentType("application/json");
+                    resp.setCharacterEncoding("UTF-8");
+                    
+                    // Simple JSON array builder
+                    StringBuilder json = new StringBuilder("[");
+                    for (int i = 0; i < questions.size(); i++) {
+                        Question q = questions.get(i);
+                        String contentPreview = q.getContent() != null ? q.getContent().replaceAll("\"", "\\\\\"").replaceAll("\n", " ") : "Câu hỏi #" + q.getQuestionId();
+                        if (contentPreview.length() > 60) contentPreview = contentPreview.substring(0, 60) + "...";
+                        
+                        json.append("{")
+                            .append("\"questionId\":").append(q.getQuestionId()).append(",")
+                            .append("\"orderInResource\":").append(q.getOrderInResource()).append(",")
+                            .append("\"content\":\"").append(contentPreview).append("\"")
+                            .append("}");
+                        if (i < questions.size() - 1) json.append(",");
+                    }
+                    json.append("]");
+                    resp.getWriter().write(json.toString());
+                    return;
+                }
 
                 String keyword = req.getParameter("keyword");
                 String skill   = req.getParameter("skill");
@@ -99,6 +132,21 @@ public class MentorQuestionServlet extends HttpServlet {
                 question.setQuestionId(id);
                 questionService.updateQuestion(question, buildAnswersFromRequest(req), extractTagIds(req));
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
+
+            } else if ("ajax-update-questions-order".equals(action)) {
+                // Parse a comma-separated list of IDs from the request
+                String orderJson = req.getParameter("orderIds");
+                if (orderJson != null && !orderJson.isEmpty()) {
+                    String[] idStrs = orderJson.split(",");
+                    List<Integer> ids = new ArrayList<>();
+                    for (String s : idStrs) {
+                        try { ids.add(Integer.parseInt(s.trim())); } catch (Exception ignored) {}
+                    }
+                    questionService.updateQuestionsOrder(ids);
+                }
+                resp.setContentType("application/json");
+                resp.getWriter().write("{\"success\": true}");
+                return;
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("questionId"));
