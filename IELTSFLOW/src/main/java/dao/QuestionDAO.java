@@ -59,6 +59,41 @@ public class QuestionDAO {
         );
     }
 
+    public List<Question> getQuestionsByResourceId(int resourceId) {
+        return JpaHelper.query(em ->
+                em.createQuery("SELECT q FROM Question q WHERE q.resourceId = :resId AND q.deleted = false ORDER BY q.orderInResource ASC", Question.class)
+                        .setParameter("resId", resourceId)
+                        .getResultList()
+        );
+    }
+
+    public void updateQuestionsOrder(List<Integer> questionIds) {
+        if (questionIds == null || questionIds.isEmpty()) return;
+        JpaHelper.execute(em -> {
+            int order = 1;
+            for (Integer qid : questionIds) {
+                em.createQuery("UPDATE Question q SET q.orderInResource = :order WHERE q.questionId = :qid")
+                        .setParameter("order", order++)
+                        .setParameter("qid", qid)
+                        .executeUpdate();
+            }
+        });
+    }
+
+    public int getNextOrderInResource(int resourceId) {
+        return JpaHelper.query(em -> {
+            try {
+                Integer maxOrder = em.createQuery(
+                        "SELECT MAX(q.orderInResource) FROM Question q WHERE q.resourceId = :resId AND q.deleted = false", Integer.class)
+                        .setParameter("resId", resourceId)
+                        .getSingleResult();
+                return (maxOrder != null) ? maxOrder + 1 : 1;
+            } catch (Exception e) {
+                return 1;
+            }
+        });
+    }
+
     public void removeAllTags(int questionId) {
         JpaHelper.execute(em ->
                 em.createNativeQuery("DELETE FROM QuestionTags WHERE QuestionID = :qid")
