@@ -21,6 +21,23 @@
         <jsp:param name="active" value="exams" />
     </jsp:include>
 
+    <!-- Include Select2 for searchable dropdown -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+            color: #212529;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+    </style>
+
     <main class="main-content">
         <header class="main-header animate-fade-up" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -130,32 +147,19 @@
                                         <p class="text-muted small">Chưa có câu hỏi nào trong section này.</p>
                                     </c:if>
 
-                                    <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" id="form-resource-${sec.sectionId}" class="d-flex align-items-center mb-3 p-3" style="background-color: #f1f5f9; border-radius: 8px;">
-                                        <input type="hidden" name="action" value="updateSectionResource">
-                                        <input type="hidden" name="examId" value="${exam.examId}">
-                                        <input type="hidden" name="sectionId" value="${sec.sectionId}">
-                                        <input type="hidden" name="resourceId" id="resourceId-${sec.sectionId}" value="${sec.resourceId}">
-                                        <label class="me-3 fw-bold text-secondary mb-0"><i class="fa-solid fa-link me-1"></i> Resource:</label>
-                                        <span class="me-3 fw-bold text-dark">
-                                            <c:choose>
-                                                <c:when test="${sec.resourceId != null && sec.resourceId > 0}">
-                                                    #${sec.resourceId}
-                                                    <c:forEach var="res" items="${allResources}">
-                                                        <c:if test="${res.resourceId == sec.resourceId}">
-                                                            - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
-                                                        </c:if>
-                                                    </c:forEach>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="text-muted fst-italic">Trống</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                        <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-3" onclick="openResourcePicker(${sec.sectionId})">Chọn Resource</button>
-                                        <c:if test="${sec.resourceId != null && sec.resourceId > 0}">
-                                            <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearResource(${sec.sectionId})" title="Bỏ chọn"><i class="fa-solid fa-xmark"></i></button>
-                                        </c:if>
-                                    </form>
+                                    <c:if test="${sec.resourceId != null && sec.resourceId > 0}">
+                                        <div class="mb-3 p-3" style="background-color: #f1f5f9; border-radius: 8px;">
+                                            <span class="me-3 fw-bold text-secondary mb-0"><i class="fa-solid fa-link me-1"></i> Resource:</span>
+                                            <span class="me-3 fw-bold text-dark">
+                                                #${sec.resourceId}
+                                                <c:forEach var="res" items="${allResources}">
+                                                    <c:if test="${res.resourceId == sec.resourceId}">
+                                                        - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                                    </c:if>
+                                                </c:forEach>
+                                            </span>
+                                        </div>
+                                    </c:if>
                                     
                                     <ul class="list-group">
                                         <c:forEach var="examQ" items="${sec.examQuestions}">
@@ -222,6 +226,17 @@
                                 <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
                                 <input type="number" name="orderIndex" class="form-control" required min="1" value="${sec.orderIndex}">
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
+                                <select name="resourceId" class="form-select select2-modal w-100">
+                                    <option value="">-- Không chọn Resource --</option>
+                                    <c:forEach var="res" items="${allResources}">
+                                        <option value="${res.resourceId}" ${sec.resourceId == res.resourceId ? 'selected' : ''}>
+                                            #${res.resourceId} - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -231,45 +246,6 @@
                 </div>
             </div>
         </c:forEach>
-
-        <!-- Resource Picker Modal -->
-        <div class="modal fade" id="resourcePickerModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold text-primary">Chọn Resource cho Section</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="text" id="resourceSearchInput" class="form-control mb-3" placeholder="Tìm kiếm theo ID, tên..." onkeyup="filterResources()">
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-hover" id="resourceTable">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Tên</th>
-                                        <th>Loại</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="res" items="${allResources}">
-                                        <tr>
-                                            <td>#${res.resourceId}</td>
-                                            <td class="res-name fw-medium">${res.resourceName != null ? res.resourceName : ''}</td>
-                                            <td><span class="badge bg-secondary">${res.type}</span></td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="selectResource(${res.resourceId})">Chọn</button>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     <!-- Modal Add Section -->
     <div class="modal fade" id="addSectionModal" tabindex="-1" aria-labelledby="addSectionModalLabel" aria-hidden="true">
@@ -298,7 +274,18 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
                         <input type="number" name="orderIndex" class="form-control" value="1" required min="1">
-                                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
+                        <select name="resourceId" class="form-select select2-modal w-100">
+                            <option value="">-- Không chọn Resource --</option>
+                            <c:forEach var="res" items="${allResources}">
+                                <option value="${res.resourceId}">
+                                    #${res.resourceId} - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                </option>
+                            </c:forEach>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -310,48 +297,17 @@
     </c:if>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    let currentSectionId = null;
-    let resourcePickerModalInstance = null;
-
     document.addEventListener('DOMContentLoaded', function() {
-        const modalEl = document.getElementById('resourcePickerModal');
-        if (modalEl) {
-            resourcePickerModalInstance = new bootstrap.Modal(modalEl);
-        }
-    });
-
-    function openResourcePicker(sectionId) {
-        currentSectionId = sectionId;
-        const searchInput = document.getElementById('resourceSearchInput');
-        if (searchInput) searchInput.value = '';
-        filterResources();
-        if (resourcePickerModalInstance) {
-            resourcePickerModalInstance.show();
-        }
-    }
-
-    function selectResource(resourceId) {
-        if (!currentSectionId) return;
-        document.getElementById('resourceId-' + currentSectionId).value = resourceId;
-        document.getElementById('form-resource-' + currentSectionId).submit();
-    }
-
-    function clearResource(sectionId) {
-        document.getElementById('resourceId-' + sectionId).value = '';
-        document.getElementById('form-resource-' + sectionId).submit();
-    }
-
-    function filterResources() {
-        const input = document.getElementById('resourceSearchInput');
-        if (!input) return;
-        const query = input.value.toLowerCase();
-        const rows = document.querySelectorAll('#resourceTable tbody tr');
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(query) ? '' : 'none';
+        // Initialize select2 on all modals when they are shown to ensure proper width
+        $('.modal').on('shown.bs.modal', function () {
+            $(this).find('.select2-modal').select2({
+                dropdownParent: $(this),
+                width: '100%'
+            });
         });
-    }
+    });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

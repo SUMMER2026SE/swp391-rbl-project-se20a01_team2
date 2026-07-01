@@ -129,6 +129,10 @@ public class ExamController extends HttpServlet {
                 sec.setSectionName(req.getParameter("sectionName"));
                 sec.setSkill(req.getParameter("skill"));
                 sec.setOrderIndex(Integer.parseInt(req.getParameter("orderIndex")));
+                String resourceIdStr = req.getParameter("resourceId");
+                if (resourceIdStr != null && !resourceIdStr.trim().isEmpty()) {
+                    sec.setResourceId(Integer.parseInt(resourceIdStr));
+                }
                 examService.addSection(sec);
                 resp.sendRedirect(req.getContextPath() + redirectPrefix + "/" + examId);
                 return;
@@ -141,6 +145,12 @@ public class ExamController extends HttpServlet {
                     sec.setSectionName(req.getParameter("sectionName"));
                     sec.setSkill(req.getParameter("skill"));
                     sec.setOrderIndex(Integer.parseInt(req.getParameter("orderIndex")));
+                    String resourceIdStr = req.getParameter("resourceId");
+                    if (resourceIdStr != null && !resourceIdStr.trim().isEmpty()) {
+                        sec.setResourceId(Integer.parseInt(resourceIdStr));
+                    } else {
+                        sec.setResourceId(null);
+                    }
                     examService.updateSection(sec);
                 }
                 resp.sendRedirect(req.getContextPath() + redirectPrefix + "/" + examId);
