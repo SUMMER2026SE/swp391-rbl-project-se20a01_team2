@@ -21,7 +21,7 @@ public class UserDAO {
      */
     public Optional<User> findByEmail(String email) {
         return JpaHelper.query(em -> {
-            TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
+            TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email AND u.deleted = false", User.class);
             query.setParameter("email", email);
             try {
                 return Optional.of(query.getSingleResult());
@@ -184,7 +184,7 @@ public class UserDAO {
      */
     public List<User> findAll() {
         return JpaHelper.query(em ->
-            em.createQuery("SELECT u FROM User u ORDER BY u.createdAt DESC", User.class).getResultList()
+            em.createQuery("SELECT u FROM User u WHERE u.deleted = false ORDER BY u.createdAt DESC", User.class).getResultList()
         );
     }
 
@@ -192,12 +192,99 @@ public class UserDAO {
     public List<User> findByRole(int roleId) {
         return JpaHelper.query(em ->
             em.createQuery(
-                "SELECT u FROM User u WHERE u.roleId = :roleId",
+                "SELECT u FROM User u WHERE u.roleId = :roleId AND u.deleted = false",
                 User.class)
               .setParameter("roleId", roleId)
               .getResultList()
         );
     }
+
+    /**
+     * Lấy danh sách user theo phân trang, lọc, tìm kiếm và sắp xếp
+     */
+    public List<User> findUsers(int page, int limit, String search, String roleFilter, String statusFilter, String sortBy, String sortOrder) {
+        return JpaHelper.query(em -> {
+            // Whitelist for sorting to prevent SQL Injection
+            String sortCol = "u.userId";
+            if (sortBy != null) {
+                switch (sortBy) {
+                    case "fullName": sortCol = "u.fullName"; break;
+                    case "email": sortCol = "u.email"; break;
+                    case "status": sortCol = "u.status"; break;
+                    case "roleId": sortCol = "u.roleId"; break;
+                    case "createdAt": sortCol = "u.createdAt"; break;
+                    case "userId": sortCol = "u.userId"; break;
+                    default: sortCol = "u.userId"; break;
+                }
+            }
+            String sortDir = "ASC".equalsIgnoreCase(sortOrder) ? "ASC" : "DESC";
+            
+            StringBuilder jpql = new StringBuilder("SELECT u FROM User u WHERE u.deleted = false");
+            if (search != null && !search.trim().isEmpty()) {
+                jpql.append(" AND (LOWER(u.fullName) LIKE :search OR LOWER(u.email) LIKE :search)");
+            }
+            if (roleFilter != null && !roleFilter.equals("all") && !roleFilter.trim().isEmpty()) {
+                jpql.append(" AND u.roleId = :roleId");
+            }
+            if (statusFilter != null && !statusFilter.equals("all") && !statusFilter.trim().isEmpty()) {
+                jpql.append(" AND u.status = :status");
+            }
+            
+            jpql.append(" ORDER BY ").append(sortCol).append(" ").append(sortDir);
+            
+            TypedQuery<User> query = em.createQuery(jpql.toString(), User.class);
+            if (search != null && !search.trim().isEmpty()) {
+                query.setParameter("search", "%" + search.trim().toLowerCase() + "%");
+            }
+            if (roleFilter != null && !roleFilter.equals("all") && !roleFilter.trim().isEmpty()) {
+                try {
+                    query.setParameter("roleId", Integer.parseInt(roleFilter));
+                } catch (NumberFormatException ignored) {}
+            }
+            if (statusFilter != null && !statusFilter.equals("all") && !statusFilter.trim().isEmpty()) {
+                query.setParameter("status", statusFilter);
+            }
+            
+            query.setFirstResult((page - 1) * limit);
+            query.setMaxResults(limit);
+            
+            return query.getResultList();
+        });
+    }
+
+    /**
+     * Đếm tổng số lượng user theo bộ lọc
+     */
+    public long countUsers(String search, String roleFilter, String statusFilter) {
+        return JpaHelper.query(em -> {
+            StringBuilder jpql = new StringBuilder("SELECT COUNT(u) FROM User u WHERE u.deleted = false");
+            if (search != null && !search.trim().isEmpty()) {
+                jpql.append(" AND (LOWER(u.fullName) LIKE :search OR LOWER(u.email) LIKE :search)");
+            }
+            if (roleFilter != null && !roleFilter.equals("all") && !roleFilter.trim().isEmpty()) {
+                jpql.append(" AND u.roleId = :roleId");
+            }
+            if (statusFilter != null && !statusFilter.equals("all") && !statusFilter.trim().isEmpty()) {
+                jpql.append(" AND u.status = :status");
+            }
+            
+            TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
+            if (search != null && !search.trim().isEmpty()) {
+                query.setParameter("search", "%" + search.trim().toLowerCase() + "%");
+            }
+            if (roleFilter != null && !roleFilter.equals("all") && !roleFilter.trim().isEmpty()) {
+                try {
+                    query.setParameter("roleId", Integer.parseInt(roleFilter));
+                } catch (NumberFormatException ignored) {}
+            }
+            if (statusFilter != null && !statusFilter.equals("all") && !statusFilter.trim().isEmpty()) {
+                query.setParameter("status", statusFilter);
+            }
+            
+            return query.getSingleResult();
+        });
+    }
+
 
     // Cập nhật thông tin user - sửa fullName, email, status, roleId
     public void update(User user) {

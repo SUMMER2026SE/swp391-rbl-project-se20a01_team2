@@ -1,0 +1,1126 @@
+{
+  "info": {
+    "_postman_id": "1e0f8ee5-99ac-463a-85bc-23f4c8ebd56b",
+    "name": "IELTSFLOW Auth API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56188347",
+    "_collection_link": "https://go.postman.co/collection/56188347-1e0f8ee5-99ac-463a-85bc-23f4c8ebd56b?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Register",
+      "item": [
+        {
+          "name": "Register - Happy Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 302]);",
+                  "});",
+                  "pm.test(\"Return success message\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Đăng ký thành công!\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "packages": {},
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "fullName",
+                  "value": "Nguyen Van A",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "nguyenvanaaaaa@gmail.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "Password@123",
+                  "type": "text"
+                },
+                {
+                  "key": "confirmPassword",
+                  "value": "Password@123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Negative (Missing Email)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Should fail or return validation error\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "    pm.expect(pm.response.text()).to.include(\"Email không hợp lệ\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "fullName",
+                  "value": "Nguyen Van A",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "Password@123",
+                  "type": "text"
+                },
+                {
+                  "key": "confirmPassword",
+                  "value": "Password@123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Negative (Wrong type - Pass mismatch)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Should return validation error on password mismatch\", function () {",
+                  "    pm.expect(pm.response.text().toLowerCase()).to.include(\"mật khẩu xác nhận không khớp\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "fullName",
+                  "value": "Nguyen Van A",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "nguyenvana@gmail.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "Password@123",
+                  "type": "text"
+                },
+                {
+                  "key": "confirmPassword",
+                  "value": "WrongPass123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Login",
+      "item": [
+        {
+          "name": "Login - Happy Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 302 (Redirect)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                  "});",
+                  "pm.test(\"Response contains session cookie (JSESSIONID)\", function () {",
+                  "    pm.expect(pm.cookies.has(\"JSESSIONID\")).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "nguyenvana@gmail.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "Password@123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Negative (Missing password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Should return error message\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Vui lòng nhập đầy đủ email và mật khẩu\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "nguyenvana@gmail.com",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Negative (Invalid Email Format)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Should return error message\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Tài khoản không tồn tại\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "not-an-email",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "Password@123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Google Auth",
+      "item": [
+        {
+          "name": "Google Auth - Negative (Invalid Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 (Form rendered with error)\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "pm.test(\"Should return invalid token error message\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Token không hợp lệ hoặc đã hết hạn\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "idToken",
+                  "value": "invalid_token_123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "google"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Logout",
+      "item": [
+        {
+          "name": "Logout - Happy Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 302 Redirect (to login)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([302]);",
+                  "});",
+                  "pm.test(\"JSESSIONID Cookie is cleared or expired\", function () {",
+                  "    let setCookieHeader = pm.response.headers.get(\"Set-Cookie\");",
+                  "    if (setCookieHeader && setCookieHeader.includes(\"JSESSIONID\")) {",
+                  "        pm.expect(setCookieHeader).to.match(/Max-Age=0|Expires=.*1970/);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout - Negative (No Session)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Should redirect to login if no session exists\", function () {",
+                  "     pm.expect(pm.response.code).to.be.oneOf([302]);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Forgot Password",
+      "item": [
+        {
+          "name": "Forgot Password - Happy Path (Send OTP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response body contains success message\", function () { pm.expect(pm.response.text()).to.include(\"Mã xác thực đã được gửi\"); });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "action",
+                  "value": "sendOtp",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "changepass@gmail.com",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password - Negative (Missing Email)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 (Form rendered with error)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response body contains error message\", function () { pm.expect(pm.response.text()).to.include(\"Vui lòng nhập email\"); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "action",
+                  "value": "sendOtp",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Change Password",
+      "item": [
+        {
+          "name": "Change Password - Happy Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Return success message\", function () {\r",
+                  "     pm.expect(pm.response.text()).to.include(\"Cập nhật mật khẩu thành công\");\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "\r",
+                  "// 2. Chạy tự động khôi phục mật khẩu nếu đổi thành công\r",
+                  "if (pm.response.code === 200 || pm.response.code === 302) {\r",
+                  "    const baseUrl = pm.variables.get(\"base_url\") || \"http://localhost:8080/IELTSFLOW\";\r",
+                  "    // Cấu hình request để khôi phục (đổi ngược lại)\r",
+                  "    const restoreRequest = {\r",
+                  "        url: baseUrl + \"/change-password\",\r",
+                  "        method: 'POST',\r",
+                  "        header: {\r",
+                  "            'Content-Type': 'application/x-www-form-urlencoded'\r",
+                  "        },\r",
+                  "        body: {\r",
+                  "            mode: 'urlencoded',\r",
+                  "            urlencoded: [\r",
+                  "                // currentPassword = Mật khẩu mới vừa đổi ở tab Body\r",
+                  "                { key: \"currentPassword\", value: \"newPass123\" }, \r",
+                  "                \r",
+                  "                // newPassword = Mật khẩu gốc ban đầu của bạn (VD: Password@123)\r",
+                  "                { key: \"newPassword\", value: \"Password@123\" },   \r",
+                  "                { key: \"confirmPassword\", value: \"Password@123\" }\r",
+                  "            ]\r",
+                  "        }\r",
+                  "    };\r",
+                  "    // Gửi request khôi phục trong nền\r",
+                  "    pm.sendRequest(restoreRequest, function (err, res) {\r",
+                  "        if (err) {\r",
+                  "            console.error(\"Password restore failed:\", err);\r",
+                  "        } else {\r",
+                  "            console.log(\"Password restored successfully back to original!\");\r",
+                  "        }\r",
+                  "    });\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Lấy base_url từ variables\r",
+                  "const baseUrl = pm.variables.get(\"base_url\");\r",
+                  "\r",
+                  "// Cấu hình request tự động đăng nhập\r",
+                  "const loginRequest = {\r",
+                  "    url: baseUrl + \"/api/auth/login\",\r",
+                  "    method: 'POST',\r",
+                  "    header: {\r",
+                  "        'Content-Type': 'application/x-www-form-urlencoded'\r",
+                  "    },\r",
+                  "    body: {\r",
+                  "        mode: 'urlencoded',\r",
+                  "        urlencoded: [\r",
+                  "            // Thay đổi bằng thông tin của tài khoản có sẵn trong DB của bạn\r",
+                  "            { key: \"email\", value: \"changeme@tanmanh350.ovh\" }, \r",
+                  "            \r",
+                  "            // Mật khẩu này phải giống với 'currentPassword' ở tab Body của Change Password\r",
+                  "            { key: \"password\", value: \"Password@123\" } \r",
+                  "        ]\r",
+                  "    }\r",
+                  "};\r",
+                  "\r",
+                  "// Gửi request\r",
+                  "pm.sendRequest(loginRequest, function (err, res) {\r",
+                  "    if (err) {\r",
+                  "        console.error(\"Auto-login failed:\", err);\r",
+                  "    } else {\r",
+                  "        // Nếu HTTP Status code trả về 200 hoặc 302\r",
+                  "        if (res.code === 200 || res.code === 302) {\r",
+                  "            console.log(\"Auto-login successful! JSESSIONID is set in Postman's cookie jar.\");\r",
+                  "        } else {\r",
+                  "            console.warn(\"Auto-login might have failed. HTTP Status:\", res.code);\r",
+                  "        }\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "currentPassword",
+                  "value": "Password@123",
+                  "type": "text"
+                },
+                {
+                  "key": "newPassword",
+                  "value": "newPass123",
+                  "type": "text"
+                },
+                {
+                  "key": "confirmPassword",
+                  "value": "newPass123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password - Negative (Not Logged In)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//pm.test(\"Should redirect to login\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 302]); });",
+                  "pm.test(\"Response should be auth page\", function () { if (pm.response.code === 200) { pm.expect(pm.response.text()).to.include(\"Xác thực - IELTSFlow\"); } });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// 1. Lấy URL thực tế sau khi đã thay thế các biến\r",
+                  "const resolvedUrlStr = pm.variables.replaceIn(pm.request.url.toString());\r",
+                  "\r",
+                  "// 2. Dùng Regex để tách lấy tên miền gốc (host)\r",
+                  "const match = resolvedUrlStr.match(/^https?:\\/\\/([^/?#]+)(?:[/?#]|$)/i);\r",
+                  "let actualHost = \"localhost\"; // Mặc định dự phòng\r",
+                  "\r",
+                  "if (match && match[1]) {\r",
+                  "    actualHost = match[1];\r",
+                  "    // Bỏ cổng (port) đi nếu có (VD: localhost:8080 -> localhost)\r",
+                  "    actualHost = actualHost.split(':')[0]; \r",
+                  "}\r",
+                  "\r",
+                  "const jar = pm.cookies.jar();\r",
+                  "\r",
+                  "// 3. Xóa cookie\r",
+                  "jar.clear(actualHost, function (error) {\r",
+                  "    if (error) {\r",
+                  "        console.error(\"Failed to clear cookies for \" + actualHost + \":\", error);\r",
+                  "    } else {\r",
+                  "        console.log(\"Cookies cleared successfully for \" + actualHost);\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "currentPassword",
+                  "value": "oldPass",
+                  "type": "text"
+                },
+                {
+                  "key": "newPassword",
+                  "value": "newPass123",
+                  "type": "text"
+                },
+                {
+                  "key": "confirmPassword",
+                  "value": "newPass123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password - Negative (Mismatched Passwords)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Response body contains error message\", function () { pm.expect(pm.response.text()).to.include(\"Mật khẩu mới và xác nhận mật khẩu không khớp\"); });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Lấy base_url từ variables\r",
+                  "const baseUrl = pm.variables.get(\"base_url\");\r",
+                  "\r",
+                  "// Cấu hình request tự động đăng nhập\r",
+                  "const loginRequest = {\r",
+                  "    url: baseUrl + \"/api/auth/login\",\r",
+                  "    method: 'POST',\r",
+                  "    header: {\r",
+                  "        'Content-Type': 'application/x-www-form-urlencoded'\r",
+                  "    },\r",
+                  "    body: {\r",
+                  "        mode: 'urlencoded',\r",
+                  "        urlencoded: [\r",
+                  "            // Thay đổi bằng thông tin của tài khoản có sẵn trong DB của bạn\r",
+                  "            { key: \"email\", value: \"changeme@tanmanh350.ovh\" }, \r",
+                  "            \r",
+                  "            // Mật khẩu này phải giống với 'currentPassword' ở tab Body của Change Password\r",
+                  "            { key: \"password\", value: \"Password@123\" } \r",
+                  "        ]\r",
+                  "    }\r",
+                  "};\r",
+                  "\r",
+                  "// Gửi request\r",
+                  "pm.sendRequest(loginRequest, function (err, res) {\r",
+                  "    if (err) {\r",
+                  "        console.error(\"Auto-login failed:\", err);\r",
+                  "    } else {\r",
+                  "        // Nếu HTTP Status code trả về 200 hoặc 302\r",
+                  "        if (res.code === 200 || res.code === 302) {\r",
+                  "            console.log(\"Auto-login successful! JSESSIONID is set in Postman's cookie jar.\");\r",
+                  "        } else {\r",
+                  "            console.warn(\"Auto-login might have failed. HTTP Status:\", res.code);\r",
+                  "        }\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "currentPassword",
+                  "value": "oldPass",
+                  "type": "text"
+                },
+                {
+                  "key": "newPassword",
+                  "value": "newPass123",
+                  "type": "text"
+                },
+                {
+                  "key": "confirmPassword",
+                  "value": "differentPass123",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Verify Email",
+      "item": [
+        {
+          "name": "Verify Email - Happy Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Redirects after verification\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 302]); });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/verify-email?token=example_valid_token_123",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "verify-email"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "example_valid_token_123"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Email - Negative (Missing Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Redirects with error\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 302]); });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/verify-email",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "verify-email"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. Auth",
+      "item": [
+        {
+          "name": "Auth - Happy Path (Forward to login)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response should be auth page\", function () { \r",
+                  "    if (pm.response.code === 200) { \r",
+                  "        pm.expect(pm.response.text()).to.include(\"Xác thực - IELTSFlow\");\r",
+                  "    } \r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// 1. Lấy URL thực tế sau khi đã thay thế các biến\r",
+                  "const resolvedUrlStr = pm.variables.replaceIn(pm.request.url.toString());\r",
+                  "\r",
+                  "// 2. Dùng Regex để tách lấy tên miền gốc (host)\r",
+                  "const match = resolvedUrlStr.match(/^https?:\\/\\/([^/?#]+)(?:[/?#]|$)/i);\r",
+                  "let actualHost = \"localhost\"; // Mặc định dự phòng\r",
+                  "\r",
+                  "if (match && match[1]) {\r",
+                  "    actualHost = match[1];\r",
+                  "    // Bỏ cổng (port) đi nếu có (VD: localhost:8080 -> localhost)\r",
+                  "    actualHost = actualHost.split(':')[0]; \r",
+                  "}\r",
+                  "\r",
+                  "const jar = pm.cookies.jar();\r",
+                  "\r",
+                  "// 3. Xóa cookie\r",
+                  "jar.clear(actualHost, function (error) {\r",
+                  "    if (error) {\r",
+                  "        console.error(\"Failed to clear cookies for \" + actualHost + \":\", error);\r",
+                  "    } else {\r",
+                  "        console.log(\"Cookies cleared successfully for \" + actualHost);\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "action",
+                  "value": "login",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/auth",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Auth - Negative (Invalid Action)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response should be auth page\", function () { \r",
+                  "    if (pm.response.code === 200) { \r",
+                  "        pm.expect(pm.response.text()).to.include(\"Xác thực - IELTSFlow\");\r",
+                  "    } \r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// 1. Lấy URL thực tế sau khi đã thay thế các biến\r",
+                  "const resolvedUrlStr = pm.variables.replaceIn(pm.request.url.toString());\r",
+                  "\r",
+                  "// 2. Dùng Regex để tách lấy tên miền gốc (host)\r",
+                  "const match = resolvedUrlStr.match(/^https?:\\/\\/([^/?#]+)(?:[/?#]|$)/i);\r",
+                  "let actualHost = \"localhost\"; // Mặc định dự phòng\r",
+                  "\r",
+                  "if (match && match[1]) {\r",
+                  "    actualHost = match[1];\r",
+                  "    // Bỏ cổng (port) đi nếu có (VD: localhost:8080 -> localhost)\r",
+                  "    actualHost = actualHost.split(':')[0]; \r",
+                  "}\r",
+                  "\r",
+                  "const jar = pm.cookies.jar();\r",
+                  "\r",
+                  "// 3. Xóa cookie\r",
+                  "jar.clear(actualHost, function (error) {\r",
+                  "    if (error) {\r",
+                  "        console.error(\"Failed to clear cookies for \" + actualHost + \":\", error);\r",
+                  "    } else {\r",
+                  "        console.log(\"Cookies cleared successfully for \" + actualHost);\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "action",
+                  "value": "invalid_action",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/auth",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
