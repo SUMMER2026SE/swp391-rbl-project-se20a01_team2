@@ -120,10 +120,13 @@
 
                 <div class="accordion" id="sectionsAccordion">
                     <c:forEach var="sec" items="${sections}" varStatus="status">
-                        <div class="accordion-item mb-3" style="border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1);">
-                            <h2 class="accordion-header" id="heading${sec.sectionId}">
-                                <button class="accordion-button ${status.first ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${sec.sectionId}" aria-expanded="${status.first}" aria-controls="collapse${sec.sectionId}" style="background-color: #f8f9fa;">
-                                    <strong>${sec.orderIndex}. ${sec.sectionName}</strong> <span class="badge bg-secondary ms-2">${sec.skill}</span>
+                        <div class="accordion-item mb-3" style="border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1);" data-section-id="${sec.sectionId}">
+                            <h2 class="accordion-header d-flex align-items-center" id="heading${sec.sectionId}" style="background-color: #f8f9fa;">
+                                <div class="px-3" style="cursor: grab;">
+                                    <i class="fa-solid fa-grip-vertical text-muted"></i>
+                                </div>
+                                <button class="accordion-button ${status.first ? '' : 'collapsed'} flex-grow-1 border-0 bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${sec.sectionId}" aria-expanded="${status.first}" aria-controls="collapse${sec.sectionId}" style="box-shadow: none;">
+                                    <strong><span class="section-badge">${sec.orderIndex}</span>. ${sec.sectionName}</strong> <span class="badge bg-secondary ms-2">${sec.skill}</span>
                                 </button>
                             </h2>
                             <div id="collapse${sec.sectionId}" class="accordion-collapse collapse ${status.first ? 'show' : ''}" aria-labelledby="heading${sec.sectionId}" data-bs-parent="#sectionsAccordion">
@@ -161,11 +164,12 @@
                                         </div>
                                     </c:if>
                                     
-                                    <ul class="list-group">
+                                    <ul class="list-group sortable-questions-list" data-section-id="${sec.sectionId}">
                                         <c:forEach var="examQ" items="${sec.examQuestions}">
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <span class="badge bg-light text-dark border me-2">Q${examQ.orderIndex}</span>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center" data-question-id="${examQ.questionId}">
+                                                <div style="cursor: grab;">
+                                                    <i class="fa-solid fa-grip-vertical text-muted me-2"></i>
+                                                    <span class="badge bg-light text-dark border me-2 question-badge">Q${examQ.orderIndex}</span>
                                                     <span class="text-truncate d-inline-block" style="max-width: 400px; vertical-align: middle;">
                                                         <c:choose>
                                                             <c:when test="${not empty examQ.question.content}">${examQ.question.content}</c:when>
@@ -223,10 +227,6 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
-                                <input type="number" name="orderIndex" class="form-control" required min="1" value="${sec.orderIndex}">
-                            </div>
-                            <div class="mb-3">
                                 <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
                                 <select name="resourceId" class="form-select select2-modal w-100">
                                     <option value="">-- Không chọn Resource --</option>
@@ -272,10 +272,6 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
-                        <input type="number" name="orderIndex" class="form-control" value="1" required min="1">
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
                         <select name="resourceId" class="form-select select2-modal w-100">
                             <option value="">-- Không chọn Resource --</option>
@@ -297,19 +293,114 @@
     </c:if>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize select2 on all modals when they are shown to ensure proper width
-        $('.modal').on('shown.bs.modal', function () {
-            $(this).find('.select2-modal').select2({
-                dropdownParent: $(this),
+    function customConfirm(event, form, message) {
+        event.preventDefault();
+        if (confirm(message)) {
+            form.submit();
+        }
+    }
+
+    $(document).ready(function() {
+        // Initialize Select2 in modals
+        $('.select2-modal').each(function() {
+            var $modal = $(this).closest('.modal');
+            $(this).select2({
+                dropdownParent: $modal,
                 width: '100%'
+            });
+        });
+
+        // Initialize SortableJS for the sections accordion
+        const accordion = document.getElementById('sectionsAccordion');
+        if (accordion) {
+            new Sortable(accordion, {
+                animation: 150,
+                handle: 'div[style*="cursor: grab"]',
+                ghostClass: 'bg-light',
+                onEnd: function(evt) {
+                    const items = accordion.querySelectorAll('.accordion-item');
+                    const ids = [];
+                    items.forEach((item, idx) => {
+                        ids.push(item.getAttribute('data-section-id'));
+                        // Update the section order badges visually
+                        const badge = item.querySelector('.section-badge');
+                        if (badge) {
+                            badge.innerText = (idx + 1);
+                        }
+                    });
+                    
+                    if (ids.length > 0) {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'ajax-reorder-exam-sections');
+                        formData.append('examId', '${exam.examId}');
+                        formData.append('orderIds', ids.join(','));
+
+                        fetch('${pageContext.request.contextPath}/mentor/exams', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: formData.toString()
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.success) {
+                                console.error('Failed to save section order.');
+                            }
+                        })
+                        .catch(err => console.error(err));
+                    }
+                }
+            });
+        }
+
+        // Initialize SortableJS for each section's question list
+        document.querySelectorAll('.sortable-questions-list').forEach(function(listContainer) {
+            new Sortable(listContainer, {
+                animation: 150,
+                handle: 'div[style*="cursor: grab"]',
+                ghostClass: 'bg-light',
+                onEnd: function(evt) {
+                    const items = listContainer.querySelectorAll('li');
+                    const ids = [];
+                    items.forEach((item, idx) => {
+                        ids.push(item.getAttribute('data-question-id'));
+                        // Update the badge numbers visually
+                        const badge = item.querySelector('.question-badge');
+                        if (badge) {
+                            badge.innerText = 'Q' + (idx + 1);
+                        }
+                    });
+                    
+                    const sectionId = listContainer.getAttribute('data-section-id');
+                    if (ids.length > 0) {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'ajax-reorder-exam-questions');
+                        formData.append('sectionId', sectionId);
+                        formData.append('orderIds', ids.join(','));
+
+                        fetch('${pageContext.request.contextPath}/mentor/exams', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: formData.toString()
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.success) {
+                                console.error('Failed to save order.');
+                            }
+                        })
+                        .catch(err => console.error(err));
+                    }
+                }
             });
         });
     });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
