@@ -4,6 +4,7 @@
 <head>
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lesson Detail</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
@@ -87,8 +88,15 @@
 
                     boolean hasDoc = false;
                     String fileName = "Tài liệu đính kèm";
+                    boolean isPdf = false;
+                    boolean isOffice = false;
+                    String finalDocUrl = "";
                     if (l.getDocumentUrl() != null) {
                         String d = l.getDocumentUrl().trim();
+                        finalDocUrl = d;
+                        String lowerD = d.toLowerCase();
+                        if (lowerD.endsWith(".pdf")) isPdf = true;
+                        else if (lowerD.endsWith(".docx") || lowerD.endsWith(".doc") || lowerD.endsWith(".pptx") || lowerD.endsWith(".xlsx")) isOffice = true;
                         if (d.length() > 5 && (d.startsWith("http") || d.startsWith("/"))) {
                             hasDoc = true;
                             if (d.contains("/")) {
@@ -105,6 +113,9 @@
                     }
                     request.setAttribute("hasDoc", hasDoc);
                     request.setAttribute("fileName", fileName);
+                    request.setAttribute("isPdf", isPdf);
+                    request.setAttribute("isOffice", isOffice);
+                    request.setAttribute("finalDocUrl", finalDocUrl);
                 %>
 
                 <% if (hasVideo) { %>
@@ -127,19 +138,22 @@
 
                 <% if (hasDoc) { %>
                     <div style="margin-bottom: 30px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid var(--accent-green);">
-                        <span style="color: var(--text-secondary); margin-right: 10px;">Đính kèm:</span>
-                        <c:choose>
-                            <c:when test="${lesson.documentUrl.startsWith('http')}">
-                                <a href="${lesson.documentUrl}" target="_blank" style="color: var(--accent-green); text-decoration: underline; font-weight: 500;">
-                                    📄 ${lesson.documentUrl}
-                                </a>
-                            </c:when>
-                            <c:otherwise>
-                                <a href="${pageContext.request.contextPath}${lesson.documentUrl}" download target="_blank" style="color: var(--accent-green); text-decoration: underline; font-weight: 500;">
-                                    📄 ${fileName}
-                                </a>
-                            </c:otherwise>
-                        </c:choose>
+                        <div style="margin-bottom: 15px;">
+                            <span style="color: var(--text-secondary); margin-right: 10px;">Tài liệu đính kèm:</span>
+                            <a href="<%= finalDocUrl.startsWith("http") ? finalDocUrl : request.getContextPath() + finalDocUrl %>" download target="_blank" style="color: var(--accent-green); text-decoration: underline; font-weight: 500;">
+                                Click vào đây để tải về tài liệu đính kèm (docs/pdf)
+                            </a>
+                        </div>
+                        
+                        <% if (isPdf) { %>
+                            <div style="width: 100%; height: 800px; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: #fff;">
+                                <iframe src="<%= finalDocUrl.startsWith("http") ? finalDocUrl : request.getContextPath() + finalDocUrl %>" width="100%" height="100%" style="border: none;"></iframe>
+                            </div>
+                        <% } else if (isOffice) { %>
+                            <div style="width: 100%; height: 800px; border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; background: #fff;">
+                                <iframe src="https://docs.google.com/viewer?embedded=true&url=<%= finalDocUrl.startsWith("http") ? finalDocUrl : "https://ieltsflow.tanmanh350.ovh" + finalDocUrl %>" width="100%" height="100%" style="border: none;"></iframe>
+                            </div>
+                        <% } %>
                     </div>
                 <% } else { %>
                     <div style="margin-bottom: 30px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border-left: 4px solid rgba(0,0,0,0.15); box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
@@ -162,5 +176,7 @@
         }];
     </script>
     <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
 </body>
 </html>
+

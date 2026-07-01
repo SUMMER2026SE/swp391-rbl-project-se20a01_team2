@@ -45,7 +45,7 @@ public class User {
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
 
-    @jakarta.persistence.Transient
+    @Column(name = "Deleted")
     private boolean deleted = false;
     
     public User() {

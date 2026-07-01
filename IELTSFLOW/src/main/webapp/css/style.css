@@ -562,3 +562,11 @@ body {
         width: 100%;
     }
 }
+
+@media (max-width: 768px) {
+    .flex-mobile-col { flex-direction: column !important; }
+    .flex-mobile-wrap { flex-wrap: wrap !important; }
+    .text-center-mobile { text-align: center !important; }
+    .w-full-mobile { width: 100% !important; }
+}
+

@@ -80,5 +80,7 @@
 </div>
 
 <!-- <script src="${pageContext.request.contextPath}/js/admin-script.js"></script> -->
+    <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>
+
