@@ -98,6 +98,36 @@ public class ExamController extends HttpServlet {
         String redirectPrefix = isMentor ? "/mentor/exams" : "/admin/exams";
 
         try {
+            if ("ajax-reorder-exam-questions".equals(action)) {
+                int sectionId = Integer.parseInt(req.getParameter("sectionId"));
+                String orderIdsStr = req.getParameter("orderIds");
+                if (orderIdsStr != null && !orderIdsStr.isBlank()) {
+                    java.util.List<Integer> questionIds = new java.util.ArrayList<>();
+                    for (String idStr : orderIdsStr.split(",")) {
+                        questionIds.add(Integer.parseInt(idStr.trim()));
+                    }
+                    examService.updateExamQuestionOrders(sectionId, questionIds);
+                }
+                resp.setContentType("application/json");
+                resp.getWriter().write("{\"success\": true}");
+                return;
+            }
+
+            if ("ajax-reorder-exam-sections".equals(action)) {
+                int examId = Integer.parseInt(req.getParameter("examId"));
+                String orderIdsStr = req.getParameter("orderIds");
+                if (orderIdsStr != null && !orderIdsStr.isBlank()) {
+                    java.util.List<Integer> sectionIds = new java.util.ArrayList<>();
+                    for (String idStr : orderIdsStr.split(",")) {
+                        sectionIds.add(Integer.parseInt(idStr.trim()));
+                    }
+                    examService.updateExamSectionOrders(examId, sectionIds);
+                }
+                resp.setContentType("application/json");
+                resp.getWriter().write("{\"success\": true}");
+                return;
+            }
+
             if ("create".equals(action)) {
                 Exam exam = buildFromRequest(req);
                 HttpSession session = req.getSession(false);
@@ -128,7 +158,6 @@ public class ExamController extends HttpServlet {
                 sec.setExamId(examId);
                 sec.setSectionName(req.getParameter("sectionName"));
                 sec.setSkill(req.getParameter("skill"));
-                sec.setOrderIndex(Integer.parseInt(req.getParameter("orderIndex")));
                 String resourceIdStr = req.getParameter("resourceId");
                 if (resourceIdStr != null && !resourceIdStr.trim().isEmpty()) {
                     sec.setResourceId(Integer.parseInt(resourceIdStr));
@@ -144,7 +173,6 @@ public class ExamController extends HttpServlet {
                 if (sec != null) {
                     sec.setSectionName(req.getParameter("sectionName"));
                     sec.setSkill(req.getParameter("skill"));
-                    sec.setOrderIndex(Integer.parseInt(req.getParameter("orderIndex")));
                     String resourceIdStr = req.getParameter("resourceId");
                     if (resourceIdStr != null && !resourceIdStr.trim().isEmpty()) {
                         sec.setResourceId(Integer.parseInt(resourceIdStr));

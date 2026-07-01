@@ -45,4 +45,18 @@ public class ExamQuestionDAO {
               .executeUpdate();
         });
     }
+
+    public void updateOrderIndexes(int sectionId, List<Integer> questionIds) {
+        if (questionIds == null || questionIds.isEmpty()) return;
+        JpaHelper.execute(em -> {
+            int order = 1;
+            for (Integer qid : questionIds) {
+                em.createQuery("UPDATE ExamQuestion eq SET eq.orderIndex = :order WHERE eq.sectionId = :sId AND eq.questionId = :qId")
+                  .setParameter("order", order++)
+                  .setParameter("sId", sectionId)
+                  .setParameter("qId", qid)
+                  .executeUpdate();
+            }
+        });
+    }
 }

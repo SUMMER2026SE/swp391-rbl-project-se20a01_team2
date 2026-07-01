@@ -105,19 +105,6 @@
                             </c:forEach>
                         </select>
                     </div>
-                    
-                    <div class="col-md-4" id="orderInResourceContainer">
-                        <label class="form-label fw-bold d-flex justify-content-between align-items-center mb-1">
-                            <span>Thứ tự trong Resource</span>
-                            <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" onclick="openReorderModal()" style="font-size: 0.8rem;" title="Sắp xếp câu hỏi">
-                                <i class="fa-solid fa-arrow-down-short-wide"></i> Sắp xếp
-                            </button>
-                        </label>
-                        <div class="p-2 bg-light border rounded text-center fw-bold fs-6 text-primary" id="orderDisplay">
-                            ${question != null && not empty question.orderInResource ? question.orderInResource : '-'}
-                        </div>
-                        <input type="hidden" name="orderInResource" id="orderInResourceInput" value="${question != null && not empty question.orderInResource ? question.orderInResource : 0}">
-                    </div>
 
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Tags</label>
@@ -219,29 +206,6 @@
     </main>
 </div>
 
-<!-- Modal Sắp xếp câu hỏi -->
-<div class="modal fade" id="reorderQuestionsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold text-primary">Sắp xếp câu hỏi trong Resource</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted small mb-3">Kéo thả để thay đổi thứ tự các câu hỏi hiện có trong Resource này. Chỉ các câu hỏi đã lưu mới hiển thị ở đây.</p>
-                <ul class="list-group" id="sortableQuestionsList">
-                    <!-- Fetched via AJAX -->
-                </ul>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" id="btnSaveOrder" onclick="saveQuestionsOrder()">Lưu thứ tự</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
     let answerIndex = parseInt(document.getElementById('answerCount').value);
     
@@ -373,7 +337,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        toggleOrderInResource();
         const contentJsonRaw = document.getElementById('contentJson').value;
         const contentContainer = document.getElementById('contentJsonFields');
         if (contentContainer) syncTextareaToBuilder('contentJson', 'contentJsonFields');
@@ -385,150 +348,6 @@
             }
         }
     });
-
-    function toggleOrderInResource(isUserAction = false) {
-        const resourceIdInput = document.getElementById('resourceId');
-        const orderContainer = document.getElementById('orderInResourceContainer');
-        const orderInput = document.getElementById('orderInResourceInput');
-        const orderDisplay = document.getElementById('orderDisplay');
-        
-        if (resourceIdInput && orderContainer) {
-            const resId = resourceIdInput.value.trim();
-            if (resId === '') {
-                orderContainer.style.display = 'none';
-                if (isUserAction && orderInput) {
-                    orderInput.value = '0';
-                    if (orderDisplay) orderDisplay.innerText = '-';
-                }
-            } else {
-                orderContainer.style.display = 'block';
-                if (isUserAction && orderInput) {
-                    if (orderDisplay) orderDisplay.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-                    fetch(window.contextPath + '/mentor/questions?action=ajax-next-order&resourceId=' + resId)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data && data.nextOrder) {
-                                orderInput.value = data.nextOrder;
-                                if (orderDisplay) orderDisplay.innerText = data.nextOrder;
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error fetching next order:", error);
-                            if (orderDisplay) orderDisplay.innerText = '-';
-                        });
-                }
-            }
-        }
-    }
-
-    // Drag and drop reordering
-    let sortableInstance = null;
-    
-    function openReorderModal() {
-        const resourceId = document.getElementById('resourceId').value.trim();
-        if (!resourceId) {
-            alert('Vui lòng chọn Resource trước khi sắp xếp.');
-            return;
-        }
-
-        const listContainer = document.getElementById('sortableQuestionsList');
-        listContainer.innerHTML = '<li class="list-group-item text-center"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</li>';
-        
-        const modal = new bootstrap.Modal(document.getElementById('reorderQuestionsModal'));
-        modal.show();
-
-        fetch(window.contextPath + '/mentor/questions?action=ajax-get-questions-by-resource&resourceId=' + resourceId)
-            .then(res => res.json())
-            .then(data => {
-                listContainer.innerHTML = '';
-                if (data.length === 0) {
-                    listContainer.innerHTML = '<li class="list-group-item text-center text-muted">Chưa có câu hỏi nào trong Resource này.</li>';
-                    return;
-                }
-                
-                data.forEach((q, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'list-group-item d-flex align-items-center';
-                    li.dataset.id = q.questionId;
-                    li.innerHTML = `
-                        <i class="fa-solid fa-grip-vertical text-muted me-3" style="cursor: grab;"></i>
-                        <span class="badge bg-secondary me-2">` + (index + 1) + `</span>
-                        <span class="text-truncate">` + q.content + `</span>
-                    `;
-                    listContainer.appendChild(li);
-                });
-
-                if (sortableInstance) sortableInstance.destroy();
-                sortableInstance = new Sortable(listContainer, {
-                    animation: 150,
-                    ghostClass: 'bg-light',
-                    onEnd: function () {
-                        // Update badges after drag
-                        const items = listContainer.querySelectorAll('li');
-                        items.forEach((item, idx) => {
-                            const badge = item.querySelector('.badge');
-                            if (badge) badge.innerText = (idx + 1);
-                        });
-                    }
-                });
-            })
-            .catch(err => {
-                console.error(err);
-                listContainer.innerHTML = '<li class="list-group-item text-center text-danger">Có lỗi xảy ra khi tải dữ liệu.</li>';
-            });
-    }
-
-    function saveQuestionsOrder() {
-        const listContainer = document.getElementById('sortableQuestionsList');
-        const items = listContainer.querySelectorAll('li');
-        if (items.length === 0) return;
-
-        const ids = Array.from(items).map(li => li.dataset.id).filter(id => id);
-        if (ids.length === 0) return;
-
-        const btn = document.getElementById('btnSaveOrder');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
-
-        const formData = new URLSearchParams();
-        formData.append('action', 'ajax-update-questions-order');
-        formData.append('orderIds', ids.join(','));
-
-        fetch(window.contextPath + '/mentor/questions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: formData.toString()
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                bootstrap.Modal.getInstance(document.getElementById('reorderQuestionsModal')).hide();
-                // If editing a question, update its order display
-                const currentQuestionId = '${question != null ? question.questionId : ""}';
-                if (currentQuestionId) {
-                    const currentIndex = ids.indexOf(currentQuestionId);
-                    if (currentIndex !== -1) {
-                        const newOrder = currentIndex + 1;
-                        document.getElementById('orderInResourceInput').value = newOrder;
-                        const display = document.getElementById('orderDisplay');
-                        if (display) {
-                            display.innerText = newOrder;
-                        }
-                    }
-                } else {
-                    // If creating a new question, refresh the auto-assigned next order
-                    toggleOrderInResource(true);
-                }
-            }
-        })
-        .catch(err => console.error(err))
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerText = 'Lưu thứ tự';
-        });
-    }
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -537,10 +356,6 @@
 <script>
     $(document).ready(function() {
         $('.selectpicker').selectpicker();
-        
-        $('#resourceId').on('change', function () {
-            toggleOrderInResource(true);
-        });
     });
 </script>
 </body>
