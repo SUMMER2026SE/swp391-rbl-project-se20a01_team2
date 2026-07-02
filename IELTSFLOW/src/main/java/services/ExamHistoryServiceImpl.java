@@ -28,6 +28,11 @@ public class ExamHistoryServiceImpl implements ExamHistoryService {
     }
 
     @Override
+    public TestSubmission getLatestCompletedPlacementTest(int userId) {
+        return examHistoryDAO.getLatestCompletedPlacementTest(userId);
+    }
+
+    @Override
     public double getAverageBand(List<TestSubmission> completed) {
         return completed.stream()
                 .filter(s -> s.getOverallBand() != null)

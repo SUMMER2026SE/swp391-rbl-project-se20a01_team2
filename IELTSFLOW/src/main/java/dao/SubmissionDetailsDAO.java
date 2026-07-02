@@ -9,6 +9,33 @@ public class SubmissionDetailsDAO {
     }
 
     /**
+     * Lấy danh sách đếm số lỗi làm sai theo từng Tag của một bài test
+     */
+    public java.util.Map<String, Integer> getWrongTagsCountBySubmissionId(int submissionId) {
+        return JpaHelper.query(em -> {
+            String sql = "SELECT t.Name, COUNT(sd.DetailID) " +
+                         "FROM SubmissionDetails sd " +
+                         "JOIN QuestionTags qt ON sd.QuestionID = qt.QuestionID " +
+                         "JOIN Tags t ON qt.TagID = t.TagID " +
+                         "WHERE sd.SubmissionID = :subId AND sd.IsCorrect = 0 " +
+                         "GROUP BY t.Name";
+            
+            @SuppressWarnings("unchecked")
+            java.util.List<Object[]> rows = em.createNativeQuery(sql)
+                    .setParameter("subId", submissionId)
+                    .getResultList();
+                    
+            java.util.Map<String, Integer> wrongTagsCount = new java.util.HashMap<>();
+            for (Object[] row : rows) {
+                if (row[0] != null && row[1] != null) {
+                    wrongTagsCount.put(row[0].toString(), ((Number) row[1]).intValue());
+                }
+            }
+            return wrongTagsCount;
+        });
+    }
+
+    /**
      * Cập nhật kết quả chấm điểm Speaking và Transcript từ Azure vào Database (Task 55 & 60)
      * 
      * @param detailId ID của chi tiết bài làm
