@@ -9,6 +9,8 @@
     <title>${question == null ? 'Tạo câu hỏi' : 'Chi tiết câu hỏi'} - IELTSFlow Mentor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Select CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
     <link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -94,24 +96,19 @@
 
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
-                        <select name="resourceId" id="resourceId" class="form-select" onchange="toggleOrderInResource()">
+                        <select name="resourceId" id="resourceId" class="selectpicker form-control" data-live-search="true" title="-- Không liên kết Resource --" onchange="toggleOrderInResource(true)">
                             <option value="">-- Không liên kết Resource --</option>
                             <c:forEach var="res" items="${allResources}">
-                                <option value="${res.resourceId}" ${question.resourceId == res.resourceId ? 'selected' : ''}>
-                                    #${res.resourceId} - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                <option value="${res.resourceId}" data-subtext="${res.type}" ${question.resourceId == res.resourceId ? 'selected' : ''}>
+                                    #${res.resourceId} - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'}
                                 </option>
                             </c:forEach>
                         </select>
                     </div>
-                    
-                    <div class="col-md-4" id="orderInResourceContainer">
-                        <label class="form-label fw-bold">Thứ tự trong Resource</label>
-                        <input type="number" name="orderInResource" class="form-control" value="${question.orderInResource}">
-                    </div>
 
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Tags</label>
-                        <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto; background-color: var(--bg-surface);">
+                        <select name="tagIds" class="selectpicker form-control" multiple data-live-search="true" data-actions-box="true" title="-- Chọn Tags --" data-selected-text-format="count > 3">
                             <c:forEach var="tag" items="${allTags}">
                                 <c:set var="isSelected" value="false" />
                                 <c:if test="${question != null}">
@@ -119,14 +116,11 @@
                                         <c:if test="${qTag.tagId == tag.tagId}"><c:set var="isSelected" value="true" /></c:if>
                                     </c:forEach>
                                 </c:if>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="tagIds" value="${tag.tagId}" id="tag_${tag.tagId}" ${isSelected ? 'checked' : ''}>
-                                    <label class="form-check-label" for="tag_${tag.tagId}">
-                                        ${tag.name}
-                                    </label>
-                                </div>
+                                <option value="${tag.tagId}" data-subtext="${tag.type}" ${isSelected ? 'selected' : ''}>
+                                    ${tag.name}
+                                </option>
                             </c:forEach>
-                        </div>
+                        </select>
                     </div>
 
                     <div class="col-md-12">
@@ -209,41 +203,6 @@
             </form>
         </div>
         
-        <c:if test="${question != null}">
-            <div class="glass-panel animate-fade-up mt-4" style="animation-delay: 0.2s; padding: 30px;">
-                <h5 class="fw-bold mb-4" style="color: var(--accent-orange);">Quản lý Tag 🏷️</h5>
-                
-                <div class="d-flex flex-wrap gap-2 mb-4">
-                    <c:forEach var="tag" items="${question.tags}">
-                        <div class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2 fs-6 rounded-pill d-flex align-items-center">
-                            ${tag.name}
-                            <form action="${pageContext.request.contextPath}/mentor/questions" method="POST" class="ms-2 d-inline">
-                                <input type="hidden" name="action" value="removeTag">
-                                <input type="hidden" name="questionId" value="${question.questionId}">
-                                <input type="hidden" name="tagId" value="${tag.tagId}">
-                                <button type="submit" class="btn-close btn-close-dark ms-1" style="font-size: 0.5rem;" aria-label="Close"></button>
-                            </form>
-                        </div>
-                    </c:forEach>
-                    <c:if test="${empty question.tags}">
-                        <span class="text-muted fst-italic">Chưa có tag nào.</span>
-                    </c:if>
-                </div>
-                
-                <form action="${pageContext.request.contextPath}/mentor/questions" method="POST" class="d-flex gap-2 align-items-center max-w-md">
-                    <input type="hidden" name="action" value="addTag">
-                    <input type="hidden" name="questionId" value="${question.questionId}">
-                    <select name="tagId" class="form-select rounded-pill w-auto flex-grow-1" required>
-                        <option value="">-- Chọn tag để thêm --</option>
-                        <c:forEach var="t" items="${allTags}">
-                            <option value="${t.tagId}">${t.name}</option>
-                        </c:forEach>
-                    </select>
-                    <button type="submit" class="btn btn-outline-success rounded-pill fw-bold"><i class="fa-solid fa-plus"></i> Thêm</button>
-                </form>
-            </div>
-        </c:if>
-
     </main>
 </div>
 
@@ -378,7 +337,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        toggleOrderInResource();
         const contentJsonRaw = document.getElementById('contentJson').value;
         const contentContainer = document.getElementById('contentJsonFields');
         if (contentContainer) syncTextareaToBuilder('contentJson', 'contentJsonFields');
@@ -390,20 +348,15 @@
             }
         }
     });
-
-    function toggleOrderInResource() {
-        const resourceIdInput = document.getElementById('resourceId');
-        const orderContainer = document.getElementById('orderInResourceContainer');
-        if (resourceIdInput && orderContainer) {
-            if (resourceIdInput.value.trim() === '') {
-                orderContainer.style.display = 'none';
-            } else {
-                orderContainer.style.display = 'block';
-            }
-        }
-    }
 </script>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.selectpicker').selectpicker();
+    });
+</script>
 </body>
 </html>

@@ -21,6 +21,23 @@
         <jsp:param name="active" value="exams" />
     </jsp:include>
 
+    <!-- Include Select2 for searchable dropdown -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+            color: #212529;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+    </style>
+
     <main class="main-content">
         <header class="main-header animate-fade-up" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -103,10 +120,13 @@
 
                 <div class="accordion" id="sectionsAccordion">
                     <c:forEach var="sec" items="${sections}" varStatus="status">
-                        <div class="accordion-item mb-3" style="border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1);">
-                            <h2 class="accordion-header" id="heading${sec.sectionId}">
-                                <button class="accordion-button ${status.first ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${sec.sectionId}" aria-expanded="${status.first}" aria-controls="collapse${sec.sectionId}" style="background-color: #f8f9fa;">
-                                    <strong>${sec.orderIndex}. ${sec.sectionName}</strong> <span class="badge bg-secondary ms-2">${sec.skill}</span>
+                        <div class="accordion-item mb-3" style="border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1);" data-section-id="${sec.sectionId}">
+                            <h2 class="accordion-header d-flex align-items-center" id="heading${sec.sectionId}" style="background-color: #f8f9fa;">
+                                <div class="px-3" style="cursor: grab;">
+                                    <i class="fa-solid fa-grip-vertical text-muted"></i>
+                                </div>
+                                <button class="accordion-button ${status.first ? '' : 'collapsed'} flex-grow-1 border-0 bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${sec.sectionId}" aria-expanded="${status.first}" aria-controls="collapse${sec.sectionId}" style="box-shadow: none;">
+                                    <strong><span class="section-badge">${sec.orderIndex}</span>. ${sec.sectionName}</strong> <span class="badge bg-secondary ms-2">${sec.skill}</span>
                                 </button>
                             </h2>
                             <div id="collapse${sec.sectionId}" class="accordion-collapse collapse ${status.first ? 'show' : ''}" aria-labelledby="heading${sec.sectionId}" data-bs-parent="#sectionsAccordion">
@@ -130,38 +150,26 @@
                                         <p class="text-muted small">Chưa có câu hỏi nào trong section này.</p>
                                     </c:if>
 
-                                    <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" id="form-resource-${sec.sectionId}" class="d-flex align-items-center mb-3 p-3" style="background-color: #f1f5f9; border-radius: 8px;">
-                                        <input type="hidden" name="action" value="updateSectionResource">
-                                        <input type="hidden" name="examId" value="${exam.examId}">
-                                        <input type="hidden" name="sectionId" value="${sec.sectionId}">
-                                        <input type="hidden" name="resourceId" id="resourceId-${sec.sectionId}" value="${sec.resourceId}">
-                                        <label class="me-3 fw-bold text-secondary mb-0"><i class="fa-solid fa-link me-1"></i> Resource:</label>
-                                        <span class="me-3 fw-bold text-dark">
-                                            <c:choose>
-                                                <c:when test="${sec.resourceId != null && sec.resourceId > 0}">
-                                                    #${sec.resourceId}
-                                                    <c:forEach var="res" items="${allResources}">
-                                                        <c:if test="${res.resourceId == sec.resourceId}">
-                                                            - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
-                                                        </c:if>
-                                                    </c:forEach>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="text-muted fst-italic">Trống</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                        <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-3" onclick="openResourcePicker(${sec.sectionId})">Chọn Resource</button>
-                                        <c:if test="${sec.resourceId != null && sec.resourceId > 0}">
-                                            <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearResource(${sec.sectionId})" title="Bỏ chọn"><i class="fa-solid fa-xmark"></i></button>
-                                        </c:if>
-                                    </form>
+                                    <c:if test="${sec.resourceId != null && sec.resourceId > 0}">
+                                        <div class="mb-3 p-3" style="background-color: #f1f5f9; border-radius: 8px;">
+                                            <span class="me-3 fw-bold text-secondary mb-0"><i class="fa-solid fa-link me-1"></i> Resource:</span>
+                                            <span class="me-3 fw-bold text-dark">
+                                                #${sec.resourceId}
+                                                <c:forEach var="res" items="${allResources}">
+                                                    <c:if test="${res.resourceId == sec.resourceId}">
+                                                        - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                                    </c:if>
+                                                </c:forEach>
+                                            </span>
+                                        </div>
+                                    </c:if>
                                     
-                                    <ul class="list-group">
+                                    <ul class="list-group sortable-questions-list" data-section-id="${sec.sectionId}">
                                         <c:forEach var="examQ" items="${sec.examQuestions}">
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <span class="badge bg-light text-dark border me-2">Q${examQ.orderIndex}</span>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center" data-question-id="${examQ.questionId}">
+                                                <div style="cursor: grab;">
+                                                    <i class="fa-solid fa-grip-vertical text-muted me-2"></i>
+                                                    <span class="badge bg-light text-dark border me-2 question-badge">Q${examQ.orderIndex}</span>
                                                     <span class="text-truncate d-inline-block" style="max-width: 400px; vertical-align: middle;">
                                                         <c:choose>
                                                             <c:when test="${not empty examQ.question.content}">${examQ.question.content}</c:when>
@@ -219,8 +227,15 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
-                                <input type="number" name="orderIndex" class="form-control" required min="1" value="${sec.orderIndex}">
+                                <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
+                                <select name="resourceId" class="form-select select2-modal w-100">
+                                    <option value="">-- Không chọn Resource --</option>
+                                    <c:forEach var="res" items="${allResources}">
+                                        <option value="${res.resourceId}" ${sec.resourceId == res.resourceId ? 'selected' : ''}>
+                                            #${res.resourceId} - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                        </option>
+                                    </c:forEach>
+                                </select>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -231,45 +246,6 @@
                 </div>
             </div>
         </c:forEach>
-
-        <!-- Resource Picker Modal -->
-        <div class="modal fade" id="resourcePickerModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold text-primary">Chọn Resource cho Section</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="text" id="resourceSearchInput" class="form-control mb-3" placeholder="Tìm kiếm theo ID, tên..." onkeyup="filterResources()">
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-hover" id="resourceTable">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Tên</th>
-                                        <th>Loại</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach var="res" items="${allResources}">
-                                        <tr>
-                                            <td>#${res.resourceId}</td>
-                                            <td class="res-name fw-medium">${res.resourceName != null ? res.resourceName : ''}</td>
-                                            <td><span class="badge bg-secondary">${res.type}</span></td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="selectResource(${res.resourceId})">Chọn</button>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     <!-- Modal Add Section -->
     <div class="modal fade" id="addSectionModal" tabindex="-1" aria-labelledby="addSectionModalLabel" aria-hidden="true">
@@ -296,9 +272,16 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Thứ tự <span class="text-danger">*</span></label>
-                        <input type="number" name="orderIndex" class="form-control" value="1" required min="1">
-                                        </div>
+                        <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
+                        <select name="resourceId" class="form-select select2-modal w-100">
+                            <option value="">-- Không chọn Resource --</option>
+                            <c:forEach var="res" items="${allResources}">
+                                <option value="${res.resourceId}">
+                                    #${res.resourceId} - ${res.resourceName != null ? res.resourceName : 'Chưa đặt tên'} (${res.type})
+                                </option>
+                            </c:forEach>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -310,50 +293,114 @@
     </c:if>
 </div>
 
-<script>
-    let currentSectionId = null;
-    let resourcePickerModalInstance = null;
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const modalEl = document.getElementById('resourcePickerModal');
-        if (modalEl) {
-            resourcePickerModalInstance = new bootstrap.Modal(modalEl);
-        }
-    });
-
-    function openResourcePicker(sectionId) {
-        currentSectionId = sectionId;
-        const searchInput = document.getElementById('resourceSearchInput');
-        if (searchInput) searchInput.value = '';
-        filterResources();
-        if (resourcePickerModalInstance) {
-            resourcePickerModalInstance.show();
-        }
-    }
-
-    function selectResource(resourceId) {
-        if (!currentSectionId) return;
-        document.getElementById('resourceId-' + currentSectionId).value = resourceId;
-        document.getElementById('form-resource-' + currentSectionId).submit();
-    }
-
-    function clearResource(sectionId) {
-        document.getElementById('resourceId-' + sectionId).value = '';
-        document.getElementById('form-resource-' + sectionId).submit();
-    }
-
-    function filterResources() {
-        const input = document.getElementById('resourceSearchInput');
-        if (!input) return;
-        const query = input.value.toLowerCase();
-        const rows = document.querySelectorAll('#resourceTable tbody tr');
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(query) ? '' : 'none';
-        });
-    }
-</script>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    function customConfirm(event, form, message) {
+        event.preventDefault();
+        if (confirm(message)) {
+            form.submit();
+        }
+    }
+
+    $(document).ready(function() {
+        // Initialize Select2 in modals
+        $('.select2-modal').each(function() {
+            var $modal = $(this).closest('.modal');
+            $(this).select2({
+                dropdownParent: $modal,
+                width: '100%'
+            });
+        });
+
+        // Initialize SortableJS for the sections accordion
+        const accordion = document.getElementById('sectionsAccordion');
+        if (accordion) {
+            new Sortable(accordion, {
+                animation: 150,
+                handle: 'div[style*="cursor: grab"]',
+                ghostClass: 'bg-light',
+                onEnd: function(evt) {
+                    const items = accordion.querySelectorAll('.accordion-item');
+                    const ids = [];
+                    items.forEach((item, idx) => {
+                        ids.push(item.getAttribute('data-section-id'));
+                        // Update the section order badges visually
+                        const badge = item.querySelector('.section-badge');
+                        if (badge) {
+                            badge.innerText = (idx + 1);
+                        }
+                    });
+                    
+                    if (ids.length > 0) {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'ajax-reorder-exam-sections');
+                        formData.append('examId', '${exam.examId}');
+                        formData.append('orderIds', ids.join(','));
+
+                        fetch('${pageContext.request.contextPath}/mentor/exams', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: formData.toString()
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.success) {
+                                console.error('Failed to save section order.');
+                            }
+                        })
+                        .catch(err => console.error(err));
+                    }
+                }
+            });
+        }
+
+        // Initialize SortableJS for each section's question list
+        document.querySelectorAll('.sortable-questions-list').forEach(function(listContainer) {
+            new Sortable(listContainer, {
+                animation: 150,
+                handle: 'div[style*="cursor: grab"]',
+                ghostClass: 'bg-light',
+                onEnd: function(evt) {
+                    const items = listContainer.querySelectorAll('li');
+                    const ids = [];
+                    items.forEach((item, idx) => {
+                        ids.push(item.getAttribute('data-question-id'));
+                        // Update the badge numbers visually
+                        const badge = item.querySelector('.question-badge');
+                        if (badge) {
+                            badge.innerText = 'Q' + (idx + 1);
+                        }
+                    });
+                    
+                    const sectionId = listContainer.getAttribute('data-section-id');
+                    if (ids.length > 0) {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'ajax-reorder-exam-questions');
+                        formData.append('sectionId', sectionId);
+                        formData.append('orderIds', ids.join(','));
+
+                        fetch('${pageContext.request.contextPath}/mentor/exams', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: formData.toString()
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.success) {
+                                console.error('Failed to save order.');
+                            }
+                        })
+                        .catch(err => console.error(err));
+                    }
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

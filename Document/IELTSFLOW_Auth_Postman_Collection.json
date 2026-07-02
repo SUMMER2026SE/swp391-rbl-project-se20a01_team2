@@ -17,16 +17,23 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200 OK or 302 Redirect\", function () {",
+                  "pm.test(\"Status code is 200\", function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 302]);",
                   "});",
-                  "pm.test(\"Response time is acceptable (< 5s)\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "pm.test(\"Return success message\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Đăng ký thành công!\");",
                   "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
                 "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "packages": {},
+                "type": "text/javascript"
               }
             }
           ],
@@ -43,7 +50,7 @@
                 },
                 {
                   "key": "email",
-                  "value": "nguyenvanaa@gmail.com",
+                  "value": "nguyenvanaaaaa@gmail.com",
                   "type": "text"
                 },
                 {
@@ -345,7 +352,9 @@
                   "    pm.expect(pm.response.text()).to.include(\"Token không hợp lệ hoặc đã hết hạn\");",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],

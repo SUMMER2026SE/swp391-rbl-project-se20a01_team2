@@ -53,4 +53,18 @@ public class ExamSectionDAO {
             if (section != null) em.remove(section);
         });
     }
+
+    public void updateOrderIndexes(int examId, List<Integer> sectionIds) {
+        if (sectionIds == null || sectionIds.isEmpty()) return;
+        JpaHelper.execute(em -> {
+            int order = 1;
+            for (Integer sid : sectionIds) {
+                em.createQuery("UPDATE ExamSection s SET s.orderIndex = :order WHERE s.examId = :eId AND s.sectionId = :sId")
+                  .setParameter("order", order++)
+                  .setParameter("eId", examId)
+                  .setParameter("sId", sid)
+                  .executeUpdate();
+            }
+        });
+    }
 }

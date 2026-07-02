@@ -40,6 +40,18 @@ public class QuestionService {
         return questionDAO.searchQuestions(keyword, skill, difficulty, type, page, pageSize);
     }
 
+    public int getNextOrderInResource(int resourceId) {
+        return questionDAO.getNextOrderInResource(resourceId);
+    }
+
+    public List<Question> getQuestionsByResourceId(int resourceId) {
+        return questionDAO.getQuestionsByResourceId(resourceId);
+    }
+
+    public void updateQuestionsOrder(List<Integer> questionIds) {
+        questionDAO.updateQuestionsOrder(questionIds);
+    }
+
     public void createQuestion(Question question, List<Answer> answers, List<Integer> tagIds) throws Exception {
         validate(question);
         if (answers == null || answers.isEmpty())

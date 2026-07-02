@@ -96,6 +96,11 @@ public class ExamService {
     }
 
     public void addSection(model.ExamSection section) {
+        if (section.getOrderIndex() <= 0) {
+            List<model.ExamSection> existing = sectionDAO.findByExamId(section.getExamId());
+            int nextOrder = existing.size() + 1;
+            section.setOrderIndex(nextOrder);
+        }
         sectionDAO.save(section);
     }
 
@@ -105,6 +110,10 @@ public class ExamService {
 
     public void deleteSection(int sectionId) {
         sectionDAO.delete(sectionId);
+    }
+
+    public void updateExamSectionOrders(int examId, java.util.List<Integer> sectionIds) {
+        sectionDAO.updateOrderIndexes(examId, sectionIds);
     }
 
     public void addQuestionToSection(int sectionId, int questionId) {
@@ -121,5 +130,9 @@ public class ExamService {
 
     public void removeQuestionFromSection(int sectionId, int questionId) {
         examQuestionDAO.delete(sectionId, questionId);
+    }
+
+    public void updateExamQuestionOrders(int sectionId, java.util.List<Integer> questionIds) {
+        examQuestionDAO.updateOrderIndexes(sectionId, questionIds);
     }
 }
