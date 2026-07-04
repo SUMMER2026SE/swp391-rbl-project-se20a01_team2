@@ -23,11 +23,11 @@ CREATE TABLE Users (
     AuthProvider NVARCHAR(50) DEFAULT 'Local', -- Local, Google, Facebook
     ProviderID NVARCHAR(100) NULL, -- ID trả về từ Google/Facebook
     FullName NVARCHAR(100) NOT NULL,
-    ProfilePic NVARCHAR(500) NULL,
     Status NVARCHAR(20) DEFAULT 'Active', -- Active, Inactive, Banned
     CreatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID),
-    Deleted BIT DEFAULT 0
+    Deleted BIT DEFAULT 0,
+    ProfilePic NVARCHAR(500) NULL
 );
 
 CREATE TABLE CandidateTargets (
@@ -91,6 +91,7 @@ CREATE TABLE UserSubscriptions (
 
 CREATE TABLE QuestionResource (
     ResourceID INT IDENTITY(1,1) PRIMARY KEY,
+    ResourceName NVARCHAR(255),
     ResourceText NVARCHAR(MAX),
     ResourceAudioURL NVARCHAR(500),
     ResourceImageURL NVARCHAR(MAX),
@@ -104,13 +105,13 @@ CREATE TABLE Questions (
     QuestionID INT IDENTITY(1,1) PRIMARY KEY,
     ResourceID INT NULL, 
     Content NVARCHAR(MAX) NOT NULL,
-    QuestionType NVARCHAR(50) NOT NULL, -- MultipleChoice, Matching, FillInBlanks. Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
+    QuestionType NVARCHAR(50) NOT NULL, -- MultipleChoice, Matching, FillInBlanks,.... Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
     Skill NVARCHAR(20) NOT NULL, -- Listening, Reading, Writing, Speaking
     Difficulty NVARCHAR(20), -- Easy, Medium, Hard
     Explanation NVARCHAR(MAX),
     OrderInResource INT NULL, -- [CẬP NHẬT] Thứ tự câu hỏi đi theo 1 bài đọc (Passage) hoặc audio
     contentJSON NVARCHAR(MAX) NOT NULL, 
-    QuestionCount INT DEFAULT 1, -- Số lượng câu hỏi con (Ví dụ: 1 đoạn fill in the blank có 5 chỗ trống -> QuestionCount = 5)
+    QuestionCount INT DEFAULT 1,
     CreatedBy INT NULL, -- Theo dõi Mentor nào tạo
     FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID),
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
@@ -196,10 +197,10 @@ CREATE TABLE Exams (
 CREATE TABLE ExamSections (
     SectionID INT IDENTITY(1,1) PRIMARY KEY,
     ExamID INT NOT NULL,
-    Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening', -- Listening, Reading, Writing, Speaking
     SectionName NVARCHAR(100) NOT NULL, -- Ví dụ: "Reading - Passage 1", "Listening - Part 3"
     ResourceID INT NULL, -- Gắn Passage/Audio thẳng vào Section (nếu có)
     OrderIndex INT NOT NULL, 
+    Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening',
 
     FOREIGN KEY (ExamID) REFERENCES Exams(ExamID) ON DELETE CASCADE,
 
@@ -258,8 +259,6 @@ CREATE TABLE SubmissionDetails (
     IsCorrect BIT,
     Score DECIMAL(5,2),
     GradingStatus NVARCHAR(50) DEFAULT 'Graded', -- 'Pending_AI', 'Processing', 'Graded', 'Failed'
-    MentorScore DECIMAL(5,2) NULL,
-    MentorFeedback NVARCHAR(MAX) NULL,
     FOREIGN KEY (SubmissionID) REFERENCES TestSubmissions(SubmissionID) ON DELETE CASCADE,
     FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID)
 );
@@ -293,6 +292,7 @@ CREATE TABLE WeeklyPlans (
     WeekNumber INT NOT NULL,
     PlanContent NVARCHAR(MAX) NOT NULL, 
     IsCompleted BIT DEFAULT 0,
+    IsCurrentWeek BIT DEFAULT 0, -- Theo dõi trạng thái tuần học hiện tại
     FOREIGN KEY (PathwayID) REFERENCES Pathways(PathwayID) ON DELETE CASCADE,
     CONSTRAINT CHK_PlanContent CHECK (ISJSON(PlanContent) = 1) 
 );
@@ -306,10 +306,8 @@ CREATE TABLE Tickets (
     UserID INT NOT NULL,
     Subject NVARCHAR(255) NOT NULL,
     Status NVARCHAR(50) DEFAULT 'Open', 
-    AssignedTo INT NULL,
     CreatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (AssignedTo) REFERENCES Users(UserID)
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
 CREATE TABLE TicketReplies (
@@ -360,6 +358,14 @@ CREATE TABLE UploadedFiles (
 );
 GO
 
+CREATE TABLE upload_sessions (
+    upload_id VARCHAR(255) PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    total_chunks INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+GO
+
 -- ==========================================
 -- DỮ LIỆU MẶC ĐỊNH
 -- ==========================================
@@ -370,5 +376,3 @@ INSERT INTO Roles (RoleName, Description) VALUES
     ('Mentor', N'Giảng viên / Mentor IELTS'),
     ('Candidate', N'Học viên luyện thi IELTS');
 GO
-
-ALTER TABLE Tags ADD Deleted BIT DEFAULT 0;
