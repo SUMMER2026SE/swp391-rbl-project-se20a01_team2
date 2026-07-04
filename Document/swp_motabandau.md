@@ -567,7 +567,7 @@ CREATE TABLE QuestionResource (
 
     ResourceAudioURL NVARCHAR(500),
 
-    ResourceImageURL NVARCHAR(500),
+    ResourceImageURL NVARCHAR(MAX),
 
     Type NVARCHAR(50) NOT NULL, \-- Passage, Audio
 
@@ -598,6 +598,8 @@ CREATE TABLE Questions (
     OrderInResource INT NULL, \-- \[CẬP NHẬT\] Thứ tự câu hỏi đi theo 1 bài đọc (Passage) hoặc audio
 
     contentJSON NVARCHAR(MAX) NOT NULL, 
+
+    QuestionCount INT DEFAULT 1,
 
     CreatedBy INT NULL, \-- Theo dõi Mentor nào tạo
 
@@ -631,7 +633,9 @@ CREATE TABLE Tags (
 
     Name NVARCHAR(100) NOT NULL,
 
-    Type NVARCHAR(50) \-- Topic, Grammar, Vocabulary...
+    Type NVARCHAR(50), -- Topic, Grammar, Vocabulary...
+
+    Deleted BIT DEFAULT 0
 
 );
 
@@ -754,6 +758,8 @@ CREATE TABLE ExamSections (
     ResourceID INT NULL, \-- Gắn Passage/Audio thẳng vào Section (nếu có)
 
     OrderIndex INT NOT NULL, 
+
+    Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening',
 
     FOREIGN KEY (ExamID) REFERENCES Exams(ExamID) ON DELETE CASCADE,
 
@@ -902,6 +908,8 @@ CREATE TABLE WeeklyPlans (
     PlanContent NVARCHAR(MAX) NOT NULL, 
 
     IsCompleted BIT DEFAULT 0,
+
+    IsCurrentWeek BIT DEFAULT 0, -- Theo dõi trạng thái tuần học hiện tại
 
     FOREIGN KEY (PathwayID) REFERENCES Pathways(PathwayID) ON DELETE CASCADE,
 
@@ -1074,6 +1082,8 @@ CREATE TABLE ExamSections (
 
     OrderIndex INT NOT NULL, 
 
+    Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening',
+
     FOREIGN KEY (ExamID) REFERENCES Exams(ExamID) ON DELETE CASCADE,
 
     FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID)
@@ -1104,70 +1114,3 @@ GO
 
 PRINT N'Đã cập nhật cấu trúc bảng ExamSections và ExamQuestions thành công\!';
 
-# Cập nhật: 17/06: Thêm bảng phục vụ cho upload:
-
-# 
-
-\-- \==========================================
-
-\-- BẢNG THEO DÕI FILE UPLOAD
-
-\-- \==========================================
-
-CREATE TABLE UploadedFiles (
-
-    FileID INT IDENTITY(1,1) PRIMARY KEY,
-
-    OriginalName NVARCHAR(255) NOT NULL,
-
-    SavedPath NVARCHAR(500) NOT NULL,
-
-    FileType NVARCHAR(50) NOT NULL, \-- e.g., 'profile\_pic', 'material'
-
-    UploadedBy INT NOT NULL,
-
-    UploadedAt DATETIME DEFAULT GETDATE(),
-
-    FOREIGN KEY (UploadedBy) REFERENCES Users(UserID)
-
-);
-
-GO
-
-ALTER TABLE users
-
-ADD ProfilePic NVARCHAR(500) NULL;
-
-GO
-
-# Cập nhật: Xóa cột ExamDate trong bảng CandidateTargets
-
-ALTER TABLE CandidateTargets
-DROP COLUMN ExamDate;
-GO
-
-
-# Cập nhật bổ sung (Tối ưu hóa Database cho hệ thống thi IELTS):
-
-```sql
--- Thêm cột Skill vào ExamSections để phân biệt kỹ năng trong 1 Full Test (Listening/Reading/Writing/Speaking)
-ALTER TABLE ExamSections ADD Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening';
-
--- Mở rộng ResourceImageURL để lưu JSON Array các URL ảnh (Cho Writing Task 1 có nhiều biểu đồ)
-ALTER TABLE QuestionResource ALTER COLUMN ResourceImageURL NVARCHAR(MAX);
-
--- Thêm QuestionCount để biết 1 JSON của Questions tương đương bao nhiêu câu hỏi thực tế 
-ALTER TABLE Questions ADD QuestionCount INT DEFAULT 1;
-```
-6/26
-UPDATE: fix tag table:
-```sql
-ALTER TABLE Tags
-ADD Deleted BIT DEFAULT 0;
-```
-29/6
-# Cập nhật bổ sung: Thêm cột ResourceName vào bảng QuestionResource
-```sql
-ALTER TABLE QuestionResource
-ADD ResourceName NVARCHAR(255);
-```
