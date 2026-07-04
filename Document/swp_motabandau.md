@@ -190,7 +190,7 @@ Mục tiêu:
 
 * **Quản lý Ngân hàng đề (Bank Management):** Tạo/Sửa/Xóa câu hỏi cho Listening, Reading, Writing, Speaking. Phân loại câu hỏi theo Tags (Dạng bài, Độ khó, Chủ đề).  
 * **Quản lý Đề thi:** Ghép các câu hỏi thành 1 Mock Test hoàn chỉnh.  
-* **Quản lý Tài liệu:** Đăng tải bài giảng (Video/PDF).  
+* **Quản lý Tài liệu:** Đăng tải bài giảng (Video/PDF). Hỗ trợ cơ chế tải lên phân mảnh (Chunked Upload) đối với các tài liệu có kích thước lớn hơn 10MB, đảm bảo tốc độ và khả năng tiếp tục khi gặp sự cố mạng (Resumable Upload).
 * **Hỗ trợ học viên:** Xem thống kê lỗi sai phổ biến của hệ thống để điều chỉnh bài giảng; Trả lời câu hỏi/ticket của học viên.
 
 ### **3.4. Phân hệ Admin (Quản trị)**
