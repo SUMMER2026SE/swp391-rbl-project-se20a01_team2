@@ -52,6 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
         avatarInput.addEventListener('change', async function() {
             const file = this.files[0];
             if (file) {
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast('Ảnh đại diện không được vượt quá 10MB', 'error');
+                    this.value = '';
+                    return;
+                }
                 // Show temporary preview
                 const reader = new FileReader();
                 reader.onload = function(e) {
