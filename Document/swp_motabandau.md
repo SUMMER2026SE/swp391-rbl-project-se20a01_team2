@@ -1138,3 +1138,86 @@ CREATE TABLE upload_sessions (
 
 ```
 
+// =========================================================================
+// SCRIPT THÊM DỮ LIỆU MẪU CHO BẢNG Tags (CHẠY ĐƯỢC NHIỀU LẦN KHÔNG BỊ TRÙNG LẶP)
+// Dành cho cả database mới tinh và database đã có sẵn dữ liệu.
+// Đoạn SQL dưới đây sử dụng WHERE NOT EXISTS để bỏ qua các Tag đã tồn tại.
+// =========================================================================
+```sql
+-- 1. NHÓM DẠNG BÀI (QUESTION TYPE)
+INSERT INTO Tags ([Name], [Type], [Deleted])
+SELECT Name, Type, Deleted FROM (
+    VALUES 
+    ('Matching Headings', 'QuestionType', 0),
+    ('True/False/Not Given', 'QuestionType', 0),
+    ('Yes/No/Not Given', 'QuestionType', 0),
+    ('Multiple Choice', 'QuestionType', 0),
+    ('Summary Completion', 'QuestionType', 0),
+    ('Sentence Completion', 'QuestionType', 0),
+    ('Table Completion', 'QuestionType', 0),
+    ('Flow-chart Completion', 'QuestionType', 0),
+    ('Diagram Label Completion', 'QuestionType', 0),
+    ('Short-answer Questions', 'QuestionType', 0),
+    ('Matching Features', 'QuestionType', 0),
+    ('Matching Information', 'QuestionType', 0),
+    ('Matching Sentence Endings', 'QuestionType', 0),
+    ('Map/Plan Labeling', 'QuestionType', 0),
+    ('Note Completion', 'QuestionType', 0),
+    ('Form Completion', 'QuestionType', 0)
+) AS v(Name, Type, Deleted)
+WHERE NOT EXISTS (SELECT 1 FROM Tags t WHERE t.Name = v.Name);
+
+-- 2. NHÓM ĐIỂM NGỮ PHÁP (GRAMMAR)
+INSERT INTO Tags ([Name], [Type], [Deleted])
+SELECT Name, Type, Deleted FROM (
+    VALUES 
+    ('Present Simple Tense', 'Grammar', 0),
+    ('Present Continuous Tense', 'Grammar', 0),
+    ('Present Perfect Tense', 'Grammar', 0),
+    ('Present Perfect Continuous', 'Grammar', 0),
+    ('Past Simple Tense', 'Grammar', 0),
+    ('Past Continuous Tense', 'Grammar', 0),
+    ('Past Perfect Tense', 'Grammar', 0),
+    ('Future Tenses', 'Grammar', 0),
+    ('Conditionals (Type 0,1,2,3)', 'Grammar', 0),
+    ('Mixed Conditionals', 'Grammar', 0),
+    ('Relative Clauses', 'Grammar', 0),
+    ('Passive Voice', 'Grammar', 0),
+    ('Reported Speech', 'Grammar', 0),
+    ('Articles (a, an, the)', 'Grammar', 0),
+    ('Prepositions', 'Grammar', 0),
+    ('Gerunds and Infinitives', 'Grammar', 0),
+    ('Modal Verbs', 'Grammar', 0),
+    ('Subject-Verb Agreement', 'Grammar', 0),
+    ('Comparatives & Superlatives', 'Grammar', 0),
+    ('Linking Words / Conjunctions', 'Grammar', 0)
+) AS v(Name, Type, Deleted)
+WHERE NOT EXISTS (SELECT 1 FROM Tags t WHERE t.Name = v.Name);
+
+-- 3. NHÓM CHỦ ĐỀ VÀ TỪ VỰNG (TOPIC / VOCABULARY)
+INSERT INTO Tags ([Name], [Type], [Deleted])
+SELECT Name, Type, Deleted FROM (
+    VALUES 
+    ('Environment & Climate Change', 'Topic', 0),
+    ('Education & Learning', 'Topic', 0),
+    ('Work, Business & Career', 'Topic', 0),
+    ('Health, Fitness & Diet', 'Topic', 0),
+    ('Technology & The Internet', 'Topic', 0),
+    ('Science & Inventions', 'Topic', 0),
+    ('Crime, Law & Justice', 'Topic', 0),
+    ('Arts, Culture & Museums', 'Topic', 0),
+    ('Travel, Tourism & Holidays', 'Topic', 0),
+    ('Globalization & Society', 'Topic', 0),
+    ('Media, Advertising & News', 'Topic', 0),
+    ('Family, Children & Relationships', 'Topic', 0),
+    ('Sports, Leisure & Hobbies', 'Topic', 0),
+    ('Space Exploration', 'Topic', 0),
+    ('History & Archaeology', 'Topic', 0),
+    ('Transport & Infrastructure', 'Topic', 0),
+    ('Language & Communication', 'Topic', 0),
+    ('Architecture & Buildings', 'Topic', 0),
+    ('Nature, Wildlife & Animals', 'Topic', 0),
+    ('Government & Politics', 'Topic', 0)
+) AS v(Name, Type, Deleted)
+WHERE NOT EXISTS (SELECT 1 FROM Tags t WHERE t.Name = v.Name);
+```
