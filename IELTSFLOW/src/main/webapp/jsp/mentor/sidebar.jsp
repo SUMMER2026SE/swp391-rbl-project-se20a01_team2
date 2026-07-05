@@ -100,5 +100,38 @@
         });
         return false;
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Floating back button logic
+        let floatingBtn = null;
+        window.addEventListener('scroll', function() {
+            const btn = document.getElementById('backBtn');
+            if (!btn) return;
+            if (window.scrollY > 150) {
+                if (!floatingBtn) {
+                    floatingBtn = document.createElement('a');
+                    floatingBtn.href = btn.href;
+                    floatingBtn.className = 'floating-back-btn';
+                    floatingBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+                    document.body.appendChild(floatingBtn);
+                }
+            } else {
+                if (floatingBtn) {
+                    floatingBtn.remove();
+                    floatingBtn = null;
+                }
+            }
+        });
+
+        // Globally prevent Enter key from submitting the form if the target is a text input
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const target = e.target;
+                if (target.tagName === 'INPUT' && (target.type === 'text' || target.type === 'number' || target.type === 'checkbox')) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
 </script>
 

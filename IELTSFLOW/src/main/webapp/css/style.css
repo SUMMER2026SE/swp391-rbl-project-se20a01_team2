@@ -570,3 +570,35 @@ body {
     .w-full-mobile { width: 100% !important; }
 }
 
+
+.auto-resize {
+    field-sizing: content;
+    min-width: 80px;
+    max-width: 100%;
+}
+
+.floating-back-btn {
+    position: fixed !important;
+    top: 80px !important;
+    left: calc(var(--sidebar-width) + 16px) !important;
+    z-index: 9999 !important;
+    border-radius: 50% !important;
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #6c757d !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    border: none !important;
+    transition: opacity 0.2s ease !important;
+    text-decoration: none !important;
+}
+.floating-back-btn .fa-arrow-left {
+    margin: 0 !important;
+}
+.floating-back-btn span {
+    display: none !important;
+}
