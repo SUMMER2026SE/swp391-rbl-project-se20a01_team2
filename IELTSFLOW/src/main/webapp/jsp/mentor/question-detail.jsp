@@ -24,10 +24,10 @@
     </jsp:include>
 
     <main class="main-content">
-        <header class="main-header animate-fade-up" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <a href="${pageContext.request.contextPath}/mentor/questions" class="btn btn-sm btn-outline-secondary rounded-pill mb-2">
-                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+        <header class="dashboard-header d-flex justify-content-between align-items-center mb-4 animate-fade-up">
+            <div class="d-flex flex-column align-items-start">
+                <a href="${pageContext.request.contextPath}/mentor/questions" id="backBtn" class="btn btn-outline-secondary mb-3 d-inline-flex align-items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Quay lại</span>
                 </a>
                 <h1 class="page-title" style="font-size: 2rem; margin: 0;">${question == null ? 'Tạo câu hỏi mới ✨' : 'Chỉnh sửa câu hỏi ✏️'}</h1>
             </div>
@@ -96,7 +96,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Resource (Bài đọc/nghe)</label>
-                        <select name="resourceId" id="resourceId" class="selectpicker form-control" data-live-search="true" title="-- Không liên kết Resource --" onchange="toggleOrderInResource(true)">
+                        <select name="resourceId" id="resourceId" class="selectpicker form-control" data-live-search="true" title="-- Không liên kết Resource --">
                             <option value="">-- Không liên kết Resource --</option>
                             <c:forEach var="res" items="${allResources}">
                                 <option value="${res.resourceId}" data-subtext="${res.type}" ${question.resourceId == res.resourceId ? 'selected' : ''}>
@@ -131,18 +131,14 @@
                     <div class="col-md-12">
                         <label class="form-label fw-bold">Dữ liệu nâng cao (JSON) <span class="text-danger">*</span></label>
                         
-                        <!-- JSON Builder UI -->
-                        <div id="contentJsonBuilder" class="mb-2 p-3 bg-light rounded border">
-                            <div class="json-fields-container" id="contentJsonFields"></div>
-                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addJsonField('contentJsonFields')">
-                                <i class="fa-solid fa-plus"></i> Thêm trường dữ liệu
-                            </button>
+                        <div id="dynamicContentJsonBuilder" class="mb-2 p-3 bg-light rounded border">
+                            <!-- This will be populated by mentor-question-builder.js based on questionType -->
                         </div>
                         
-                        <textarea name="contentJson" id="contentJson" class="form-control" rows="2" style="display: none;">${question.contentJson == null ? '{}' : question.contentJson}</textarea>
+                        <textarea name="contentJson" id="contentJson" class="form-control" rows="5" style="display: none;">${question.contentJson == null ? '{}' : question.contentJson}</textarea>
                         
                         <div class="form-check form-switch mt-2">
-                            <input class="form-check-input" type="checkbox" id="toggleRawContentJson" onchange="toggleRawJson('contentJson', 'contentJsonBuilder')">
+                            <input class="form-check-input" type="checkbox" id="toggleRawContentJson">
                             <label class="form-check-label text-muted" for="toggleRawContentJson">Hiển thị mã JSON thô</label>
                         </div>
                     </div>
@@ -155,32 +151,26 @@
                 <div id="answers-container">
                     <c:forEach var="ans" items="${question.answers}" varStatus="status">
                         <div class="answer-item glass-panel mb-3 p-3 position-relative" style="background: rgba(255,255,255,0.4);">
-                            <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2" onclick="this.parentElement.remove(); updateAnswerCount();"><i class="fa-solid fa-xmark"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 btn-remove-answer"><i class="fa-solid fa-xmark"></i></button>
                             <div class="row g-3">
-                                <div class="col-md-8">
+                                <div class="col-md-8 answer-content-col">
                                     <label class="form-label fw-bold">Nội dung đáp án</label>
-                                    <input type="text" name="answerContent_${status.index}" class="form-control" value="${ans.content}" required>
+                                    <input type="text" name="answerContent_${status.index}" class="form-control answer-content-input" value="${ans.content}" required>
                                 </div>
-                                <div class="col-md-4 d-flex align-items-end">
+                                <div class="col-md-4 d-flex align-items-end answer-correct-col">
                                     <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="answerIsCorrect_${status.index}" value="true" ${ans.correct ? 'checked' : ''} id="correct_${status.index}">
+                                        <input class="form-check-input answer-correct-checkbox" type="checkbox" name="answerIsCorrect_${status.index}" value="true" ${ans.correct ? 'checked' : ''} id="correct_${status.index}">
                                         <label class="form-check-label fw-bold text-success" for="correct_${status.index}">Là đáp án đúng?</label>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
+                                <div class="col-md-12 answer-json-col">
                                     <label class="form-label fw-bold">Dữ liệu mở rộng đáp án (JSON)</label>
-                                    
-                                    <div id="ansJsonBuilder_${status.index}" class="mb-2 p-2 bg-light rounded border">
-                                        <div class="json-fields-container" id="ansJsonFields_${status.index}"></div>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addJsonField('ansJsonFields_${status.index}')">
-                                            <i class="fa-solid fa-plus"></i> Thêm trường dữ liệu
-                                        </button>
+                                    <div class="dynamicAnsJsonBuilder mb-2 p-2 bg-light rounded border" data-index="${status.index}">
+                                        <!-- Populated by JS -->
                                     </div>
-                                    
-                                    <textarea name="answerContentJson_${status.index}" id="ansJson_${status.index}" class="form-control" rows="2" style="display: none;">${ans.contentJson == null ? '{}' : ans.contentJson}</textarea>
-                                    
+                                    <textarea name="answerContentJson_${status.index}" id="ansJson_${status.index}" class="form-control ansJsonRaw" rows="5" style="display: none;">${ans.contentJson == null ? '{}' : ans.contentJson}</textarea>
                                     <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" id="toggleRawAnsJson_${status.index}" onchange="toggleRawJson('ansJson_${status.index}', 'ansJsonBuilder_${status.index}')">
+                                        <input class="form-check-input toggleRawAnsJson" type="checkbox" data-index="${status.index}" id="toggleRawAnsJson_${status.index}">
                                         <label class="form-check-label text-muted" style="font-size: 0.85rem;" for="toggleRawAnsJson_${status.index}">Mã JSON thô</label>
                                     </div>
                                 </div>
@@ -191,11 +181,14 @@
                 
                 <input type="hidden" name="answerCount" id="answerCount" value="${question == null ? 0 : question.answers.size()}">
                 
-                <button type="button" class="btn btn-outline-primary rounded-pill mb-4 shadow-sm" onclick="addAnswer()">
+                <button type="button" class="btn btn-outline-primary rounded-pill mb-4 shadow-sm" id="btnAddAnswer">
                     <i class="fa-solid fa-plus"></i> Thêm đáp án
                 </button>
 
-                <div class="mt-5 text-end">
+                <div class="mt-4 text-end d-flex justify-content-end gap-2 sticky-bottom" style="position: sticky; bottom: 15px; z-index: 99;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 py-2 shadow" onclick="showPreviewModal()">
+                        <i class="fa-solid fa-eye me-2"></i> Xem Trước (Preview)
+                    </button>
                     <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow fw-bold">
                         <i class="fa-solid fa-floppy-disk me-2"></i> Lưu Câu Hỏi
                     </button>
@@ -206,149 +199,34 @@
     </main>
 </div>
 
-<script>
-    let answerIndex = parseInt(document.getElementById('answerCount').value);
-    
-    function addAnswer() {
-        const container = document.getElementById('answers-container');
-        const html = `
-            <div class="answer-item glass-panel mb-3 p-3 position-relative" style="background: rgba(255,255,255,0.4);">
-                <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2" onclick="this.parentElement.remove(); updateAnswerCount();"><i class="fa-solid fa-xmark"></i></button>
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold">Nội dung đáp án</label>
-                        <input type="text" name="answerContent_` + answerIndex + `" class="form-control" required>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        <div class="form-check form-switch mb-2">
-                            <input class="form-check-input" type="checkbox" name="answerIsCorrect_` + answerIndex + `" value="true" id="correct_` + answerIndex + `">
-                            <label class="form-check-label fw-bold text-success" for="correct_` + answerIndex + `">Là đáp án đúng?</label>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold">Dữ liệu mở rộng đáp án (JSON)</label>
-                        <div id="ansJsonBuilder_` + answerIndex + `" class="mb-2 p-2 bg-light rounded border">
-                            <div class="json-fields-container" id="ansJsonFields_` + answerIndex + `"></div>
-                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addJsonField('ansJsonFields_` + answerIndex + `')">
-                                <i class="fa-solid fa-plus"></i> Thêm trường dữ liệu
-                            </button>
-                        </div>
-                        <textarea name="answerContentJson_` + answerIndex + `" id="ansJson_` + answerIndex + `" class="form-control" rows="2" style="display: none;">{}</textarea>
-                        <div class="form-check form-switch mt-2">
-                            <input class="form-check-input" type="checkbox" id="toggleRawAnsJson_` + answerIndex + `" onchange="toggleRawJson('ansJson_` + answerIndex + `', 'ansJsonBuilder_` + answerIndex + `')">
-                            <label class="form-check-label text-muted" style="font-size: 0.85rem;" for="toggleRawAnsJson_` + answerIndex + `">Mã JSON thô</label>
-                        </div>
-                    </div>
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-primary" id="previewModalLabel">Xem Trước Câu Hỏi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContainer" class="p-4 rounded border bg-light">
+                    <!-- Preview content injected by JS -->
                 </div>
             </div>
-        `;
-        container.insertAdjacentHTML('beforeend', html);
-        answerIndex++;
-        updateAnswerCount();
-    }
-    
-    function updateAnswerCount() {
-        // MentorQuestionServlet relies on answerCount to loop up to that index.
-        // Actually, it loops from 0 to count-1. So we shouldn't just decrement count, 
-        // because the indices might have gaps if we remove one in the middle.
-        // The servlet reads `req.getParameter("answerContent_" + i)`. If it's missing, it continues.
-        // So we just need answerCount to be at least the maximum index + 1.
-        document.getElementById('answerCount').value = answerIndex;
-    }
-    
-    // --- JSON BUILDER LOGIC ---
-    function toggleRawJson(textareaId, builderId) {
-        const textarea = document.getElementById(textareaId);
-        const builder = document.getElementById(builderId);
-        if (textarea.style.display === 'none') {
-            // Show raw, hide builder
-            textarea.style.display = 'block';
-            builder.style.display = 'none';
-        } else {
-            // Hide raw, show builder
-            textarea.style.display = 'none';
-            builder.style.display = 'block';
-            // Sync from textarea to builder
-            syncTextareaToBuilder(textareaId, builderId.replace('Builder', 'Fields'));
-        }
-    }
-
-    function addJsonField(containerId, key = '', value = '') {
-        const container = document.getElementById(containerId);
-        const row = document.createElement('div');
-        row.className = 'row g-2 mb-2 align-items-center json-field-row';
-        row.innerHTML = `
-            <div class="col-4">
-                <input type="text" class="form-control form-control-sm json-key" placeholder="Key (VD: blanks)" value="` + key.replace(/"/g, '&quot;') + `" onchange="syncBuilderToTextarea('` + containerId + `')">
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
-            <div class="col-7">
-                <input type="text" class="form-control form-control-sm json-value" placeholder="Value (Text, Number, hoặc JSON Array)" value="` + value.replace(/"/g, '&quot;') + `" onchange="syncBuilderToTextarea('` + containerId + `')">
-            </div>
-            <div class="col-1 text-end">
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.remove(); syncBuilderToTextarea('` + containerId + `')"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        `;
-        container.appendChild(row);
-    }
+        </div>
+    </div>
+</div>
 
-    function syncBuilderToTextarea(containerId) {
-        const container = document.getElementById(containerId);
-        const rows = container.querySelectorAll('.json-field-row');
-        const obj = {};
-        
-        rows.forEach(row => {
-            const key = row.querySelector('.json-key').value.trim();
-            const val = row.querySelector('.json-value').value.trim();
-            if (key) {
-                // Try to parse val as JSON (for numbers, booleans, arrays, objects)
-                try {
-                    obj[key] = JSON.parse(val);
-                } catch (e) {
-                    obj[key] = val; // fallback to string
-                }
-            }
-        });
-        
-        // Find corresponding textarea
-        const textareaId = containerId.replace('Fields', ''); // 'contentJsonFields' -> 'contentJson', 'ansJsonFields_0' -> 'ansJson_0'
-        const textarea = document.getElementById(textareaId);
-        if (textarea) {
-            textarea.value = JSON.stringify(obj, null, 2);
-        }
-    }
+<div id="resource-texts" style="display:none;">
+    <c:forEach var="res" items="${allResources}">
+        <div id="res_text_${res.resourceId}">${res.resourceText}</div>
+    </c:forEach>
+</div>
 
-    function syncTextareaToBuilder(textareaId, containerId) {
-        const textarea = document.getElementById(textareaId);
-        const container = document.getElementById(containerId);
-        if (!textarea || !container) return;
-        
-        container.innerHTML = ''; // clear current
-        
-        try {
-            const obj = JSON.parse(textarea.value || '{}');
-            for (const [k, v] of Object.entries(obj)) {
-                let valStr = typeof v === 'object' ? JSON.stringify(v) : String(v);
-                addJsonField(containerId, k, valStr);
-            }
-        } catch (e) {
-            console.error("Invalid JSON in textarea", textareaId);
-            addJsonField(containerId);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const contentJsonRaw = document.getElementById('contentJson').value;
-        const contentContainer = document.getElementById('contentJsonFields');
-        if (contentContainer) syncTextareaToBuilder('contentJson', 'contentJsonFields');
-
-        const answerCount = parseInt(document.getElementById('answerCount').value);
-        for (let i = 0; i < answerCount; i++) {
-            if (document.getElementById('ansJson_' + i)) {
-                syncTextareaToBuilder('ansJson_' + i, 'ansJsonFields_' + i);
-            }
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/mentor-question-builder.js"></script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -88,7 +88,7 @@ public class MentorQuestionServlet extends HttpServlet {
                 Question question = buildQuestionFromRequest(req);
                 question.setCreatedBy(mentorId);
                 questionService.createQuestion(question, buildAnswersFromRequest(req), extractTagIds(req));
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Tạo câu hỏi thành công", "UTF-8"));
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + question.getQuestionId() + "?success=" + java.net.URLEncoder.encode("Tạo câu hỏi thành công", "UTF-8"));
 
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("questionId"));
@@ -98,7 +98,7 @@ public class MentorQuestionServlet extends HttpServlet {
                 Question question = buildQuestionFromRequest(req);
                 question.setQuestionId(id);
                 questionService.updateQuestion(question, buildAnswersFromRequest(req), extractTagIds(req));
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + id + "?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("questionId"));

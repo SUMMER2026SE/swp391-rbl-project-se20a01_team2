@@ -139,7 +139,7 @@
                     </div>
                 </div>
 
-                <div class="mt-5 text-end">
+                <div class="mt-4 text-end d-flex justify-content-end gap-2 sticky-bottom" style="position: sticky; bottom: 15px; z-index: 99;">
                     <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow fw-bold" style="background-color: var(--accent-green); border-color: var(--accent-green);">
                         <i class="fa-solid fa-floppy-disk me-2"></i> Lưu Bài Học
                     </button>
