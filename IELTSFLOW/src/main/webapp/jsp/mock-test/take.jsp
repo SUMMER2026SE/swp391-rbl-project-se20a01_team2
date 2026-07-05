@@ -207,10 +207,12 @@
                                                 <h4>${sec.sectionName}</h4>
                                                 
                                                 <c:if test="${sk == 'Writing'}">
-                                                    <!-- Special layout for Writing: Show the first question content here -->
-                                                    <div class="writing-prompt-box" style="font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem;">
-                                                        ${sec.examQuestions[0].question.content}
-                                                    </div>
+                                                    <!-- Special layout for Writing: Show all question prompts here, toggled by JS -->
+                                                    <c:forEach var="xQ" items="${sec.examQuestions}" varStatus="ws">
+                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem;">
+                                                            ${xQ.question.content}
+                                                        </div>
+                                                    </c:forEach>
                                                 </c:if>
                                                 
                                                 <c:if test="${sk != 'Writing'}">
@@ -427,14 +429,18 @@
                         if (!section) return;
                         
                         const qCards = section.querySelectorAll('.q-card');
-                        qCards.forEach(card => {
-                            const num = card.querySelector('.q-num').innerText.replace(/[^0-9]/g, '');
+                        qCards.forEach((card, index) => {
+                            let numStr = (index + 1).toString();
+                            const numEl = card.querySelector('.q-num');
+                            if (numEl) {
+                                numStr = numEl.innerText.replace(/[^0-9]/g, '');
+                            }
                             const qId = card.getAttribute('data-qid');
                             
                             const btn = document.createElement('div');
                             btn.className = 'nav-btn';
                             btn.id = 'navbtn_' + qId;
-                            btn.innerText = num;
+                            btn.innerText = numStr;
                             
                             if (card.classList.contains('flagged')) btn.classList.add('flagged');
                             if (checkIfAnswered(card)) btn.classList.add('answered');
@@ -668,6 +674,28 @@
                             });
                         });
                     }
+
+                    // ── WRITING PROMPT SWITCHER ───────────────────────────────────────
+                    const writingObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const qId = entry.target.getAttribute('data-qid');
+                                const allPrompts = document.querySelectorAll('.writing-prompt-box');
+                                if (allPrompts.length > 0) {
+                                    allPrompts.forEach(p => p.style.display = 'none');
+                                    const targetPrompt = document.getElementById('prompt_' + qId);
+                                    if (targetPrompt) targetPrompt.style.display = 'block';
+                                }
+                            }
+                        });
+                    }, { root: null, threshold: 0.5 });
+
+                    // We need to wait for DOM to be ready, but this script is at the bottom anyway
+                    setTimeout(() => {
+                        document.querySelectorAll('#section-Writing .q-card').forEach(card => {
+                            writingObserver.observe(card);
+                        });
+                    }, 500);
 
                 </script>
                 <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>

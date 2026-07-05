@@ -190,6 +190,19 @@ public class MockTestServlet extends HttpServlet {
             String qType  = q.getQuestionType() != null ? q.getQuestionType().trim() : "";
             String answer = req.getParameter("q_" + q.getQuestionId());
 
+            if (("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
+                && answer != null && !answer.isBlank()) {
+                try {
+                    int ansId = Integer.parseInt(answer.trim());
+                    for (model.Answer a : q.getAnswers()) {
+                        if (a.getAnswerId() == ansId) {
+                            answer = a.getContent();
+                            break;
+                        }
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+
             SubmissionDetail detail = new SubmissionDetail();
             detail.setSubmissionId(submissionId);
             detail.setQuestionId(q.getQuestionId());
