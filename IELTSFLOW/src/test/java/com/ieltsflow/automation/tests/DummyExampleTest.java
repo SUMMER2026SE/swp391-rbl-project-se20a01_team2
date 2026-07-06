@@ -20,15 +20,4 @@ public class DummyExampleTest extends BaseTest {
         Assertions.assertTrue(title.contains("Google"), "Title không đúng");
     }
 
-    @Test
-    public void testOpenGoogleAndFail() {
-        // Step 1: Mở trang web
-        driver.get("https://www.google.com");
-
-        // Step 2: Cố tình test Fail để xem chức năng chụp ảnh màn hình
-        test.info("Đã mở trang Google, chuẩn bị test fail để lấy Screenshot");
-        
-        // Assert fail
-        Assertions.assertEquals("IELTSFlow", driver.getTitle(), "Cố tình cho fail vì title là Google chứ không phải IELTSFlow");
-    }
 }
