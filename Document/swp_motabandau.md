@@ -717,7 +717,7 @@ CREATE TABLE UserQuestionBookmarks (
 
     FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID) ON DELETE CASCADE,
 
-    CONSTRAINT UQ\_User\_Question UNIQUE (UserID, QuestionID)
+    CONSTRAINT UQ_User_Question UNIQUE (UserID, QuestionID)
 
 );
 
@@ -851,7 +851,7 @@ CREATE TABLE SubmissionDetails (
 
     Score DECIMAL(5,2),
 
-    GradingStatus NVARCHAR(50) DEFAULT 'Graded', -- 'Pending\_AI', 'Processing', 'Graded', 'Failed'
+    GradingStatus NVARCHAR(50) DEFAULT 'Graded', -- 'Pending_AI', 'Processing', 'Graded', 'Failed'
 
     FOREIGN KEY (SubmissionID) REFERENCES TestSubmissions(SubmissionID) ON DELETE CASCADE,
 
@@ -871,7 +871,7 @@ CREATE TABLE AIEvaluations (
 
     FOREIGN KEY (DetailID) REFERENCES SubmissionDetails(DetailID) ON DELETE CASCADE,
 
-    CONSTRAINT CHK\_FeedbackJSON CHECK (ISJSON(FeedbackJSON) = 1\) 
+    CONSTRAINT CHK_FeedbackJSON CHECK (ISJSON(FeedbackJSON) = 1) 
 
 );
 
@@ -915,7 +915,7 @@ CREATE TABLE WeeklyPlans (
 
     FOREIGN KEY (PathwayID) REFERENCES Pathways(PathwayID) ON DELETE CASCADE,
 
-    CONSTRAINT CHK\_PlanContent CHECK (ISJSON(PlanContent) = 1\) 
+    CONSTRAINT CHK_PlanContent CHECK (ISJSON(PlanContent) = 1) 
 
 );
 
@@ -989,7 +989,7 @@ CREATE TABLE SystemLogs (
 
     UserID INT NULL, -- ID người thực hiện (NULL nếu là auto system event)
 
-    Action NVARCHAR(100) NOT NULL, -- Ví dụ: 'DELETE\_USER', 'API\_ERROR'
+    Action NVARCHAR(100) NOT NULL, -- Ví dụ: 'DELETE_USER', 'API_ERROR'
 
     Entity NVARCHAR(50), -- Bảng hoặc Module bị tác động
 
@@ -1017,7 +1017,7 @@ CREATE TABLE UploadedFiles (
 
     SavedPath NVARCHAR(500) NOT NULL,
 
-    FileType NVARCHAR(50) NOT NULL, --  'profile\_pic', 'material', ‘video’
+    FileType NVARCHAR(50) NOT NULL, --  'profile_pic', 'material', ‘video’
 
     UploadedBy INT NOT NULL,
 
@@ -1042,7 +1042,7 @@ CREATE TABLE upload_sessions (
 
 -- ==========================================
 
-IF NOT EXISTS (SELECT \* FROM Roles WHERE RoleName = 'Admin')
+IF NOT EXISTS (SELECT * FROM Roles WHERE RoleName = 'Admin')
 
 INSERT INTO Roles (RoleName, Description) VALUES
 
