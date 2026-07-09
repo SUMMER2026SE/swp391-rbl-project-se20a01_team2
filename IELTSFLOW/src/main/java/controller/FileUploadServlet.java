@@ -144,11 +144,13 @@ public class FileUploadServlet extends HttpServlet {
             boolean isVideo = ALLOWED_VIDEOS.contains(extension);
             boolean isAudio = ALLOWED_AUDIOS.contains(extension);
 
-            if ("profile_pic".equals(type) && !ALLOWED_PROFILE_PICS.contains(extension)) {
+            boolean isImage = ALLOWED_PROFILE_PICS.contains(extension);
+
+            if ("profile_pic".equals(type) && !isImage) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().write(mapper.writeValueAsString(Map.of("error", "Invalid profile picture format")));
                 return;
-            } else if ("material".equals(type) && !isDocument && !isVideo && !isAudio) {
+            } else if ("material".equals(type) && !isDocument && !isVideo && !isAudio && !isImage) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().write(mapper.writeValueAsString(Map.of("error", "Invalid material format")));
                 return;
@@ -169,6 +171,7 @@ public class FileUploadServlet extends HttpServlet {
                     if (isDocument) relativeSaveDir = "/material/document";
                     else if (isVideo) relativeSaveDir = "/material/video";
                     else if (isAudio) relativeSaveDir = "/material/audio";
+                    else if (isImage) relativeSaveDir = "/material/image";
                 }
                 String absoluteSavePath = req.getServletContext().getRealPath(relativeSaveDir);
 

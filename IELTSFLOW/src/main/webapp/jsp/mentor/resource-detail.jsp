@@ -36,7 +36,7 @@
         </c:if>
 
         <script>
-            async function uploadAudio(inputId, targetId) {
+            async function uploadMaterial(inputId, targetId) {
                 const input = document.getElementById(inputId);
                 const file = input.files[0];
                 if (!file) {
@@ -46,7 +46,7 @@
 
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('type', 'audio');
+                formData.append('type', 'material'); // Using 'material' type
 
                 const btn = input.nextElementSibling;
                 const originalHtml = btn.innerHTML;
@@ -54,7 +54,7 @@
                 btn.disabled = true;
 
                 try {
-                    const response = await fetch(window.contextPath + '/upload', {
+                    const response = await fetch(window.contextPath + '/api/upload', { // Added /api/upload
                         method: 'POST',
                         body: formData
                     });
@@ -77,13 +77,9 @@
             
             function toggleResourceFields() {
                 const type = document.getElementById('resourceType').value;
-                if (type === 'Passage') {
-                    document.getElementById('passageFields').style.display = 'block';
-                    document.getElementById('audioFields').style.display = 'none';
-                } else {
-                    document.getElementById('passageFields').style.display = 'none';
-                    document.getElementById('audioFields').style.display = 'block';
-                }
+                document.getElementById('passageFields').style.display = (type === 'Passage') ? 'block' : 'none';
+                document.getElementById('audioFields').style.display = (type === 'Audio') ? 'block' : 'none';
+                document.getElementById('imageFields').style.display = (type === 'Image') ? 'block' : 'none';
             }
         </script>
 
@@ -106,6 +102,7 @@
                         <select name="type" id="resourceType" class="form-select" required onchange="toggleResourceFields()">
                             <option value="Passage" ${resource.type == 'Passage' ? 'selected' : ''}>Đoạn văn (Reading Passage)</option>
                             <option value="Audio" ${resource.type == 'Audio' ? 'selected' : ''}>Tệp âm thanh (Listening Audio)</option>
+                            <option value="Image" ${resource.type == 'Image' ? 'selected' : ''}>Hình ảnh (Image)</option>
                         </select>
                     </div>
                 </div>
@@ -126,11 +123,25 @@
                         <label class="form-label fw-bold">Tải lên tệp nghe (MP3/WAV)</label>
                         <div class="input-group">
                             <input type="file" id="audioUpload" class="form-control" accept=".mp3,.wav,.ogg">
-                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadAudio('audioUpload', 'resourceAudioUrl')">
+                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('audioUpload', 'resourceAudioUrl')">
                                 <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
                             </button>
                         </div>
                         <input type="text" name="resourceAudioUrl" id="resourceAudioUrl" class="form-control mt-2 bg-light" placeholder="URL Audio sau khi tải lên sẽ hiển thị ở đây..." value="${resource.resourceAudioUrl}">
+                    </div>
+                </div>
+
+                <div id="imageFields" style="display: ${resource != null && resource.type == 'Image' ? 'block' : 'none'};">
+                    <h5 class="fw-bold mb-3" style="color: #3b82f6;"><i class="fa-solid fa-image me-2"></i>Tệp Hình Ảnh</h5>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tải lên hình ảnh (JPG/PNG/GIF)</label>
+                        <div class="input-group">
+                            <input type="file" id="imageUpload" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp,.avif">
+                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('imageUpload', 'resourceImageUrl')">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
+                            </button>
+                        </div>
+                        <input type="text" name="resourceImageUrl" id="resourceImageUrl" class="form-control mt-2 bg-light" placeholder="URL Hình ảnh sau khi tải lên sẽ hiển thị ở đây..." value="${resource.resourceImageUrl}">
                     </div>
                 </div>
 

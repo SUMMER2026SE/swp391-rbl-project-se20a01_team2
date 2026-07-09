@@ -88,8 +88,8 @@
                                 <td class="ps-4 fw-bold" style="color: var(--accent-purple);">#${res.resourceId}</td>
                                 <td class="fw-bold text-dark">${res.resourceName != null ? res.resourceName : '<span class="text-muted fst-italic">Chưa đặt tên</span>'}</td>
                                 <td>
-                                    <span class="type-badge ${res.type eq 'Passage' ? 'type-passage' : 'type-audio'}">
-                                        <i class="fa-solid ${res.type eq 'Passage' ? 'fa-book-open' : 'fa-headphones'} me-1"></i> ${res.type}
+                                    <span class="type-badge ${res.type eq 'Passage' ? 'type-passage' : (res.type eq 'Audio' ? 'type-audio' : 'bg-primary bg-opacity-10 text-primary')}">
+                                        <i class="fa-solid ${res.type eq 'Passage' ? 'fa-book-open' : (res.type eq 'Audio' ? 'fa-headphones' : 'fa-image')} me-1"></i> ${res.type}
                                     </span>
                                 </td>
                                 <td class="text-center pe-4">
@@ -125,6 +125,11 @@
                                                         <i class="fa-solid fa-headphones-simple mb-3 text-secondary" style="font-size: 3rem;"></i>
                                                         <br>
                                                         <audio controls src="${res.resourceAudioUrl}" style="width: 100%; max-width: 400px;"></audio>
+                                                    </div>
+                                                </c:when>
+                                                <c:when test="${res.type eq 'Image'}">
+                                                    <div class="text-center bg-white p-4 border rounded shadow-sm">
+                                                        <img src="${res.resourceImageUrl}" class="img-fluid rounded" alt="Image Resource" style="max-height: 500px;" />
                                                     </div>
                                                 </c:when>
                                             </c:choose>
