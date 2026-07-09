@@ -167,6 +167,78 @@ public class GeminiApiService {
     }
 
     /**
+     * Gọi Gemini API cho tính năng Chat (Plain text).
+     *
+     * @param systemInstruction Vai trò và hướng dẫn cho AI
+     * @param userMessage        Tin nhắn của người dùng
+     * @return Chuỗi text phản hồi từ AI, hoặc null nếu thất bại
+     */
+    public String generateChatReply(String systemInstruction, String userMessage) {
+        String[] keys = getAllKeys();
+        int maxAttempts = keys.length * 2; 
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            String apiKey = getNextKey(keys);
+            try {
+                String fullPayload = buildChatPayload(systemInstruction, userMessage);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(BASE_URL + apiKey))
+                        .header("Content-Type", "application/json; charset=UTF-8")
+                        .timeout(Duration.ofSeconds(60))
+                        .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request,
+                        HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8));
+
+                int status = response.statusCode();
+
+                if (status == 200) {
+                    return extractTextFromResponse(response.body());
+                } else if (status == 429 || status == 503 || status >= 500) {
+                    int sleepMs = Math.min(2000 * attempt, 10000); 
+                    Thread.sleep(sleepMs);
+                } else {
+                    LOGGER.severe(String.format("[Gemini Chat] Fatal error %d: %s", status, response.body()));
+                    return null;
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                return null;
+            } catch (Exception e) {
+                if (attempt < maxAttempts) {
+                    try { Thread.sleep(1000); } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Build JSON payload đơn giản cho Chat.
+     */
+    private String buildChatPayload(String systemInstruction, String userMessage) {
+        try {
+            String sysText = objectMapper.writeValueAsString(systemInstruction);
+            String userText = objectMapper.writeValueAsString(userMessage);
+            return "{"
+                + "\"systemInstruction\":{\"parts\":[{\"text\":" + sysText + "}]},"
+                + "\"contents\":[{\"parts\":[{\"text\":" + userText + "}]}],"
+                + "\"generationConfig\":{"
+                + "\"temperature\":0.7"
+                + "}"
+                + "}";
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to build Chat payload", e);
+            return null;
+        }
+    }
+
+    /**
      * Parse kết quả từ Gemini API response body.
      * Gemini trả về text nằm trong candidates[0].content.parts[0].text
      */
