@@ -39,7 +39,7 @@ Dựa trên tài liệu mô tả hệ thống IELTSFlow (tại file `swp_motaban
   - **Quản lý Tài liệu:** Luồng upload video hoặc tài liệu dạng PDF.
   - **Q&A/Ticket:** Thao tác trả lời ticket thắc mắc của học viên.
 
-### 🧑‍💻 Thành viên 6: Phân hệ Admin & Thanh toán (Subscription & Payment)
+### 🧑‍💻 Thành viên 6: Phân hệ Admin & Thanh toán (Subscription & Payment) (Tân)
 - **Nhiệm vụ Test:**
   - **User Management:** Khóa tài khoản, mở khóa, phân quyền user (cấp quyền Mentor).
   - **Finance (Quản lý gói cước):** Tạo/Sửa các gói Subscription (Candidate Pro).
