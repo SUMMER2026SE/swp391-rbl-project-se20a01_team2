@@ -38,6 +38,8 @@
             <div class="alert alert-danger animate-fade-up">${error}</div>
         </c:if>
 
+        <script src="${pageContext.request.contextPath}/js/toast.js"></script>
+        <script src="${pageContext.request.contextPath}/js/chunked-upload.js"></script>
         <script>
             if (window.history.replaceState) {
                 const url = new URL(window.location.href);
@@ -51,7 +53,7 @@
             async function uploadMaterial(inputId, targetId) {
                 const fileInput = document.getElementById(inputId);
                 if (!fileInput.files || fileInput.files.length === 0) {
-                    alert('Vui lòng chọn file trước khi tải lên.');
+                    showToast('Vui lòng chọn file trước khi tải lên.', 'error');
                     return;
                 }
                 
@@ -60,24 +62,33 @@
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
                 btn.disabled = true;
 
-                const formData = new FormData();
-                formData.append('type', 'material');
-                formData.append('file', fileInput.files[0]);
+                const file = fileInput.files[0];
 
                 try {
-                    const response = await fetch(window.contextPath + '/api/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await response.json();
-                    if (response.ok) {
-                        document.getElementById(targetId).value = data.url;
-                        alert('Tải lên thành công!');
+                    let data;
+                    if (file.size > 10 * 1024 * 1024) {
+                        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 0%';
+                        data = await uploadFileChunked(file, 'material', (progress, statusText) => {
+                            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + (statusText || progress + '%');
+                        });
                     } else {
-                        alert('Lỗi tải lên: ' + (data.error || 'Lỗi không xác định'));
+                        const formData = new FormData();
+                        formData.append('type', 'material');
+                        formData.append('file', file);
+                        const response = await fetch(window.contextPath + '/api/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        data = await response.json();
+                        if (!response.ok) {
+                            throw new Error(data.error || 'Lỗi không xác định');
+                        }
                     }
+                    
+                    document.getElementById(targetId).value = data.url;
+                    showToast('Tải lên thành công!', 'success');
                 } catch (error) {
-                    alert('Lỗi mạng khi tải lên: ' + error.message);
+                    showToast('Lỗi: ' + error.message, 'error');
                 } finally {
                     btn.innerHTML = originalHtml;
                     btn.disabled = false;
@@ -119,7 +130,7 @@
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Video Bài Giảng (MP4/WebM)</label>
                         <div class="input-group">
-                            <input type="file" id="videoUpload" class="form-control" accept=".mp4,.webm">
+                            <input type="file" id="videoUpload" class="form-control" accept=".mp4,.mov,.webm">
                             <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('videoUpload', 'videoUrl')">
                                 <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
                             </button>
@@ -130,7 +141,7 @@
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Tài Liệu Đính Kèm (PDF/Docx/Zip)</label>
                         <div class="input-group">
-                            <input type="file" id="documentUpload" class="form-control" accept=".pdf,.doc,.docx,.zip,.rar">
+                            <input type="file" id="documentUpload" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar">
                             <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('documentUpload', 'documentUrl')">
                                 <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
                             </button>

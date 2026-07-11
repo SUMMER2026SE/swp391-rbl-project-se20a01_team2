@@ -35,12 +35,13 @@
             <div class="alert alert-danger animate-fade-up">${error}</div>
         </c:if>
 
+        <script src="${pageContext.request.contextPath}/js/toast.js"></script>
         <script>
             async function uploadMaterial(inputId, targetId) {
                 const input = document.getElementById(inputId);
                 const file = input.files[0];
                 if (!file) {
-                    Swal.fire({ icon: 'warning', title: 'Cảnh báo', text: 'Vui lòng chọn một file trước khi tải lên.' });
+                    showToast('Vui lòng chọn một file trước khi tải lên.', 'error');
                     return;
                 }
 
@@ -63,12 +64,12 @@
                     
                     if (response.ok) {
                         document.getElementById(targetId).value = result.url;
-                        Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Tải lên thành công!', timer: 2000, showConfirmButton: false });
+                        showToast('Tải lên thành công!', 'success');
                     } else {
-                        Swal.fire({ icon: 'error', title: 'Lỗi', text: result.error || 'Không xác định' });
+                        showToast('Lỗi: ' + (result.error || 'Không xác định'), 'error');
                     }
                 } catch (error) {
-                    Swal.fire({ icon: 'error', title: 'Lỗi mạng', text: error.message });
+                    showToast('Lỗi mạng khi tải lên: ' + error.message, 'error');
                 } finally {
                     btn.innerHTML = originalHtml;
                     btn.disabled = false;
@@ -145,8 +146,8 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tải lên tệp nghe (MP3/WAV)</label>
                         <div class="input-group">
-                            <input type="file" id="audioUpload" class="form-control" accept=".mp3,.wav,.ogg">
-                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('audioUpload', 'resourceAudioUrl')">
+                            <input type="file" id="audioUpload" class="form-control" accept=".mp3,.aac,.wav,.ogg,.oga,.flac">
+                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadAudio('audioUpload', 'resourceAudioUrl')">
                                 <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
                             </button>
                         </div>
@@ -232,7 +233,7 @@
                                 $('#summernote').summernote('insertImage', response.url);
                             },
                             error: function(jqXHR, textStatus, errorThrown) {
-                                alert('Lỗi tải ảnh: ' + textStatus + " " + errorThrown);
+                                showToast('Lỗi tải ảnh: ' + textStatus + " " + errorThrown, 'error');
                             }
                         });
                     }

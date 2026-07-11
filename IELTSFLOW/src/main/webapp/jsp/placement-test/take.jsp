@@ -10,566 +10,118 @@
                 <title>Đang thi – IELTSFLOW</title>
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
                 <style>
-                    /* ── Full-screen exam UI (no sidebar during exam) ── */
-                    body {
-                        margin: 0;
-                        padding: 0;
-                        background: #0f172a !important;
-                        color: #f1f5f9 !important;
-                        font-family: inherit;
-                    }
-
-                    .top-bar {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        z-index: 1000;
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        padding: .75rem 2rem;
-                        background: rgba(15, 23, 42, .97);
-                        backdrop-filter: blur(12px);
-                        border-bottom: 1px solid rgba(255, 255, 255, .08);
-                    }
-
-                    .exam-title {
-                        font-weight: 700;
-                        font-size: 1rem;
-                    }
-
-                    .exam-title span {
-                        color: #94a3b8;
-                        font-weight: 400;
-                        margin-left: .5rem;
-                        font-size: .875rem;
-                    }
-
-                    .timer {
-                        display: flex;
-                        align-items: center;
-                        gap: .5rem;
-                        font-size: 1.5rem;
-                        font-weight: 800;
-                        font-variant-numeric: tabular-nums;
-                        color: #6366f1;
-                    }
-
-                    .timer.warning {
-                        color: #f59e0b;
-                    }
-
-                    .timer.danger {
-                        color: #ef4444;
-                        animation: blink .8s infinite;
-                    }
-
-                    @keyframes blink {
-
-                        0%,
-                        100% {
-                            opacity: 1
-                        }
-
-                        50% {
-                            opacity: .3
-                        }
-                    }
-
-                    .violation-bar {
-                        display: flex;
-                        align-items: center;
-                        gap: .5rem;
-                        font-size: .85rem;
-                        color: #94a3b8;
-                    }
-
-                    .violation-dot {
-                        width: 12px;
-                        height: 12px;
-                        border-radius: 50%;
-                        border: 2px solid #94a3b8;
-                    }
-
-                    .violation-dot.used {
-                        background: #ef4444;
-                        border-color: #ef4444;
-                    }
-
-                    .main {
-                        margin-top: 70px;
-                        padding: 2rem;
-                        max-width: 900px;
-                        margin-left: auto;
-                        margin-right: auto;
-                    }
-
-                    .skill-tabs {
-                        display: flex;
-                        gap: .5rem;
-                        margin-bottom: 2rem;
-                        flex-wrap: wrap;
-                    }
-
-                    .skill-tab {
-                        padding: .5rem 1.25rem;
-                        border-radius: .6rem;
-                        border: 1px solid rgba(255, 255, 255, .08);
-                        background: rgba(255, 255, 255, .05);
-                        color: #94a3b8;
-                        cursor: pointer;
-                        font-size: .875rem;
-                        font-family: inherit;
-                        font-weight: 500;
-                        transition: all .2s;
-                    }
-
-                    .skill-tab.active {
-                        background: #6366f1;
-                        border-color: #6366f1;
-                        color: #fff;
-                    }
-
-                    .skill-tab:hover:not(.active) {
-                        border-color: #6366f1;
-                        color: #6366f1;
-                    }
-
-                    .skill-section {
-                        display: none;
-                    }
-
-                    .skill-section.active {
-                        display: block;
-                    }
-
-                    .resource-box {
-                        background: rgba(255, 255, 255, .04);
-                        border: 1px solid rgba(255, 255, 255, .08);
-                        border-radius: 1rem;
-                        padding: 1.5rem;
-                        margin-bottom: 1.5rem;
-                        max-height: 280px;
-                        overflow-y: auto;
-                        font-size: .9rem;
-                        line-height: 1.8;
-                        color: #94a3b8;
-                    }
-
-                    .resource-box audio {
-                        width: 100%;
-                        margin-bottom: 1rem;
-                    }
-
-                    .q-card {
-                        background: rgba(255, 255, 255, .04);
-                        border: 1px solid rgba(255, 255, 255, .08);
-                        border-radius: 1rem;
-                        padding: 1.5rem;
-                        margin-bottom: 1rem;
-                        transition: border-color .2s;
-                    }
-
-                    .q-card:hover {
-                        border-color: rgba(99, 102, 241, .3);
-                    }
-
-                    .q-num {
-                        display: inline-block;
-                        background: rgba(99, 102, 241, .15);
-                        color: #6366f1;
-                        border-radius: .4rem;
-                        padding: .2rem .6rem;
-                        font-size: .75rem;
-                        font-weight: 700;
-                        margin-bottom: .75rem;
-                    }
-
-                    .q-skill-badge {
-                        display: inline-block;
-                        padding: .15rem .6rem;
-                        border-radius: .4rem;
-                        font-size: .7rem;
-                        font-weight: 600;
-                        text-transform: uppercase;
-                        letter-spacing: .05em;
-                        margin-left: .5rem;
-                    }
-
-                    .q-skill-badge.Listening {
-                        background: rgba(16, 185, 129, .15);
-                        color: #10b981;
-                    }
-
-                    .q-skill-badge.Reading {
-                        background: rgba(99, 102, 241, .15);
-                        color: #6366f1;
-                    }
-
-                    .q-skill-badge.Writing {
-                        background: rgba(245, 158, 11, .15);
-                        color: #f59e0b;
-                    }
-
-                    .q-skill-badge.Speaking {
-                        background: rgba(236, 72, 153, .15);
-                        color: #ec4899;
-                    }
-
-                    .q-content {
-                        font-size: 1rem;
-                        line-height: 1.65;
-                        color: #f1f5f9;
-                        margin-bottom: 1rem;
-                    }
-
-                    .choices {
-                        display: flex;
-                        flex-direction: column;
-                        gap: .5rem;
-                    }
-
-                    .choice {
-                        display: flex;
-                        align-items: center;
-                        gap: .75rem;
-                        padding: .75rem 1rem;
-                        border: 1px solid rgba(255, 255, 255, .08);
-                        border-radius: .6rem;
-                        cursor: pointer;
-                        transition: all .2s;
-                        width: 100%;
-                    }
-
-                    .choice:hover {
-                        border-color: #6366f1;
-                        background: rgba(99, 102, 241, .05);
-                    }
-
-                    .choice input[type=radio] {
-                        accent-color: #6366f1;
-                        width: 16px;
-                        height: 16px;
-                        cursor: pointer;
-                    }
-
-                    .choice .choice-text {
-                        cursor: pointer;
-                        font-size: .9rem;
-                        line-height: 1.5;
-                        width: 100%;
-                        display: block;
-                    }
-
-                    .essay-area {
-                        width: 100%;
-                        min-height: 220px;
-                        padding: 1rem;
-                        border-radius: .75rem;
-                        resize: vertical;
-                        background: rgba(255, 255, 255, .04);
-                        border: 1px solid rgba(255, 255, 255, .08);
-                        color: #f1f5f9;
-                        font-family: inherit;
-                        font-size: .9rem;
-                        line-height: 1.7;
-                        transition: border-color .2s;
-                    }
-
-                    .essay-area:focus {
-                        outline: none;
-                        border-color: #6366f1;
-                    }
-
-                    .word-count {
-                        font-size: .8rem;
-                        color: #94a3b8;
-                        text-align: right;
-                        margin-top: .4rem;
-                    }
-
-                    .speaking-controls {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 1rem;
-                    }
-
-                    .timer-circle {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        width: 80px;
-                        height: 80px;
-                        border-radius: 50%;
-                        border: 3px solid #6366f1;
-                        font-size: 1.2rem;
-                        font-weight: 800;
-                        color: #6366f1;
-                        font-variant-numeric: tabular-nums;
-                        margin: 0 auto;
-                    }
-
-                    .rec-btn {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: .5rem;
-                        padding: .75rem 1.5rem;
-                        border-radius: .75rem;
-                        border: none;
-                        cursor: pointer;
-                        font-family: inherit;
-                        font-weight: 600;
-                        font-size: .9rem;
-                        transition: all .3s;
-                    }
-
-                    .rec-btn.start {
-                        background: #ef4444;
-                        color: #fff;
-                    }
-
-                    .rec-btn.stop {
-                        background: rgba(255, 255, 255, .08);
-                        color: #f1f5f9;
-                        border: 1px solid rgba(255, 255, 255, .08);
-                    }
-
-                    .rec-btn:hover {
-                        transform: translateY(-1px);
-                    }
-
-                    .transcript-display {
-                        background: rgba(255, 255, 255, .04);
-                        border: 1px solid rgba(255, 255, 255, .08);
-                        border-radius: .75rem;
-                        padding: 1rem;
-                        font-size: .85rem;
-                        color: #94a3b8;
-                        min-height: 80px;
-                        line-height: 1.7;
-                        font-style: italic;
-                    }
-
-                    .bottom-nav {
-                        position: fixed;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        background: rgba(15, 23, 42, .97);
-                        backdrop-filter: blur(12px);
-                        border-top: 1px solid rgba(255, 255, 255, .08);
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        padding: 1rem 2rem;
-                    }
-
-                    .progress-info {
-                        font-size: .875rem;
-                        color: #94a3b8;
-                    }
-
-                    .nav-btns {
-                        display: flex;
-                        gap: .75rem;
-                    }
-
-                    .btn-nav {
-                        padding: .65rem 1.5rem;
-                        border-radius: .75rem;
-                        border: 1px solid rgba(255, 255, 255, .08);
-                        background: rgba(255, 255, 255, .05);
-                        color: #f1f5f9;
-                        cursor: pointer;
-                        font-family: inherit;
-                        font-size: .9rem;
-                        font-weight: 600;
-                        transition: all .2s;
-                    }
-
-                    .btn-nav:hover {
-                        border-color: #6366f1;
-                    }
-
-                    .btn-submit-exam {
-                        padding: .65rem 2rem;
-                        border-radius: .75rem;
-                        border: none;
-                        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-                        color: #fff;
-                        cursor: pointer;
-                        font-family: inherit;
-                        font-size: .9rem;
-                        font-weight: 700;
-                        transition: all .2s;
-                    }
-
-                    .btn-submit-exam:hover {
-                        transform: translateY(-1px);
-                        box-shadow: 0 8px 20px rgba(99, 102, 241, .35);
-                    }
-
-                    /* Overlays */
-                    .overlay {
-                        position: fixed;
-                        inset: 0;
-                        background: rgba(0, 0, 0, .85);
-                        z-index: 9999;
-                        display: none;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 1.5rem;
-                    }
-
-                    .overlay.active {
-                        display: flex;
-                    }
-
-                    .overlay-card {
-                        background: #1e293b;
-                        border: 1px solid #ef4444;
-                        border-radius: 1.25rem;
-                        padding: 2.5rem;
-                        max-width: 480px;
-                        text-align: center;
-                    }
-
-                    .overlay-card h2 {
-                        color: #ef4444;
-                        font-size: 1.5rem;
-                        margin-bottom: .75rem;
-                    }
-
-                    .overlay-card p {
-                        color: #94a3b8;
-                        line-height: 1.7;
-                        margin-bottom: 1.5rem;
-                    }
-
-                    .overlay-card.accent {
-                        border-color: #6366f1;
-                    }
-
-                    .overlay-card.accent h2 {
-                        color: #6366f1;
-                    }
-
-                    .btn-back-focus {
-                        padding: .75rem 2rem;
-                        border-radius: .875rem;
-                        border: none;
-                        background: #6366f1;
-                        color: #fff;
-                        font-size: 1rem;
-                        font-weight: 700;
-                        cursor: pointer;
-                        font-family: inherit;
-                    }
-
-                    .forced-overlay {
-                        position: fixed;
-                        inset: 0;
-                        background: rgba(0, 0, 0, .95);
-                        z-index: 99999;
-                        display: none;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 1.5rem;
-                    }
-
-                    .forced-overlay.active {
-                        display: flex;
-                    }
-
-                    .forced-overlay h1 {
-                        color: #ef4444;
-                        font-size: 2rem;
-                        font-weight: 800;
-                    }
-
-                    .forced-overlay p {
-                        color: #94a3b8;
-                        max-width: 400px;
-                        text-align: center;
-                        line-height: 1.7;
-                    }
-                    
-                    /* Question Navigator */
-                    .nav-panel {
-                        position: fixed;
-                        top: 90px;
-                        right: 20px;
-                        width: 300px;
-                        background: rgba(15,23,42,.95);
-                        backdrop-filter: blur(12px);
-                        border: 1px solid rgba(255,255,255,.08);
-                        border-radius: 1rem;
-                        padding: 1.5rem;
-                        max-height: calc(100vh - 180px);
-                        overflow-y: auto;
-                        z-index: 100;
-                    }
-                    .nav-panel h3 { margin-top: 0; font-size: 1.1rem; color: #f1f5f9; margin-bottom: 1rem; text-align: center; }
-                    .nav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-                    .nav-btn {
-                        background: #ffffff;
-                        color: #0f172a;
-                        border: 2px solid #cbd5e1;
-                        border-radius: 6px;
-                        height: 40px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-weight: 700;
-                        font-size: 0.9rem;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                    }
-                    .nav-btn.answered {
-                        background: #10b981;
-                        color: white;
-                        border-color: #059669;
-                    }
-                    .nav-btn.flagged {
-                        background: #f59e0b;
-                        color: white;
-                        border-color: #d97706;
-                    }
-                    .nav-btn.answered.flagged {
-                        background: linear-gradient(135deg, #10b981 50%, #f59e0b 50%);
-                    }
-                    .btn-flag {
-                        background: transparent;
-                        border: 1px solid rgba(255,255,255,.2);
-                        color: #cbd5e1;
-                        border-radius: 4px;
-                        padding: 4px 8px;
-                        font-size: 0.75rem;
-                        cursor: pointer;
-                        float: right;
-                    }
-                    .btn-flag.active {
-                        background: #f59e0b;
-                        color: white;
-                        border-color: #d97706;
-                    }
-                    @media (max-width: 1300px) {
-                        .nav-panel { display: none; } /* Hide on smaller screens */
-                        .main { margin-right: auto; }
-                    }
-                
-                    @media (max-width: 768px) {
-                        .top-bar { flex-direction: column; align-items: stretch; padding: 0.5rem; text-align: center; gap: 0.5rem; }
-                        .exam-title { font-size: 0.9rem; }
-                        .timer { justify-content: center; font-size: 1.2rem; }
-                        .violation-bar { justify-content: center; }
-                        .main { margin-top: 100px; padding: 1rem; }
-                    }
-                </style>
+        body { margin: 0; padding: 0; background: #f3f4f6; color: #1f2937; font-family: Arial, Helvetica, sans-serif; }
+        .top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 2rem; background: #fff; border-bottom: 2px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .exam-title { font-weight: 800; font-size: 1.5rem; color: #dc2626; letter-spacing: -0.5px; }
+        .exam-title span { color: #4b5563; font-weight: 500; margin-left: 1rem; font-size: 1rem; letter-spacing: 0; }
+        .timer { display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; color: #1f2937; background: #f3f4f6; padding: 0.25rem 1rem; border-radius: 20px; }
+        .timer.warning { color: #ea580c; }
+        .timer.danger { color: #dc2626; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1 } 50% { opacity: 0.3 } }
+        .violation-bar { display: none; }
+        
+        .main { margin-top: 65px; margin-bottom: 80px; padding: 0; }
+        
+        /* SKILLS (Parts) - In real CD IELTS these are at the bottom, but we keep them hidden or as tabs */
+        .skill-tabs { display: none; }
+        .skill-section { display: none; height: calc(100vh - 145px); }
+        .skill-section.active { display: block; }
+        
+        .split-layout-container { display: flex; width: 100%; height: 100%; }
+        .split-left { flex: 1; padding: 2rem; overflow-y: auto; background: #eaecf0; border-right: 4px solid #cbd5e1; margin: 0; box-shadow: none; }
+        .split-right { flex: 1; padding: 2rem; overflow-y: auto; background: #eaecf0; margin: 0; box-shadow: none; border-left: 1px solid #cbd5e1; }
+        
+        .resource-box { font-size: 1.1rem; line-height: 1.8; color: #111827; }
+        .resource-box p { margin-bottom: 1rem; }
+        .resource-box audio { width: 100%; margin-bottom: 1rem; height: 40px; }
+        
+        .q-card { padding: 0; margin-bottom: 1.5rem; border: none; background: transparent; }
+        .q-card:hover { border-color: transparent; box-shadow: none; }
+        .q-num { display: inline-block; background: #fff; color: #111827; border-radius: 0; padding: 0.15rem 0.5rem; font-size: 1rem; font-weight: 700; margin-right: 0.75rem; margin-bottom: 0; min-width: 20px; text-align: center; border: 1px solid #cbd5e1; }
+        .q-content { font-size: 1.05rem; font-weight: 400; line-height: 1.6; color: #111827; margin-bottom: 0.75rem; display: inline-block; }
+        
+        .choices { display: flex; flex-direction: column; gap: 0.5rem; }
+        .choice { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 2px; cursor: pointer; background: #fff; }
+        .choice:hover { background: #eff6ff; border-color: #bfdbfe; }
+        .choice input[type=radio] { accent-color: #2563eb; width: 18px; height: 18px; cursor: pointer; }
+        .choice .choice-text { font-size: 1rem; color: #1f2937; font-weight: 500; }
+        
+        .essay-area { width: 100%; min-height: 300px; padding: 1rem; border-radius: 6px; border: 1px solid #d1d5db; font-family: Arial, Helvetica, sans-serif; font-size: 1.05rem; line-height: 1.6; transition: border-color 0.2s; resize: vertical; }
+        .essay-area:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .word-count { font-size: 0.9rem; color: #6b7280; text-align: right; margin-top: 0.5rem; font-weight: 600; }
+        
+        .speaking-controls { text-align: center; padding: 2rem 0; }
+        .timer-circle { display: flex; align-items: center; justify-content: center; width: 100px; height: 100px; border-radius: 50%; border: 4px solid #3b82f6; font-size: 1.5rem; font-weight: 800; color: #1e3a8a; margin: 0 auto 1.5rem; }
+        .rec-btn { padding: 0.75rem 2rem; border-radius: 2rem; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; color: white; transition: transform 0.1s; }
+        .rec-btn.start { background: #ef4444; }
+        .rec-btn.stop { background: #4b5563; }
+        .rec-btn:hover { transform: scale(1.05); }
+        .transcript-display { margin-top: 1.5rem; padding: 1rem; background: #f3f4f6; border-radius: 6px; font-style: italic; color: #4b5563; }
+        
+        /* BOTTOM NAV - CD IELTS Style */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0; height: 80px; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .bottom-nav-left { display: flex; height: 100%; align-items: center; }
+        .bottom-nav-left .skill-tab { height: 100%; background: transparent; border: none; border-right: 1px solid #e5e7eb; padding: 0 2rem; font-size: 1.1rem; font-weight: 700; color: #6b7280; cursor: pointer; }
+        .bottom-nav-left .skill-tab.active { color: #dc2626; border-top: 4px solid #dc2626; background: #fef2f2; }
+        .bottom-nav-left .skill-tab:hover { background: #f9fafb; }
+        
+        .nav-panel { position: relative; background: transparent; border: none; padding: 0; width: auto; max-height: none; top: auto; right: auto; margin: 0 1rem; display: flex; align-items: center; }
+        .nav-panel h3 { display: none; }
+        .nav-grid { display: flex; gap: 4px; overflow-x: auto; padding: 10px; max-width: 600px; }
+        .nav-btn { width: 32px; height: 32px; flex-shrink: 0; border: 1px solid #9ca3af; border-radius: 4px; background: #fff; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1f2937; }
+        .nav-btn.answered { background: #1f2937; color: #fff; border-color: #1f2937; }
+        .nav-btn.flagged { border-radius: 50%; border-color: #d97706; }
+        
+        .bottom-nav-right { display: flex; align-items: center; padding-right: 2rem; gap: 1rem; }
+        .btn-submit-exam { padding: 0.75rem 2rem; background: #dc2626; color: white; font-weight: 700; border: none; border-radius: 4px; font-size: 1.1rem; cursor: pointer; }
+        .btn-submit-exam:hover { background: #b91c1c; }
+        
+        .overlay, .forced-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .overlay.active, .forced-overlay.active { display: flex; }
+        .overlay-card { background: #fff; border-radius: 8px; padding: 2.5rem; text-align: center; max-width: 500px; }
+        .overlay-card h2 { color: #1f2937; margin-top: 0; }
+        .overlay-card p { color: #4b5563; line-height: 1.6; }
+        .btn-back-focus { background: #dc2626; color: white; border: none; padding: 1rem 2rem; border-radius: 4px; font-size: 1.1rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 1rem; }
+        .btn-flag { display: none; }
+        .btn-flag.active { background: #fef3c7; border-color: #f59e0b; color: #d97706; font-weight: bold; }
+        
+        /* Overrides */
+        .q-skill-badge { display: none; }
+
+        /* IELTS Listening Layout */
+        #section-Listening .split-layout-container { flex-direction: column; }
+        #section-Listening .split-layout-container { background: #fff; }
+        #section-Listening .split-left { border-right: none; border-bottom: 2px solid #e5e7eb; padding: 1rem; flex: 0 0 auto; box-shadow: none; margin: 0; background: #fff; border-left: none; }
+        #section-Listening .split-right { margin: 0 auto; width: 100%; max-width: 1000px; padding: 2rem; box-shadow: none; background: #fff; border-left: none; }
+        #section-Listening .split-right { margin: 0 auto; width: 100%; max-width: 1000px; padding: 2rem; box-shadow: none; }
+        #section-Listening .resource-box { display: flex; justify-content: center; }
+        #section-Listening .resource-box audio { width: 50%; }
+        #section-Listening h4 { text-align: center; font-size: 1.5rem; margin-bottom: 0.5rem; }
+        
+        /* Settings Popup */
+        .settings-popup { display: none; position: absolute; top: 60px; right: 20px; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1001; width: 250px; }
+        .settings-popup.active { display: block; }
+        .settings-popup h4 { margin-top: 0; margin-bottom: 1rem; color: #1f2937; }
+        .volume-control { display: flex; align-items: center; gap: 10px; }
+        .volume-control input[type=range] { flex: 1; cursor: pointer; }
+
+
+        /* IELTS Speaking Custom UI */
+        #section-Speaking .split-layout-container { flex-direction: column; background: #f8fafc; align-items: center; justify-content: flex-start; min-height: 100%; padding-top: 4rem; }
+        #section-Speaking .split-left { display: none; }
+        #section-Speaking .split-right { margin: 0 auto; width: 100%; max-width: 700px; padding: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center; }
+        
+        .timer-circle { width: 130px; height: 130px; border-radius: 50%; border: 6px solid #3b82f6; font-size: 2rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 2.5rem; color: #1e3a8a; transition: all 0.3s; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); background: #fff; }
+        .timer-circle.recording { border-color: #ef4444; color: #ef4444; box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); animation: pulse-red 1.5s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 70% { box-shadow: 0 0 0 25px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        
+        .rec-btn { padding: 1rem 3rem; border-radius: 3rem; border: none; font-weight: 800; font-size: 1.15rem; cursor: pointer; color: white; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-transform: uppercase; letter-spacing: 1px; }
+        .rec-btn.start { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .rec-btn.stop { background: linear-gradient(135deg, #64748b, #475569); }
+        .rec-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+        .transcript-display { margin-top: 2rem; padding: 1.5rem; background: #f1f5f9; border-radius: 8px; font-style: italic; color: #334155; font-size: 1.1rem; border-left: 4px solid #3b82f6; text-align: left; min-height: 80px; }
+
+</style>
             </head>
 
             <body>
@@ -577,19 +129,23 @@
                 <!-- TOP BAR -->
                 <div class="top-bar">
                     <div class="exam-title">
-                        ${exam.title}
-                        <span>${exam.skillFocus} · ${exam.duration} phút</span>
+                        IELTS <span>${exam.title} - ${exam.skillFocus}</span>
                     </div>
                     <div class="timer" id="timer">00:00:00</div>
-                    <div class="violation-bar" id="violation-bar">
-                        Vi phạm:
-                        <div class="violation-dot" id="vdot1"></div>
-                        <div class="violation-dot" id="vdot2"></div>
-                        <div class="violation-dot" id="vdot3"></div>
+                    <div style="position: relative;">
+                        <button type="button" id="btn-settings" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #4b5563;">⚙️</button>
+                        <div class="settings-popup" id="settings-popup">
+                            <h4>Settings</h4>
+                            <label style="display:block; margin-bottom:0.5rem; color:#4b5563; font-size:0.9rem;">Master Volume</label>
+                            <div class="volume-control">
+                                <span>🔈</span>
+                                <input type="range" id="master-volume" min="0" max="1" step="0.05" value="1">
+                                <span>🔊</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- VIOLATION WARNING OVERLAY -->
+<!-- VIOLATION WARNING OVERLAY -->
                 <div class="overlay" id="violation-overlay">
                     <div class="overlay-card">
                         <h2>⚠️ Cảnh báo vi phạm!</h2>
@@ -634,25 +190,9 @@
                 </div>
 
                 <!-- MAIN CONTENT -->
-                <div class="main" style="margin-right: 340px;">
-                    <!-- NAVIGATOR PANEL -->
-                    <div class="nav-panel" id="nav-panel">
-                        <h3>Menu Câu Hỏi</h3>
-                        <div class="nav-grid" id="nav-grid">
-                            <!-- JS will populate buttons here -->
-                        </div>
-                    </div>
-                    <c:set var="skills" value="${['Listening','Reading','Writing','Speaking']}" />
-                    <div class="skill-tabs" id="skill-tabs">
-                        <c:forEach var="sk" items="${skills}" varStatus="st">
-                            <button class="skill-tab ${st.first ? 'active' : ''}" onclick="switchSkill('${sk}')"
-                                id="tab-${sk}" type="button">${sk}</button>
-                        </c:forEach>
-                    </div>
-
-                    <form method="post"
-                        action="${pageContext.request.contextPath}/candidate/placement-test?action=submit"
-                        id="exam-form">
+                <div class="main">
+<c:set var="skills" value="${['Listening','Reading','Writing','Speaking']}" />
+                    <form method="post" action="${pageContext.request.contextPath}/candidate/placement-test?action=submit" id="exam-form" style="height: 100%;">
                         <input type="hidden" name="action" value="submit">
                         <input type="hidden" name="submissionId" value="${submissionId}">
 
@@ -661,124 +201,130 @@
                                 <c:set var="qNum" value="${0}" />
                                 <c:forEach var="sec" items="${sections}">
                                     <c:if test="${sec.skill == sk}">
-                                        <div class="exam-section-container" style="margin-bottom: 2rem; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; background: #fff;">
-                                            <h4 style="margin-bottom: 1rem; color: var(--text-primary);">${sec.sectionName}</h4>
-                                            
-                                            <%-- Section-level resource (Reading Passage or Audio for multiple questions) --%>
-                                            <c:if test="${not empty sec.resourceText || not empty sec.resourceAudioUrl}">
-                                                <div class="resource-box">
-                                                    <c:if test="${not empty sec.resourceAudioUrl}">
-                                                        <audio controls src="${sec.resourceAudioUrl}"></audio>
-                                                    </c:if>
-                                                    <c:if test="${not empty sec.resourceText}">
-                                                        <p>${sec.resourceText}</p>
-                                                    </c:if>
-                                                </div>
-                                            </c:if>
-                                            
-                                            <%-- Loop over questions in this section --%>
-                                            <c:forEach var="eq" items="${sec.examQuestions}">
-                                                <c:set var="q" value="${eq.question}"/>
-                                                <c:set var="qNum" value="${qNum + 1}" />
-        
-                                                <%-- Individual question-level resource (if any) --%>
-                                                <c:if test="${not empty q.resourceText || not empty q.resourceAudioUrl}">
-                                                    <div class="resource-box" style="margin-top: 1rem;">
-                                                        <c:if test="${not empty q.resourceAudioUrl}">
-                                                            <audio controls src="${q.resourceAudioUrl}"></audio>
-                                                        </c:if>
-                                                        <c:if test="${not empty q.resourceText}">
-                                                            <p>${q.resourceText}</p>
-                                                        </c:if>
-                                                    </div>
-                                                </c:if>
-        
-                                                <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}">
-                                            <div>
-                                                <span class="q-num">Câu ${qNum}</span>
-                                                <span class="q-skill-badge ${q.skill}">${q.skill}</span>
-                                                <button type="button" class="btn-flag" onclick="toggleFlag(${q.questionId})">🚩 Đánh dấu</button>
-                                            </div>
-                                            <div class="q-content">${q.content}</div>
-
-                                            <c:choose>
-                                                <%-- MULTIPLE CHOICE --%>
-                                                    <c:when test="${q.questionType == 'Multiple_Choice'}">
-                                                        <div class="choices">
-                                                            <c:forEach var="ans" items="${q.answers}">
-                                                                <label class="choice" for="ans_${ans.answerId}">
-                                                                    <input type="radio" name="q_${q.questionId}"
-                                                                        id="ans_${ans.answerId}"
-                                                                        value="${ans.answerId}">
-                                                                    <span class="choice-text">${ans.content}</span>
-                                                                </label>
-                                                            </c:forEach>
+                                        <div class="split-layout-container">
+                                            <!-- LEFT PANE: Resource -->
+                                            <div class="split-left">
+                                                <h4>${sec.sectionName}</h4>
+                                                
+                                                <c:if test="${sk == 'Writing'}">
+                                                    <!-- Special layout for Writing: Show all question prompts here, toggled by JS -->
+                                                    <c:forEach var="xQ" items="${sec.examQuestions}" varStatus="ws">
+                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem;">
+                                                            ${xQ.question.content}
                                                         </div>
-                                                    </c:when>
-
-                                                    <%-- ESSAY (Writing) --%>
-                                                        <c:when test="${q.questionType == 'Essay'}">
-                                                            <textarea class="essay-area" name="q_${q.questionId}"
-                                                                id="essay_${q.questionId}"
-                                                                placeholder="Viết bài của bạn ở đây..."
-                                                                oninput="countWords(this, 'wc_${q.questionId}')"></textarea>
-                                                            <div class="word-count" id="wc_${q.questionId}">0 từ</div>
-                                                        </c:when>
-
-                                                        <%-- SPEAKING --%>
-                                                            <c:when test="${q.questionType == 'Speaking'}">
-                                                                <div class="speaking-controls">
-                                                                    <div class="timer-circle"
-                                                                        id="rec-timer-${q.questionId}">00:00</div>
-                                                                    <div
-                                                                        style="display:flex;gap:.75rem;justify-content:center;">
-                                                                        <button type="button" class="rec-btn start"
-                                                                            onclick="startRecording(${q.questionId})"
-                                                                            id="btn-rec-${q.questionId}">
-                                                                            🎙 Bắt đầu thu âm
-                                                                        </button>
-                                                                        <button type="button" class="rec-btn stop"
-                                                                            onclick="stopRecording(${q.questionId})"
-                                                                            id="btn-stop-${q.questionId}"
-                                                                            style="display:none">
-                                                                            ⏹ Dừng thu âm
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="transcript-display" id="transcript-${q.questionId}" style="min-height: auto; text-align: center; padding: 0.75rem;">
-                                                                        Trạng thái: Chưa ghi âm
-                                                                    </div>
-                                                                    <input type="hidden"
-                                                                        name="transcript_${q.questionId}"
-                                                                        id="hidden-transcript-${q.questionId}">
-                                                                    <input type="hidden" name="azure_${q.questionId}" id="hidden-azure-${q.questionId}" value="0">
-                                                                    <input type="hidden" name="q_${q.questionId}"
-                                                                        value="">
+                                                    </c:forEach>
+                                                </c:if>
+                                                
+                                                <c:if test="${sk != 'Writing'}">
+                                                    <!-- Find the shared resource from the first question -->
+                                                    <c:set var="sharedAudio" value="" />
+                                                    <c:set var="sharedText" value="" />
+                                                    <c:forEach var="xQ" items="${sec.examQuestions}">
+                                                        <c:if test="${not empty xQ.question.resourceAudioUrl and empty sharedAudio}">
+                                                            <c:set var="sharedAudio" value="${xQ.question.resourceAudioUrl}" />
+                                                        </c:if>
+                                                        <c:if test="${not empty xQ.question.resourceText and empty sharedText}">
+                                                            <c:set var="sharedText" value="${xQ.question.resourceText}" />
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    
+                                                    <c:if test="${not empty sharedText || not empty sharedAudio}">
+                                                        <div class="resource-box">
+                                                            <c:if test="${not empty sharedAudio}">
+                                                                <audio controls src="${sharedAudio}"></audio>
+                                                            </c:if>
+                                                            <c:if test="${not empty sharedText}">
+                                                                ${sharedText}
+                                                            </c:if>
+                                                        </div>
+                                                    </c:if>
+                                                    <c:if test="${empty sharedText && empty sharedAudio}">
+                                                        <div style="color: #9ca3af; font-style: italic; text-align: center; margin-top: 2rem;">Read the questions on the right carefully.</div>
+                                                    </c:if>
+                                                </c:if>
+                                            </div>
+                                            
+                                            <!-- RIGHT PANE: Questions -->
+                                            <div class="split-right">
+                                                <c:forEach var="examQ" items="${sec.examQuestions}">
+                                                    <c:set var="q" value="${examQ.question}"/>
+                                                    <c:set var="qNum" value="${qNum + 1}" />
+            
+                                                    
+            
+                                                    <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}">
+                                                        <c:if test="${sk != 'Writing' && sk != 'Speaking'}">
+                                                            <div style="display: flex; align-items: flex-start;">
+                                                                <span class="q-num">${qNum}</span>
+                                                                <div class="q-content">${q.content}</div>
+                                                            </div>
+                                                        </c:if>
+                                                        <c:if test="${sk == 'Speaking'}">
+                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                                                ${q.content}
+                                                            </div>
+                                                        </c:if>
+                                                        
+                                                        <!-- Input fields -->
+                                                        <c:choose>
+                                                            <c:when test="${q.questionType == 'Multiple_Choice'}">
+                                                                <div class="choices">
+                                                                    <c:forEach var="ans" items="${q.answers}">
+                                                                        <label class="choice" for="ans_${ans.answerId}">
+                                                                            <input type="radio" name="q_${q.questionId}" id="ans_${ans.answerId}" value="${ans.answerId}">
+                                                                            <span class="choice-text">${ans.content}</span>
+                                                                        </label>
+                                                                    </c:forEach>
                                                                 </div>
                                                             </c:when>
-
-                                                            <%-- FILL BLANK --%>
-                                                                <c:otherwise>
-                                                                    <input type="text" name="q_${q.questionId}"
-                                                                        placeholder="Nhập câu trả lời..."
-                                                                        style="width:100%;padding:.75rem;border-radius:.6rem;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f1f5f9;font-size:.9rem;font-family:inherit;">
-                                                                </c:otherwise>
-                                            </c:choose>
+                                                            <c:when test="${q.questionType == 'Essay'}">
+                                                                <textarea class="essay-area" style="height: calc(100vh - 280px); width: 100%; border: 1px solid #94a3b8; border-radius: 2px; padding: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-family: Arial; font-size: 1.05rem; resize: none; background: #fff;" name="q_${q.questionId}" id="essay_${q.questionId}" placeholder="" oninput="countWords(this, 'wc_${q.questionId}')"></textarea>
+                                                                <div class="word-count" id="wc_${q.questionId}" style="text-align: left; margin-top: 0.5rem; font-weight: 700; color: #4b5563;">Word count: 0</div>
+                                                            </c:when>
+                                                            <c:when test="${q.questionType == 'Speaking'}">
+                                                                <div class="speaking-controls">
+                                                                    <div class="timer-circle" id="rec-timer-${q.questionId}">00:00</div>
+                                                                    <div>
+                                                                        <button type="button" class="rec-btn start" onclick="startRecording(${q.questionId})" id="btn-rec-${q.questionId}">Start Recording</button>
+                                                                        <button type="button" class="rec-btn stop" onclick="stopRecording(${q.questionId})" id="btn-stop-${q.questionId}" style="display:none">Stop Recording</button>
+                                                                    </div>
+                                                                    <div class="transcript-display" id="transcript-${q.questionId}">Status: Not recorded</div>
+                                                                    <input type="hidden" name="transcript_${q.questionId}" id="hidden-transcript-${q.questionId}">
+                                                                    <input type="hidden" name="azure_${q.questionId}" id="hidden-azure-${q.questionId}" value="0">
+                                                                    <input type="hidden" name="q_${q.questionId}" value="">
+                                                                </div>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <input type="text" name="q_${q.questionId}" placeholder="Enter your answer" style="width:100%;padding:0.75rem;border-radius:4px;border:1px solid #d1d5db;font-size:1rem;font-family:inherit;">
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </c:forEach>
+                                            </div>
                                         </div>
-                                    </c:forEach>
-                                    </div>
+                                    </c:if>
                                 </c:forEach>
                             </div>
                         </c:forEach>
 
                         <!-- BOTTOM NAV -->
                         <div class="bottom-nav">
-                            <div class="progress-info">Mã bài: #${submissionId}</div>
-                            <div class="nav-btns">
-                                <button type="button" class="btn-nav" onclick="history.back()"
-                                    id="btn-cancel">Hủy</button>
-                                <button type="submit" class="btn-submit-exam" id="btn-submit-exam"
-                                    onclick="return confirmSubmit()">
-                                    📤 Nộp bài
+                            <div class="bottom-nav-left">
+                                <c:forEach var="sk" items="${skills}" varStatus="st">
+                                    <button class="skill-tab ${st.first ? 'active' : ''}" onclick="switchSkill('${sk}')" id="tab-${sk}" type="button">${sk}</button>
+                                </c:forEach>
+                            </div>
+                            
+                            <div class="nav-panel" id="nav-panel">
+                                <h3>Questions</h3>
+                                <div class="nav-grid" id="nav-grid">
+                                    <!-- JS will populate buttons here -->
+                                </div>
+                            </div>
+                            
+                            <div class="bottom-nav-right">
+                                <button type="submit" class="btn-submit-exam" id="btn-submit-exam" onclick="return confirmSubmit()">
+                                    Submit
                                 </button>
                             </div>
                         </div>
@@ -847,7 +393,7 @@
                             .then(r => r.json())
                             .then(data => {
                                 violationCount = data.violations;
-                                updateViolationDots(violationCount);
+                                // updateViolationDots(violationCount);
                                 document.getElementById('vio-count').textContent = violationCount;
                                 if (data.cheated) {
                                     isExamStarted = false;
@@ -860,11 +406,7 @@
                             .catch(() => { });
                     }
 
-                    function updateViolationDots(count) {
-                        for (let i = 1; i <= 3; i++) {
-                            document.getElementById('vdot' + i).classList.toggle('used', i <= count);
-                        }
-                    }
+                    
                     document.getElementById('btn-back-focus').addEventListener('click', () => {
                         document.getElementById('violation-overlay').classList.remove('active');
                         requestFullscreen();
@@ -887,14 +429,18 @@
                         if (!section) return;
                         
                         const qCards = section.querySelectorAll('.q-card');
-                        qCards.forEach(card => {
-                            const num = card.querySelector('.q-num').innerText.replace('Câu ', '');
+                        qCards.forEach((card, index) => {
+                            let numStr = (index + 1).toString();
+                            const numEl = card.querySelector('.q-num');
+                            if (numEl) {
+                                numStr = numEl.innerText.replace(/[^0-9]/g, '');
+                            }
                             const qId = card.getAttribute('data-qid');
                             
                             const btn = document.createElement('div');
                             btn.className = 'nav-btn';
                             btn.id = 'navbtn_' + qId;
-                            btn.innerText = num;
+                            btn.innerText = numStr;
                             
                             if (card.classList.contains('flagged')) btn.classList.add('flagged');
                             if (checkIfAnswered(card)) btn.classList.add('answered');
@@ -1103,6 +649,54 @@
                         function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
                         function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
                     }
+                
+                    // ── SETTINGS & VOLUME ─────────────────────────────────────────────
+                    const btnSettings = document.getElementById('btn-settings');
+                    const popupSettings = document.getElementById('settings-popup');
+                    const masterVolume = document.getElementById('master-volume');
+                    
+                    if(btnSettings && popupSettings) {
+                        btnSettings.addEventListener('click', () => {
+                            popupSettings.classList.toggle('active');
+                        });
+                        
+                        // Close popup when clicking outside
+                        document.addEventListener('click', (e) => {
+                            if (!btnSettings.contains(e.target) && !popupSettings.contains(e.target)) {
+                                popupSettings.classList.remove('active');
+                            }
+                        });
+                        
+                        masterVolume.addEventListener('input', (e) => {
+                            const vol = e.target.value;
+                            document.querySelectorAll('audio').forEach(audio => {
+                                audio.volume = vol;
+                            });
+                        });
+                    }
+
+                    // ── WRITING PROMPT SWITCHER ───────────────────────────────────────
+                    const writingObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const qId = entry.target.getAttribute('data-qid');
+                                const allPrompts = document.querySelectorAll('.writing-prompt-box');
+                                if (allPrompts.length > 0) {
+                                    allPrompts.forEach(p => p.style.display = 'none');
+                                    const targetPrompt = document.getElementById('prompt_' + qId);
+                                    if (targetPrompt) targetPrompt.style.display = 'block';
+                                }
+                            }
+                        });
+                    }, { root: null, threshold: 0.5 });
+
+                    // We need to wait for DOM to be ready, but this script is at the bottom anyway
+                    setTimeout(() => {
+                        document.querySelectorAll('#section-Writing .q-card').forEach(card => {
+                            writingObserver.observe(card);
+                        });
+                    }, 500);
+
                 </script>
                 <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
