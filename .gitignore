@@ -44,3 +44,7 @@ goalapi_testcase.md
 *.py
 dashboard & analystic.drawio
 IELTSFLOW/E2E_TestResults.html
+
+# NetBeans IDE files
+nbactions.xml
+IELTSFLOW/nbactions.xml
