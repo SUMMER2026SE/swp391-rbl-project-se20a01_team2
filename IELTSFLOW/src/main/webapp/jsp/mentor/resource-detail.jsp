@@ -40,7 +40,7 @@
                 const input = document.getElementById(inputId);
                 const file = input.files[0];
                 if (!file) {
-                    alert('Vui lòng chọn một file trước khi tải lên.');
+                    Swal.fire({ icon: 'warning', title: 'Cảnh báo', text: 'Vui lòng chọn một file trước khi tải lên.' });
                     return;
                 }
 
@@ -63,12 +63,12 @@
                     
                     if (response.ok) {
                         document.getElementById(targetId).value = result.url;
-                        alert('Tải lên thành công!');
+                        Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Tải lên thành công!', timer: 2000, showConfirmButton: false });
                     } else {
-                        alert('Lỗi: ' + (result.error || 'Không xác định'));
+                        Swal.fire({ icon: 'error', title: 'Lỗi', text: result.error || 'Không xác định' });
                     }
                 } catch (error) {
-                    alert('Lỗi mạng khi tải lên: ' + error.message);
+                    Swal.fire({ icon: 'error', title: 'Lỗi mạng', text: error.message });
                 } finally {
                     btn.innerHTML = originalHtml;
                     btn.disabled = false;
@@ -76,40 +76,63 @@
             }
             
             function toggleResourceFields() {
-                const type = document.getElementById('resourceType').value;
-                document.getElementById('passageFields').style.display = (type === 'Passage') ? 'block' : 'none';
-                document.getElementById('audioFields').style.display = (type === 'Audio') ? 'block' : 'none';
-                document.getElementById('imageFields').style.display = (type === 'Image') ? 'block' : 'none';
+                const isPassage = document.getElementById('checkPassage').checked;
+                const isAudio = document.getElementById('checkAudio').checked;
+                const isImage = document.getElementById('checkImage').checked;
+
+                document.getElementById('passageFields').style.display = isPassage ? 'block' : 'none';
+                document.getElementById('audioFields').style.display = isAudio ? 'block' : 'none';
+                document.getElementById('imageFields').style.display = isImage ? 'block' : 'none';
+
+                let primaryType = "";
+                if (isPassage) primaryType = "Passage";
+                else if (isAudio) primaryType = "Audio";
+                else if (isImage) primaryType = "Image";
+
+                document.getElementById('hiddenType').value = primaryType;
             }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleResourceFields();
+            });
         </script>
 
-        <div class="glass-panel animate-fade-up" style="animation-delay: 0.1s; padding: 30px;">
-            <form action="${pageContext.request.contextPath}/mentor/resources" method="POST">
-                <input type="hidden" name="action" value="${resource == null ? 'create' : 'update'}">
+        <div class="glass-panel animate-fade-up shadow-sm p-4" style="animation-delay: 0.1s; border-radius: 12px; background: rgba(255,255,255,0.85);">
+            <form action="${pageContext.request.contextPath}/mentor/resources" method="POST" id="resourceForm">
+                <input type="hidden" name="action" value="${resource != null ? 'update' : 'create'}">
                 <c:if test="${resource != null}">
                     <input type="hidden" name="resourceId" value="${resource.resourceId}">
                 </c:if>
-                
-                <h5 class="fw-bold mb-4" style="color: var(--accent-purple);">Thông tin chung</h5>
-                
+                <input type="hidden" name="type" id="hiddenType" value="${resource != null ? resource.type : 'Passage'}">
+
                 <div class="row g-4">
                     <div class="col-md-8">
                         <label class="form-label fw-bold">Tên Tài Nguyên (Tùy chọn)</label>
                         <input type="text" name="resourceName" class="form-control" placeholder="Nhập tên gợi nhớ (VD: Cam 18 Test 1 Passage 1)" value="${resource.resourceName}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Loại Tài Nguyên <span class="text-danger">*</span></label>
-                        <select name="type" id="resourceType" class="form-select" required onchange="toggleResourceFields()">
-                            <option value="Passage" ${resource.type == 'Passage' ? 'selected' : ''}>Đoạn văn (Reading Passage)</option>
-                            <option value="Audio" ${resource.type == 'Audio' ? 'selected' : ''}>Tệp âm thanh (Listening Audio)</option>
-                            <option value="Image" ${resource.type == 'Image' ? 'selected' : ''}>Hình ảnh (Image)</option>
-                        </select>
+                        <label class="form-label fw-bold d-block">Loại Tài Liệu <span class="text-danger">*</span></label>
+                        <div class="d-flex flex-wrap gap-3 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Passage" id="checkPassage" onchange="toggleResourceFields()" ${resource == null || not empty resource.resourceText || resource.type == 'Passage' ? 'checked' : ''}>
+                                <label class="form-check-label fw-medium" for="checkPassage" style="color: #10b981;"><i class="fa-solid fa-book-open"></i> Bài đọc</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Audio" id="checkAudio" onchange="toggleResourceFields()" ${not empty resource.resourceAudioUrl || resource.type == 'Audio' ? 'checked' : ''}>
+                                <label class="form-check-label fw-medium" for="checkAudio" style="color: #f59e0b;"><i class="fa-solid fa-headphones"></i> Bài nghe</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Image" id="checkImage" onchange="toggleResourceFields()" ${not empty resource.resourceImageUrl || resource.type == 'Image' ? 'checked' : ''}>
+                                <label class="form-check-label fw-medium" for="checkImage" style="color: #3b82f6;"><i class="fa-solid fa-image"></i> Hình ảnh</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <hr class="my-4" style="border-color: var(--border-color);">
+                <p class="text-muted mb-4"><i class="fa-solid fa-circle-info me-2"></i>Chọn các loại tài liệu ở trên để hiển thị khung nhập tương ứng.</p>
 
-                <div id="passageFields" style="display: ${resource == null || resource.type == 'Passage' ? 'block' : 'none'};">
+                <div id="passageFields" class="mb-4" style="display: none;">
                     <h5 class="fw-bold mb-3" style="color: #10b981;"><i class="fa-solid fa-book-open me-2"></i>Nội dung Đoạn văn</h5>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nội dung bài đọc (Rich Text)</label>
@@ -117,7 +140,7 @@
                     </div>
                 </div>
 
-                <div id="audioFields" style="display: ${resource != null && resource.type == 'Audio' ? 'block' : 'none'};">
+                <div id="audioFields" class="mb-4" style="display: none;">
                     <h5 class="fw-bold mb-3" style="color: #f59e0b;"><i class="fa-solid fa-headphones me-2"></i>Tệp Âm Thanh</h5>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tải lên tệp nghe (MP3/WAV)</label>
@@ -131,7 +154,7 @@
                     </div>
                 </div>
 
-                <div id="imageFields" style="display: ${resource != null && resource.type == 'Image' ? 'block' : 'none'};">
+                <div id="imageFields" class="mb-4" style="display: none;">
                     <h5 class="fw-bold mb-3" style="color: #3b82f6;"><i class="fa-solid fa-image me-2"></i>Tệp Hình Ảnh</h5>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tải lên hình ảnh (JPG/PNG/GIF)</label>
@@ -146,12 +169,30 @@
                 </div>
 
                 <div class="mt-4 text-end d-flex justify-content-end gap-2 sticky-bottom" style="position: sticky; bottom: 15px; z-index: 99;">
-                    <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow fw-bold" style="background-color: var(--accent-purple); border-color: var(--accent-purple);">
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow fw-bold" style="background-color: var(--accent-purple); border-color: var(--accent-purple);" onclick="return validateCheckboxes()">
                         <i class="fa-solid fa-floppy-disk me-2"></i> Lưu Tài Nguyên
                     </button>
                 </div>
             </form>
         </div>
+
+        <script>
+            function validateCheckboxes() {
+                const isPassage = document.getElementById('checkPassage').checked;
+                const isAudio = document.getElementById('checkAudio').checked;
+                const isImage = document.getElementById('checkImage').checked;
+                
+                if (!isPassage && !isAudio && !isImage) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Thiếu Loại Tài Liệu',
+                        text: 'Vui lòng chọn ít nhất một loại tài liệu (Bài đọc, Bài nghe, hoặc Hình ảnh)!'
+                    });
+                    return false;
+                }
+                return true;
+            }
+        </script>
 
     </main>
 </div>
