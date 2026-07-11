@@ -236,5 +236,8 @@
         $('.selectpicker').selectpicker();
     });
 </script>
+    <!-- AI Chatbox Widget -->
+    <jsp:include page="/jsp/components/chat-widget.jsp" />
+    
 </body>
 </html>

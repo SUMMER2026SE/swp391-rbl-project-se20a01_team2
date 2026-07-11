@@ -227,6 +227,9 @@
 
     <script src="${pageContext.request.contextPath}/js/api.js"></script>
     <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
+    <!-- AI Chatbox Widget -->
+    <jsp:include page="/jsp/components/chat-widget.jsp" />
+    
 </body>
 </html>
 
