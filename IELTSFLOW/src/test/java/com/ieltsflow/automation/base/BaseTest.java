@@ -59,6 +59,12 @@ public class BaseTest {
         if (chromeBinary != null && !chromeBinary.isEmpty()) {
             options.setBinary(chromeBinary);
         }
+        // Tắt popup cảnh báo mật khẩu bị lộ của Chrome (tránh bị chặn trong test)
+        options.addArguments("--disable-features=PasswordLeakDetection");
+        java.util.Map<String, Object> prefs = new java.util.HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        options.setExperimentalOption("prefs", prefs);
 
         driver = new ChromeDriver(options);
         // Thiết lập Implicit Wait (Khuyên dùng Explicit Wait trong các bài test cụ thể)

@@ -488,6 +488,9 @@
     }
     </script>
     <script src="${pageContext.request.contextPath}/js/api.js?v=${System.currentTimeMillis()}"></script>
+    <!-- AI Chatbox Widget -->
+    <jsp:include page="/jsp/components/chat-widget.jsp" />
+    
 </body>
 </html>
 
