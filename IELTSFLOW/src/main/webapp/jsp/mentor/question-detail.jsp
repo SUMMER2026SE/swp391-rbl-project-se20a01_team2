@@ -221,7 +221,24 @@
 
 <div id="resource-texts" style="display:none;">
     <c:forEach var="res" items="${allResources}">
-        <div id="res_text_${res.resourceId}">${res.resourceText}</div>
+        <div id="res_text_${res.resourceId}">
+            <div class="d-flex flex-column gap-3">
+                <c:if test="${not empty res.resourceText}">
+                    <div>${res.resourceText}</div>
+                </c:if>
+                <c:if test="${not empty res.resourceImageUrl}">
+                    <div class="text-center">
+                        <img src="${pageContext.request.contextPath}${res.resourceImageUrl}" class="img-fluid rounded shadow-sm" alt="Image Resource" style="max-height: 400px;" />
+                    </div>
+                </c:if>
+                <c:if test="${not empty res.resourceAudioUrl}">
+                    <div class="text-center p-3 bg-light rounded">
+                        <i class="fa-solid fa-headphones fs-1 text-warning mb-2"></i><br>
+                        <audio controls class="w-100 mt-2"><source src="${pageContext.request.contextPath}${res.resourceAudioUrl}"></audio>
+                    </div>
+                </c:if>
+            </div>
+        </div>
     </c:forEach>
 </div>
 

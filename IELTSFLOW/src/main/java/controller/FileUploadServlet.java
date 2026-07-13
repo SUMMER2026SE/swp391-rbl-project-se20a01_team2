@@ -131,6 +131,8 @@ public class FileUploadServlet extends HttpServlet {
             } else {
                 handleStandardUpload(req, resp, session, type);
             }
+
+
         } catch (Exception e) {
             e.printStackTrace();
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
