@@ -25,7 +25,7 @@ public class GeminiApiService {
     private static final Logger LOGGER = Logger.getLogger(GeminiApiService.class.getName());
 
     // Đã verify ngày 25/06/2026: gemini-2.5-flash hoạt động với structured output
-    private static final String MODEL_NAME = "gemini-2.5-flash";
+    private static final String MODEL_NAME = "gemma-4-31b-it";
     private static final String BASE_URL   =
             "https://generativelanguage.googleapis.com/v1beta/models/"
             + MODEL_NAME + ":generateContent?key=";
@@ -195,7 +195,18 @@ public class GeminiApiService {
                 int status = response.statusCode();
 
                 if (status == 200) {
-                    return extractTextFromResponse(response.body());
+                    String jsonText = extractTextFromResponse(response.body());
+                    if (jsonText != null) {
+                        try {
+                            com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(jsonText);
+                            if (root.has("reply")) {
+                                return root.get("reply").asText();
+                            }
+                        } catch (Exception e) {
+                            LOGGER.warning("Failed to parse chat json response: " + jsonText);
+                        }
+                    }
+                    return jsonText;
                 } else if (status == 429 || status == 503 || status >= 500) {
                     int sleepMs = Math.min(2000 * attempt, 10000); 
                     Thread.sleep(sleepMs);
@@ -225,11 +236,14 @@ public class GeminiApiService {
         try {
             String sysText = objectMapper.writeValueAsString(systemInstruction);
             String userText = objectMapper.writeValueAsString(userMessage);
+            String schema = "{\"type\":\"object\",\"properties\":{\"thinking\":{\"type\":\"string\",\"description\":\"Internal thoughts and reasoning\"},\"reply\":{\"type\":\"string\",\"description\":\"The final response to the user\"}},\"required\":[\"thinking\",\"reply\"]}";
             return "{"
                 + "\"systemInstruction\":{\"parts\":[{\"text\":" + sysText + "}]},"
                 + "\"contents\":[{\"parts\":[{\"text\":" + userText + "}]}],"
                 + "\"generationConfig\":{"
-                + "\"temperature\":0.7"
+                + "\"temperature\":0.7,"
+                + "\"responseMimeType\":\"application/json\","
+                + "\"responseSchema\":" + schema
                 + "}"
                 + "}";
         } catch (Exception e) {
