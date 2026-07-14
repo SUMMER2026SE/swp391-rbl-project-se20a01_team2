@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+<%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -213,6 +214,9 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-success fw-bold" onclick="checkPreviewAnswers()">
+                    <i class="fa-solid fa-check-double me-1"></i> Kiểm tra đáp án
+                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
@@ -233,8 +237,21 @@
                 </c:if>
                 <c:if test="${not empty res.resourceAudioUrl}">
                     <div class="text-center p-3 bg-light rounded">
-                        <i class="fa-solid fa-headphones fs-1 text-warning mb-2"></i><br>
-                        <audio controls class="w-100 mt-2"><source src="${pageContext.request.contextPath}${res.resourceAudioUrl}"></audio>
+                        <c:choose>
+                            <c:when test="${fn:contains(res.resourceAudioUrl, 'youtube.com') or fn:contains(res.resourceAudioUrl, 'youtu.be')}">
+                                <c:set var="embedUrl" value="${fn:replace(res.resourceAudioUrl, 'watch?v=', 'embed/')}" />
+                                <c:set var="embedUrl" value="${fn:replace(embedUrl, 'youtu.be/', 'youtube.com/embed/')}" />
+                                <iframe width="100%" height="250" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </c:when>
+                            <c:when test="${fn:contains(res.resourceAudioUrl, 'drive.google.com')}">
+                                <c:set var="embedUrl" value="${fn:replace(res.resourceAudioUrl, '/view', '/preview')}" />
+                                <iframe src="${embedUrl}" width="100%" height="250" allow="autoplay"></iframe>
+                            </c:when>
+                            <c:otherwise>
+                                <i class="fa-solid fa-headphones fs-1 text-warning mb-2"></i><br>
+                                <audio controls class="w-100 mt-2"><source src="${pageContext.request.contextPath}${res.resourceAudioUrl}"></audio>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </c:if>
             </div>
