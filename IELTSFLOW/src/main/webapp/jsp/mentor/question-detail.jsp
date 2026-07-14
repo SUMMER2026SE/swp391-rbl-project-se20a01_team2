@@ -73,16 +73,18 @@
 
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Dạng bài <span class="text-danger">*</span></label>
-                        <select name="questionType" class="form-select" required>
+                        <select name="questionType" id="questionTypeSelect" class="form-select" required>
                             <option value="MultipleChoice" ${question.questionType == 'MultipleChoice' ? 'selected' : ''}>Multiple Choice</option>
                             <option value="Matching" ${question.questionType == 'Matching' ? 'selected' : ''}>Matching</option>
                             <option value="FillInBlanks" ${question.questionType == 'FillInBlanks' ? 'selected' : ''}>Fill In Blanks</option>
+                            <option value="Essay" ${question.questionType == 'Essay' ? 'selected' : ''}>Tự luận (Essay)</option>
+                            <option value="AudioResponse" ${question.questionType == 'AudioResponse' ? 'selected' : ''}>Ghi âm (Speaking)</option>
                         </select>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Kỹ năng <span class="text-danger">*</span></label>
-                        <select name="skill" class="form-select" required>
+                        <select name="skill" id="skillSelect" class="form-select" required>
                             <option value="Listening" ${question.skill == 'Listening' ? 'selected' : ''}>Listening</option>
                             <option value="Reading" ${question.skill == 'Reading' ? 'selected' : ''}>Reading</option>
                             <option value="Writing" ${question.skill == 'Writing' ? 'selected' : ''}>Writing</option>
@@ -264,7 +266,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-<script src="${pageContext.request.contextPath}/js/mentor-question-builder.js"></script>
+<script src="${pageContext.request.contextPath}/js/mentor-question-builder.js?t=<%= System.currentTimeMillis() %>"></script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -274,8 +276,353 @@
         $('.selectpicker').selectpicker();
     });
 </script>
-    <!-- AI Chatbox Widget -->
-    <jsp:include page="/jsp/components/chat-widget.jsp" />
+<!-- INJECTED PREVIEW LOGIC -->
+<script>
+window.showPreviewModal = function() {
+    const qType = document.querySelector('select[name=questionType]').value;
+    const content = document.querySelector('textarea[name=content]').value;
+    const container = document.getElementById('previewContainer');
+
+    let resourceId = document.getElementById('resourceId').value;
+    let resourceTextHtml = '';
+    if (resourceId) {
+        let resDiv = document.getElementById('res_text_' + resourceId);
+        if (resDiv) {
+            resourceTextHtml = `<div class="resource-panel mb-4 p-3 border rounded bg-white shadow-sm" style="max-height: 300px; overflow-y: auto;">` + resDiv.innerHTML + `</div>`;
+        }
+    }
+
+    let html = resourceTextHtml + `<div class="q-content mb-4">${content.replace(/\n/g, '<br>')}</div>`;
+
+    if (qType === 'MultipleChoice') {
+        html += `<div class="choices d-flex flex-column gap-2">`;
+        document.querySelectorAll('.answer-item').forEach((item, i) => {
+            if (item.style.display !== 'none') {
+                const text = item.querySelector('.answer-content-input').value;
+                html += `
+                    <label class="choice border p-2 rounded d-flex align-items-center gap-2" style="cursor: pointer;">
+                        <input type="radio" name="preview_mc">
+                        <span class="choice-text">${text}</span>
+                    </label>
+                `;
+            }
+        });
+        html += `</div>`;
+    } else if (qType === 'Matching') {
+        const dataStr = document.getElementById('contentJson').value;
+        let data = {};
+        try { data = JSON.parse(dataStr || '{}'); } catch(e) {}
+        const leftSide = data.left_side || [];
+        const rightSide = data.right_side || [];
+
+        html += `<div class="matching-preview row">`;
+        html += `<div class="col-md-8">`;
+        leftSide.forEach(item => {
+            html += `
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-secondary">${item.id}</span>
+                    <span>${item.text}</span>
+                    <select class="form-select form-select-sm" style="width: auto;">
+                        <option value="">-- Chọn --</option>
+                        ${rightSide.map(r => `<option value="${r.id}">${r.id}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        });
+        html += `</div>`;
+        html += `<div class="col-md-4 border-start">`;
+        html += `<h6 class="fw-bold">Lựa chọn:</h6>`;
+        html += `<ul class="list-unstyled">`;
+        rightSide.forEach(r => {
+            html += `<li class="mb-1"><span class="badge bg-light text-dark border">${r.id}</span> ${r.text}</li>`;
+        });
+        html += `</ul>`;
+        html += `</div>`;
+        html += `</div>`;
+    } else if (qType === 'FillInBlanks') {
+        const dataStr = document.getElementById('contentJson').value;
+        let data = {};
+        try { data = JSON.parse(dataStr || '{}'); } catch(e) {}
+        const blanks = data.blanks || {};
+
+        let previewContentHtml = content.replace(/\n/g, '<br>');
+        let previewResourceHtml = resourceTextHtml;
+        let warnings = [];
+
+        for (const [id, config] of Object.entries(blanks)) {
+            let blankHtml = '';
+            if (config.type === 'text') {
+                blankHtml = `<input type="text" data-blank-id="${id}" class="form-control form-control-sm d-inline-block mx-1 preview-auto-fit" placeholder="${config.placeholder || ''}" style="width: 100px; min-width: 60px;" oninput="autoFitInput(this)">`;
+            } else {
+                const opts = config.options || [];
+                blankHtml = `<select data-blank-id="${id}" class="form-select form-select-sm d-inline-block w-auto mx-1">`;
+                blankHtml += `<option value="">-- Chọn --</option>`;
+                opts.forEach(o => {
+                    blankHtml += `<option value="${o}">${o}</option>`;
+                });
+                blankHtml += `</select>`;
+            }
+
+            const regex = new RegExp(`\\(${id}\\)`, 'g');
+            let foundInText = false;
+            if (previewContentHtml.match(regex)) {
+                previewContentHtml = previewContentHtml.replace(regex, blankHtml);
+                foundInText = true;
+            }
+            if (previewResourceHtml && previewResourceHtml.match(regex)) {
+                previewResourceHtml = previewResourceHtml.replace(regex, blankHtml);
+                foundInText = true;
+            }
+
+            if (!foundInText) {
+                warnings.push(`Cảnh báo: Không tìm thấy đánh dấu <strong>(${id})</strong> trong bài đọc hoặc nội dung câu hỏi!`);
+            }
+        }
+
+        let warningHtml = '';
+        if (warnings.length > 0) {
+            warningHtml = warnings.map(w => `<div class="alert alert-warning py-2 mb-2"><i class="fa-solid fa-triangle-exclamation"></i> ${w}</div>`).join('');
+        }
+
+        html = warningHtml + previewResourceHtml + `<div class="q-content mb-4">${previewContentHtml}</div>`;
+    } else if (qType === 'Essay') {
+        html += `<textarea class="form-control mt-3" rows="8" placeholder="Học viên sẽ gõ bài làm tự luận của mình tại đây..."></textarea>`;
+    } else if (qType === 'AudioResponse') {
+        html += `<div class="alert alert-info mt-3 d-flex align-items-center gap-3">
+            <button class="btn btn-danger rounded-circle p-3" style="width: 50px; height: 50px;"><i class="fa-solid fa-microphone"></i></button>
+            <span>Khu vực học viên ghi âm câu trả lời (Bản xem trước)</span>
+        </div>`;
+    }
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.preview-auto-fit').forEach(inp => autoFitInput(inp));
+
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+};
+
+window.checkPreviewAnswers = function() {
+    const qType = document.querySelector('select[name=questionType]').value;
+    const container = document.getElementById('previewContainer');
+    let allCorrect = true;
+    let checkedAtLeastOne = false;
+
+    if (qType === 'Essay' || qType === 'AudioResponse') {
+        Swal.fire('Thông tin', 'Dạng bài này sẽ được chấm điểm bằng AI sau khi nộp bài, không có đáp án đúng sai cố định.', 'info');
+        return;
+    }
+
+    if (qType === 'MultipleChoice') {
+        const radios = container.querySelectorAll('input[type="radio"]');
+        let selectedIndex = -1;
+        radios.forEach((r, i) => { if (r.checked) selectedIndex = i; });
+
+        if (selectedIndex === -1) {
+            Swal.fire('Chưa trả lời', 'Vui lòng chọn một đáp án!', 'warning');
+            return;
+        }
+
+        let correctIndex = -1;
+        let count = 0;
+        document.querySelectorAll('.answer-item').forEach(item => {
+            if (item.style.display !== 'none') {
+                if (item.querySelector('.answer-correct-checkbox').checked) correctIndex = count;
+                count++;
+            }
+        });
+
+        if (selectedIndex === correctIndex) {
+            Swal.fire('Chính xác!', 'Bạn đã chọn đúng đáp án.', 'success');
+        } else {
+            Swal.fire('Sai rồi!', 'Đáp án chưa chính xác.', 'error');
+        }
+    } else if (qType === 'Matching') {
+        const selects = container.querySelectorAll('.matching-preview select');
+        if (selects.length === 0) return;
+
+        const ansJsonTextarea = document.querySelector('.answer-item .ansJsonRaw');
+        let correctMapping = {};
+        try { correctMapping = JSON.parse(ansJsonTextarea.value || '{}'); } catch(e) {}
+
+        let correctCount = 0;
+        selects.forEach(sel => {
+            const leftId = sel.closest('div').querySelector('.badge').innerText;
+            const rightId = sel.value;
+            if (rightId && correctMapping[leftId] == rightId) {
+                correctCount++;
+                sel.style.borderColor = 'green';
+                sel.style.backgroundColor = '#e8f5e9';
+            } else {
+                allCorrect = false;
+                if (rightId) {
+                    sel.style.borderColor = 'red';
+                    sel.style.backgroundColor = '#ffebee';
+                }
+            }
+            if (rightId) checkedAtLeastOne = true;
+        });
+
+        if (!checkedAtLeastOne) {
+            Swal.fire('Chưa trả lời', 'Vui lòng nối ít nhất 1 đáp án.', 'warning');
+            return;
+        }
+
+        if (allCorrect) {
+            Swal.fire('Chính xác!', 'Bạn đã nối đúng tất cả!', 'success');
+        } else {
+            Swal.fire('Chưa chính xác!', `Bạn đã đúng ${correctCount}/${selects.length} mục.`, 'error');
+        }
+    } else if (qType === 'FillInBlanks') {
+        const inputs = container.querySelectorAll('input.preview-auto-fit, select.form-select');
+        if (inputs.length === 0) return;
+
+        const ansJsonTextarea = document.querySelector('.answer-item .ansJsonRaw');
+        let correctAnswers = {};
+        try { correctAnswers = JSON.parse(ansJsonTextarea.value || '{}'); } catch(e) {}
+
+        let correctCount = 0;
+        inputs.forEach(inp => {
+            const val = inp.value.trim().toLowerCase();
+            const id = inp.getAttribute('data-blank-id');
+            if (val) checkedAtLeastOne = true;
+
+            let isCorrect = false;
+            let validOpts = correctAnswers[id] || [];
+            if (!Array.isArray(validOpts)) validOpts = [validOpts];
+
+            validOpts = validOpts.map(v => String(v).trim().toLowerCase());
+
+            if (val && validOpts.includes(val)) {
+                isCorrect = true;
+                correctCount++;
+            }
+
+            if (isCorrect) {
+                inp.style.borderColor = 'green';
+                inp.style.backgroundColor = '#e8f5e9';
+            } else if (val) {
+                inp.style.borderColor = 'red';
+                inp.style.backgroundColor = '#ffebee';
+                allCorrect = false;
+            } else {
+                allCorrect = false;
+            }
+        });
+
+        if (!checkedAtLeastOne) {
+            Swal.fire('Chưa trả lời', 'Vui lòng điền ít nhất 1 ô trống.', 'warning');
+            return;
+        }
+
+        if (allCorrect) {
+            Swal.fire('Chính xác!', 'Bạn đã điền đúng tất cả!', 'success');
+        } else {
+            Swal.fire('Chưa chính xác!', `Bạn đã đúng ${correctCount}/${inputs.length} mục.`, 'error');
+        }
+    }
+};
+
+window.autoFitInput = function(inp) {
+    const canvas = window.autoFitInput._canvas || (window.autoFitInput._canvas = document.createElement('canvas'));
+    const ctx = canvas.getContext('2d');
+    const style = window.getComputedStyle(inp);
+    ctx.font = style.fontSize + ' ' + style.fontFamily;
+    const text = inp.value || inp.placeholder || '';
+    const measured = ctx.measureText(text).width;
+    const newWidth = Math.max(measured + 24, 70);
+    inp.style.width = Math.min(newWidth, 400) + 'px';
+};
+</script>
+
+<!-- INJECTED QUESTION TYPE LOGIC -->
+<script>
+window.filterQuestionTypes = function() {
+    const skill = document.getElementById('skillSelect').value;
+    const qTypeSelect = document.getElementById('questionTypeSelect');
     
+    let validTypes = [];
+    if (skill === 'Writing') {
+        validTypes = ['Essay'];
+    } else if (skill === 'Speaking') {
+        validTypes = ['AudioResponse'];
+    } else {
+        validTypes = ['MultipleChoice', 'Matching', 'FillInBlanks'];
+    }
+    
+    let currentVal = qTypeSelect.value;
+    qTypeSelect.innerHTML = '';
+    
+    const allOptions = [
+        {value: 'MultipleChoice', text: 'Multiple Choice'},
+        {value: 'Matching', text: 'Matching'},
+        {value: 'FillInBlanks', text: 'Fill In Blanks'},
+        {value: 'Essay', text: 'Tự luận (Essay)'},
+        {value: 'AudioResponse', text: 'Ghi âm (Speaking)'}
+    ];
+    
+    let hasSelected = false;
+    allOptions.forEach(opt => {
+        if (validTypes.includes(opt.value)) {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.text = opt.text;
+            if (opt.value === currentVal) {
+                option.selected = true;
+                hasSelected = true;
+            }
+            qTypeSelect.appendChild(option);
+        }
+    });
+    
+    if (!hasSelected && validTypes.length > 0) {
+        qTypeSelect.value = validTypes[0];
+    }
+    
+    if (typeof window.applyQuestionTypeLogicOverride === 'function') {
+        setTimeout(window.applyQuestionTypeLogicOverride, 10);
+    }
+};
+
+window.applyQuestionTypeLogicOverride = function() {
+    const qTypeSelect = document.getElementById('questionTypeSelect');
+    if (!qTypeSelect) return;
+    const qType = qTypeSelect.value;
+    const contentJsonContainer = document.getElementById('dynamicContentJsonBuilder');
+    const btnAddAnswer = document.getElementById('btnAddAnswer');
+    const answersContainerBody = document.getElementById('answersContainer');
+    
+    if (qType === 'Essay' || qType === 'AudioResponse') {
+        if (contentJsonContainer) contentJsonContainer.parentElement.style.display = 'none';
+        if (btnAddAnswer) btnAddAnswer.style.display = 'none';
+        
+        if (answersContainerBody) {
+            answersContainerBody.style.display = 'none';
+            const header = answersContainerBody.parentElement.querySelector('.card-header');
+            if (header) header.style.display = 'none';
+        }
+    } else {
+        if (answersContainerBody) {
+            answersContainerBody.style.display = '';
+            const header = answersContainerBody.parentElement.querySelector('.card-header');
+            if (header) header.style.display = '';
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const skillSelect = document.getElementById('skillSelect');
+    if (skillSelect) {
+        skillSelect.addEventListener('change', window.filterQuestionTypes);
+        // Run once on load
+        window.filterQuestionTypes();
+    }
+    const qTypeSelect = document.getElementById('questionTypeSelect');
+    if (qTypeSelect) {
+        qTypeSelect.addEventListener('change', () => setTimeout(window.applyQuestionTypeLogicOverride, 10));
+    }
+});
+</script>
+
 </body>
 </html>
