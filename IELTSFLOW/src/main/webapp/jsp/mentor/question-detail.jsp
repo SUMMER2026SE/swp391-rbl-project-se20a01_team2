@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+<%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -19,17 +20,21 @@
     <div class="bg-blob blob-3" style="background: var(--accent-purple); opacity: 0.1;"></div>
 
 <div class="layout-wrapper">
-    <jsp:include page="sidebar.jsp">
-        <jsp:param name="active" value="questions" />
-    </jsp:include>
+    <c:if test="${param.hideSidebar != 'true'}">
+        <jsp:include page="sidebar.jsp">
+            <jsp:param name="active" value="questions" />
+        </jsp:include>
+    </c:if>
 
-    <main class="main-content">
+    <main class="main-content" style="${param.hideSidebar == 'true' ? 'margin-left: 0; width: 100%; max-width: 100%; padding: 20px;' : ''}">
         <header class="dashboard-header d-flex justify-content-between align-items-center mb-4 animate-fade-up">
             <div class="d-flex flex-column align-items-start">
-                <a href="${pageContext.request.contextPath}/mentor/questions" id="backBtn" class="btn btn-outline-secondary mb-3 d-inline-flex align-items-center gap-2">
-                    <i class="fa-solid fa-arrow-left"></i> <span>Quay lại</span>
-                </a>
-                <h1 class="page-title" style="font-size: 2rem; margin: 0;">${question == null ? 'Tạo câu hỏi mới ✨' : 'Chỉnh sửa câu hỏi ✏️'}</h1>
+                <c:if test="${param.hideSidebar != 'true'}">
+                    <a href="${pageContext.request.contextPath}/mentor/questions" id="backBtn" class="btn btn-outline-secondary mb-3 d-inline-flex align-items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Quay lại
+                    </a>
+                </c:if>
+                <h1 class="page-title" style="font-size: 2rem; margin: 0;">${question == null ? 'Thêm Câu Hỏi Mới 📝' : 'Chỉnh Sửa Câu Hỏi ✍️'}</h1>
             </div>
         </header>
         
@@ -213,6 +218,9 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-success fw-bold" onclick="checkPreviewAnswers()">
+                    <i class="fa-solid fa-check-double me-1"></i> Kiểm tra đáp án
+                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
@@ -233,8 +241,21 @@
                 </c:if>
                 <c:if test="${not empty res.resourceAudioUrl}">
                     <div class="text-center p-3 bg-light rounded">
-                        <i class="fa-solid fa-headphones fs-1 text-warning mb-2"></i><br>
-                        <audio controls class="w-100 mt-2"><source src="${pageContext.request.contextPath}${res.resourceAudioUrl}"></audio>
+                        <c:choose>
+                            <c:when test="${fn:contains(res.resourceAudioUrl, 'youtube.com') or fn:contains(res.resourceAudioUrl, 'youtu.be')}">
+                                <c:set var="embedUrl" value="${fn:replace(res.resourceAudioUrl, 'watch?v=', 'embed/')}" />
+                                <c:set var="embedUrl" value="${fn:replace(embedUrl, 'youtu.be/', 'youtube.com/embed/')}" />
+                                <iframe width="100%" height="250" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </c:when>
+                            <c:when test="${fn:contains(res.resourceAudioUrl, 'drive.google.com')}">
+                                <c:set var="embedUrl" value="${fn:replace(res.resourceAudioUrl, '/view', '/preview')}" />
+                                <iframe src="${embedUrl}" width="100%" height="250" allow="autoplay"></iframe>
+                            </c:when>
+                            <c:otherwise>
+                                <i class="fa-solid fa-headphones fs-1 text-warning mb-2"></i><br>
+                                <audio controls class="w-100 mt-2"><source src="${pageContext.request.contextPath}${res.resourceAudioUrl}"></audio>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </c:if>
             </div>

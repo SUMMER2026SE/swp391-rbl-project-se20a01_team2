@@ -147,7 +147,7 @@
                         <label class="form-label fw-bold">Tải lên tệp nghe (MP3/WAV)</label>
                         <div class="input-group">
                             <input type="file" id="audioUpload" class="form-control" accept=".mp3,.aac,.wav,.ogg,.oga,.flac">
-                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadAudio('audioUpload', 'resourceAudioUrl')">
+                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('audioUpload', 'resourceAudioUrl')">
                                 <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
                             </button>
                         </div>
@@ -170,11 +170,34 @@
                 </div>
 
                 <div class="mt-4 text-end d-flex justify-content-end gap-2 sticky-bottom" style="position: sticky; bottom: 15px; z-index: 99;">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2 shadow fw-bold bg-white" onclick="showResourcePreview()">
+                        <i class="fa-solid fa-eye me-2"></i> Xem trước
+                    </button>
                     <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow fw-bold" style="background-color: var(--accent-purple); border-color: var(--accent-purple);" onclick="return validateCheckboxes()">
                         <i class="fa-solid fa-floppy-disk me-2"></i> Lưu Tài Nguyên
                     </button>
                 </div>
             </form>
+        </div>
+
+        <!-- Preview Modal -->
+        <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="previewModalLabel" style="color: var(--accent-purple);"><i class="fa-solid fa-eye me-2"></i>Xem trước Resource</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="background-color: #f8f9fa;">
+                        <div id="previewContainer" class="d-flex flex-column gap-3">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <script>
@@ -192,6 +215,45 @@
                     return false;
                 }
                 return true;
+            }
+
+            function showResourcePreview() {
+                const isPassage = document.getElementById('checkPassage').checked;
+                const isAudio = document.getElementById('checkAudio').checked;
+                const isImage = document.getElementById('checkImage').checked;
+
+                const textContent = isPassage ? $('#summernote').summernote('code') : '';
+                const audioUrl = isAudio ? document.getElementById('resourceAudioUrl').value : '';
+                const imageUrl = isImage ? document.getElementById('resourceImageUrl').value : '';
+
+                const container = document.getElementById('previewContainer');
+                let html = '';
+                
+                if (!textContent && !audioUrl && !imageUrl) {
+                    html = '<div class="alert alert-warning">Chưa có nội dung nào để xem trước.</div>';
+                } else {
+                    if (textContent) {
+                        html += '<div class="bg-white p-4 border rounded shadow-sm" style="line-height: 1.8;">' + textContent + '</div>';
+                    }
+                    if (imageUrl) {
+                        html += '<div class="text-center bg-white p-4 border rounded shadow-sm"><img src="${pageContext.request.contextPath}' + imageUrl + '" class="img-fluid rounded" alt="Image Resource" style="max-height: 500px;" /></div>';
+                    }
+                    if (audioUrl) {
+                        if (audioUrl.includes('youtube.com') || audioUrl.includes('youtu.be')) {
+                            let embedUrl = audioUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/');
+                            html += '<div class="text-center bg-white p-4 border rounded shadow-sm"><iframe width="100%" height="250" src="' + embedUrl + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+                        } else if (audioUrl.includes('drive.google.com')) {
+                            let embedUrl = audioUrl.replace('/view', '/preview');
+                            html += '<div class="text-center bg-white p-4 border rounded shadow-sm"><iframe src="' + embedUrl + '" width="100%" height="250" allow="autoplay"></iframe></div>';
+                        } else {
+                            html += '<div class="text-center bg-white p-4 border rounded shadow-sm"><i class="fa-solid fa-headphones-simple mb-3 text-secondary" style="font-size: 2rem;"></i><br><audio controls src="${pageContext.request.contextPath}' + audioUrl + '" style="width: 100%; max-width: 400px;"></audio></div>';
+                        }
+                    }
+                }
+                
+                container.innerHTML = html;
+                const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+                modal.show();
             }
         </script>
 

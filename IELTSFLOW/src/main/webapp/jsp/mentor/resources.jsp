@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+<%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -184,9 +185,22 @@
                         </c:if>
                         <c:if test="${not empty res.resourceAudioUrl}">
                             <div class="text-center bg-white p-4 border rounded shadow-sm">
-                                <i class="fa-solid fa-headphones-simple mb-3 text-secondary" style="font-size: 2rem;"></i>
-                                <br>
-                                <audio controls src="${pageContext.request.contextPath}${res.resourceAudioUrl}" style="width: 100%; max-width: 400px;"></audio>
+                                <c:choose>
+                                    <c:when test="${fn:contains(res.resourceAudioUrl, 'youtube.com') or fn:contains(res.resourceAudioUrl, 'youtu.be')}">
+                                        <c:set var="embedUrl" value="${fn:replace(res.resourceAudioUrl, 'watch?v=', 'embed/')}" />
+                                        <c:set var="embedUrl" value="${fn:replace(embedUrl, 'youtu.be/', 'youtube.com/embed/')}" />
+                                        <iframe width="100%" height="315" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                    </c:when>
+                                    <c:when test="${fn:contains(res.resourceAudioUrl, 'drive.google.com')}">
+                                        <c:set var="embedUrl" value="${fn:replace(res.resourceAudioUrl, '/view', '/preview')}" />
+                                        <iframe src="${embedUrl}" width="100%" height="315" allow="autoplay"></iframe>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="fa-solid fa-headphones-simple mb-3 text-secondary" style="font-size: 2rem;"></i>
+                                        <br>
+                                        <audio controls src="${pageContext.request.contextPath}${res.resourceAudioUrl}" style="width: 100%; max-width: 400px;"></audio>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </c:if>
                     </div>
