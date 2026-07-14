@@ -20,17 +20,21 @@
     <div class="bg-blob blob-3" style="background: var(--accent-purple); opacity: 0.1;"></div>
 
 <div class="layout-wrapper">
-    <jsp:include page="sidebar.jsp">
-        <jsp:param name="active" value="questions" />
-    </jsp:include>
+    <c:if test="${param.hideSidebar != 'true'}">
+        <jsp:include page="sidebar.jsp">
+            <jsp:param name="active" value="questions" />
+        </jsp:include>
+    </c:if>
 
-    <main class="main-content">
+    <main class="main-content" style="${param.hideSidebar == 'true' ? 'margin-left: 0; width: 100%; max-width: 100%; padding: 20px;' : ''}">
         <header class="dashboard-header d-flex justify-content-between align-items-center mb-4 animate-fade-up">
             <div class="d-flex flex-column align-items-start">
-                <a href="${pageContext.request.contextPath}/mentor/questions" id="backBtn" class="btn btn-outline-secondary mb-3 d-inline-flex align-items-center gap-2">
-                    <i class="fa-solid fa-arrow-left"></i> <span>Quay lại</span>
-                </a>
-                <h1 class="page-title" style="font-size: 2rem; margin: 0;">${question == null ? 'Tạo câu hỏi mới ✨' : 'Chỉnh sửa câu hỏi ✏️'}</h1>
+                <c:if test="${param.hideSidebar != 'true'}">
+                    <a href="${pageContext.request.contextPath}/mentor/questions" id="backBtn" class="btn btn-outline-secondary mb-3 d-inline-flex align-items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Quay lại
+                    </a>
+                </c:if>
+                <h1 class="page-title" style="font-size: 2rem; margin: 0;">${question == null ? 'Thêm Câu Hỏi Mới 📝' : 'Chỉnh Sửa Câu Hỏi ✍️'}</h1>
             </div>
         </header>
         

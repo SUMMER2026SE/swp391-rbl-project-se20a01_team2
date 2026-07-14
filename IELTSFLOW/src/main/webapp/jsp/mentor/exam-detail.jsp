@@ -141,6 +141,9 @@
                                         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editSectionModal${sec.sectionId}">
                                             <i class="fa-solid fa-pen"></i> Sửa
                                         </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="bulkDeleteQuestions(${sec.sectionId})">
+                                            <i class="fa-solid fa-trash-can"></i> Xóa nhiều
+                                        </button>
                                         <a href="${pageContext.request.contextPath}/mentor/exams/${exam.examId}/sections/${sec.sectionId}/add-questions" class="btn btn-sm btn-primary" style="background-color: var(--accent-blue); border-color: var(--accent-blue);">
                                             <i class="fa-solid fa-plus"></i> Thêm câu hỏi
                                         </a>
@@ -167,23 +170,29 @@
                                     <ul class="list-group sortable-questions-list" data-section-id="${sec.sectionId}">
                                         <c:forEach var="examQ" items="${sec.examQuestions}">
                                             <li class="list-group-item d-flex justify-content-between align-items-center" data-question-id="${examQ.questionId}">
-                                                <div style="cursor: grab;">
+                                                <div style="cursor: grab;" class="d-flex align-items-center">
                                                     <i class="fa-solid fa-grip-vertical text-muted me-2"></i>
+                                                    <input type="checkbox" class="form-check-input bulk-cb-${sec.sectionId} me-2 mt-0" value="${examQ.questionId}">
                                                     <span class="badge bg-light text-dark border me-2 question-badge">Q${examQ.orderIndex}</span>
-                                                    <span class="text-truncate d-inline-block" style="max-width: 400px; vertical-align: middle;">
+                                                    <span class="text-truncate d-inline-block" style="max-width: 350px; vertical-align: middle;">
                                                         <c:choose>
                                                             <c:when test="${not empty examQ.question.content}">${examQ.question.content}</c:when>
                                                             <c:otherwise>Câu hỏi #${examQ.questionId}</c:otherwise>
                                                         </c:choose>
                                                     </span>
                                                 </div>
-                                                <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="d-inline" onsubmit="return customConfirm(event, this, 'Xóa câu hỏi khỏi section này?');">
-                                                    <input type="hidden" name="action" value="removeQuestion">
-                                                    <input type="hidden" name="examId" value="${exam.examId}">
-                                                    <input type="hidden" name="sectionId" value="${sec.sectionId}">
-                                                    <input type="hidden" name="questionId" value="${examQ.questionId}">
-                                                    <button type="submit" class="btn btn-sm text-danger" title="Xóa câu hỏi"><i class="fa-solid fa-times"></i></button>
-                                                </form>
+                                                <div>
+                                                    <button type="button" class="btn btn-sm text-primary" title="Sửa câu hỏi này" onclick="editQuestionInline(${examQ.questionId})">
+                                                        <i class="fa-solid fa-pen"></i>
+                                                    </button>
+                                                    <form action="${pageContext.request.contextPath}/mentor/exams" method="POST" class="d-inline" onsubmit="return customConfirm(event, this, 'Xóa câu hỏi khỏi section này?');">
+                                                        <input type="hidden" name="action" value="removeQuestion">
+                                                        <input type="hidden" name="examId" value="${exam.examId}">
+                                                        <input type="hidden" name="sectionId" value="${sec.sectionId}">
+                                                        <input type="hidden" name="questionId" value="${examQ.questionId}">
+                                                        <button type="submit" class="btn btn-sm text-danger" title="Xóa câu hỏi"><i class="fa-solid fa-times"></i></button>
+                                                    </form>
+                                                </div>
                                             </li>
                                         </c:forEach>
                                     </ul>
@@ -401,6 +410,87 @@
             });
         });
     });
+</script>
+
+<div class="modal fade" id="editQuestionModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-primary">Sửa Câu Hỏi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <iframe id="editQuestionIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function editQuestionInline(questionId) {
+        const iframe = document.getElementById('editQuestionIframe');
+        iframe.src = window.contextPath + '/mentor/questions/' + questionId + '?hideSidebar=true';
+        const modal = new bootstrap.Modal(document.getElementById('editQuestionModal'));
+        modal.show();
+        
+        document.getElementById('editQuestionModal').addEventListener('hidden.bs.modal', function () {
+            window.location.reload();
+        }, { once: true });
+    }
+
+    function bulkDeleteQuestions(sectionId) {
+        const checkboxes = document.querySelectorAll('.bulk-cb-' + sectionId + ':checked');
+        if (checkboxes.length === 0) {
+            Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một câu hỏi để xóa.', 'warning');
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Xóa hàng loạt?',
+            text: 'Bạn có chắc chắn muốn xóa ' + checkboxes.length + ' câu hỏi khỏi section này?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = window.contextPath + '/mentor/exams';
+                
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'bulkRemoveQuestions';
+                form.appendChild(actionInput);
+                
+                const examInput = document.createElement('input');
+                examInput.type = 'hidden';
+                examInput.name = 'examId';
+                examInput.value = '${exam.examId}';
+                form.appendChild(examInput);
+                
+                const sectionInput = document.createElement('input');
+                sectionInput.type = 'hidden';
+                sectionInput.name = 'sectionId';
+                sectionInput.value = sectionId;
+                form.appendChild(sectionInput);
+                
+                checkboxes.forEach(cb => {
+                    const qInput = document.createElement('input');
+                    qInput.type = 'hidden';
+                    qInput.name = 'questionIds';
+                    qInput.value = cb.value;
+                    form.appendChild(qInput);
+                });
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
 </script>
 </body>
 </html>

@@ -147,7 +147,7 @@
                         <label class="form-label fw-bold">Tải lên tệp nghe (MP3/WAV)</label>
                         <div class="input-group">
                             <input type="file" id="audioUpload" class="form-control" accept=".mp3,.aac,.wav,.ogg,.oga,.flac">
-                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadAudio('audioUpload', 'resourceAudioUrl')">
+                            <button type="button" class="btn btn-outline-primary fw-bold" onclick="uploadMaterial('audioUpload', 'resourceAudioUrl')">
                                 <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
                             </button>
                         </div>

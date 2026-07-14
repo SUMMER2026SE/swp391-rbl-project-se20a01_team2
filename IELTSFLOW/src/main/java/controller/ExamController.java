@@ -69,9 +69,18 @@ public class ExamController extends HttpServlet {
                     
                     services.QuestionService qs = new services.QuestionService();
                     java.util.List<model.Question> questions = qs.searchQuestions(keyword, section.getSkill(), resourceId);
+                    
+                    java.util.Set<Integer> existingQuestionIds = new java.util.HashSet<>();
+                    if (section.getExamQuestions() != null) {
+                        for (model.ExamQuestion eq : section.getExamQuestions()) {
+                            existingQuestionIds.add(eq.getQuestionId());
+                        }
+                    }
+                    
                     req.setAttribute("exam", exam);
                     req.setAttribute("section", section);
                     req.setAttribute("questions", questions);
+                    req.setAttribute("existingQuestionIds", existingQuestionIds);
                     req.setAttribute("allResources", new services.QuestionResourceService().getAllResources());
                     req.getRequestDispatcher(jspPath + "exam-add-questions.jsp").forward(req, resp);
                     return;
@@ -212,6 +221,18 @@ public class ExamController extends HttpServlet {
                 int sectionId = Integer.parseInt(req.getParameter("sectionId"));
                 int questionId = Integer.parseInt(req.getParameter("questionId"));
                 examService.removeQuestionFromSection(sectionId, questionId);
+                resp.sendRedirect(req.getContextPath() + redirectPrefix + "/" + examId);
+                return;
+
+            } else if ("bulkRemoveQuestions".equals(action)) {
+                int examId = Integer.parseInt(req.getParameter("examId"));
+                int sectionId = Integer.parseInt(req.getParameter("sectionId"));
+                String[] qIds = req.getParameterValues("questionIds");
+                if (qIds != null) {
+                    for (String qIdStr : qIds) {
+                        examService.removeQuestionFromSection(sectionId, Integer.parseInt(qIdStr));
+                    }
+                }
                 resp.sendRedirect(req.getContextPath() + redirectPrefix + "/" + examId);
                 return;
 
