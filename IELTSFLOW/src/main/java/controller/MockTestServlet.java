@@ -48,6 +48,14 @@ public class MockTestServlet extends HttpServlet {
             return;
         }
 
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+        if (!hasActiveSub) {
+            resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_mocktest");
+            return;
+        }
+
         String action = req.getParameter("action");
         if (action == null) action = "";
 
@@ -79,6 +87,14 @@ public class MockTestServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             resp.sendRedirect(req.getContextPath() + "/auth");
+            return;
+        }
+
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+        if (!hasActiveSub) {
+            resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_mocktest");
             return;
         }
 

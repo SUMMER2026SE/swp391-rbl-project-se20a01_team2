@@ -51,6 +51,22 @@ public class PlacementTestServlet extends HttpServlet {
         String action = req.getParameter("action");
         if (action == null) action = "";
 
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+
+        if (!hasActiveSub) {
+            if ("result".equals(action)) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_result");
+                return;
+            }
+            java.util.List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
+            if (!history.isEmpty()) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_placement");
+                return;
+            }
+        }
+
         try {
             switch (action) {
                 case "take":
@@ -84,6 +100,22 @@ public class PlacementTestServlet extends HttpServlet {
 
         String action = req.getParameter("action");
         if (action == null) action = "";
+
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+
+        if (!hasActiveSub) {
+            if ("result".equals(action)) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_result");
+                return;
+            }
+            java.util.List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
+            if (!history.isEmpty()) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_placement");
+                return;
+            }
+        }
 
         try {
             switch (action) {

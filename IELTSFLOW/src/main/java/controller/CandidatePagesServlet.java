@@ -59,6 +59,18 @@ public class CandidatePagesServlet extends HttpServlet {
         String path = req.getServletPath();
         String jspPath = "/jsp/candidate/dashboard.jsp"; // Default fallback
 
+        // Kiểm tra subscription
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+
+        if (("/candidate/weekly-plan".equals(path) || 
+             "/candidate/lessons".equals(path) || 
+             "/candidate/lesson-detail".equals(path) || 
+             "/candidate/redo-exercises".equals(path)) && !hasActiveSub) {
+            resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required");
+            return;
+        }
+
         if ("/candidate/weekly-plan".equals(path)) {
             jspPath = "/jsp/candidate/weekly-plan.jsp";
         } else if ("/candidate/lessons".equals(path)) {
