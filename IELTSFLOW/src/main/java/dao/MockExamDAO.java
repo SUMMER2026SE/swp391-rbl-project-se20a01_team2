@@ -141,7 +141,7 @@ public class MockExamDAO {
 
     @SuppressWarnings("unchecked")
     private List<Answer> getAnswersForQuestion(jakarta.persistence.EntityManager em, int questionId) {
-        String sql = "SELECT AnswerID, QuestionID, Content, IsCorrect " +
+        String sql = "SELECT AnswerID, QuestionID, Content, IsCorrect, ContentJson " +
                      "FROM Answers WHERE QuestionID = :questionId";
         List<Object[]> rows = em.createNativeQuery(sql)
                 .setParameter("questionId", questionId)
@@ -156,6 +156,7 @@ public class MockExamDAO {
             // SQL Server: IsCorrect là BIT → có thể là Boolean hoặc Boolean
             a.setCorrect(Boolean.TRUE.equals(row[3]) || Integer.valueOf(1).equals(row[3])
                     || (row[3] instanceof Number && ((Number) row[3]).intValue() == 1));
+            a.setContentJson(row[4] != null ? row[4].toString() : null);
             answers.add(a);
         }
         return answers;

@@ -101,6 +101,7 @@ public class MockTestService {
         
         // Handle JSON array (nhiều đáp án/ô trống)
         if (candidateAnswer.trim().startsWith("[")) {
+            System.out.println("[MockTestService] NEW GRADING ENGINE RUNNING! qType: " + q.getQuestionType() + " | answer: " + candidateAnswer);
             int correctCount = 0;
             try {
                 ObjectMapper mapper = new ObjectMapper();

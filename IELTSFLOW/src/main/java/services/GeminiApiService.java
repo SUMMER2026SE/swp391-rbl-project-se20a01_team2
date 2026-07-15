@@ -25,7 +25,7 @@ public class GeminiApiService {
     private static final Logger LOGGER = Logger.getLogger(GeminiApiService.class.getName());
 
     // Đã verify ngày 25/06/2026: gemini-2.5-flash hoạt động với structured output
-    private static final String MODEL_NAME = "gemma-4-26b-a4b-it";
+    private static final String MODEL_NAME = "gemma-4-31b-it";
     private static final String BASE_URL   =
             "https://generativelanguage.googleapis.com/v1beta/models/"
             + MODEL_NAME + ":generateContent?key=";
