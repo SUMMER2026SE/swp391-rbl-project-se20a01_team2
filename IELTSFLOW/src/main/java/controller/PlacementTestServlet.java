@@ -261,11 +261,11 @@ public class PlacementTestServlet extends HttpServlet {
                 detail.setIsCorrect(correctCount > 0);
                 detail.setScore((double) correctCount);
                 detail.setGradingStatus("Graded");
-                if ("Reading".equals(skill))   { 
+                if ("Reading".equalsIgnoreCase(skill))   { 
                     totalReading += q.getQuestionCount();   
                     correctReading += correctCount;   
                 }
-                if ("Listening".equals(skill)) { 
+                if ("Listening".equalsIgnoreCase(skill)) { 
                     totalListening += q.getQuestionCount(); 
                     correctListening += correctCount; 
                 }
@@ -274,7 +274,7 @@ public class PlacementTestServlet extends HttpServlet {
                 detail.setGradingStatus("Pending_AI");
                 String transcript = null;
                 double azureScore = 0.0;
-                if ("Speaking".equals(skill)) {
+                if ("Speaking".equalsIgnoreCase(skill) || "Speaking".equalsIgnoreCase(qType)) {
                     detail.setSpeakingUrl(req.getParameter("speaking_url_" + q.getQuestionId()));
                     transcript = req.getParameter("transcript_" + q.getQuestionId());
                     detail.setCandidateTranscript(transcript);
@@ -285,12 +285,12 @@ public class PlacementTestServlet extends HttpServlet {
                 }
                 int detailId = mockTestService.saveDetail(detail);
 
-                if ("Writing".equals(skill)) {
+                if ("Writing".equalsIgnoreCase(skill) || "Writing".equalsIgnoreCase(qType) || "Essay".equalsIgnoreCase(qType)) {
                     countWriting++;
                     writingDetailIds.add(new int[]{detailId});
                     writingTopics.add(q.getContent());
                     writingAnswers.add(answer);
-                } else if ("Speaking".equals(skill)) {
+                } else if ("Speaking".equalsIgnoreCase(skill) || "Speaking".equalsIgnoreCase(qType)) {
                     countSpeaking++;
                     speakingDetailIds.add(new int[]{detailId});
                     speakingTopics.add(q.getContent());
