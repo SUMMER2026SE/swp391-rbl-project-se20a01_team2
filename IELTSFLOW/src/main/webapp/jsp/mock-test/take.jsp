@@ -89,10 +89,10 @@
         .q-skill-badge { display: none; }
 
         /* IELTS Listening Layout */
-        .exam-section[data-skill="Listening"] .split-layout-container { flex-direction: column; background: #fff; }
-        .exam-section[data-skill="Listening"] .split-left { border-right: none; border-bottom: 2px solid #e5e7eb; padding: 1rem; flex: 0 0 auto; box-shadow: none; margin: 0; background: #fff; border-left: none; }
-        .exam-section[data-skill="Listening"] .split-right { margin: 0 auto; width: 100%; max-width: 1000px; padding: 2rem; box-shadow: none; background: #fff; border-left: none; }
-        .exam-section[data-skill="Listening"] .resource-box { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+        #section-Listening .split-layout-container { flex-direction: column; background: #fff; }
+        #section-Listening .split-left { border-right: none; border-bottom: 2px solid #e5e7eb; padding: 1rem; flex: 0 0 auto; box-shadow: none; margin: 0; background: #fff; border-left: none; }
+        #section-Listening .split-right { margin: 0 auto; width: 100%; max-width: 1000px; padding: 2rem; box-shadow: none; background: #fff; border-left: none; }
+        #section-Listening .resource-box { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
         
         /* Settings Popup */
         .settings-popup { display: none; position: absolute; top: 60px; right: 20px; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1001; width: 250px; }
@@ -567,7 +567,7 @@
                             const qId = card.getAttribute('data-qid');
                             const promptBox = document.getElementById('prompt_' + qId);
                             if (promptBox) {
-                                card.closest('.exam-section').querySelectorAll('.writing-prompt-box').forEach(p => p.style.display = 'none');
+                                card.closest('.skill-section').querySelectorAll('.writing-prompt-box').forEach(p => p.style.display = 'none');
                                 promptBox.style.display = 'block';
                             }
                         }
