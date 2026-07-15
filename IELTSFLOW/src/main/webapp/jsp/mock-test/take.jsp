@@ -271,7 +271,13 @@
                                                         <c:choose>
                                                             <c:when test="${q.questionType == 'Multiple_Choice'}">
                                                                 <div class="choices">
-                                                                    <c:set var="inputType" value="${q.multipleAnswer ? 'checkbox' : 'radio'}" />
+                                                                    <c:set var="correctCount" value="0" />
+                                                                    <c:forEach var="ans" items="${q.answers}">
+                                                                        <c:if test="${ans.correct}">
+                                                                            <c:set var="correctCount" value="${correctCount + 1}" />
+                                                                        </c:if>
+                                                                    </c:forEach>
+                                                                    <c:set var="inputType" value="${correctCount > 1 ? 'checkbox' : 'radio'}" />
                                                                     <c:forEach var="ans" items="${q.answers}">
                                                                         <label class="choice" for="ans_${ans.answerId}">
                                                                             <input type="${inputType}" name="q_${q.questionId}" id="ans_${ans.answerId}" value="${ans.answerId}">
