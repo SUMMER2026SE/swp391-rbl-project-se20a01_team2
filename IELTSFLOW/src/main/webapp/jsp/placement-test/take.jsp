@@ -257,6 +257,9 @@
                                                     
             
                                                     <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}" data-qtype="${q.questionType}">
+                                                        <c:if test="${not empty q.explanation}">
+                                                            <div style="font-size: 0.95rem; color: #48586f; margin-bottom: 0.75rem; white-space: pre-wrap; font-weight: 600; font-style: italic;">${q.explanation}</div>
+                                                        </c:if>
                                                         <c:if test="${sk != 'Writing' && sk != 'Speaking'}">
                                                             <div style="display: flex; align-items: flex-start;">
                                                                 <span class="q-num">${qNum}</span>
@@ -270,10 +273,6 @@
                                                             <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0; white-space: pre-wrap;">
                                                                 ${q.content}
                                                             </div>
-                                                        </c:if>
-
-                                                        <c:if test="${not empty q.explanation}">
-                                                            <div style="font-size: 0.95rem; color: #334155; margin-bottom: 1rem; white-space: pre-wrap; font-weight: 600; font-style: italic;">${q.explanation}</div>
                                                         </c:if>
                                                         
                                                         <!-- Input fields -->
