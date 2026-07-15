@@ -9,6 +9,7 @@ import model.TestSubmission;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -104,6 +105,31 @@ public class MockTestService {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 List<String> answers = mapper.readValue(candidateAnswer, new TypeReference<List<String>>(){});
+                
+                if ("FillInBlanks".equals(q.getQuestionType()) || "FillBlank".equals(q.getQuestionType()) || "Matching".equals(q.getQuestionType())) {
+                    if (q.getAnswers() != null && !q.getAnswers().isEmpty()) {
+                        model.Answer correctAns = q.getAnswers().get(0);
+                        if (correctAns.getContentJson() != null && !correctAns.getContentJson().isBlank()) {
+                            Map<String, List<String>> answerMap = mapper.readValue(correctAns.getContentJson(), new TypeReference<Map<String, List<String>>>(){});
+                            for (int i = 0; i < answers.size(); i++) {
+                                String uAns = answers.get(i);
+                                if (uAns == null || uAns.trim().isEmpty()) continue;
+                                String blankKey = String.valueOf(i + 1);
+                                List<String> validOptions = answerMap.get(blankKey);
+                                if (validOptions != null) {
+                                    for (String validOpt : validOptions) {
+                                        if (uAns.trim().equalsIgnoreCase(validOpt.trim())) {
+                                            correctCount++;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return Math.min(correctCount, q.getQuestionCount());
+                }
+
                 for (String ans : answers) {
                     if (ans == null || ans.isBlank()) continue;
                     for (model.Answer a : q.getAnswers()) {

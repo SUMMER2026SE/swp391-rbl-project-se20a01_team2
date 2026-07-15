@@ -376,7 +376,12 @@
                         timerEl.textContent = formatTime(secondsLeft);
                         if (secondsLeft <= 300) timerEl.classList.add('warning');
                         if (secondsLeft <= 60) { timerEl.classList.remove('warning'); timerEl.classList.add('danger'); }
-                        if (secondsLeft <= 0) { clearInterval(countdown); isExamStarted = false; document.getElementById('exam-form').submit(); }
+                        if (secondsLeft <= 0) { 
+                            clearInterval(countdown); 
+                            isExamStarted = false; 
+                            if(typeof prepareFIBAnswers === 'function') prepareFIBAnswers();
+                            document.getElementById('exam-form').submit(); 
+                        }
                     }, 1000);
 
                     // ── FOCUS MODE — Fullscreen + Tab detection ───────────────────────
@@ -424,6 +429,7 @@
                                 if (data.cheated) {
                                     isExamStarted = false;
                                     document.getElementById('forced-overlay').classList.add('active');
+                                    if(typeof prepareFIBAnswers === 'function') prepareFIBAnswers();
                                     document.getElementById('exam-form').submit();
                                 } else {
                                     document.getElementById('violation-overlay').classList.add('active');
@@ -611,22 +617,32 @@
                         }
                     });
 
-                    document.getElementById('exam-form').addEventListener('submit', function() {
+                    function prepareFIBAnswers() {
                         const fibCards = document.querySelectorAll('.q-card[data-qtype="FillInBlanks"], .q-card[data-qtype="FillBlank"]');
                         fibCards.forEach(card => {
                             const qId = card.getAttribute('data-qid');
                             const inputs = card.querySelectorAll('.fib-input');
                             if (inputs.length > 0) {
-                                const ansObj = {};
+                                const ansArray = [];
                                 inputs.forEach(inp => {
-                                    ansObj[inp.getAttribute('data-blank-id')] = inp.value.trim();
+                                    const blankId = parseInt(inp.getAttribute('data-blank-id'));
+                                    if (!isNaN(blankId)) {
+                                        ansArray[blankId - 1] = inp.value.trim();
+                                    }
                                 });
+                                for (let i = 0; i < ansArray.length; i++) {
+                                    if (typeof ansArray[i] === 'undefined') ansArray[i] = "";
+                                }
                                 let hiddenInput = document.getElementById('hidden_fib_' + qId);
                                 if (hiddenInput) {
-                                    hiddenInput.value = JSON.stringify(ansObj);
+                                    hiddenInput.value = JSON.stringify(ansArray);
                                 }
                             }
                         });
+                    }
+
+                    document.getElementById('exam-form').addEventListener('submit', function() {
+                        prepareFIBAnswers();
                     });
 
                     // ── WORD COUNT (Writing) ──────────────────────────────────────────
@@ -726,7 +742,10 @@
                     // ── SUBMIT CONFIRM ─────────────────────────────────────────────────
                     function confirmSubmit() {
                         const ok = confirm('Bạn có chắc chắn muốn nộp bài? Hành động này không thể hoàn tác.');
-                        if (ok) isExamStarted = false;
+                        if (ok) {
+                            if(typeof prepareFIBAnswers === 'function') prepareFIBAnswers();
+                            isExamStarted = false;
+                        }
                         return ok;
                     }
 
