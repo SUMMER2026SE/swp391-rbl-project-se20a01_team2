@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -118,19 +119,30 @@
                     request.setAttribute("finalDocUrl", finalDocUrl);
                 %>
 
-                <% if (hasVideo) { %>
+                <c:if test="${hasVideo}">
                     <div class="video-container">
-                        <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
-                            <source src="${pageContext.request.contextPath}${lesson.videoUrl}" type="video/mp4">
-                            Your browser does not support HTML video.
-                        </video>
+                        <c:choose>
+                            <c:when test="${lesson.videoUrl.contains('youtube.com') || lesson.videoUrl.contains('youtu.be')}">
+                                <iframe src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" 
+                                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                                        frameborder="0" allowfullscreen>
+                                </iframe>
+                            </c:when>
+                            <c:otherwise>
+                                <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
+                                    <source src="${pageContext.request.contextPath}${lesson.videoUrl}" type="video/mp4">
+                                    Your browser does not support HTML video.
+                                </video>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
-                <% } else { %>
+                </c:if>
+                <c:if test="${not hasVideo}">
                     <div style="padding: 40px 20px; text-align: center; background: rgba(0,0,0,0.03); border-radius: 12px; margin-bottom: 20px; border: 1px dashed rgba(0,0,0,0.15); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
                         <div style="font-size: 2.2rem; opacity: 0.6; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">🎦</div>
                         <div style="color: #64748b; font-style: italic; font-size: 0.95rem; font-weight: 500;">Không có video bài giảng cho bài học này</div>
                     </div>
-                <% } %>
+                </c:if>
 
                 <div style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.85); min-height: 100px; margin-bottom: 20px;">
                     ${lesson.content}
