@@ -199,8 +199,10 @@
                         <c:forEach var="sk" items="${skills}" varStatus="skSt">
                             <div class="skill-section ${skSt.first ? 'active' : ''}" id="section-${sk}">
                                 <c:set var="qNum" value="${0}" />
+                                <c:set var="firstSec" value="true" />
                                 <c:forEach var="sec" items="${sections}">
                                     <c:if test="${sec.skill == sk}">
+                                        <div class="exam-section-part" id="exam-sec-${sec.sectionId}" style="display: ${firstSec ? 'block' : 'none'}; height: 100%;">
                                         <div class="split-layout-container">
                                             <!-- LEFT PANE: Resource -->
                                             <div class="split-left">
@@ -252,7 +254,7 @@
             
                                                     
             
-                                                    <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}">
+                                                    <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}" data-qtype="${q.questionType}">
                                                         <c:if test="${sk != 'Writing' && sk != 'Speaking'}">
                                                             <div style="display: flex; align-items: flex-start;">
                                                                 <span class="q-num">${qNum}</span>
@@ -269,9 +271,10 @@
                                                         <c:choose>
                                                             <c:when test="${q.questionType == 'Multiple_Choice'}">
                                                                 <div class="choices">
+                                                                    <c:set var="inputType" value="${q.multipleAnswer ? 'checkbox' : 'radio'}" />
                                                                     <c:forEach var="ans" items="${q.answers}">
                                                                         <label class="choice" for="ans_${ans.answerId}">
-                                                                            <input type="radio" name="q_${q.questionId}" id="ans_${ans.answerId}" value="${ans.answerId}">
+                                                                            <input type="${inputType}" name="q_${q.questionId}" id="ans_${ans.answerId}" value="${ans.answerId}">
                                                                             <span class="choice-text">${ans.content}</span>
                                                                         </label>
                                                                     </c:forEach>
@@ -294,6 +297,10 @@
                                                                     <input type="hidden" name="q_${q.questionId}" value="">
                                                                 </div>
                                                             </c:when>
+                                                            <c:when test="${q.questionType == 'FillInBlanks' || q.questionType == 'FillBlank'}">
+                                                                <!-- Inputs are rendered inline in the q-content via Javascript -->
+                                                                <input type="hidden" name="q_${q.questionId}" id="hidden_fib_${q.questionId}" value="">
+                                                            </c:when>
                                                             <c:otherwise>
                                                                 <input type="text" name="q_${q.questionId}" placeholder="Enter your answer" style="width:100%;padding:0.75rem;border-radius:4px;border:1px solid #d1d5db;font-size:1rem;font-family:inherit;">
                                                             </c:otherwise>
@@ -302,6 +309,8 @@
                                                 </c:forEach>
                                             </div>
                                         </div>
+                                        </div>
+                                        <c:set var="firstSec" value="false" />
                                     </c:if>
                                 </c:forEach>
                             </div>
@@ -422,43 +431,107 @@
                     }
 
                     // ── QUESTION NAVIGATOR ────────────────────────────────────────────
+                    function switchPart(skill, secId) {
+                        const section = document.getElementById('section-' + skill);
+                        if (!section) return;
+                        
+                        const parts = section.querySelectorAll('.exam-section-part');
+                        parts.forEach(p => {
+                            p.style.display = 'none';
+                        });
+                        
+                        const target = document.getElementById('exam-sec-' + secId);
+                        if (target) {
+                            target.style.display = 'block';
+                        }
+                        
+                        buildNavigator(skill);
+                    }
+
                     function buildNavigator(skill) {
                         const grid = document.getElementById('nav-grid');
                         grid.innerHTML = '';
                         const section = document.getElementById('section-' + skill);
                         if (!section) return;
                         
-                        const qCards = section.querySelectorAll('.q-card');
-                        qCards.forEach((card, index) => {
-                            let numStr = (index + 1).toString();
-                            const numEl = card.querySelector('.q-num');
-                            if (numEl) {
-                                numStr = numEl.innerText.replace(/[^0-9]/g, '');
+                        const parts = section.querySelectorAll('.exam-section-part');
+                        parts.forEach((part, partIndex) => {
+                            const secId = part.id.replace('exam-sec-', '');
+                            
+                            const partGroup = document.createElement('div');
+                            partGroup.className = 'nav-part-group';
+                            partGroup.style.display = 'flex';
+                            partGroup.style.alignItems = 'center';
+                            partGroup.style.marginRight = '1rem';
+                            partGroup.style.borderRight = '1px solid #e5e7eb';
+                            partGroup.style.paddingRight = '1rem';
+                            
+                            const partLabel = document.createElement('button');
+                            partLabel.type = 'button';
+                            partLabel.className = 'nav-part-label';
+                            partLabel.innerText = 'Part ' + (partIndex + 1);
+                            partLabel.style.marginRight = '10px';
+                            partLabel.style.fontWeight = 'bold';
+                            partLabel.style.background = 'transparent';
+                            partLabel.style.border = 'none';
+                            partLabel.style.cursor = 'pointer';
+                            if (part.style.display !== 'none') {
+                                partLabel.style.color = '#dc2626';
+                                partLabel.style.borderBottom = '2px solid #dc2626';
+                            } else {
+                                partLabel.style.color = '#6b7280';
                             }
-                            const qId = card.getAttribute('data-qid');
                             
-                            const btn = document.createElement('div');
-                            btn.className = 'nav-btn';
-                            btn.id = 'navbtn_' + qId;
-                            btn.innerText = numStr;
-                            
-                            if (card.classList.contains('flagged')) btn.classList.add('flagged');
-                            if (checkIfAnswered(card)) btn.classList.add('answered');
-                            
-                            btn.onclick = () => {
-                                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                card.style.borderColor = '#6366f1';
-                                setTimeout(() => card.style.borderColor = '', 1500);
+                            partLabel.onclick = () => {
+                                switchPart(skill, secId);
                             };
-                            grid.appendChild(btn);
+                            partGroup.appendChild(partLabel);
+                            
+                            const qGrid = document.createElement('div');
+                            qGrid.style.display = 'flex';
+                            qGrid.style.gap = '4px';
+                            
+                            const qCards = part.querySelectorAll('.q-card');
+                            qCards.forEach((card, index) => {
+                                let numStr = (index + 1).toString();
+                                const numEl = card.querySelector('.q-num');
+                                if (numEl) {
+                                    numStr = numEl.innerText.replace(/[^0-9]/g, '');
+                                }
+                                const qId = card.getAttribute('data-qid');
+                                
+                                const btn = document.createElement('div');
+                                btn.className = 'nav-btn';
+                                btn.id = 'navbtn_' + qId;
+                                btn.innerText = numStr;
+                                
+                                if (card.classList.contains('flagged')) btn.classList.add('flagged');
+                                if (checkIfAnswered(card)) btn.classList.add('answered');
+                                
+                                btn.onclick = () => {
+                                    if (part.style.display === 'none') {
+                                        switchPart(skill, secId);
+                                    }
+                                    setTimeout(() => {
+                                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        card.style.borderColor = '#6366f1';
+                                        setTimeout(() => card.style.borderColor = '', 1500);
+                                    }, 100);
+                                };
+                                qGrid.appendChild(btn);
+                            });
+                            
+                            partGroup.appendChild(qGrid);
+                            grid.appendChild(partGroup);
                         });
                     }
 
                     function checkIfAnswered(card) {
-                        const inputs = card.querySelectorAll('input[type="radio"]:checked, input[type="text"], textarea');
+                        const inputs = card.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked, input[type="text"], textarea');
                         let answered = false;
                         inputs.forEach(inp => {
                             if (inp.type === 'radio' && inp.checked) answered = true;
+                            else if (inp.type === 'checkbox' && inp.checked) answered = true;
                             else if (inp.type === 'text' && inp.value.trim().length > 0) answered = true;
                             else if (inp.tagName === 'TEXTAREA' && inp.value.trim().length > 0) answered = true;
                         });
@@ -498,6 +571,36 @@
                         const activeTab = document.querySelector('.skill-tab.active');
                         if (activeTab) switchSkill(activeTab.innerText.trim());
                     }, 100);
+
+                    // ── FILL IN BLANKS LOGIC ──────────────────────────────────────────
+                    document.querySelectorAll('.q-card[data-qtype="FillInBlanks"], .q-card[data-qtype="FillBlank"]').forEach(card => {
+                        const qId = card.getAttribute('data-qid');
+                        const contentDiv = card.querySelector('.q-content');
+                        if (contentDiv) {
+                            // Replace (1), (2), etc. with inline text inputs
+                            contentDiv.innerHTML = contentDiv.innerHTML.replace(/\((\d+)\)/g, function(match, number) {
+                                return `<input type="text" class="fib-input" data-qid="${qId}" data-blank-id="${number}" style="width: 100px; padding: 2px 5px; border: 1px solid #d1d5db; border-radius: 4px; margin: 0 4px; display: inline-block;">`;
+                            });
+                        }
+                    });
+
+                    document.getElementById('exam-form').addEventListener('submit', function() {
+                        const fibCards = document.querySelectorAll('.q-card[data-qtype="FillInBlanks"], .q-card[data-qtype="FillBlank"]');
+                        fibCards.forEach(card => {
+                            const qId = card.getAttribute('data-qid');
+                            const inputs = card.querySelectorAll('.fib-input');
+                            if (inputs.length > 0) {
+                                const ansObj = {};
+                                inputs.forEach(inp => {
+                                    ansObj[inp.getAttribute('data-blank-id')] = inp.value.trim();
+                                });
+                                let hiddenInput = document.getElementById('hidden_fib_' + qId);
+                                if (hiddenInput) {
+                                    hiddenInput.value = JSON.stringify(ansObj);
+                                }
+                            }
+                        });
+                    });
 
                     // ── WORD COUNT (Writing) ──────────────────────────────────────────
                     function countWords(textarea, counterId) {

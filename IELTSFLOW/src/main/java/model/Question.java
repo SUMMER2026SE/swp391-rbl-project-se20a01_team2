@@ -100,4 +100,11 @@ public class Question {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
     public List<Answer> getAnswers() { return answers; }
     public void setAnswers(List<Answer> answers) { this.answers = answers; }
+
+    @Transient
+    public boolean isMultipleAnswer() {
+        if (answers == null || answers.isEmpty()) return false;
+        long correctCount = answers.stream().filter(Answer::isCorrect).count();
+        return correctCount > 1;
+    }
 }
