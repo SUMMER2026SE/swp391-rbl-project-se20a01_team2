@@ -131,6 +131,8 @@ public class FileUploadServlet extends HttpServlet {
             } else {
                 handleStandardUpload(req, resp, session, type);
             }
+
+
         } catch (Exception e) {
             e.printStackTrace();
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -200,7 +202,8 @@ public class FileUploadServlet extends HttpServlet {
         boolean isDocument = ALLOWED_DOCUMENTS.contains(extension);
         boolean isVideo = ALLOWED_VIDEOS.contains(extension);
         boolean isAudio = ALLOWED_AUDIOS.contains(extension);
-        if (!isDocument && !isVideo && !isAudio) {
+        boolean isImage = ALLOWED_PROFILE_PICS.contains(extension);
+        if (!isDocument && !isVideo && !isAudio && !isImage) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(mapper.writeValueAsString(Map.of("error", "Invalid material format")));
             return;
@@ -287,12 +290,13 @@ public class FileUploadServlet extends HttpServlet {
         boolean isDocument = ALLOWED_DOCUMENTS.contains(extension);
         boolean isVideo = ALLOWED_VIDEOS.contains(extension);
         boolean isAudio = ALLOWED_AUDIOS.contains(extension);
+        boolean isImage = ALLOWED_PROFILE_PICS.contains(extension);
 
-        if ("profile_pic".equals(type) && !ALLOWED_PROFILE_PICS.contains(extension)) {
+        if ("profile_pic".equals(type) && !isImage) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(mapper.writeValueAsString(Map.of("error", "Invalid profile picture format")));
             return;
-        } else if ("material".equals(type) && !isDocument && !isVideo && !isAudio) {
+        } else if ("material".equals(type) && !isDocument && !isVideo && !isAudio && !isImage) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(mapper.writeValueAsString(Map.of("error", "Invalid material format")));
             return;

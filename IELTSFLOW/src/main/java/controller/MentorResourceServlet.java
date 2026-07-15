@@ -32,15 +32,21 @@ public class MentorResourceServlet extends HttpServlet {
 
                 String keyword = req.getParameter("keyword");
                 String typeFilter = req.getParameter("typeFilter");
+                String sortOrder = req.getParameter("sortOrder");
                 
-                if (keyword != null || (typeFilter != null && !typeFilter.isEmpty())) {
-                    req.setAttribute("resources", resourceService.searchResources(keyword, typeFilter));
-                } else {
-                    req.setAttribute("resources", resourceService.getAllResources());
-                }
+                int page = 1;
+                try {
+                    page = Integer.parseInt(req.getParameter("page"));
+                } catch (NumberFormatException ignored) {}
+                
+                util.PaginatedList<model.QuestionResource> resourcesPage = resourceService.searchResources(keyword, typeFilter, sortOrder, page, 10);
+                
+                req.setAttribute("resources", resourcesPage.getItems());
+                req.setAttribute("resourcesPage", resourcesPage);
                 
                 req.setAttribute("keyword", keyword);
                 req.setAttribute("typeFilter", typeFilter);
+                req.setAttribute("sortOrder", sortOrder);
                 req.getRequestDispatcher("/jsp/mentor/resources.jsp").forward(req, resp);
             } else {
                 int id = Integer.parseInt(pathInfo.substring(1));

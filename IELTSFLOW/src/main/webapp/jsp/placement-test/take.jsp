@@ -200,6 +200,7 @@
                                 </c:if>
                             </c:if>
                         </div>
+<<<<<<< HEAD
                         <div class="split-right">
                             <c:if test="${sk != 'Writing' && sk != 'Speaking'}">
                                 <div class="q-group-header" style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb;">
@@ -221,7 +222,182 @@
                                         <div style="display: flex; align-items: flex-start;">
                                             <span class="q-num">${qNum}</span>
                                             <div class="q-content">${q.content}</div>
+=======
+                    </div>
+                </div>
+<!-- VIOLATION WARNING OVERLAY -->
+                <div class="overlay" id="violation-overlay">
+                    <div class="overlay-card">
+                        <h2>⚠️ Cảnh báo vi phạm!</h2>
+                        <p id="violation-msg">Bạn đã thoát toàn màn hình hoặc chuyển tab.<br>Vi phạm lần: <strong
+                                id="vio-count">1</strong> / 3.<br>Nếu vi phạm đủ 3 lần, bài thi sẽ tự động nộp.</p>
+                        <button class="btn-back-focus" id="btn-back-focus">🔒 Quay lại thi</button>
+                    </div>
+                </div>
+
+                <!-- FORCED SUBMIT OVERLAY -->
+                <div class="forced-overlay" id="forced-overlay">
+                    <h1>🚫 Bài thi đã kết thúc</h1>
+                    <p>Bạn đã vi phạm quy định thi quá 3 lần. Bài làm được tự động nộp và đánh dấu vi phạm.</p>
+                    <div style="color:#94a3b8;font-size:.9rem;">Đang nộp bài...</div>
+                </div>
+
+                <!-- START EXAM OVERLAY -->
+                <div class="overlay active" id="start-overlay">
+                    <div class="overlay-card accent" style="max-width:520px;">
+                        <h2>🔒 PHÒNG THI BẢO MẬT</h2>
+                        <div
+                            style="color:#94a3b8;font-size:.9rem;text-align:left;line-height:1.8;margin-bottom:1.75rem;">
+                            <p>Chào mừng bạn đến với phòng thi <strong>IELTSFlow</strong>.</p>
+                            <p>Hệ thống đã kích hoạt chế độ <strong>Giám sát trực tuyến (Online Proctoring)</strong>.
+                            </p>
+                            <div
+                                style="margin-top:1rem;background:rgba(239,68,68,.08);border-left:4px solid #ef4444;padding:.75rem;border-radius:.4rem;color:#fca5a5;">
+                                <strong>⚠️ QUY ĐỊNH PHÒNG THI:</strong><br>
+                                1. Hệ thống sẽ khóa toàn màn hình. Không được tự ý thoát.<br>
+                                2. Tuyệt đối không được chuyển tab hoặc ẩn trình duyệt.<br>
+                                3. Vi phạm quá <strong>3 lần</strong>, hệ thống sẽ <strong>tự động nộp bài lập
+                                    tức</strong>.
+                            </div>
+                            <p style="margin-top:1rem;font-style:italic;text-align:center;">Vui lòng chuẩn bị sẵn sàng
+                                và bấm nút bên dưới để mở toàn màn hình &amp; bắt đầu tính giờ làm bài.</p>
+                        </div>
+                        <button class="btn-back-focus" id="btn-start-exam"
+                            style="width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:.75rem;padding:.85rem;font-size:1.05rem;letter-spacing:.02em;">
+                            🔓 KÍCH HOẠT BẢO MẬT &amp; BẮT ĐẦU LÀM BÀI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MAIN CONTENT -->
+                <div class="main">
+<c:set var="skills" value="${['Listening','Reading','Writing','Speaking']}" />
+                    <form method="post" action="${pageContext.request.contextPath}/candidate/placement-test?action=submit" id="exam-form" style="height: 100%;">
+                        <input type="hidden" name="action" value="submit">
+                        <input type="hidden" name="submissionId" value="${submissionId}">
+
+                        <c:forEach var="sk" items="${skills}" varStatus="skSt">
+                            <div class="skill-section ${skSt.first ? 'active' : ''}" id="section-${sk}">
+                                <c:set var="qNum" value="${0}" />
+                                <c:set var="firstSec" value="true" />
+                                <c:forEach var="sec" items="${sections}">
+                                    <c:if test="${sec.skill == sk}">
+                                        <div class="exam-section-part" id="exam-sec-${sec.sectionId}" style="display: ${firstSec ? 'block' : 'none'}; height: 100%;">
+                                        <div class="split-layout-container">
+                                            <!-- LEFT PANE: Resource -->
+                                            <div class="split-left">
+                                                <h4>${sec.sectionName}</h4>
+                                                
+                                                <c:if test="${sk == 'Writing'}">
+                                                    <!-- Special layout for Writing: Show all question prompts here, toggled by JS -->
+                                                    <c:forEach var="xQ" items="${sec.examQuestions}" varStatus="ws">
+                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem;">
+                                                            ${xQ.question.content}
+                                                        </div>
+                                                    </c:forEach>
+                                                </c:if>
+                                                
+                                                <c:if test="${sk != 'Writing'}">
+                                                    <!-- Find the shared resource from the first question -->
+                                                    <c:set var="sharedAudio" value="" />
+                                                    <c:set var="sharedText" value="" />
+                                                    <c:forEach var="xQ" items="${sec.examQuestions}">
+                                                        <c:if test="${not empty xQ.question.resourceAudioUrl and empty sharedAudio}">
+                                                            <c:set var="sharedAudio" value="${xQ.question.resourceAudioUrl}" />
+                                                        </c:if>
+                                                        <c:if test="${not empty xQ.question.resourceText and empty sharedText}">
+                                                            <c:set var="sharedText" value="${xQ.question.resourceText}" />
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    
+                                                    <c:if test="${not empty sharedText || not empty sharedAudio}">
+                                                        <div class="resource-box">
+                                                            <c:if test="${not empty sharedAudio}">
+                                                                <audio controls src="${sharedAudio}"></audio>
+                                                            </c:if>
+                                                            <c:if test="${not empty sharedText}">
+                                                                ${sharedText}
+                                                            </c:if>
+                                                        </div>
+                                                    </c:if>
+                                                    <c:if test="${empty sharedText && empty sharedAudio}">
+                                                        <div style="color: #9ca3af; font-style: italic; text-align: center; margin-top: 2rem;">Read the questions on the right carefully.</div>
+                                                    </c:if>
+                                                </c:if>
+                                            </div>
+                                            
+                                            <!-- RIGHT PANE: Questions -->
+                                            <div class="split-right">
+                                                <c:forEach var="examQ" items="${sec.examQuestions}">
+                                                    <c:set var="q" value="${examQ.question}"/>
+                                                    <c:set var="qNum" value="${qNum + 1}" />
+            
+                                                    
+            
+                                                    <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}" data-qtype="${q.questionType}">
+                                                        <c:if test="${sk != 'Writing' && sk != 'Speaking'}">
+                                                            <div style="display: flex; align-items: flex-start;">
+                                                                <span class="q-num">${qNum}</span>
+                                                                <div class="q-content">${q.content}</div>
+                                                            </div>
+                                                        </c:if>
+                                                        <c:if test="${sk == 'Speaking'}">
+                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                                                ${q.content}
+                                                            </div>
+                                                        </c:if>
+                                                        
+                                                        <!-- Input fields -->
+                                                        <c:choose>
+                                                            <c:when test="${q.questionType == 'Multiple_Choice'}">
+                                                                <div class="choices">
+                                                                    <c:set var="correctCount" value="0" />
+                                                                    <c:forEach var="ans" items="${q.answers}">
+                                                                        <c:if test="${ans.correct}">
+                                                                            <c:set var="correctCount" value="${correctCount + 1}" />
+                                                                        </c:if>
+                                                                    </c:forEach>
+                                                                    <c:set var="inputType" value="${correctCount > 1 ? 'checkbox' : 'radio'}" />
+                                                                    <c:forEach var="ans" items="${q.answers}">
+                                                                        <label class="choice" for="ans_${ans.answerId}">
+                                                                            <input type="${inputType}" name="q_${q.questionId}" id="ans_${ans.answerId}" value="${ans.answerId}">
+                                                                            <span class="choice-text">${ans.content}</span>
+                                                                        </label>
+                                                                    </c:forEach>
+                                                                </div>
+                                                            </c:when>
+                                                            <c:when test="${q.questionType == 'Essay' || q.questionType == 'Writing' || sk == 'Writing'}">
+                                                                <textarea class="essay-area" style="height: calc(100vh - 280px); width: 100%; border: 1px solid #94a3b8; border-radius: 2px; padding: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-family: Arial; font-size: 1.05rem; resize: none; background: #fff;" name="q_${q.questionId}" id="essay_${q.questionId}" placeholder="" oninput="countWords(this, 'wc_${q.questionId}')"></textarea>
+                                                                <div class="word-count" id="wc_${q.questionId}" style="text-align: left; margin-top: 0.5rem; font-weight: 700; color: #4b5563;">Word count: 0</div>
+                                                            </c:when>
+                                                            <c:when test="${q.questionType == 'Speaking'}">
+                                                                <div class="speaking-controls">
+                                                                    <div class="timer-circle" id="rec-timer-${q.questionId}">00:00</div>
+                                                                    <div>
+                                                                        <button type="button" class="rec-btn start" onclick="startRecording(${q.questionId})" id="btn-rec-${q.questionId}">Start Recording</button>
+                                                                        <button type="button" class="rec-btn stop" onclick="stopRecording(${q.questionId})" id="btn-stop-${q.questionId}" style="display:none">Stop Recording</button>
+                                                                    </div>
+                                                                    <div class="transcript-display" id="transcript-${q.questionId}">Status: Not recorded</div>
+                                                                    <input type="hidden" name="transcript_${q.questionId}" id="hidden-transcript-${q.questionId}">
+                                                                    <input type="hidden" name="azure_${q.questionId}" id="hidden-azure-${q.questionId}" value="0">
+                                                                    <input type="hidden" name="q_${q.questionId}" value="">
+                                                                </div>
+                                                            </c:when>
+                                                            <c:when test="${q.questionType == 'FillInBlanks' || q.questionType == 'FillBlank'}">
+                                                                <!-- Inputs are rendered inline in the q-content via Javascript -->
+                                                                <input type="hidden" name="q_${q.questionId}" id="hidden_fib_${q.questionId}" value="">
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <input type="text" name="q_${q.questionId}" placeholder="Enter your answer" style="width:100%;padding:0.75rem;border-radius:4px;border:1px solid #d1d5db;font-size:1rem;font-family:inherit;">
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </c:forEach>
+                                            </div>
+>>>>>>> 10fba726528eb73feaa1565955bb05935631eeb6
                                         </div>
+                                        </div>
+                                        <c:set var="firstSec" value="false" />
                                     </c:if>
                                     <c:if test="${sk == 'Writing'}">
                                         <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">✍️ Your Answer - Task ${qSt.index + 1}</div>
@@ -358,10 +534,425 @@
                 shortName = shortName.replace(/^[^\w]+/, '');
                 shortName = shortName.replace(/(Passage|Task|Part)\s*(\d+)/i, 'Part $2');
 
+<<<<<<< HEAD
                 const groupDiv = document.createElement('div');
                 groupDiv.style.display = 'flex';
                 groupDiv.style.alignItems = 'center';
                 groupDiv.style.marginRight = '1.5rem';
+=======
+                <script>
+                    // ── COUNTDOWN TIMER ──────────────────────────────────────────────
+                    const TOTAL_SECONDS = ${ exam.duration } * 60;
+                    let secondsLeft = TOTAL_SECONDS;
+                    const timerEl = document.getElementById('timer');
+                    let isExamStarted = false;
+
+                    function formatTime(s) {
+                        const h = Math.floor(s / 3600).toString().padStart(2, '0');
+                        const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
+                        const sec = (s % 60).toString().padStart(2, '0');
+                        return h + ':' + m + ':' + sec;
+                    }
+                    const countdown = setInterval(() => {
+                        if (!isExamStarted) return;
+                        secondsLeft--;
+                        timerEl.textContent = formatTime(secondsLeft);
+                        if (secondsLeft <= 300) timerEl.classList.add('warning');
+                        if (secondsLeft <= 60) { timerEl.classList.remove('warning'); timerEl.classList.add('danger'); }
+                        if (secondsLeft <= 0) { clearInterval(countdown); isExamStarted = false; document.getElementById('exam-form').submit(); }
+                    }, 1000);
+
+                    // ── FOCUS MODE — Fullscreen + Tab detection ───────────────────────
+                    let violationCount = 0;
+                    const MAX_VIOLATIONS = ${ maxViolations };
+                    const submissionId = ${ submissionId };
+
+                    function requestFullscreen() {
+                        const el = document.documentElement;
+                        if (el.requestFullscreen) el.requestFullscreen();
+                        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                    }
+                    function isFullscreen() {
+                        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+                    }
+
+                    document.getElementById('btn-start-exam').addEventListener('click', () => {
+                        requestFullscreen();
+                        isExamStarted = true;
+                        document.getElementById('start-overlay').classList.remove('active');
+                        timerEl.textContent = formatTime(secondsLeft);
+                    });
+
+                    document.addEventListener('visibilitychange', () => {
+                        if (!isExamStarted) return;
+                        if (document.hidden) triggerViolation('tab');
+                    });
+                    document.addEventListener('fullscreenchange', () => {
+                        if (!isExamStarted) return;
+                        if (!isFullscreen()) triggerViolation('fullscreen');
+                    });
+
+                    function triggerViolation(type) {
+                        if (violationCount >= MAX_VIOLATIONS) return;
+                        fetch('${pageContext.request.contextPath}/candidate/placement-test?action=violation', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'action=violation&submissionId=' + submissionId
+                        })
+                            .then(r => r.json())
+                            .then(data => {
+                                violationCount = data.violations;
+                                // updateViolationDots(violationCount);
+                                document.getElementById('vio-count').textContent = violationCount;
+                                if (data.cheated) {
+                                    isExamStarted = false;
+                                    document.getElementById('forced-overlay').classList.add('active');
+                                    document.getElementById('exam-form').submit();
+                                } else {
+                                    document.getElementById('violation-overlay').classList.add('active');
+                                }
+                            })
+                            .catch(() => { });
+                    }
+
+                    
+                    document.getElementById('btn-back-focus').addEventListener('click', () => {
+                        document.getElementById('violation-overlay').classList.remove('active');
+                        requestFullscreen();
+                    });
+
+                    // ── SKILL TABS ────────────────────────────────────────────────────
+                    function switchSkill(skill) {
+                        document.querySelectorAll('.skill-tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.skill-section').forEach(s => s.classList.remove('active'));
+                        document.getElementById('tab-' + skill).classList.add('active');
+                        document.getElementById('section-' + skill).classList.add('active');
+                        buildNavigator(skill);
+                    }
+
+                    // ── QUESTION NAVIGATOR ────────────────────────────────────────────
+                    function switchPart(skill, secId) {
+                        const section = document.getElementById('section-' + skill);
+                        if (!section) return;
+                        
+                        const parts = section.querySelectorAll('.exam-section-part');
+                        parts.forEach(p => {
+                            p.style.display = 'none';
+                        });
+                        
+                        const target = document.getElementById('exam-sec-' + secId);
+                        if (target) {
+                            target.style.display = 'block';
+                        }
+                        
+                        buildNavigator(skill);
+                    }
+
+                    function buildNavigator(skill) {
+                        const grid = document.getElementById('nav-grid');
+                        grid.innerHTML = '';
+                        const section = document.getElementById('section-' + skill);
+                        if (!section) return;
+                        
+                        const parts = section.querySelectorAll('.exam-section-part');
+                        parts.forEach((part, partIndex) => {
+                            const secId = part.id.replace('exam-sec-', '');
+                            
+                            const partGroup = document.createElement('div');
+                            partGroup.className = 'nav-part-group';
+                            partGroup.style.display = 'flex';
+                            partGroup.style.alignItems = 'center';
+                            partGroup.style.marginRight = '1rem';
+                            partGroup.style.borderRight = '1px solid #e5e7eb';
+                            partGroup.style.paddingRight = '1rem';
+                            
+                            const partLabel = document.createElement('button');
+                            partLabel.type = 'button';
+                            partLabel.className = 'nav-part-label';
+                            partLabel.innerText = 'Part ' + (partIndex + 1);
+                            partLabel.style.marginRight = '10px';
+                            partLabel.style.fontWeight = 'bold';
+                            partLabel.style.background = 'transparent';
+                            partLabel.style.border = 'none';
+                            partLabel.style.cursor = 'pointer';
+                            if (part.style.display !== 'none') {
+                                partLabel.style.color = '#dc2626';
+                                partLabel.style.borderBottom = '2px solid #dc2626';
+                            } else {
+                                partLabel.style.color = '#6b7280';
+                            }
+                            
+                            partLabel.onclick = () => {
+                                switchPart(skill, secId);
+                            };
+                            partGroup.appendChild(partLabel);
+                            
+                            const qGrid = document.createElement('div');
+                            qGrid.style.display = 'flex';
+                            qGrid.style.gap = '4px';
+                            
+                            const qCards = part.querySelectorAll('.q-card');
+                            qCards.forEach((card, index) => {
+                                let numStr = (index + 1).toString();
+                                const numEl = card.querySelector('.q-num');
+                                if (numEl) {
+                                    numStr = numEl.innerText.replace(/[^0-9]/g, '');
+                                }
+                                const qId = card.getAttribute('data-qid');
+                                
+                                const btn = document.createElement('div');
+                                btn.className = 'nav-btn';
+                                btn.id = 'navbtn_' + qId;
+                                btn.innerText = numStr;
+                                
+                                if (card.classList.contains('flagged')) btn.classList.add('flagged');
+                                if (checkIfAnswered(card)) btn.classList.add('answered');
+                                
+                                btn.onclick = () => {
+                                    if (part.style.display === 'none') {
+                                        switchPart(skill, secId);
+                                    }
+                                    setTimeout(() => {
+                                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        card.style.borderColor = '#6366f1';
+                                        setTimeout(() => card.style.borderColor = '', 1500);
+                                    }, 100);
+                                };
+                                qGrid.appendChild(btn);
+                            });
+                            
+                            partGroup.appendChild(qGrid);
+                            grid.appendChild(partGroup);
+                        });
+                    }
+
+                    function checkIfAnswered(card) {
+                        const inputs = card.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked, input[type="text"], textarea');
+                        let answered = false;
+                        inputs.forEach(inp => {
+                            if (inp.type === 'radio' && inp.checked) answered = true;
+                            else if (inp.type === 'checkbox' && inp.checked) answered = true;
+                            else if (inp.type === 'text' && inp.value.trim().length > 0) answered = true;
+                            else if (inp.tagName === 'TEXTAREA' && inp.value.trim().length > 0) answered = true;
+                        });
+                        const hiddenRec = card.querySelector('input[type="hidden"][name^="transcript_"]');
+                        if (hiddenRec && hiddenRec.value.trim().length > 0) answered = true;
+                        return answered;
+                    }
+
+                    function updateNavStatus() {
+                        document.querySelectorAll('.q-card').forEach(card => {
+                            const qId = card.getAttribute('data-qid');
+                            const btn = document.getElementById('navbtn_' + qId);
+                            if (btn) {
+                                if (checkIfAnswered(card)) btn.classList.add('answered');
+                                else btn.classList.remove('answered');
+                            }
+                        });
+                    }
+
+                    document.addEventListener('input', (e) => {
+                        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') updateNavStatus();
+                    });
+                    document.addEventListener('change', (e) => {
+                        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') updateNavStatus();
+                    });
+
+                    function toggleFlag(qId) {
+                        const card = document.getElementById('qcard_' + qId);
+                        const btn = card.querySelector('.btn-flag');
+                        const navBtn = document.getElementById('navbtn_' + qId);
+                        card.classList.toggle('flagged');
+                        btn.classList.toggle('active');
+                        if (navBtn) navBtn.classList.toggle('flagged');
+                    }
+
+                    setTimeout(() => {
+                        const activeTab = document.querySelector('.skill-tab.active');
+                        if (activeTab) switchSkill(activeTab.innerText.trim());
+                    }, 100);
+
+                    // ── FILL IN BLANKS LOGIC ──────────────────────────────────────────
+                    document.querySelectorAll('.q-card[data-qtype="FillInBlanks"], .q-card[data-qtype="FillBlank"]').forEach(card => {
+                        const qId = card.getAttribute('data-qid');
+                        const contentDiv = card.querySelector('.q-content');
+                        if (contentDiv) {
+                            // Replace (1), (2), etc. with inline text inputs
+                            contentDiv.innerHTML = contentDiv.innerHTML.replace(/\((\d+)\)/g, function(match, number) {
+                                return '<input type="text" class="fib-input" data-qid="' + qId + '" data-blank-id="' + number + '" style="width: 100px; padding: 2px 5px; border: 1px solid #d1d5db; border-radius: 4px; margin: 0 4px; display: inline-block;">';
+                            });
+                        }
+                    });
+
+                    document.getElementById('exam-form').addEventListener('submit', function() {
+                        const fibCards = document.querySelectorAll('.q-card[data-qtype="FillInBlanks"], .q-card[data-qtype="FillBlank"]');
+                        fibCards.forEach(card => {
+                            const qId = card.getAttribute('data-qid');
+                            const inputs = card.querySelectorAll('.fib-input');
+                            if (inputs.length > 0) {
+                                const ansObj = {};
+                                inputs.forEach(inp => {
+                                    ansObj[inp.getAttribute('data-blank-id')] = inp.value.trim();
+                                });
+                                let hiddenInput = document.getElementById('hidden_fib_' + qId);
+                                if (hiddenInput) {
+                                    hiddenInput.value = JSON.stringify(ansObj);
+                                }
+                            }
+                        });
+                    });
+
+                    // ── WORD COUNT (Writing) ──────────────────────────────────────────
+                    function countWords(textarea, counterId) {
+                        const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
+                        document.getElementById(counterId).textContent = words.length + ' từ';
+                    }
+
+                    // ── SPEAKING — MediaRecorder & STT via Azure ────────────────────
+                    const mediaRecorders = {};
+                    const audioChunksMap = {};
+                    const recTimers = {};
+
+                    async function startRecording(qId) {
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            const mediaRecorder = new MediaRecorder(stream);
+                            audioChunksMap[qId] = [];
+
+                            mediaRecorder.ondataavailable = event => {
+                                if (event.data.size > 0) {
+                                    audioChunksMap[qId].push(event.data);
+                                }
+                            };
+
+                            mediaRecorder.onstop = async () => {
+                                document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Đang xử lý âm thanh với hệ thống...';
+                                const rawBlob = new Blob(audioChunksMap[qId], { type: 'audio/webm' });
+                                
+                                try {
+                                    const audioBlob = await convertBlobToWav(rawBlob);
+
+                                    const formData = new FormData();
+                                    formData.append('audioFile', audioBlob, 'speaking.wav');
+                                    formData.append('isUnscripted', 'true');
+
+                                    fetch('${pageContext.request.contextPath}/api/speech/assess', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if(data.success && data.data) {
+                                            document.getElementById('hidden-transcript-' + qId).value = data.data.recognizedText || '';
+                                            document.getElementById('hidden-azure-' + qId).value = data.data.pronunciationScore || 0;
+                                            document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Đã ghi âm và xử lý xong.';
+                                            updateNavStatus();
+                                        } else {
+                                            document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi xử lý âm thanh (' + (data.error || 'Unknown') + ')';
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi kết nối đến máy chủ!';
+                                    });
+                                } catch(e) {
+                                    console.error('Lỗi khi convert sang WAV:', e);
+                                    document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi convert âm thanh!';
+                                }
+
+                                // Dọn dẹp stream
+                                stream.getTracks().forEach(track => track.stop());
+                            };
+
+                            mediaRecorder.start();
+                            mediaRecorders[qId] = mediaRecorder;
+                            
+                            document.querySelector('[name="q_' + qId + '"]').value = 'recorded';
+                            document.getElementById('transcript-' + qId).textContent = 'Đang ghi âm... (Vui lòng nói rõ ràng)';
+                            document.getElementById('btn-rec-' + qId).style.display = 'none';
+                            document.getElementById('btn-stop-' + qId).style.display = '';
+
+                            let secs = 0;
+                            document.getElementById('rec-timer-' + qId).textContent = '00:00';
+                            recTimers[qId] = setInterval(() => {
+                                secs++;
+                                const m = Math.floor(secs/60).toString().padStart(2,'0');
+                                const s = (secs%60).toString().padStart(2,'0');
+                                document.getElementById('rec-timer-' + qId).textContent = m + ':' + s;
+                            }, 1000);
+                            
+                        } catch (e) {
+                            alert('Có lỗi xảy ra khi bắt đầu thu âm (Mic access denied?): ' + e.message);
+                        }
+                    }
+
+                    function stopRecording(qId) {
+                        if (mediaRecorders[qId]) { 
+                            mediaRecorders[qId].stop(); 
+                            delete mediaRecorders[qId]; 
+                        }
+                        clearInterval(recTimers[qId]);
+                        document.getElementById('btn-rec-' + qId).style.display = '';
+                        document.getElementById('btn-stop-' + qId).style.display = 'none';
+                    }
+
+                    // ── SUBMIT CONFIRM ─────────────────────────────────────────────────
+                    function confirmSubmit() {
+                        const ok = confirm('Bạn có chắc chắn muốn nộp bài? Hành động này không thể hoàn tác.');
+                        if (ok) isExamStarted = false;
+                        return ok;
+                    }
+
+                    // ── AUDIO CONVERT TO WAV ───────────────────────────────────────────
+                    async function convertBlobToWav(blob) {
+                        const arrayBuffer = await blob.arrayBuffer();
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                        return audioBufferToWav(audioBuffer);
+                    }
+
+                    function audioBufferToWav(buffer) {
+                        const numOfChan = buffer.numberOfChannels,
+                            length = buffer.length * numOfChan * 2 + 44,
+                            bufferWav = new ArrayBuffer(length),
+                            view = new DataView(bufferWav),
+                            channels = [],
+                            sampleRate = buffer.sampleRate;
+                        let offset = 0, pos = 0;
+
+                        setUint32(0x46464952);                         // "RIFF"
+                        setUint32(length - 8);                         // file length - 8
+                        setUint32(0x45564157);                         // "WAVE"
+                        setUint32(0x20746d66);                         // "fmt " chunk
+                        setUint32(16);                                 // length = 16
+                        setUint16(1);                                  // PCM
+                        setUint16(numOfChan);
+                        setUint32(sampleRate);
+                        setUint32(sampleRate * 2 * numOfChan);         // avg. bytes/sec
+                        setUint16(numOfChan * 2);                      // block-align
+                        setUint16(16);                                 // 16-bit
+                        setUint32(0x61746164);                         // "data" - chunk
+                        setUint32(length - pos - 4);                   // chunk length
+
+                        for (let i = 0; i < buffer.numberOfChannels; i++)
+                            channels.push(buffer.getChannelData(i));
+
+                        while (pos < length) {
+                            for (let i = 0; i < numOfChan; i++) {
+                                let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                                sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                                view.setInt16(pos, sample, true);
+                                pos += 2;
+                            }
+                            offset++;
+                        }
+
+                        return new Blob([bufferWav], { type: "audio/wav" });
+
+                        function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+                        function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+                    }
+>>>>>>> 10fba726528eb73feaa1565955bb05935631eeb6
                 
                 const groupTitle = document.createElement('div');
                 groupTitle.innerText = shortName;

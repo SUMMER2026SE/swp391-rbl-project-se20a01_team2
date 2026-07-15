@@ -13,22 +13,43 @@ public class QuestionResourceDAO {
         );
     }
 
-    public List<QuestionResource> search(String keyword, String type) {
+    public util.PaginatedList<QuestionResource> searchPaginated(String keyword, String type, String sortOrder, int page, int pageSize) {
         boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
         boolean hasType = type != null && !type.trim().isEmpty();
 
         StringBuilder queryStr = new StringBuilder("SELECT r FROM QuestionResource r WHERE r.deleted = false");
-        if (hasType) queryStr.append(" AND r.type = :type");
+        StringBuilder countStr = new StringBuilder("SELECT COUNT(r) FROM QuestionResource r WHERE r.deleted = false");
+        
+        StringBuilder conditions = new StringBuilder();
+        if (hasType) conditions.append(" AND r.type = :type");
         if (hasKeyword) {
-            queryStr.append(" AND (LOWER(r.resourceName) LIKE :kw OR LOWER(r.resourceText) LIKE :kw)");
+            conditions.append(" AND (LOWER(r.resourceName) LIKE :kw OR LOWER(r.resourceText) LIKE :kw)");
         }
-        queryStr.append(" ORDER BY r.resourceId DESC");
+        
+        queryStr.append(conditions);
+        countStr.append(conditions);
+        
+        if ("oldest".equalsIgnoreCase(sortOrder)) {
+            queryStr.append(" ORDER BY r.resourceId ASC");
+        } else {
+            queryStr.append(" ORDER BY r.resourceId DESC");
+        }
 
         return JpaHelper.query(em -> {
+            jakarta.persistence.TypedQuery<Long> countQuery = em.createQuery(countStr.toString(), Long.class);
+            if (hasType) countQuery.setParameter("type", type);
+            if (hasKeyword) countQuery.setParameter("kw", "%" + keyword.toLowerCase() + "%");
+            long totalItems = countQuery.getSingleResult();
+
             jakarta.persistence.TypedQuery<QuestionResource> query = em.createQuery(queryStr.toString(), QuestionResource.class);
             if (hasType) query.setParameter("type", type);
             if (hasKeyword) query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
-            return query.getResultList();
+            
+            query.setFirstResult((page - 1) * pageSize);
+            query.setMaxResults(pageSize);
+            
+            List<QuestionResource> items = query.getResultList();
+            return new util.PaginatedList<>(items, page, totalItems, pageSize);
         });
     }
 

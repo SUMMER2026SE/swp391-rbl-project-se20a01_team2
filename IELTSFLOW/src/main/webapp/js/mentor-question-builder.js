@@ -689,10 +689,10 @@ window.showPreviewModal = function() {
         for (const [id, config] of Object.entries(blanks)) {
             let blankHtml = '';
             if (config.type === 'text') {
-                blankHtml = `<input type="text" class="form-control form-control-sm d-inline-block mx-1 preview-auto-fit" placeholder="${config.placeholder || ''}" style="width: 100px; min-width: 60px;" oninput="autoFitInput(this)">`;
+                blankHtml = `<input type="text" data-blank-id="${id}" class="form-control form-control-sm d-inline-block mx-1 preview-auto-fit" placeholder="${config.placeholder || ''}" style="width: 100px; min-width: 60px;" oninput="autoFitInput(this)">`;
             } else {
                 const opts = config.options || [];
-                blankHtml = `<select class="form-select form-select-sm d-inline-block w-auto mx-1">`;
+                blankHtml = `<select data-blank-id="${id}" class="form-select form-select-sm d-inline-block w-auto mx-1">`;
                 blankHtml += `<option value="">-- Chọn --</option>`;
                 opts.forEach(o => {
                     blankHtml += `<option value="${o}">${o}</option>`;
@@ -734,6 +734,122 @@ window.showPreviewModal = function() {
     
     const modal = new bootstrap.Modal(document.getElementById('previewModal'));
     modal.show();
+};
+
+window.checkPreviewAnswers = function() {
+    const qType = document.querySelector('select[name=questionType]').value;
+    const container = document.getElementById('previewContainer');
+    let allCorrect = true;
+    let checkedAtLeastOne = false;
+
+    if (qType === 'MultipleChoice') {
+        const radios = container.querySelectorAll('input[type="radio"]');
+        let selectedIndex = -1;
+        radios.forEach((r, i) => { if (r.checked) selectedIndex = i; });
+        
+        if (selectedIndex === -1) {
+            Swal.fire('Chưa trả lời', 'Vui lòng chọn một đáp án!', 'warning');
+            return;
+        }
+        
+        let correctIndex = -1;
+        let count = 0;
+        document.querySelectorAll('.answer-item').forEach(item => {
+            if (item.style.display !== 'none') {
+                if (item.querySelector('.answer-correct-checkbox').checked) correctIndex = count;
+                count++;
+            }
+        });
+        
+        if (selectedIndex === correctIndex) {
+            Swal.fire('Chính xác!', 'Bạn đã chọn đúng đáp án.', 'success');
+        } else {
+            Swal.fire('Sai rồi!', 'Đáp án chưa chính xác.', 'error');
+        }
+    } else if (qType === 'Matching') {
+        const selects = container.querySelectorAll('.matching-preview select');
+        if (selects.length === 0) return;
+        
+        const ansJsonTextarea = document.querySelector('.answer-item .ansJsonRaw');
+        let correctMapping = {};
+        try { correctMapping = JSON.parse(ansJsonTextarea.value || '{}'); } catch(e) {}
+        
+        let correctCount = 0;
+        selects.forEach(sel => {
+            const leftId = sel.closest('div').querySelector('.badge').innerText;
+            const rightId = sel.value;
+            if (rightId && correctMapping[leftId] == rightId) {
+                correctCount++;
+                sel.style.borderColor = 'green';
+                sel.style.backgroundColor = '#e8f5e9';
+            } else {
+                allCorrect = false;
+                if (rightId) {
+                    sel.style.borderColor = 'red';
+                    sel.style.backgroundColor = '#ffebee';
+                }
+            }
+            if (rightId) checkedAtLeastOne = true;
+        });
+        
+        if (!checkedAtLeastOne) {
+            Swal.fire('Chưa trả lời', 'Vui lòng nối ít nhất 1 đáp án.', 'warning');
+            return;
+        }
+        
+        if (allCorrect) {
+            Swal.fire('Chính xác!', 'Bạn đã nối đúng tất cả!', 'success');
+        } else {
+            Swal.fire('Chưa chính xác!', `Bạn đã đúng ${correctCount}/${selects.length} mục.`, 'error');
+        }
+    } else if (qType === 'FillInBlanks') {
+        const inputs = container.querySelectorAll('input.preview-auto-fit, select.form-select');
+        if (inputs.length === 0) return;
+        
+        const ansJsonTextarea = document.querySelector('.answer-item .ansJsonRaw');
+        let correctAnswers = {};
+        try { correctAnswers = JSON.parse(ansJsonTextarea.value || '{}'); } catch(e) {}
+        
+        let correctCount = 0;
+        inputs.forEach(inp => {
+            const val = inp.value.trim().toLowerCase();
+            const id = inp.getAttribute('data-blank-id');
+            if (val) checkedAtLeastOne = true;
+            
+            let isCorrect = false;
+            let validOpts = correctAnswers[id] || [];
+            if (!Array.isArray(validOpts)) validOpts = [validOpts];
+            
+            validOpts = validOpts.map(v => String(v).trim().toLowerCase());
+            
+            if (val && validOpts.includes(val)) {
+                isCorrect = true;
+                correctCount++;
+            }
+            
+            if (isCorrect) {
+                inp.style.borderColor = 'green';
+                inp.style.backgroundColor = '#e8f5e9';
+            } else if (val) {
+                inp.style.borderColor = 'red';
+                inp.style.backgroundColor = '#ffebee';
+                allCorrect = false;
+            } else {
+                allCorrect = false;
+            }
+        });
+        
+        if (!checkedAtLeastOne) {
+            Swal.fire('Chưa trả lời', 'Vui lòng điền ít nhất 1 ô trống.', 'warning');
+            return;
+        }
+        
+        if (allCorrect) {
+            Swal.fire('Chính xác!', 'Bạn đã điền đúng tất cả!', 'success');
+        } else {
+            Swal.fire('Chưa chính xác!', `Bạn đã đúng ${correctCount}/${inputs.length} mục.`, 'error');
+        }
+    }
 };
 
 (function() {

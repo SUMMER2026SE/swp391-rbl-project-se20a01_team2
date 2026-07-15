@@ -12,8 +12,8 @@ public class QuestionResourceService {
         return resourceDAO.findAll();
     }
 
-    public List<QuestionResource> searchResources(String keyword, String type) {
-        return resourceDAO.search(keyword, type);
+    public util.PaginatedList<QuestionResource> searchResources(String keyword, String type, String sortOrder, int page, int pageSize) {
+        return resourceDAO.searchPaginated(keyword, type, sortOrder, page, pageSize);
     }
 
     public QuestionResource getResourceById(int id) {
