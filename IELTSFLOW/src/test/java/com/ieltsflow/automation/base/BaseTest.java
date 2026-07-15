@@ -4,11 +4,13 @@ import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
 import com.ieltsflow.automation.utils.ExtentReportManager;
+import com.ieltsflow.automation.utils.TestConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -52,6 +54,11 @@ public class BaseTest {
         // options.addArguments("--headless"); // Bỏ comment nếu muốn chạy ngầm không hiện UI
         options.addArguments("--start-maximized");
         options.addArguments("--disable-notifications");
+        
+        String chromeBinary = TestConfig.getChromeBinaryPath();
+        if (chromeBinary != null && !chromeBinary.isEmpty()) {
+            options.setBinary(chromeBinary);
+        }
         // Tắt popup cảnh báo mật khẩu bị lộ của Chrome (tránh bị chặn trong test)
         options.addArguments("--disable-features=PasswordLeakDetection");
         java.util.Map<String, Object> prefs = new java.util.HashMap<>();
@@ -78,23 +85,17 @@ public class BaseTest {
         }
     }
 
-    // Cơ chế chụp màn hình khi test Fail (Sử dụng JUnit 5 TestWatcher)
+    // Cơ chế chụp màn hình khi test Fail (Chạy trước @AfterEach để giữ WebDriver sống)
     @RegisterExtension
-    TestWatcher watcher = new TestWatcher() {
+    AfterTestExecutionCallback callback = new AfterTestExecutionCallback() {
         @Override
-        public void testFailed(ExtensionContext context, Throwable cause) {
-            test.log(Status.FAIL, "Test Failed: " + cause.getMessage());
-            takeScreenshot(context.getDisplayName());
-        }
-
-        @Override
-        public void testSuccessful(ExtensionContext context) {
-            test.log(Status.PASS, "Test Passed");
-        }
-
-        @Override
-        public void testAborted(ExtensionContext context, Throwable cause) {
-            test.log(Status.SKIP, "Test Aborted");
+        public void afterTestExecution(ExtensionContext context) throws Exception {
+            if (context.getExecutionException().isPresent()) {
+                test.log(Status.FAIL, "Test Failed: " + context.getExecutionException().get().getMessage());
+                takeScreenshot(context.getDisplayName());
+            } else {
+                test.log(Status.PASS, "Test Passed");
+            }
         }
     };
 

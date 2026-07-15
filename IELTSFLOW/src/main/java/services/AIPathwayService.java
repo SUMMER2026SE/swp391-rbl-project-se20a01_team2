@@ -20,17 +20,17 @@ public class AIPathwayService {
     private final ObjectMapper objectMapper;
     
     private static final String PATHWAY_SCHEMA = "{" +
-            "  \"type\": \"ARRAY\"," +
+            "  \"type\": \"array\"," +
             "  \"description\": \"Lộ trình học theo từng tuần, tối đa 12 tuần\"," +
             "  \"items\": {" +
-            "    \"type\": \"OBJECT\"," +
+            "    \"type\": \"object\"," +
             "    \"properties\": {" +
-            "      \"weekNumber\": { \"type\": \"INTEGER\" }," +
-            "      \"skillsFocus\": { \"type\": \"STRING\", \"description\": \"Tên 2 kỹ năng ưu tiên trong tuần\" }," +
-            "      \"objectives\": { \"type\": \"STRING\", \"description\": \"Mục tiêu ngắn gọn\" }," +
+            "      \"weekNumber\": { \"type\": \"integer\" }," +
+            "      \"skillsFocus\": { \"type\": \"string\", \"description\": \"Tên 2 kỹ năng ưu tiên trong tuần\" }," +
+            "      \"objectives\": { \"type\": \"string\", \"description\": \"Mục tiêu ngắn gọn\" }," +
             "      \"activities\": {" +
-            "        \"type\": \"ARRAY\"," +
-            "        \"items\": { \"type\": \"STRING\" }" +
+            "        \"type\": \"array\"," +
+            "        \"items\": { \"type\": \"string\" }" +
             "      }" +
             "    }," +
             "    \"required\": [\"weekNumber\", \"skillsFocus\", \"objectives\", \"activities\"]" +
