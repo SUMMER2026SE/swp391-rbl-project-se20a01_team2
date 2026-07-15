@@ -74,11 +74,11 @@
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Dạng bài <span class="text-danger">*</span></label>
                         <select name="questionType" id="questionTypeSelect" class="form-select" required>
-                            <option value="Multiple_Choice" ${question.questionType == 'Multiple_Choice' ? 'selected' : ''}>Multiple Choice</option>
+                            <option value="MultipleChoice" ${question.questionType == 'MultipleChoice' ? 'selected' : ''}>Multiple Choice</option>
                             <option value="Matching" ${question.questionType == 'Matching' ? 'selected' : ''}>Matching</option>
-                            <option value="FillBlank" ${question.questionType == 'FillBlank' ? 'selected' : ''}>Fill In Blanks</option>
+                            <option value="FillInBlanks" ${question.questionType == 'FillInBlanks' ? 'selected' : ''}>Fill In Blanks</option>
                             <option value="Essay" ${question.questionType == 'Essay' ? 'selected' : ''}>Tự luận (Essay)</option>
-                            <option value="Speaking" ${question.questionType == 'Speaking' ? 'selected' : ''}>Ghi âm (Speaking)</option>
+                            <option value="AudioResponse" ${question.questionType == 'AudioResponse' ? 'selected' : ''}>Ghi âm (Speaking)</option>
                         </select>
                     </div>
 
@@ -294,7 +294,7 @@ window.showPreviewModal = function() {
 
     let html = resourceTextHtml + `<div class="q-content mb-4">\${content.replace(/\n/g, '<br>')}</div>`;
 
-    if (qType === 'Multiple_Choice') {
+    if (qType === 'MultipleChoice') {
         html += `<div class="choices d-flex flex-column gap-2">`;
         document.querySelectorAll('.answer-item').forEach((item, i) => {
             if (item.style.display !== 'none') {
@@ -339,7 +339,7 @@ window.showPreviewModal = function() {
         html += `</ul>`;
         html += `</div>`;
         html += `</div>`;
-    } else if (qType === 'FillBlank') {
+    } else if (qType === 'FillInBlanks') {
         const dataStr = document.getElementById('contentJson').value;
         let data = {};
         try { data = JSON.parse(dataStr || '{}'); } catch(e) {}
@@ -387,7 +387,7 @@ window.showPreviewModal = function() {
         html = warningHtml + previewResourceHtml + `<div class="q-content mb-4">\${previewContentHtml}</div>`;
     } else if (qType === 'Essay') {
         html += `<textarea class="form-control mt-3" rows="8" placeholder="Học viên sẽ gõ bài làm tự luận của mình tại đây..."></textarea>`;
-    } else if (qType === 'Speaking') {
+    } else if (qType === 'AudioResponse') {
         html += `<div class="alert alert-info mt-3 d-flex align-items-center gap-3">
             <button class="btn btn-danger rounded-circle p-3" style="width: 50px; height: 50px;"><i class="fa-solid fa-microphone"></i></button>
             <span>Khu vực học viên ghi âm câu trả lời (Bản xem trước)</span>
@@ -408,12 +408,12 @@ window.checkPreviewAnswers = function() {
     let allCorrect = true;
     let checkedAtLeastOne = false;
 
-    if (qType === 'Essay' || qType === 'Speaking') {
+    if (qType === 'Essay' || qType === 'AudioResponse') {
         Swal.fire('Thông tin', 'Dạng bài này sẽ được chấm điểm bằng AI sau khi nộp bài, không có đáp án đúng sai cố định.', 'info');
         return;
     }
 
-    if (qType === 'Multiple_Choice') {
+    if (qType === 'MultipleChoice') {
         const radios = container.querySelectorAll('input[type="radio"]');
         let selectedIndex = -1;
         radios.forEach((r, i) => { if (r.checked) selectedIndex = i; });
@@ -473,7 +473,7 @@ window.checkPreviewAnswers = function() {
         } else {
             Swal.fire('Chưa chính xác!', `Bạn đã đúng \${correctCount}/\${selects.length} mục.`, 'error');
         }
-    } else if (qType === 'FillBlank') {
+    } else if (qType === 'FillInBlanks') {
         const inputs = container.querySelectorAll('input.preview-auto-fit, select.form-select');
         if (inputs.length === 0) return;
 
@@ -545,20 +545,20 @@ window.filterQuestionTypes = function() {
     if (skill === 'Writing') {
         validTypes = ['Essay'];
     } else if (skill === 'Speaking') {
-        validTypes = ['Speaking'];
+        validTypes = ['AudioResponse'];
     } else {
-        validTypes = ['Multiple_Choice', 'Matching', 'FillBlank'];
+        validTypes = ['MultipleChoice', 'Matching', 'FillInBlanks'];
     }
     
     let currentVal = qTypeSelect.value;
     qTypeSelect.innerHTML = '';
     
     const allOptions = [
-        {value: 'Multiple_Choice', text: 'Multiple Choice'},
+        {value: 'MultipleChoice', text: 'Multiple Choice'},
         {value: 'Matching', text: 'Matching'},
-        {value: 'FillBlank', text: 'Fill In Blanks'},
+        {value: 'FillInBlanks', text: 'Fill In Blanks'},
         {value: 'Essay', text: 'Tự luận (Essay)'},
-        {value: 'Speaking', text: 'Ghi âm (Speaking)'}
+        {value: 'AudioResponse', text: 'Ghi âm (Speaking)'}
     ];
     
     let hasSelected = false;
@@ -592,7 +592,7 @@ window.applyQuestionTypeLogicOverride = function() {
     const btnAddAnswer = document.getElementById('btnAddAnswer');
     const answersContainerBody = document.getElementById('answersContainer');
     
-    if (qType === 'Essay' || qType === 'Speaking') {
+    if (qType === 'Essay' || qType === 'AudioResponse') {
         if (contentJsonContainer) contentJsonContainer.parentElement.style.display = 'none';
         if (btnAddAnswer) btnAddAnswer.style.display = 'none';
         
