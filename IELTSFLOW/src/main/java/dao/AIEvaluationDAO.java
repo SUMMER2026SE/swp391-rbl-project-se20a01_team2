@@ -40,50 +40,59 @@ public class AIEvaluationDAO {
         }
     }
 
-    /**
-     * Cập nhật điểm Band và Feedback AI tổng hợp vào TestSubmissions
-     * 
-     * @param detailId ID của chi tiết bài làm
-     * @param bandScore Điểm Overall của kỹ năng đó
-     * @param skillType Loại kỹ năng (Writing / Speaking)
-     * @param aiFeedback Lời nhận xét chung
-     * @return true nếu cập nhật thành công
-     */
     public boolean updateTestSubmissionBand(int detailId, double bandScore, String skillType, String aiFeedback) {
         try {
             JpaHelper.execute(em -> {
                 String columnToUpdate = skillType.equalsIgnoreCase("Writing") ? "WritingBand" : "SpeakingBand";
                 
-                // Sử dụng subquery để tìm SubmissionID từ DetailID
+                // 1. Cập nhật Score cho SubmissionDetail này để làm cơ sở tính trung bình
+                em.createNativeQuery("UPDATE SubmissionDetails SET Score = ?1 WHERE DetailID = ?2")
+                  .setParameter(1, bandScore)
+                  .setParameter(2, detailId)
+                  .executeUpdate();
+
+                // 2. Sử dụng subquery để tìm SubmissionID và QuestionID từ DetailID
                 int subId = (Integer) em.createNativeQuery("SELECT SubmissionID FROM SubmissionDetails WHERE DetailID = ?1")
                                         .setParameter(1, detailId)
                                         .getSingleResult();
+                int qId = (Integer) em.createNativeQuery("SELECT QuestionID FROM SubmissionDetails WHERE DetailID = ?1")
+                                        .setParameter(1, detailId)
+                                        .getSingleResult();
 
+                // 3. Tính toán lại trung bình điểm (toán học chuẩn) của tất cả các câu trong cùng một Skill
+                String avgSql = "SELECT AVG(CAST(sd.Score AS FLOAT)) " +
+                                "FROM SubmissionDetails sd " +
+                                "JOIN Questions q ON sd.QuestionID = q.QuestionID " +
+                                "WHERE sd.SubmissionID = ?1 AND q.Skill = ?2 AND sd.Score IS NOT NULL";
+                
+                Double exactAvgBand = (Double) em.createNativeQuery(avgSql)
+                                                .setParameter(1, subId)
+                                                .setParameter(2, skillType)
+                                                .getSingleResult();
+
+                // 4. Cập nhật band điểm skill và cộng dồn tất cả Feedback vào OverallAIFeedback
                 String sql = "UPDATE TestSubmissions " +
-                             "SET " + columnToUpdate + " = (CASE WHEN " + columnToUpdate + " IS NULL THEN CAST(?1 AS FLOAT) ELSE (" + columnToUpdate + " + CAST(?1 AS FLOAT)) / 2.0 END), " +
-                             "    OverallAIFeedback = CASE " +
-                             "        WHEN CHARINDEX('[" + skillType + " Feedback]', ISNULL(OverallAIFeedback, '')) > 0 THEN OverallAIFeedback " +
-                             "        ELSE CONCAT(ISNULL(OverallAIFeedback, ''), CHAR(13), CHAR(10), ?2) " +
-                             "    END " +
+                             "SET " + columnToUpdate + " = ?1, " +
+                             "    OverallAIFeedback = CONCAT(ISNULL(OverallAIFeedback, ''), CHAR(13), CHAR(10), CHAR(13), CHAR(10), ?2) " +
                              "WHERE SubmissionID = ?3";
                              
                 Query query = em.createNativeQuery(sql);
-                query.setParameter(1, bandScore);
-                query.setParameter(2, "[" + skillType + " Feedback]: " + aiFeedback);
+                query.setParameter(1, exactAvgBand);
+                query.setParameter(2, "[" + skillType + " Feedback - QID " + qId + "]: " + aiFeedback);
                 query.setParameter(3, subId);
                 
                 int updatedCount = query.executeUpdate();
                 
-                // Cập nhật lại OverallBand
+                // 5. Cập nhật lại OverallBand
                 String recalcSql = "UPDATE TestSubmissions SET OverallBand = ROUND((ISNULL(ListeningBand, 0) + ISNULL(ReadingBand, 0) + ISNULL(WritingBand, 0) + ISNULL(SpeakingBand, 0)) * 2.0 / " +
                                    "NULLIF((CASE WHEN ListeningBand IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN ReadingBand IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN WritingBand IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN SpeakingBand IS NOT NULL THEN 1 ELSE 0 END), 0), 0) / 2.0 " +
-                                   "WHERE SubmissionID = (SELECT SubmissionID FROM SubmissionDetails WHERE DetailID = ?1)";
+                                   "WHERE SubmissionID = ?1";
                 Query recalcQuery = em.createNativeQuery(recalcSql);
-                recalcQuery.setParameter(1, detailId);
+                recalcQuery.setParameter(1, subId);
                 recalcQuery.executeUpdate();
                 
                 LOGGER.log(Level.INFO, "Đã cập nhật {0} = {1} và OverallBand cho TestSubmission từ detailId {2} (Affected rows: {3})", 
-                        new Object[]{columnToUpdate, bandScore, detailId, updatedCount});
+                        new Object[]{columnToUpdate, exactAvgBand, detailId, updatedCount});
             });
             return true;
         } catch (Exception e) {

@@ -188,19 +188,38 @@ public class MockTestServlet extends HttpServlet {
         for (Question q : questions) {
             String skill  = q.getSkill()        != null ? q.getSkill().trim()        : "";
             String qType  = q.getQuestionType() != null ? q.getQuestionType().trim() : "";
-            String answer = req.getParameter("q_" + q.getQuestionId());
+            
+            // Xử lý parameter gửi lên từ form
+            String[] answersArray = req.getParameterValues("q_" + q.getQuestionId());
+            String answer = null;
+            if (answersArray != null && answersArray.length > 0) {
+                if (answersArray.length == 1) {
+                    answer = answersArray[0];
+                } else {
+                    // Nếu là nhiều đáp án, gom thành JSON Array string
+                    try {
+                        answer = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(answersArray);
+                    } catch (Exception e) {
+                        answer = answersArray[0];
+                    }
+                }
+            }
 
             if (("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
                 && answer != null && !answer.isBlank()) {
-                try {
-                    int ansId = Integer.parseInt(answer.trim());
-                    for (model.Answer a : q.getAnswers()) {
-                        if (a.getAnswerId() == ansId) {
-                            answer = a.getContent();
-                            break;
+                
+                // Nếu chỉ có 1 đáp án dạng ID, convert sang nội dung text (như code cũ)
+                if (!answer.trim().startsWith("[")) {
+                    try {
+                        int ansId = Integer.parseInt(answer.trim());
+                        for (model.Answer a : q.getAnswers()) {
+                            if (a.getAnswerId() == ansId) {
+                                answer = a.getContent();
+                                break;
+                            }
                         }
-                    }
-                } catch (NumberFormatException ignored) {}
+                    } catch (NumberFormatException ignored) {}
+                }
             }
 
             SubmissionDetail detail = new SubmissionDetail();
@@ -209,12 +228,18 @@ public class MockTestServlet extends HttpServlet {
             detail.setCandidateAnswer(answer);
 
             if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) {
-                boolean correct = mockTestService.isAnswerCorrect(q, answer);
-                detail.setIsCorrect(correct);
-                detail.setScore(correct ? 1.0 : 0.0);
+                int correctCount = mockTestService.isAnswerCorrect(q, answer);
+                detail.setIsCorrect(correctCount > 0);
+                detail.setScore((double) correctCount);
                 detail.setGradingStatus("Graded");
-                if ("Reading".equals(skill))   { totalReading++;   if (correct) correctReading++;   }
-                if ("Listening".equals(skill)) { totalListening++; if (correct) correctListening++; }
+                if ("Reading".equals(skill))   { 
+                    totalReading += q.getQuestionCount();   
+                    correctReading += correctCount;   
+                }
+                if ("Listening".equals(skill)) { 
+                    totalListening += q.getQuestionCount(); 
+                    correctListening += correctCount; 
+                }
                 mockTestService.saveDetail(detail);
             } else {
                 detail.setGradingStatus("Pending_AI");
