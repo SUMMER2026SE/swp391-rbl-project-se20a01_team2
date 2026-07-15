@@ -292,7 +292,7 @@ window.showPreviewModal = function() {
         }
     }
 
-    let html = resourceTextHtml + `<div class="q-content mb-4">${content.replace(/\n/g, '<br>')}</div>`;
+    let html = resourceTextHtml + `<div class="q-content mb-4">\${content.replace(/\n/g, '<br>')}</div>`;
 
     if (qType === 'MultipleChoice') {
         html += `<div class="choices d-flex flex-column gap-2">`;
@@ -302,7 +302,7 @@ window.showPreviewModal = function() {
                 html += `
                     <label class="choice border p-2 rounded d-flex align-items-center gap-2" style="cursor: pointer;">
                         <input type="radio" name="preview_mc">
-                        <span class="choice-text">${text}</span>
+                        <span class="choice-text">\${text}</span>
                     </label>
                 `;
             }
@@ -320,11 +320,11 @@ window.showPreviewModal = function() {
         leftSide.forEach(item => {
             html += `
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-secondary">${item.id}</span>
-                    <span>${item.text}</span>
+                    <span class="badge bg-secondary">\${item.id}</span>
+                    <span>\${item.text}</span>
                     <select class="form-select form-select-sm" style="width: auto;">
                         <option value="">-- Chọn --</option>
-                        ${rightSide.map(r => `<option value="${r.id}">${r.id}</option>`).join('')}
+                        \${rightSide.map(r => `<option value="\${r.id}">\${r.id}</option>`).join('')}
                     </select>
                 </div>
             `;
@@ -334,7 +334,7 @@ window.showPreviewModal = function() {
         html += `<h6 class="fw-bold">Lựa chọn:</h6>`;
         html += `<ul class="list-unstyled">`;
         rightSide.forEach(r => {
-            html += `<li class="mb-1"><span class="badge bg-light text-dark border">${r.id}</span> ${r.text}</li>`;
+            html += `<li class="mb-1"><span class="badge bg-light text-dark border">\${r.id}</span> \${r.text}</li>`;
         });
         html += `</ul>`;
         html += `</div>`;
@@ -352,18 +352,18 @@ window.showPreviewModal = function() {
         for (const [id, config] of Object.entries(blanks)) {
             let blankHtml = '';
             if (config.type === 'text') {
-                blankHtml = `<input type="text" data-blank-id="${id}" class="form-control form-control-sm d-inline-block mx-1 preview-auto-fit" placeholder="${config.placeholder || ''}" style="width: 100px; min-width: 60px;" oninput="autoFitInput(this)">`;
+                blankHtml = `<input type="text" data-blank-id="\${id}" class="form-control form-control-sm d-inline-block mx-1 preview-auto-fit" placeholder="\${config.placeholder || ''}" style="width: 100px; min-width: 60px;" oninput="autoFitInput(this)">`;
             } else {
                 const opts = config.options || [];
-                blankHtml = `<select data-blank-id="${id}" class="form-select form-select-sm d-inline-block w-auto mx-1">`;
+                blankHtml = `<select data-blank-id="\${id}" class="form-select form-select-sm d-inline-block w-auto mx-1">`;
                 blankHtml += `<option value="">-- Chọn --</option>`;
                 opts.forEach(o => {
-                    blankHtml += `<option value="${o}">${o}</option>`;
+                    blankHtml += `<option value="\${o}">\${o}</option>`;
                 });
                 blankHtml += `</select>`;
             }
 
-            const regex = new RegExp(`\\(${id}\\)`, 'g');
+            const regex = new RegExp(`\\(\${id}\\)`, 'g');
             let foundInText = false;
             if (previewContentHtml.match(regex)) {
                 previewContentHtml = previewContentHtml.replace(regex, blankHtml);
@@ -375,16 +375,16 @@ window.showPreviewModal = function() {
             }
 
             if (!foundInText) {
-                warnings.push(`Cảnh báo: Không tìm thấy đánh dấu <strong>(${id})</strong> trong bài đọc hoặc nội dung câu hỏi!`);
+                warnings.push(`Cảnh báo: Không tìm thấy đánh dấu <strong>(\${id})</strong> trong bài đọc hoặc nội dung câu hỏi!`);
             }
         }
 
         let warningHtml = '';
         if (warnings.length > 0) {
-            warningHtml = warnings.map(w => `<div class="alert alert-warning py-2 mb-2"><i class="fa-solid fa-triangle-exclamation"></i> ${w}</div>`).join('');
+            warningHtml = warnings.map(w => `<div class="alert alert-warning py-2 mb-2"><i class="fa-solid fa-triangle-exclamation"></i> \${w}</div>`).join('');
         }
 
-        html = warningHtml + previewResourceHtml + `<div class="q-content mb-4">${previewContentHtml}</div>`;
+        html = warningHtml + previewResourceHtml + `<div class="q-content mb-4">\${previewContentHtml}</div>`;
     } else if (qType === 'Essay') {
         html += `<textarea class="form-control mt-3" rows="8" placeholder="Học viên sẽ gõ bài làm tự luận của mình tại đây..."></textarea>`;
     } else if (qType === 'AudioResponse') {
@@ -471,7 +471,7 @@ window.checkPreviewAnswers = function() {
         if (allCorrect) {
             Swal.fire('Chính xác!', 'Bạn đã nối đúng tất cả!', 'success');
         } else {
-            Swal.fire('Chưa chính xác!', `Bạn đã đúng ${correctCount}/${selects.length} mục.`, 'error');
+            Swal.fire('Chưa chính xác!', `Bạn đã đúng \${correctCount}/\${selects.length} mục.`, 'error');
         }
     } else if (qType === 'FillInBlanks') {
         const inputs = container.querySelectorAll('input.preview-auto-fit, select.form-select');
@@ -518,7 +518,7 @@ window.checkPreviewAnswers = function() {
         if (allCorrect) {
             Swal.fire('Chính xác!', 'Bạn đã điền đúng tất cả!', 'success');
         } else {
-            Swal.fire('Chưa chính xác!', `Bạn đã đúng ${correctCount}/${inputs.length} mục.`, 'error');
+            Swal.fire('Chưa chính xác!', `Bạn đã đúng \${correctCount}/\${inputs.length} mục.`, 'error');
         }
     }
 };
