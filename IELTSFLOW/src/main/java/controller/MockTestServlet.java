@@ -221,7 +221,9 @@ public class MockTestServlet extends HttpServlet {
                 }
             }
 
-            if (("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
+            // Only apply answer-ID-to-content conversion for objective (non-AI) skills
+            boolean isAiSkill = "Speaking".equalsIgnoreCase(skill) || "Writing".equalsIgnoreCase(skill);
+            if (!isAiSkill && ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
                 && answer != null && !answer.isBlank()) {
                 
                 // Nếu chỉ có 1 đáp án dạng ID, convert sang nội dung text (như code cũ)
@@ -243,7 +245,10 @@ public class MockTestServlet extends HttpServlet {
             detail.setQuestionId(q.getQuestionId());
             detail.setCandidateAnswer(answer);
 
-            if ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) {
+            // Route to objective grading only if the skill is NOT Speaking/Writing.
+            // Speaking questions may have QuestionType='FillInBlanks' in the DB,
+            // so skill must take precedence over qType here.
+            if (!isAiSkill && ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType))) {
                 int correctCount = mockTestService.isAnswerCorrect(q, answer);
                 detail.setIsCorrect(correctCount > 0);
                 detail.setScore((double) correctCount);
