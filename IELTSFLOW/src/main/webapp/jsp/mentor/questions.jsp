@@ -95,8 +95,8 @@
                 <div class="col-md-2">
                     <select name="type" class="form-select rounded-pill" onchange="document.getElementById('page-input').value = 1; ajaxSearch(this.form);">
                         <option value="">-- Dạng --</option>
-                        <option value="MultipleChoice" ${param.type == 'MultipleChoice' ? 'selected' : ''}>Multiple Choice</option>
-                        <option value="FillInBlanks" ${param.type == 'FillInBlanks' ? 'selected' : ''}>Fill In Blanks</option>
+                        <option value="Multiple_Choice" ${param.type == 'Multiple_Choice' ? 'selected' : ''}>Multiple Choice</option>
+                        <option value="FillBlank" ${param.type == 'FillBlank' ? 'selected' : ''}>Fill In Blanks</option>
                         <option value="Matching" ${param.type == 'Matching' ? 'selected' : ''}>Matching</option>
                     </select>
                 </div>
