@@ -38,7 +38,7 @@
         .q-card { padding: 0; margin-bottom: 1.5rem; border: none; background: transparent; }
         .q-card:hover { border-color: transparent; box-shadow: none; }
         .q-num { display: inline-block; background: #fff; color: #111827; border-radius: 0; padding: 0.15rem 0.5rem; font-size: 1rem; font-weight: 700; margin-right: 0.75rem; margin-bottom: 0; min-width: 20px; text-align: center; border: 1px solid #cbd5e1; }
-        .q-content { font-size: 1.05rem; font-weight: 400; line-height: 1.6; color: #111827; margin-bottom: 0.75rem; display: inline-block; }
+        .q-content { font-size: 1.05rem; font-weight: 400; line-height: 1.6; color: #111827; margin-bottom: 0.75rem; display: inline-block; white-space: pre-wrap; }
         
         .choices { display: flex; flex-direction: column; gap: 0.5rem; }
         .choice { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 2px; cursor: pointer; background: #fff; }
@@ -213,7 +213,7 @@
                                                 <c:if test="${sk == 'Writing'}">
                                                     <!-- Special layout for Writing: Show all question prompts here, toggled by JS -->
                                                     <c:forEach var="xQ" items="${sec.examQuestions}" varStatus="ws">
-                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem;">
+                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem; white-space: pre-wrap;">
                                                             ${xQ.question.content}
                                                         </div>
                                                     </c:forEach>
@@ -267,9 +267,13 @@
                                                             <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">✍️ Your Answer - Task ${qSt.index + 1}</div>
                                                         </c:if>
                                                         <c:if test="${sk == 'Speaking'}">
-                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0; white-space: pre-wrap;">
                                                                 ${q.content}
                                                             </div>
+                                                        </c:if>
+
+                                                        <c:if test="${not empty q.explanation}">
+                                                            <div style="font-size: 0.95rem; color: #334155; margin-bottom: 1rem; white-space: pre-wrap; font-weight: 600; font-style: italic;">${q.explanation}</div>
                                                         </c:if>
                                                         
                                                         <!-- Input fields -->
