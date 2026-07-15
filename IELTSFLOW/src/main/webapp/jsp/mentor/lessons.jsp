@@ -148,10 +148,20 @@
                                                 <div class="container-fluid">
                                                     <c:if test="${not empty lesson.videoUrl}">
                                                         <div class="mb-4 bg-dark rounded shadow-sm overflow-hidden" style="position: relative; padding-top: 56.25%;">
-                                                            <iframe src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" 
-                                                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-                                                                    frameborder="0" allowfullscreen>
-                                                            </iframe>
+                                                            <c:choose>
+                                                                <c:when test="${lesson.videoUrl.contains('youtube.com') || lesson.videoUrl.contains('youtu.be')}">
+                                                                    <iframe src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" 
+                                                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                                                                            frameborder="0" allowfullscreen>
+                                                                    </iframe>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
+                                                                        <source src="${pageContext.request.contextPath}${lesson.videoUrl}" type="video/mp4">
+                                                                        Trình duyệt của bạn không hỗ trợ video HTML5.
+                                                                    </video>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </div>
                                                     </c:if>
 
