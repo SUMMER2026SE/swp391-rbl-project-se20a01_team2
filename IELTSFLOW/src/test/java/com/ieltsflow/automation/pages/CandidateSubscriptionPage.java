@@ -6,7 +6,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import com.ieltsflow.automation.utils.TestConfig;
+import com.ieltsflow.automation.utils.ConfigReader;
 
 public class CandidateSubscriptionPage extends BasePage {
 
@@ -17,7 +17,7 @@ public class CandidateSubscriptionPage extends BasePage {
     private By pricingCards = By.cssSelector(".pricing-card");
     
     public void navigate() {
-        navigateTo(TestConfig.getBaseUrl() + "/subscription");
+        navigateTo(ConfigReader.getBaseUrl() + "/subscription");
     }
 
     public void selectFirstProPackage() {

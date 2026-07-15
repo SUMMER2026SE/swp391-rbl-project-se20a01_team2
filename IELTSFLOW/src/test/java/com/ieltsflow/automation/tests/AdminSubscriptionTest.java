@@ -4,7 +4,7 @@ import com.ieltsflow.automation.base.BaseTest;
 import com.ieltsflow.automation.pages.AdminPackageFormPage;
 import com.ieltsflow.automation.pages.AdminSubscriptionPage;
 import com.ieltsflow.automation.pages.LoginPage;
-import com.ieltsflow.automation.utils.TestConfig;
+import com.ieltsflow.automation.utils.ConfigReader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -26,7 +26,7 @@ public class AdminSubscriptionTest extends BaseTest {
     public void testCreateNewPackage() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigate();
-        loginPage.login(TestConfig.getAdminEmail(), TestConfig.getAdminPassword());
+        loginPage.login(ConfigReader.getAdminEmail(), ConfigReader.getAdminPassword());
         loginPage.waitForLoginSuccess();
         AdminSubscriptionPage subscriptionPage = new AdminSubscriptionPage(driver);
         subscriptionPage.navigate();
@@ -65,7 +65,7 @@ public class AdminSubscriptionTest extends BaseTest {
         
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigate();
-        loginPage.login(TestConfig.getAdminEmail(), TestConfig.getAdminPassword());
+        loginPage.login(ConfigReader.getAdminEmail(), ConfigReader.getAdminPassword());
         loginPage.waitForLoginSuccess();
 
         AdminSubscriptionPage subscriptionPage = new AdminSubscriptionPage(driver);
@@ -99,7 +99,7 @@ public class AdminSubscriptionTest extends BaseTest {
     public void testEmptyMandatoryFields() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigate();
-        loginPage.login(TestConfig.getAdminEmail(), TestConfig.getAdminPassword());
+        loginPage.login(ConfigReader.getAdminEmail(), ConfigReader.getAdminPassword());
         loginPage.waitForLoginSuccess();
 
         AdminSubscriptionPage subscriptionPage = new AdminSubscriptionPage(driver);
@@ -119,7 +119,7 @@ public class AdminSubscriptionTest extends BaseTest {
     public void testNegativeValues() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigate();
-        loginPage.login(TestConfig.getAdminEmail(), TestConfig.getAdminPassword());
+        loginPage.login(ConfigReader.getAdminEmail(), ConfigReader.getAdminPassword());
         loginPage.waitForLoginSuccess();
 
         AdminSubscriptionPage subscriptionPage = new AdminSubscriptionPage(driver);
@@ -141,7 +141,7 @@ public class AdminSubscriptionTest extends BaseTest {
 
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigate();
-        loginPage.login(TestConfig.getAdminEmail(), TestConfig.getAdminPassword());
+        loginPage.login(ConfigReader.getAdminEmail(), ConfigReader.getAdminPassword());
         loginPage.waitForLoginSuccess();
 
         AdminSubscriptionPage subscriptionPage = new AdminSubscriptionPage(driver);

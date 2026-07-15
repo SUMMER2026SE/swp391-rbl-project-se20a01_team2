@@ -6,7 +6,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import com.ieltsflow.automation.utils.TestConfig;
+import com.ieltsflow.automation.utils.ConfigReader;
 
 public class AdminUserManagementPage extends BasePage {
 
@@ -31,7 +31,7 @@ public class AdminUserManagementPage extends BasePage {
     private By confirmBtn = By.id("confirmBtn");
 
     public void navigate() {
-        navigateTo(TestConfig.getBaseUrl() + "/admin/users");
+        navigateTo(ConfigReader.getBaseUrl() + "/admin/users");
     }
 
     public void searchUser(String keyword) {

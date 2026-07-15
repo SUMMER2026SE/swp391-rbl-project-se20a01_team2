@@ -4,7 +4,6 @@ import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
 import com.ieltsflow.automation.utils.ExtentReportManager;
-import com.ieltsflow.automation.utils.TestConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,13 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestWatcher;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,33 +45,13 @@ public class BaseTest {
         }
         test = extent.createTest(testName);
 
-        // Khởi tạo WebDriver (Chrome)
-        ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless"); // Bỏ comment nếu muốn chạy ngầm không hiện UI
-        options.addArguments("--start-maximized");
-        options.addArguments("--disable-notifications");
-        
-        String chromeBinary = TestConfig.getChromeBinaryPath();
-        if (chromeBinary != null && !chromeBinary.isEmpty()) {
-            options.setBinary(chromeBinary);
-        }
-        // Tắt popup cảnh báo mật khẩu bị lộ của Chrome (tránh bị chặn trong test)
-        options.addArguments("--disable-features=PasswordLeakDetection");
-        java.util.Map<String, Object> prefs = new java.util.HashMap<>();
-        prefs.put("credentials_enable_service", false);
-        prefs.put("profile.password_manager_enabled", false);
-        options.setExperimentalOption("prefs", prefs);
-
-        driver = new ChromeDriver(options);
-        // Thiết lập Implicit Wait (Khuyên dùng Explicit Wait trong các bài test cụ thể)
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        // Khởi tạo WebDriver thông qua DriverFactory
+        driver = com.ieltsflow.automation.utils.DriverFactory.initDriver();
     }
 
     @AfterEach
     public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        com.ieltsflow.automation.utils.DriverFactory.quitDriver();
     }
 
     @AfterAll

@@ -4,7 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import com.ieltsflow.automation.utils.TestConfig;
+import com.ieltsflow.automation.utils.ConfigReader;
 
 public class LoginPage extends BasePage {
 
@@ -18,7 +18,7 @@ public class LoginPage extends BasePage {
     private By errorAlert = By.className("alert-error");
 
     public void navigate() {
-        navigateTo(TestConfig.getBaseUrl() + "/auth");
+        navigateTo(ConfigReader.getBaseUrl() + "/auth");
     }
 
     public void login(String email, String password) {
@@ -33,7 +33,7 @@ public class LoginPage extends BasePage {
     
     public void logout() {
         driver.manage().deleteAllCookies();
-        navigateTo(TestConfig.getBaseUrl() + "/logout");
+        navigateTo(ConfigReader.getBaseUrl() + "/logout");
     }
 
     public void waitForLoginSuccess() {

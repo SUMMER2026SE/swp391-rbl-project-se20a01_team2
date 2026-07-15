@@ -5,7 +5,7 @@ import com.ieltsflow.automation.pages.CandidateSubscriptionPage;
 import com.ieltsflow.automation.pages.CheckoutPage;
 import com.ieltsflow.automation.pages.LoginPage;
 import com.ieltsflow.automation.utils.MockPaymentHelper;
-import com.ieltsflow.automation.utils.TestConfig;
+import com.ieltsflow.automation.utils.ConfigReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ public class CandidatePaymentTest extends BaseTest {
     public void testProPackagePurchaseWithValidWebhook() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigate();
-        loginPage.login(TestConfig.getCandidateEmail(), TestConfig.getCandidatePassword());
+        loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
 
         CandidateSubscriptionPage subPage = new CandidateSubscriptionPage(driver);
@@ -47,7 +47,7 @@ public class CandidatePaymentTest extends BaseTest {
     public void testCancelCheckout() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigate();
-        loginPage.login(TestConfig.getCandidateEmail(), TestConfig.getCandidatePassword());
+        loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
 
         CandidateSubscriptionPage subPage = new CandidateSubscriptionPage(driver);
@@ -70,7 +70,7 @@ public class CandidatePaymentTest extends BaseTest {
     public void testCheckoutTimeout() {
         LoginPage loginPage = new LoginPage(driver);
         loginPage.navigate();
-        loginPage.login(TestConfig.getCandidateEmail(), TestConfig.getCandidatePassword());
+        loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
 
         CandidateSubscriptionPage subPage = new CandidateSubscriptionPage(driver);

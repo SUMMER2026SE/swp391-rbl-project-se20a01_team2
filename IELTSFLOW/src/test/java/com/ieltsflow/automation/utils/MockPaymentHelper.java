@@ -65,7 +65,7 @@ public class MockPaymentHelper {
                     .build();
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(TestConfig.getBaseUrl() + "/webhook/sepay"))
+                    .uri(URI.create(ConfigReader.getBaseUrl() + "/webhook/sepay"))
                     .header("Content-Type", "application/json")
                     // .header("Signature", signature) // Uncomment if backend requires
                     .POST(HttpRequest.BodyPublishers.ofString(payload))

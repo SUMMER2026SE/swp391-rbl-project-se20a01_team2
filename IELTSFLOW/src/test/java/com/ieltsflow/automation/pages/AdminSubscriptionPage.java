@@ -6,7 +6,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import com.ieltsflow.automation.utils.TestConfig;
+import com.ieltsflow.automation.utils.ConfigReader;
 
 public class AdminSubscriptionPage extends BasePage {
 
@@ -19,7 +19,7 @@ public class AdminSubscriptionPage extends BasePage {
     private By noDataMsg = By.xpath("//td[contains(text(), 'Không có dữ liệu gói thành viên')]");
 
     public void navigate() {
-        navigateTo(TestConfig.getBaseUrl() + "/admin/packages");
+        navigateTo(ConfigReader.getBaseUrl() + "/admin/packages");
     }
 
     public void clickCreatePackage() {
