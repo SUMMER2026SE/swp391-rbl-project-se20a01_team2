@@ -64,8 +64,8 @@ public class MockTestServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            req.setAttribute("errorMsg", "Đã xảy ra lỗi: " + e.getMessage());
-            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
+            resp.setContentType("text/plain;charset=UTF-8");
+            e.printStackTrace(resp.getWriter());
         }
     }
 
@@ -101,8 +101,8 @@ public class MockTestServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            req.setAttribute("errorMsg", "Đã xảy ra lỗi: " + e.getMessage());
-            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
+            resp.setContentType("text/plain;charset=UTF-8");
+            e.printStackTrace(resp.getWriter());
         }
     }
 
