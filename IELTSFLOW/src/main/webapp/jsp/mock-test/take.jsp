@@ -211,9 +211,7 @@
                                                 <c:if test="${sk == 'Writing'}">
                                                     <!-- Special layout for Writing: Show all question prompts here, toggled by JS -->
                                                     <c:forEach var="xQ" items="${sec.examQuestions}" varStatus="ws">
-                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem; white-space: pre-wrap;">
-                                                            ${xQ.question.content}
-                                                        </div>
+                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem; white-space: pre-wrap;">${xQ.question.content}</div>
                                                     </c:forEach>
                                                 </c:if>
                                                 
@@ -268,9 +266,7 @@
                                                             <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">✍️ Your Answer - Task ${qSt.index + 1}</div>
                                                         </c:if>
                                                         <c:if test="${sk == 'Speaking'}">
-                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0; white-space: pre-wrap;">
-                                                                ${q.content}
-                                                            </div>
+                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0; white-space: pre-wrap;">${q.content}</div>
                                                         </c:if>
                                                         
                                                         <!-- Input fields -->
