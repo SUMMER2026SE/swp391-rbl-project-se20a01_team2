@@ -286,7 +286,7 @@
                                                                     </c:forEach>
                                                                 </div>
                                                             </c:when>
-                                                            <c:when test="${q.questionType == 'Essay'}">
+                                                            <c:when test="${q.questionType == 'Essay' || q.questionType == 'Writing' || sk == 'Writing'}">
                                                                 <textarea class="essay-area" style="height: calc(100vh - 280px); width: 100%; border: 1px solid #94a3b8; border-radius: 2px; padding: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-family: Arial; font-size: 1.05rem; resize: none; background: #fff;" name="q_${q.questionId}" id="essay_${q.questionId}" placeholder="" oninput="countWords(this, 'wc_${q.questionId}')"></textarea>
                                                                 <div class="word-count" id="wc_${q.questionId}" style="text-align: left; margin-top: 0.5rem; font-weight: 700; color: #4b5563;">Word count: 0</div>
                                                             </c:when>
@@ -585,7 +585,7 @@
                         if (contentDiv) {
                             // Replace (1), (2), etc. with inline text inputs
                             contentDiv.innerHTML = contentDiv.innerHTML.replace(/\((\d+)\)/g, function(match, number) {
-                                return `<input type="text" class="fib-input" data-qid="${qId}" data-blank-id="${number}" style="width: 100px; padding: 2px 5px; border: 1px solid #d1d5db; border-radius: 4px; margin: 0 4px; display: inline-block;">`;
+                                return '<input type="text" class="fib-input" data-qid="' + qId + '" data-blank-id="' + number + '" style="width: 100px; padding: 2px 5px; border: 1px solid #d1d5db; border-radius: 4px; margin: 0 4px; display: inline-block;">';
                             });
                         }
                     });
