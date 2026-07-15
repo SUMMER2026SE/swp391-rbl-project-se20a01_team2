@@ -205,7 +205,7 @@ public class MockTestServlet extends HttpServlet {
                 }
             }
 
-            if (("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
+            if (("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
                 && answer != null && !answer.isBlank()) {
                 
                 // Nếu chỉ có 1 đáp án dạng ID, convert sang nội dung text (như code cũ)
@@ -227,7 +227,7 @@ public class MockTestServlet extends HttpServlet {
             detail.setQuestionId(q.getQuestionId());
             detail.setCandidateAnswer(answer);
 
-            if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) {
+            if ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) {
                 int correctCount = mockTestService.isAnswerCorrect(q, answer);
                 detail.setIsCorrect(correctCount > 0);
                 detail.setScore((double) correctCount);
