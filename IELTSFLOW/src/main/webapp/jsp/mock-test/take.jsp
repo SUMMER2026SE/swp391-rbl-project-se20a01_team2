@@ -38,7 +38,7 @@
         .q-card { padding: 0; margin-bottom: 1.5rem; border: none; background: transparent; }
         .q-card:hover { border-color: transparent; box-shadow: none; }
         .q-num { display: inline-block; background: #fff; color: #111827; border-radius: 0; padding: 0.15rem 0.5rem; font-size: 1rem; font-weight: 700; margin-right: 0.75rem; margin-bottom: 0; min-width: 20px; text-align: center; border: 1px solid #cbd5e1; }
-        .q-content { font-size: 1.05rem; font-weight: 400; line-height: 1.6; color: #111827; margin-bottom: 0.75rem; display: inline-block; }
+        .q-content { font-size: 1.05rem; font-weight: 400; line-height: 1.6; color: #111827; margin-bottom: 0.75rem; display: inline-block; white-space: pre-wrap; }
         
         .choices { display: flex; flex-direction: column; gap: 0.5rem; }
         .choice { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 2px; cursor: pointer; background: #fff; }
@@ -89,14 +89,10 @@
         .q-skill-badge { display: none; }
 
         /* IELTS Listening Layout */
-        #section-Listening .split-layout-container { flex-direction: column; }
-        #section-Listening .split-layout-container { background: #fff; }
+        #section-Listening .split-layout-container { flex-direction: column; background: #fff; }
         #section-Listening .split-left { border-right: none; border-bottom: 2px solid #e5e7eb; padding: 1rem; flex: 0 0 auto; box-shadow: none; margin: 0; background: #fff; border-left: none; }
         #section-Listening .split-right { margin: 0 auto; width: 100%; max-width: 1000px; padding: 2rem; box-shadow: none; background: #fff; border-left: none; }
-        #section-Listening .split-right { margin: 0 auto; width: 100%; max-width: 1000px; padding: 2rem; box-shadow: none; }
-        #section-Listening .resource-box { display: flex; justify-content: center; }
-        #section-Listening .resource-box audio { width: 50%; }
-        #section-Listening h4 { text-align: center; font-size: 1.5rem; margin-bottom: 0.5rem; }
+        #section-Listening .resource-box { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
         
         /* Settings Popup */
         .settings-popup { display: none; position: absolute; top: 60px; right: 20px; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1001; width: 250px; }
@@ -197,19 +193,25 @@
                         <input type="hidden" name="submissionId" value="${submissionId}">
 
                         <c:forEach var="sk" items="${skills}" varStatus="skSt">
-                            <div class="skill-section ${skSt.first ? 'active' : ''}" id="section-${sk}">
+                            <div class="skill-section ${skSt.first ? 'active' : ''}" id="section-${sk}" data-skill="${sk}">
                                 <c:set var="qNum" value="${0}" />
+                                <c:set var="firstSec" value="true" />
                                 <c:forEach var="sec" items="${sections}">
                                     <c:if test="${sec.skill == sk}">
+                                        <div class="exam-section-part" id="exam-sec-${sec.sectionId}" style="display: ${firstSec ? 'block' : 'none'}; height: 100%;">
                                         <div class="split-layout-container">
                                             <!-- LEFT PANE: Resource -->
                                             <div class="split-left">
-                                                <h4>${sec.sectionName}</h4>
+                                            <c:set var="secTitle" value="${sec.sectionName}" />
+                                            <c:if test="${fn:contains(secTitle, '-')}">
+                                                <c:set var="secTitle" value="${fn:trim(fn:substringAfter(secTitle, '-'))}" />
+                                            </c:if>
+                                            <h4>${secTitle}</h4>
                                                 
                                                 <c:if test="${sk == 'Writing'}">
                                                     <!-- Special layout for Writing: Show all question prompts here, toggled by JS -->
                                                     <c:forEach var="xQ" items="${sec.examQuestions}" varStatus="ws">
-                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem;">
+                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem; white-space: pre-wrap;">
                                                             ${xQ.question.content}
                                                         </div>
                                                     </c:forEach>
@@ -246,38 +248,58 @@
                                             
                                             <!-- RIGHT PANE: Questions -->
                                             <div class="split-right">
-                                                <c:forEach var="examQ" items="${sec.examQuestions}">
+                                                <c:forEach var="examQ" items="${sec.examQuestions}" varStatus="qSt">
                                                     <c:set var="q" value="${examQ.question}"/>
                                                     <c:set var="qNum" value="${qNum + 1}" />
             
                                                     
             
-                                                    <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}">
+                                                    <div class="q-card" id="qcard_${q.questionId}" data-qid="${q.questionId}" data-qtype="${q.questionType}">
+                                                        <c:if test="${not empty q.explanation}">
+                                                            <div style="font-size: 0.95rem; color: #48586f; margin-bottom: 0.75rem; white-space: pre-wrap; font-weight: 600; font-style: italic;">${q.explanation}</div>
+                                                        </c:if>
                                                         <c:if test="${sk != 'Writing' && sk != 'Speaking'}">
                                                             <div style="display: flex; align-items: flex-start;">
                                                                 <span class="q-num">${qNum}</span>
                                                                 <div class="q-content">${q.content}</div>
                                                             </div>
                                                         </c:if>
+                                                        <c:if test="${sk == 'Writing'}">
+                                                            <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">✍️ Your Answer - Task ${qSt.index + 1}</div>
+                                                        </c:if>
                                                         <c:if test="${sk == 'Speaking'}">
-                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0; white-space: pre-wrap;">
                                                                 ${q.content}
                                                             </div>
                                                         </c:if>
                                                         
                                                         <!-- Input fields -->
                                                         <c:choose>
-                                                            <c:when test="${q.questionType == 'Multiple_Choice'}">
+                                                            <c:when test="${q.questionType == 'Multiple_Choice' || q.questionType == 'MultipleChoice'}">
                                                                 <div class="choices">
+                                                                    <c:set var="correctCount" value="0" />
+                                                                    <c:forEach var="ans" items="${q.answers}">
+                                                                        <c:if test="${ans.correct}">
+                                                                            <c:set var="correctCount" value="${correctCount + 1}" />
+                                                                        </c:if>
+                                                                    </c:forEach>
+                                                                    <c:choose>
+                                                                        <c:when test="${correctCount > 1}">
+                                                                            <c:set var="inputType" value="checkbox" />
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <c:set var="inputType" value="radio" />
+                                                                        </c:otherwise>
+                                                                    </c:choose>
                                                                     <c:forEach var="ans" items="${q.answers}">
                                                                         <label class="choice" for="ans_${ans.answerId}">
-                                                                            <input type="radio" name="q_${q.questionId}" id="ans_${ans.answerId}" value="${ans.answerId}">
+                                                                            <input type="${inputType}" name="q_${q.questionId}" id="ans_${ans.answerId}" value="${ans.answerId}">
                                                                             <span class="choice-text">${ans.content}</span>
                                                                         </label>
                                                                     </c:forEach>
                                                                 </div>
                                                             </c:when>
-                                                            <c:when test="${q.questionType == 'Essay'}">
+                                                            <c:when test="${q.questionType == 'Essay' || q.questionType == 'Writing' || sk == 'Writing'}">
                                                                 <textarea class="essay-area" style="height: calc(100vh - 280px); width: 100%; border: 1px solid #94a3b8; border-radius: 2px; padding: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-family: Arial; font-size: 1.05rem; resize: none; background: #fff;" name="q_${q.questionId}" id="essay_${q.questionId}" placeholder="" oninput="countWords(this, 'wc_${q.questionId}')"></textarea>
                                                                 <div class="word-count" id="wc_${q.questionId}" style="text-align: left; margin-top: 0.5rem; font-weight: 700; color: #4b5563;">Word count: 0</div>
                                                             </c:when>
@@ -294,6 +316,10 @@
                                                                     <input type="hidden" name="q_${q.questionId}" value="">
                                                                 </div>
                                                             </c:when>
+                                                            <c:when test="${q.questionType == 'FillInBlanks' || q.questionType == 'FillBlank'}">
+                                                                <!-- Inputs are rendered inline in the q-content via Javascript -->
+                                                                <input type="hidden" name="q_${q.questionId}" id="hidden_fib_${q.questionId}" value="">
+                                                            </c:when>
                                                             <c:otherwise>
                                                                 <input type="text" name="q_${q.questionId}" placeholder="Enter your answer" style="width:100%;padding:0.75rem;border-radius:4px;border:1px solid #d1d5db;font-size:1rem;font-family:inherit;">
                                                             </c:otherwise>
@@ -302,6 +328,8 @@
                                                 </c:forEach>
                                             </div>
                                         </div>
+                                        </div>
+                                        <c:set var="firstSec" value="false" />
                                     </c:if>
                                 </c:forEach>
                             </div>
@@ -422,43 +450,107 @@
                     }
 
                     // ── QUESTION NAVIGATOR ────────────────────────────────────────────
+                    function switchPart(skill, secId) {
+                        const section = document.getElementById('section-' + skill);
+                        if (!section) return;
+                        
+                        const parts = section.querySelectorAll('.exam-section-part');
+                        parts.forEach(p => {
+                            p.style.display = 'none';
+                        });
+                        
+                        const target = document.getElementById('exam-sec-' + secId);
+                        if (target) {
+                            target.style.display = 'block';
+                        }
+                        
+                        buildNavigator(skill);
+                    }
+
                     function buildNavigator(skill) {
                         const grid = document.getElementById('nav-grid');
                         grid.innerHTML = '';
                         const section = document.getElementById('section-' + skill);
                         if (!section) return;
                         
-                        const qCards = section.querySelectorAll('.q-card');
-                        qCards.forEach((card, index) => {
-                            let numStr = (index + 1).toString();
-                            const numEl = card.querySelector('.q-num');
-                            if (numEl) {
-                                numStr = numEl.innerText.replace(/[^0-9]/g, '');
+                        const parts = section.querySelectorAll('.exam-section-part');
+                        parts.forEach((part, partIndex) => {
+                            const secId = part.id.replace('exam-sec-', '');
+                            
+                            const partGroup = document.createElement('div');
+                            partGroup.className = 'nav-part-group';
+                            partGroup.style.display = 'flex';
+                            partGroup.style.alignItems = 'center';
+                            partGroup.style.marginRight = '1rem';
+                            partGroup.style.borderRight = '1px solid #e5e7eb';
+                            partGroup.style.paddingRight = '1rem';
+                            
+                            const partLabel = document.createElement('button');
+                            partLabel.type = 'button';
+                            partLabel.className = 'nav-part-label';
+                            partLabel.innerText = 'Part ' + (partIndex + 1);
+                            partLabel.style.marginRight = '10px';
+                            partLabel.style.fontWeight = 'bold';
+                            partLabel.style.background = 'transparent';
+                            partLabel.style.border = 'none';
+                            partLabel.style.cursor = 'pointer';
+                            if (part.style.display !== 'none') {
+                                partLabel.style.color = '#dc2626';
+                                partLabel.style.borderBottom = '2px solid #dc2626';
+                            } else {
+                                partLabel.style.color = '#6b7280';
                             }
-                            const qId = card.getAttribute('data-qid');
                             
-                            const btn = document.createElement('div');
-                            btn.className = 'nav-btn';
-                            btn.id = 'navbtn_' + qId;
-                            btn.innerText = numStr;
-                            
-                            if (card.classList.contains('flagged')) btn.classList.add('flagged');
-                            if (checkIfAnswered(card)) btn.classList.add('answered');
-                            
-                            btn.onclick = () => {
-                                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                card.style.borderColor = '#6366f1';
-                                setTimeout(() => card.style.borderColor = '', 1500);
+                            partLabel.onclick = () => {
+                                switchPart(skill, secId);
                             };
-                            grid.appendChild(btn);
+                            partGroup.appendChild(partLabel);
+                            
+                            const qGrid = document.createElement('div');
+                            qGrid.style.display = 'flex';
+                            qGrid.style.gap = '4px';
+                            
+                            const qCards = part.querySelectorAll('.q-card');
+                            qCards.forEach((card, index) => {
+                                let numStr = (index + 1).toString();
+                                const numEl = card.querySelector('.q-num');
+                                if (numEl) {
+                                    numStr = numEl.innerText.replace(/[^0-9]/g, '');
+                                }
+                                const qId = card.getAttribute('data-qid');
+                                
+                                const btn = document.createElement('div');
+                                btn.className = 'nav-btn';
+                                btn.id = 'navbtn_' + qId;
+                                btn.innerText = numStr;
+                                
+                                if (card.classList.contains('flagged')) btn.classList.add('flagged');
+                                if (checkIfAnswered(card)) btn.classList.add('answered');
+                                
+                                btn.onclick = () => {
+                                    if (part.style.display === 'none') {
+                                        switchPart(skill, secId);
+                                    }
+                                    setTimeout(() => {
+                                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        card.style.borderColor = '#6366f1';
+                                        setTimeout(() => card.style.borderColor = '', 1500);
+                                    }, 100);
+                                };
+                                qGrid.appendChild(btn);
+                            });
+                            
+                            partGroup.appendChild(qGrid);
+                            grid.appendChild(partGroup);
                         });
                     }
 
                     function checkIfAnswered(card) {
-                        const inputs = card.querySelectorAll('input[type="radio"]:checked, input[type="text"], textarea');
+                        const inputs = card.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked, input[type="text"], textarea');
                         let answered = false;
                         inputs.forEach(inp => {
                             if (inp.type === 'radio' && inp.checked) answered = true;
+                            else if (inp.type === 'checkbox' && inp.checked) answered = true;
                             else if (inp.type === 'text' && inp.value.trim().length > 0) answered = true;
                             else if (inp.tagName === 'TEXTAREA' && inp.value.trim().length > 0) answered = true;
                         });
@@ -479,6 +571,16 @@
                     }
 
                     document.addEventListener('input', (e) => {
+                        const card = e.target.closest('.q-card');
+                        if (card) {
+                            card.classList.add('active-q');
+                            const qId = card.getAttribute('data-qid');
+                            const promptBox = document.getElementById('prompt_' + qId);
+                            if (promptBox) {
+                                card.closest('.skill-section').querySelectorAll('.writing-prompt-box').forEach(p => p.style.display = 'none');
+                                promptBox.style.display = 'block';
+                            }
+                        }
                         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') updateNavStatus();
                     });
                     document.addEventListener('change', (e) => {
@@ -498,6 +600,36 @@
                         const activeTab = document.querySelector('.skill-tab.active');
                         if (activeTab) switchSkill(activeTab.innerText.trim());
                     }, 100);
+
+                    // ── FILL IN BLANKS LOGIC ──────────────────────────────────────────
+                    document.querySelectorAll('.q-card[data-qtype="FillInBlanks"], .q-card[data-qtype="FillBlank"]').forEach(card => {
+                        const qId = card.getAttribute('data-qid');
+                        const contentDiv = card.querySelector('.q-content');
+                        if (contentDiv) {
+                            // Replace (1), (2), etc. with inline text inputs
+                            contentDiv.innerHTML = contentDiv.innerHTML.replace(/\((\d+)\)/g, function(match, number) {
+                                return '<input type="text" class="fib-input" data-qid="' + qId + '" data-blank-id="' + number + '" style="width: 100px; padding: 2px 5px; border: 1px solid #d1d5db; border-radius: 4px; margin: 0 4px; display: inline-block;">';
+                            });
+                        }
+                    });
+
+                    document.getElementById('exam-form').addEventListener('submit', function() {
+                        const fibCards = document.querySelectorAll('.q-card[data-qtype="FillInBlanks"], .q-card[data-qtype="FillBlank"]');
+                        fibCards.forEach(card => {
+                            const qId = card.getAttribute('data-qid');
+                            const inputs = card.querySelectorAll('.fib-input');
+                            if (inputs.length > 0) {
+                                const ansObj = {};
+                                inputs.forEach(inp => {
+                                    ansObj[inp.getAttribute('data-blank-id')] = inp.value.trim();
+                                });
+                                let hiddenInput = document.getElementById('hidden_fib_' + qId);
+                                if (hiddenInput) {
+                                    hiddenInput.value = JSON.stringify(ansObj);
+                                }
+                            }
+                        });
+                    });
 
                     // ── WORD COUNT (Writing) ──────────────────────────────────────────
                     function countWords(textarea, counterId) {
