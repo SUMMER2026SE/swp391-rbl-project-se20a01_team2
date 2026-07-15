@@ -117,15 +117,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const contentJsonContainer = document.getElementById('dynamicContentJsonBuilder').parentElement;
         const btnAddAnswer = document.getElementById('btnAddAnswer');
         
-        // Ensure at least one answer row exists for Matching/FillInBlanks
-        if (qType !== 'MultipleChoice') {
+        // Ensure at least one answer row exists for Matching/FillBlank
+        if (qType !== 'Multiple_Choice') {
             const items = document.querySelectorAll('.answer-item');
             if (items.length === 0) {
                 addAnswerRow();
             }
         }
         
-        if (qType === 'MultipleChoice') {
+        if (qType === 'Multiple_Choice') {
             contentJsonContainer.style.display = 'none';
             btnAddAnswer.style.display = 'inline-block';
             
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     item.style.display = 'none';
                 }
             });
-        } else if (qType === 'FillInBlanks') {
+        } else if (qType === 'FillBlank') {
             contentJsonContainer.style.display = 'block';
             btnAddAnswer.style.display = 'none';
             
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     item.querySelector('.answer-json-col').style.display = 'block';
                     item.querySelector('.btn-remove-answer').style.display = 'none';
                     
-                    item.querySelector('.answer-content-input').value = 'FillInBlanks Answer Map';
+                    item.querySelector('.answer-content-input').value = 'FillBlank Answer Map';
                     item.querySelector('.answer-correct-checkbox').checked = true;
                     
                     buildFillInBlanksAnswerUI(item);
@@ -630,7 +630,7 @@ window.showPreviewModal = function() {
     
     let html = resourceTextHtml + `<div class="q-content mb-4">${content.replace(/\n/g, '<br>')}</div>`;
     
-    if (qType === 'MultipleChoice') {
+    if (qType === 'Multiple_Choice') {
         html += `<div class="choices d-flex flex-column gap-2">`;
         document.querySelectorAll('.answer-item').forEach((item, i) => {
             if (item.style.display !== 'none') {
@@ -675,7 +675,7 @@ window.showPreviewModal = function() {
         html += `</ul>`;
         html += `</div>`;
         html += `</div>`;
-    } else if (qType === 'FillInBlanks') {
+    } else if (qType === 'FillBlank') {
         const dataStr = document.getElementById('contentJson').value;
         let data = {};
         try { data = JSON.parse(dataStr || '{}'); } catch(e) {}
@@ -742,7 +742,7 @@ window.checkPreviewAnswers = function() {
     let allCorrect = true;
     let checkedAtLeastOne = false;
 
-    if (qType === 'MultipleChoice') {
+    if (qType === 'Multiple_Choice') {
         const radios = container.querySelectorAll('input[type="radio"]');
         let selectedIndex = -1;
         radios.forEach((r, i) => { if (r.checked) selectedIndex = i; });
@@ -802,7 +802,7 @@ window.checkPreviewAnswers = function() {
         } else {
             Swal.fire('Chưa chính xác!', `Bạn đã đúng ${correctCount}/${selects.length} mục.`, 'error');
         }
-    } else if (qType === 'FillInBlanks') {
+    } else if (qType === 'FillBlank') {
         const inputs = container.querySelectorAll('input.preview-auto-fit, select.form-select');
         if (inputs.length === 0) return;
         
