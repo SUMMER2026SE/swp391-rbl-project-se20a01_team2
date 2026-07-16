@@ -35,7 +35,7 @@
 <a href="#"><span class="badge badge-primary">E2E Testing Results</span></a>
 </li>
 <li class="m-r-10">
-<a href="#"><span class="badge badge-primary">thg 7 14, 2026 09:09:09 SA</span></a>
+<a href="#"><span class="badge badge-primary">thg 7 16, 2026 09:06:45 CH</span></a>
 </li>
 </ul>
 </div>
@@ -67,7 +67,6 @@
 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-exclamation-circle"></i></a>
 <ul id="status-toggle" class="dropdown-menu dropdown-md p-v-0">
 <a class="dropdown-item" status="pass" href="#"><span>Pass</span><span class="status success"></span></a>
-<a class="dropdown-item" status="fail" href="#"><span>Fail</span><span class="status danger"></span></a>
 <div class="dropdown-divider"></div>
 <a status="clear" class="dropdown-item" href="#"><span>Clear</span><span class="pull-right"><i class="fa fa-close"></i></span></a>
 </ul>
@@ -80,9 +79,9 @@
           tag=""
           device="">
           <div class="test-detail">
-            <p class="name">testOpenGoogleAndPass</p>
+            <p class="name">testFocusModeViolation</p>
             <p class="text-sm">
-              <span>09:09:10</span> / <span>00:00:06:646</span>
+              <span>21:06:46</span> / <span>00:00:16:181</span>
               <span class="badge pass-bg log float-right">Pass</span>
             </p>
           </div>
@@ -90,10 +89,10 @@
 <div class="detail-head">
 <div class="p-v-10">
 <div class="info">
-<h5 class="test-status text-pass">testOpenGoogleAndPass</h5>
-<span class='badge badge-success'>07.14.2026 09:09:10</span>
-<span class='badge badge-danger'>07.14.2026 09:09:17</span>
-<span class='badge badge-default'>00:00:06:646</span>
+<h5 class="test-status text-pass">testFocusModeViolation</h5>
+<span class='badge badge-success'>07.16.2026 21:06:46</span>
+<span class='badge badge-danger'>07.16.2026 21:07:02</span>
+<span class='badge badge-default'>00:00:16:181</span>
 &middot; <span class='uri-anchor badge badge-default'>#test-id=1</span>
 <span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
 <span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
@@ -106,126 +105,37 @@
   <tbody>
       <tr class="event-row">
         <td><span class="badge log info-bg">Info</span></td>
-        <td>09:09:16</td>
-        <td>
-          Đã mở trang chủ Google
-        </td>
-      </tr>
-      <tr class="event-row">
-        <td><span class="badge log pass-bg">Pass</span></td>
-        <td>09:09:17</td>
-        <td>
-          Test Passed
-        </td>
-      </tr>
-  </tbody>
-</table>
-</div>
-          </div>
-        </li>
-        <li class="test-item"  status="fail" test-id="2"
-          author=""
-          tag=""
-          device="">
-          <div class="test-detail">
-            <p class="name">testMockTestTimer</p>
-            <p class="text-sm">
-              <span>09:09:17</span> / <span>00:00:03:865</span>
-              <span class="badge fail-bg log float-right">Fail</span>
-            </p>
-          </div>
-          <div class="test-contents d-none">
-<div class="detail-head">
-<div class="p-v-10">
-<div class="info">
-<h5 class="test-status text-fail">testMockTestTimer</h5>
-<span class='badge badge-success'>07.14.2026 09:09:17</span>
-<span class='badge badge-danger'>07.14.2026 09:09:21</span>
-<span class='badge badge-default'>00:00:03:865</span>
-&middot; <span class='uri-anchor badge badge-default'>#test-id=2</span>
-<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
-<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
-<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
-</div>
-</div>
-</div><div class="detail-body mt-4">
-<table class="table table-sm">
-  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
-  <tbody>
-      <tr class="event-row">
-        <td><span class="badge log info-bg">Info</span></td>
-        <td>09:09:18</td>
-        <td>
-          Bắt đầu test luồng Mock Test từ đăng nhập đến phòng thi
-        </td>
-      </tr>
-      <tr class="event-row">
-        <td><span class="badge log fail-bg">Fail</span></td>
-        <td>09:09:21</td>
-        <td>
-          Test Failed: unknown error: net::ERR_CONNECTION_REFUSED
-  (Session info: chrome=150.0.7871.114)
-Build info: version: '4.45.0', revision: 'cd6a3cd cd6a3cdfca6970f62e5bc8344109d0fe0e2af05e'
-System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '24.0.1'
-Driver info: org.openqa.selenium.chrome.ChromeDriver
-Command: [4b1ab6627bfc710e2af0017abf002abc, get {url=http://localhost:8080/IELTSFLOW/auth}]
-Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 150.0.7871.114, chrome: {chromedriverVersion: 150.0.7871.115 (25f5b661e5b..., userDataDir: C:\Users\vovuo\AppData\Loca...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:58425}, goog:processID: 19464, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: windows, proxy: Proxy(), se:cdp: ws://localhost:58425/devtoo..., se:cdpVersion: 150.0.7871.114, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
-Session ID: 4b1ab6627bfc710e2af0017abf002abc
-        </td>
-      </tr>
-  </tbody>
-</table>
-</div>
-          </div>
-        </li>
-        <li class="test-item"  status="fail" test-id="3"
-          author=""
-          tag=""
-          device="">
-          <div class="test-detail">
-            <p class="name">testFocusModeViolation</p>
-            <p class="text-sm">
-              <span>09:09:21</span> / <span>00:00:03:695</span>
-              <span class="badge fail-bg log float-right">Fail</span>
-            </p>
-          </div>
-          <div class="test-contents d-none">
-<div class="detail-head">
-<div class="p-v-10">
-<div class="info">
-<h5 class="test-status text-fail">testFocusModeViolation</h5>
-<span class='badge badge-success'>07.14.2026 09:09:21</span>
-<span class='badge badge-danger'>07.14.2026 09:09:25</span>
-<span class='badge badge-default'>00:00:03:695</span>
-&middot; <span class='uri-anchor badge badge-default'>#test-id=3</span>
-<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
-<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
-<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
-</div>
-</div>
-</div><div class="detail-body mt-4">
-<table class="table table-sm">
-  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
-  <tbody>
-      <tr class="event-row">
-        <td><span class="badge log info-bg">Info</span></td>
-        <td>09:09:22</td>
+        <td>21:06:47</td>
         <td>
           Bắt đầu test chức năng chống gian lận (Focus Mode)
         </td>
       </tr>
       <tr class="event-row">
-        <td><span class="badge log fail-bg">Fail</span></td>
-        <td>09:09:25</td>
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>21:06:56</td>
         <td>
-          Test Failed: unknown error: net::ERR_CONNECTION_REFUSED
-  (Session info: chrome=150.0.7871.114)
-Build info: version: '4.45.0', revision: 'cd6a3cd cd6a3cdfca6970f62e5bc8344109d0fe0e2af05e'
-System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '24.0.1'
-Driver info: org.openqa.selenium.chrome.ChromeDriver
-Command: [99ce6edc20d747e5f5cb0768e77b712b, get {url=http://localhost:8080/IELTSFLOW/auth}]
-Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 150.0.7871.114, chrome: {chromedriverVersion: 150.0.7871.115 (25f5b661e5b..., userDataDir: C:\Users\vovuo\AppData\Loca...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:59673}, goog:processID: 10216, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: windows, proxy: Proxy(), se:cdp: ws://localhost:59673/devtoo..., se:cdpVersion: 150.0.7871.114, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
-Session ID: 99ce6edc20d747e5f5cb0768e77b712b
+          ✅ Hiển thị cảnh báo vi phạm lần 1 thành công
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>21:06:57</td>
+        <td>
+          ✅ Hiển thị cảnh báo vi phạm lần 2 thành công
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>21:07:02</td>
+        <td>
+          ✅ Đã khóa bài và hệ thống tự động nộp bài do vi phạm quá 3 lần
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>21:07:02</td>
+        <td>
+          Test Passed
         </td>
       </tr>
   </tbody>
@@ -247,13 +157,13 @@ Session ID: 99ce6edc20d747e5f5cb0768e77b712b
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0">Started</p>
-<h3>thg 7 14, 2026 09:09:09 SA</h3>
+<h3>thg 7 16, 2026 09:06:45 CH</h3>
 </div></div>
 </div>
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0">Ended</p>
-<h3>thg 7 14, 2026 09:09:25 SA</h3>
+<h3>thg 7 16, 2026 09:07:02 CH</h3>
 </div></div>
 </div>
 <div class="col-md-3">
@@ -265,7 +175,7 @@ Session ID: 99ce6edc20d747e5f5cb0768e77b712b
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0 text-fail">Tests Failed</p>
-<h3>2</h3>
+<h3>0</h3>
 </div></div>
 </div>
 </div>
@@ -281,12 +191,12 @@ Session ID: 99ce6edc20d747e5f5cb0768e77b712b
 </div>
 </div>
 <div class="card-footer">
-<div><small data-tooltip='33%'>
+<div><small data-tooltip='100%'>
 <b>1</b> tests passed
 </small>
 </div>
 <div>
-<small data-tooltip='66%'><b>2</b> tests failed,
+<small data-tooltip='0%'><b>0</b> tests failed,
 <b>0</b> skipped, <b data-tooltip='0%'>0</b> others
 </small>
 </div>
@@ -304,10 +214,10 @@ Session ID: 99ce6edc20d747e5f5cb0768e77b712b
 </div>
 </div>
 <div class="card-footer">
-<div><small data-tooltip='16%'><b>1</b> events passed</small></div>
+<div><small data-tooltip='80%'><b>4</b> events passed</small></div>
 <div>
-<small data-tooltip='33%'><b>2</b> events failed,
-<b data-tooltip='%'>3</b> others
+<small data-tooltip='0%'><b>0</b> events failed,
+<b data-tooltip='%'>1</b> others
 </small>
 </div>
 </div>
@@ -323,7 +233,7 @@ Session ID: 99ce6edc20d747e5f5cb0768e77b712b
 </div></div>
 <script>
 var timeline = {
-"testOpenGoogleAndPass":6.646,"testMockTestTimer":3.865,"testFocusModeViolation":3.695
+"testFocusModeViolation":16.181
 };
 </script>
 <div class="row">
@@ -347,7 +257,7 @@ var timeline = {
 </tr>
 <tr>
 <td>Java Version</td>
-<td>24.0.1</td>
+<td>21.0.11</td>
 </tr>
 </tbody>
 </table></div>
@@ -359,7 +269,7 @@ var timeline = {
 var statusGroup = {
 parentCount: 5,
 passParent: 1,
-failParent: 2,
+failParent: 0,
 warningParent: 0,
 skipParent: 0,
 childCount: 5,
@@ -375,11 +285,11 @@ warningGrandChild: 0,
 skipGrandChild: 0,
 infoGrandChild: 0,
 eventsCount: 5,
-passEvents: 1,
-failEvents: 2,
+passEvents: 4,
+failEvents: 0,
 warningEvents: 0,
 skipEvents: 0,
-infoEvents: 3
+infoEvents: 1
 };
 </script>        </div>
       </div>
