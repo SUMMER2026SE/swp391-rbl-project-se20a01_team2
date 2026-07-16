@@ -1,4 +1,4 @@
-package com.ieltsflow.automation.pages;
+package com.ieltsflow.automation.base;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
