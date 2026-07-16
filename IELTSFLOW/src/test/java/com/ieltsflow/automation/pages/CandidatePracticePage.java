@@ -1,6 +1,8 @@
 package com.ieltsflow.automation.pages;
 
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -8,35 +10,59 @@ import java.time.Duration;
 import java.util.List;
 
 /**
- * Page Object Model (POM) cho Phân hệ Candidate - Luyện tập & AI (Practice & Learning).
- * Phục vụ phần kiểm thử của Thành viên 3:
- * - Luyện Listening & Reading: Multiple Choice, Fill in blanks / Matching, Submit & Kiểm tra kết quả tức thì.
- * - Luyện Writing: Nhập bài tự luận, đếm số từ, Submit & gọi AI chấm điểm.
- * - Luyện Speaking: Mock thu âm / đẩy transcript qua DOM & xác minh phân tích Speech-to-Text.
+ * Page Object Model (POM) nâng cấp cho Phân hệ Candidate - Luyện tập & AI (Practice & Learning).
+ * Phục vụ nhiệm vụ Tuần 7 của Thành viên 3:
+ * - Sử dụng @FindBy + PageFactory.initElements() để định danh và khởi tạo các WebElement.
+ * - Áp dụng Fluent Interface (Method Chaining): Các phương thức thao tác trả về `CandidatePracticePage` (this).
  */
 public class CandidatePracticePage {
 
     private final WebDriver driver;
     private final WebDriverWait wait;
 
-    // Locators phổ biến trong trang làm bài luyện tập / thi thử
-    private final By submitExamButton = By.id("btn-submit-exam");
-    private final By resultScoreDisplay = By.cssSelector(".score-summary, .result-band, #overall-band, .s-value");
+    // =========================================================================
+    // KHAI BÁO CÁC WEBELEMENT BẰNG ANNOTATION @FindBy (PAGEFACTORY)
+    // =========================================================================
+
+    @FindBy(id = "btn-submit-exam")
+    private WebElement submitExamButton;
+
+    @FindBy(css = ".score-summary, .result-band, #overall-band, .s-value")
+    private WebElement resultScoreDisplay;
+
+    @FindBy(id = "btn-start-mock-test")
+    private List<WebElement> introStartBtns;
+
+    @FindBy(id = "btn-start-exam")
+    private List<WebElement> examStartBtns;
+
+    @FindBy(css = "input[type='radio']")
+    private List<WebElement> radioAnswers;
+
+    @FindBy(css = "input[type='text']")
+    private List<WebElement> textInputs;
+
+    @FindBy(css = "textarea.essay-area, textarea")
+    private List<WebElement> essayTextareas;
+
+    @FindBy(css = "[id^='wc_'], .word-count")
+    private List<WebElement> wordCountElements;
 
     public CandidatePracticePage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        PageFactory.initElements(driver, this);
     }
 
     /**
      * Tự động kiểm tra và bấm nút "Bắt đầu thi ngay" (#btn-start-mock-test)
      * và nút "Kích hoạt bảo mật & Bắt đầu làm bài" (#btn-start-exam) một cách kiên trì.
      * Đảm bảo cả 3 lần chạy test (TC01, TC02, TC03) đều tự động mở phòng thi thành công 100%.
+     * Trả về `this` (Fluent Interface).
      */
-    public void ensureExamStartedAndOverlayDismissed() {
+    public CandidatePracticePage ensureExamStartedAndOverlayDismissed() {
         // 1. Kiểm tra nếu đang ở trang Giới thiệu đề thi có nút "Bắt đầu thi ngay"
         try {
-            List<WebElement> introStartBtns = driver.findElements(By.id("btn-start-mock-test"));
             if (!introStartBtns.isEmpty() && introStartBtns.get(0).isDisplayed()) {
                 introStartBtns.get(0).click();
                 Thread.sleep(800); // Chờ chuyển sang trang take.jsp
@@ -54,7 +80,6 @@ public class CandidatePracticePage {
                 "}"
             );
 
-            List<WebElement> examStartBtns = driver.findElements(By.id("btn-start-exam"));
             if (!examStartBtns.isEmpty() && examStartBtns.get(0).isDisplayed()) {
                 examStartBtns.get(0).click();
             }
@@ -68,41 +93,45 @@ public class CandidatePracticePage {
                 "if (typeof isExamStarted !== 'undefined') { isExamStarted = true; }"
             );
         } catch (Exception ignored) {}
+        return this;
     }
 
     /**
-     * Chuyển đổi qua lại giữa các kỹ năng (Listening, Reading, Writing, Speaking)
+     * Chuyển đổi qua lại giữa các kỹ năng (Listening, Reading, Writing, Speaking).
+     * Trả về `this` (Fluent Interface).
      */
-    public void switchSkillTab(String skillName) {
+    public CandidatePracticePage switchSkillTab(String skillName) {
         ensureExamStartedAndOverlayDismissed();
         try {
             By skillTabLocator = By.id("tab-" + skillName);
             WebElement tabBtn = wait.until(ExpectedConditions.elementToBeClickable(skillTabLocator));
             tabBtn.click();
         } catch (Exception ignored) {}
+        return this;
     }
 
     /**
-     * Tự động tìm và chọn một đáp án trắc nghiệm (Multiple Choice / Radio) bất kỳ đang hiển thị
+     * Tự động tìm và chọn một đáp án trắc nghiệm (Multiple Choice / Radio) bất kỳ đang hiển thị.
+     * Trả về `this` (Fluent Interface).
      */
-    public void selectAnyAvailableRadioAnswer() {
+    public CandidatePracticePage selectAnyAvailableRadioAnswer() {
         try {
-            List<WebElement> radios = driver.findElements(By.cssSelector("input[type='radio']"));
-            for (WebElement radio : radios) {
+            for (WebElement radio : radioAnswers) {
                 if (radio.isDisplayed() && radio.isEnabled()) {
                     radio.click();
                     break;
                 }
             }
         } catch (Exception ignored) {}
+        return this;
     }
 
     /**
-     * Tự động tìm và điền từ vào ô trống (Fill in blanks) bất kỳ đang hiển thị
+     * Tự động tìm và điền từ vào ô trống (Fill in blanks) bất kỳ đang hiển thị.
+     * Trả về `this` (Fluent Interface).
      */
-    public void fillAnyAvailableTextInput(String text) {
+    public CandidatePracticePage fillAnyAvailableTextInput(String text) {
         try {
-            List<WebElement> textInputs = driver.findElements(By.cssSelector("input[type='text']"));
             for (WebElement input : textInputs) {
                 if (input.isDisplayed() && input.isEnabled()) {
                     input.clear();
@@ -111,6 +140,7 @@ public class CandidatePracticePage {
                 }
             }
         } catch (Exception ignored) {}
+        return this;
     }
 
     // =========================================================================
@@ -118,30 +148,32 @@ public class CandidatePracticePage {
     // =========================================================================
 
     /**
-     * Chọn đáp án trắc nghiệm (Multiple Choice) theo ID câu hỏi và ID câu trả lời
+     * Chọn đáp án trắc nghiệm (Multiple Choice) theo ID câu hỏi và ID câu trả lời.
      */
-    public void selectMultipleChoiceAnswer(int questionId, int answerId) {
+    public CandidatePracticePage selectMultipleChoiceAnswer(int questionId, int answerId) {
         By choiceLocator = By.id("ans_" + answerId);
         WebElement radioInput = wait.until(ExpectedConditions.elementToBeClickable(choiceLocator));
         if (!radioInput.isSelected()) {
             radioInput.click();
         }
+        return this;
     }
 
     /**
-     * Điền từ vào ô trống (Fill in blanks / Matching) cho câu hỏi
+     * Điền từ vào ô trống (Fill in blanks / Matching) cho câu hỏi.
      */
-    public void fillInBlankAnswer(int questionId, String answerText) {
+    public CandidatePracticePage fillInBlankAnswer(int questionId, String answerText) {
         By inputLocator = By.cssSelector("input[name='q_" + questionId + "']");
         WebElement inputField = wait.until(ExpectedConditions.visibilityOfElementLocated(inputLocator));
         inputField.clear();
         inputField.sendKeys(answerText);
+        return this;
     }
 
     /**
-     * Bấm nút Nộp bài (Submit) và xử lý Alert xác nhận (nếu trình duyệt hiển thị confirm dialog)
+     * Bấm nút Nộp bài (Submit) và xử lý Alert xác nhận (nếu trình duyệt hiển thị confirm dialog).
      */
-    public void clickSubmit() {
+    public CandidatePracticePage clickSubmit() {
         WebElement submitBtn = wait.until(ExpectedConditions.elementToBeClickable(submitExamButton));
         submitBtn.click();
 
@@ -152,13 +184,14 @@ public class CandidatePracticePage {
         } catch (TimeoutException ignored) {
             // Không có alert hoặc đã submit tự động bằng form
         }
+        return this;
     }
 
     /**
-     * Kiểm tra kết quả trả về tức thì sau khi submit (điểm số / thông báo hoàn thành)
+     * Kiểm tra kết quả trả về tức thì sau khi submit (điểm số / thông báo hoàn thành).
      */
     public String getResultSummaryText() {
-        WebElement resultElement = wait.until(ExpectedConditions.visibilityOfElementLocated(resultScoreDisplay));
+        WebElement resultElement = wait.until(ExpectedConditions.visibilityOf(resultScoreDisplay));
         return resultElement.getText();
     }
 
@@ -167,17 +200,18 @@ public class CandidatePracticePage {
     // =========================================================================
 
     /**
-     * Nhập nội dung bài Writing vào ô soạn thảo
+     * Nhập nội dung bài Writing vào ô soạn thảo.
      */
-    public void inputWritingEssay(int questionId, String essayContent) {
+    public CandidatePracticePage inputWritingEssay(int questionId, String essayContent) {
         By essayAreaLocator = By.id("essay_" + questionId);
         WebElement essayTextArea = wait.until(ExpectedConditions.visibilityOfElementLocated(essayAreaLocator));
         essayTextArea.clear();
         essayTextArea.sendKeys(essayContent);
+        return this;
     }
 
     /**
-     * Đọc bộ đếm số từ (Word count) hiển thị dưới ô soạn thảo Writing
+     * Đọc bộ đếm số từ (Word count) hiển thị dưới ô soạn thảo Writing.
      */
     public String getWordCountText(int questionId) {
         By wordCountLocator = By.id("wc_" + questionId);
@@ -186,7 +220,7 @@ public class CandidatePracticePage {
     }
 
     /**
-     * Xác minh hệ thống gọi API chấm điểm AI trả về kết quả đánh giá (Feedback / AI Score)
+     * Xác minh hệ thống gọi API chấm điểm AI trả về kết quả đánh giá (Feedback / AI Score).
      */
     public boolean isAiGradingFeedbackDisplayed() {
         By aiFeedbackLocator = By.cssSelector(".ai-feedback, .ai-score, #ai-evaluation-result, .essay-feedback");
@@ -203,27 +237,29 @@ public class CandidatePracticePage {
     // =========================================================================
 
     /**
-     * Nhấn nút bắt đầu thu âm (Start Recording)
+     * Nhấn nút bắt đầu thu âm (Start Recording).
      */
-    public void clickStartRecording(int questionId) {
+    public CandidatePracticePage clickStartRecording(int questionId) {
         By startBtnLocator = By.id("btn-rec-" + questionId);
         WebElement startBtn = wait.until(ExpectedConditions.elementToBeClickable(startBtnLocator));
         startBtn.click();
+        return this;
     }
 
     /**
-     * Nhấn nút dừng thu âm (Stop Recording)
+     * Nhấn nút dừng thu âm (Stop Recording).
      */
-    public void clickStopRecording(int questionId) {
+    public CandidatePracticePage clickStopRecording(int questionId) {
         By stopBtnLocator = By.id("btn-stop-" + questionId);
         WebElement stopBtn = wait.until(ExpectedConditions.elementToBeClickable(stopBtnLocator));
         stopBtn.click();
+        return this;
     }
 
     /**
-     * Mock hành vi thu âm và đẩy trực tiếp kết quả phân tích Speech-to-Text vào DOM qua JavaScript
+     * Mock hành vi thu âm và đẩy trực tiếp kết quả phân tích Speech-to-Text vào DOM qua JavaScript.
      */
-    public void mockSpeechToTextResultViaDom(int questionId, String mockTranscriptText) {
+    public CandidatePracticePage mockSpeechToTextResultViaDom(int questionId, String mockTranscriptText) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
         // Cập nhật thẻ hidden input chứa transcript gửi lên server
@@ -239,10 +275,11 @@ public class CandidatePracticePage {
             "if (displayBox) { displayBox.innerText = 'Transcript: ' + arguments[1]; }",
             questionId, mockTranscriptText
         );
+        return this;
     }
 
     /**
-     * Lấy kết quả hiển thị của Speech-to-Text trên giao diện
+     * Lấy kết quả hiển thị của Speech-to-Text trên giao diện.
      */
     public String getSpeechToTextDisplayText(int questionId) {
         By transcriptDisplayLocator = By.id("transcript-" + questionId);
@@ -255,21 +292,23 @@ public class CandidatePracticePage {
     // =========================================================================
 
     /**
-     * Nộp bài kiểm tra / luyện tập động (Wrapper gọi clickSubmit)
+     * Nộp bài kiểm tra / luyện tập động (Wrapper gọi clickSubmit).
+     * Trả về `this` (Fluent Interface).
      */
-    public void submitPracticeExam() {
+    public CandidatePracticePage submitPracticeExam() {
         try {
             clickSubmit();
         } catch (Exception ignored) {}
+        return this;
     }
 
     /**
-     * Nhập bài tự luận Writing vào bất kỳ ô textarea .essay-area nào đang hiển thị
+     * Nhập bài tự luận Writing vào bất kỳ ô textarea .essay-area nào đang hiển thị.
+     * Trả về `this` (Fluent Interface).
      */
-    public void inputWritingEssayText(String essayContent) {
+    public CandidatePracticePage inputWritingEssayText(String essayContent) {
         try {
-            List<WebElement> textareas = driver.findElements(By.cssSelector("textarea.essay-area, textarea"));
-            for (WebElement ta : textareas) {
+            for (WebElement ta : essayTextareas) {
                 if (ta.isDisplayed() && ta.isEnabled()) {
                     ta.clear();
                     ta.sendKeys(essayContent);
@@ -277,15 +316,15 @@ public class CandidatePracticePage {
                 }
             }
         } catch (Exception ignored) {}
+        return this;
     }
 
     /**
-     * Lấy số từ (Word Count) tức thì đang hiển thị trên giao diện
+     * Lấy số từ (Word Count) tức thì đang hiển thị trên giao diện.
      */
     public int getRealtimeWordCount() {
         try {
-            List<WebElement> wcElements = driver.findElements(By.cssSelector("[id^='wc_'], .word-count"));
-            for (WebElement el : wcElements) {
+            for (WebElement el : wordCountElements) {
                 if (el.isDisplayed()) {
                     String numStr = el.getText().replaceAll("[^0-9]", "");
                     if (!numStr.isEmpty()) {
@@ -298,9 +337,10 @@ public class CandidatePracticePage {
     }
 
     /**
-     * Giả lập thu âm Speaking hoặc đẩy transcript qua DOM cho câu hỏi hiện tại
+     * Giả lập thu âm Speaking hoặc đẩy transcript qua DOM cho câu hỏi hiện tại.
+     * Trả về `this` (Fluent Interface).
      */
-    public void mockSpeakingAudioOrTranscript(String simulatedSpeech) {
+    public CandidatePracticePage mockSpeakingAudioOrTranscript(String simulatedSpeech) {
         try {
             JavascriptExecutor js = (JavascriptExecutor) driver;
             js.executeScript(
@@ -311,5 +351,7 @@ public class CandidatePracticePage {
                 simulatedSpeech
             );
         } catch (Exception ignored) {}
+        return this;
     }
 }
+

@@ -79,19 +79,19 @@ public class CandidatePracticeAndAITest extends BaseTest {
         ensureLoggedInAndNavigateToPractice(testUrl);
         test.info("Đã truy cập trang làm bài luyện tập: " + testUrl);
 
-        // 1. Chuyển sang kỹ năng Listening & tự động chọn đáp án Multiple Choice
+        // 1. Chuyển sang kỹ năng Listening & tự động chọn đáp án Multiple Choice bằng Method Chaining (Fluent Interface)
         try {
-            practicePage.switchSkillTab("Listening");
-            practicePage.selectAnyAvailableRadioAnswer();
+            practicePage.switchSkillTab("Listening")
+                        .selectAnyAvailableRadioAnswer();
             test.info("Đã chọn tự động đáp án trắc nghiệm trong phần Listening");
         } catch (Exception e) {
             test.info("Phần Listening chọn đáp án động: " + e.getMessage());
         }
 
-        // 2. Chuyển sang kỹ năng Reading & tự động điền từ vào ô trống
+        // 2. Chuyển sang kỹ năng Reading & tự động điền từ vào ô trống bằng Method Chaining (Fluent Interface)
         try {
-            practicePage.switchSkillTab("Reading");
-            practicePage.fillAnyAvailableTextInput("climate stability");
+            practicePage.switchSkillTab("Reading")
+                        .fillAnyAvailableTextInput("climate stability");
             test.info("Đã tự động điền từ vào ô trống phần Reading");
         } catch (Exception e) {
             test.info("Phần Reading điền từ động: " + e.getMessage());
@@ -120,9 +120,9 @@ public class CandidatePracticeAndAITest extends BaseTest {
         ensureLoggedInAndNavigateToPractice(testUrl);
 
         try {
-            practicePage.switchSkillTab("Writing");
             String sampleEssay = "The chart below illustrates the proportion of renewable energy consumption across four different countries from 2010 to 2020. Overall, it is evident that green energy usage increased steadily during the period.";
-            practicePage.inputWritingEssayText(sampleEssay);
+            practicePage.switchSkillTab("Writing")
+                        .inputWritingEssayText(sampleEssay);
             test.info("Đã nhập bài tự luận Writing: " + sampleEssay);
 
             int wordCount = practicePage.getRealtimeWordCount();
@@ -148,23 +148,15 @@ public class CandidatePracticeAndAITest extends BaseTest {
         ensureLoggedInAndNavigateToPractice(speakingUrl);
 
         try {
-            // 1. Chuyển sang tab Speaking
-            practicePage.switchSkillTab("Speaking");
-            test.info("Đã chuyển sang phần luyện tập Speaking");
-
             int questionId = 401;
-
-            // 2. Mock thao tác bấm Start Recording
-            try {
-                practicePage.clickStartRecording(questionId);
-                test.info("Đã kích hoạt Start Recording cho câu hỏi #" + questionId);
-            } catch (Exception ignored) {}
-
-            // 3. Mock đẩy transcript trực tiếp qua DOM (giả lập kết quả phân tích Speech-to-Text từ API)
             String mockSttTranscript = "I live in a bustling city with modern architecture and friendly residents.";
-            practicePage.mockSpeakingAudioOrTranscript(mockSttTranscript);
-            test.info("Đã đẩy dữ liệu mô phỏng Speech-to-Text vào DOM: " + mockSttTranscript);
 
+            // Chuyển sang tab Speaking -> bấm Start Recording -> mock đẩy transcript trực tiếp qua DOM bằng Method Chaining (Fluent Interface)
+            practicePage.switchSkillTab("Speaking")
+                        .clickStartRecording(questionId)
+                        .mockSpeakingAudioOrTranscript(mockSttTranscript);
+
+            test.info("Đã chuyển sang phần luyện tập Speaking, kích hoạt Start Recording và đẩy dữ liệu mô phỏng Speech-to-Text vào DOM: " + mockSttTranscript);
             assertTrue(true, "Xác minh thành công luồng Mock thu âm Speaking và nhận diện Speech-to-Text");
         } catch (Exception e) {
             test.info("Ghi nhận thực thi Mock Speech-to-Text: " + e.getMessage());
