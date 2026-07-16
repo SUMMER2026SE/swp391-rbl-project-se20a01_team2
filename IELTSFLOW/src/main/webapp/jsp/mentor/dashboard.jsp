@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         .mentor-stat-card {
             background: var(--bg-surface);
@@ -149,10 +148,10 @@
                         <i class="fa-solid fa-circle-question"></i>
                     </div>
                     <div class="stat-label">Tổng câu hỏi</div>
-                    <!-- <div class="stat-value">
+                    <div class="stat-value">
                         ${questionCountTotal}
-                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${questionCountPersonal} của bạn)</span>
-                    </div> -->
+                        <!-- <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${questionCountPersonal} của bạn)</span> -->
+                    </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/questions">
                             Quản lý câu hỏi <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
@@ -166,10 +165,10 @@
                         <i class="fa-solid fa-book-open"></i>
                     </div>
                     <div class="stat-label">Tổng bài học</div>
-                    <!-- <div class="stat-value">
+                    <div class="stat-value">
                         ${lessonCountTotal}
-                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${lessonCountPersonal} của bạn)</span>
-                    </div> -->
+                        <!-- <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${lessonCountPersonal} của bạn)</span> -->
+                    </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/lessons">
                             Quản lý bài học <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
@@ -183,10 +182,10 @@
                         <i class="fa-solid fa-file-pen"></i>
                     </div>
                     <div class="stat-label">Tổng đề thi</div>
-                    <!-- <div class="stat-value">
+                    <div class="stat-value">
                         ${examCountTotal}
-                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${examCountPersonal} của bạn)</span>
-                    </div> -->
+                        <!-- <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${examCountPersonal} của bạn)</span> -->
+                    </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/exams">
                             Quản lý đề thi <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
