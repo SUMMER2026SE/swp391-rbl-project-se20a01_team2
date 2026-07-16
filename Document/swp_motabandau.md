@@ -298,9 +298,10 @@ Khi hiển thị đề cho học viên, nguyên tắc tối thượng vẫn là 
 1. **Frontend gửi data lên backend.**  
 2. **Truy Xuất Tương Đáp Án:** Backend lấy chuỗi JSON từ bảng `Answers` và parse thành đối tượng Dictionary chứa Array.  
 3. **Logic Chấm Điểm (Evaluation Engine):**  
-   * Duyệt qua từng key trong `user_answers`.  
+   * Frontend gửi lên một mảng JSON các đáp án theo thứ tự (ví dụ: `["python", "java"]`).
+   * Duyệt qua từng đáp án trong mảng của user bằng chỉ số (index).
    * **Tiền xử lý (Sanitize):** Nếu là text input, backend bắt buộc phải `Trim()` (cắt khoảng trắng 2 đầu) và `ToLower()` cả chuỗi của user lẫn mảng đáp án chuẩn   
-   * **So sánh:** Kiểm tra xem chuỗi user đã nhập (sau khi đã sanitize) có tồn tại trong mảng đáp án chuẩn hay không  
+   * **So sánh:** Kiểm tra xem chuỗi user đã nhập (sau khi đã sanitize) có tồn tại trong mảng đáp án chuẩn (lấy theo key `index + 1` của dictionary đáp án chuẩn) hay không  
    * Cộng điểm thành phần cho mỗi ô điền đúng.
 
 ### **4\. Cấu trúc JSON:** **câu hỏi:** 
@@ -310,7 +311,11 @@ Khi hiển thị đề cho học viên, nguyên tắc tối thượng vẫn là 
 
 ### matching đúng (lưu bảng answer):
 
-| {   "1": ["Python", "python", "PYTHON"\],   "2": \["C\#", "Java"]  }  |
+| {   "1": ["Python", "python", "PYTHON"],   "2": ["C#", "Java"]  }  |
+| :---- |
+
+### student answer (Frontend gửi lên JSON Array):
+| ["python", "Java"] |
 | :---- |
 
 **6.3. Đối với câu hỏi dạng Multiple Choise:**

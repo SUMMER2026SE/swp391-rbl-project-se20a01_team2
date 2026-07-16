@@ -51,6 +51,22 @@ public class PlacementTestServlet extends HttpServlet {
         String action = req.getParameter("action");
         if (action == null) action = "";
 
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+
+        if (!hasActiveSub) {
+            if ("result".equals(action)) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_result");
+                return;
+            }
+            java.util.List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
+            if (!history.isEmpty()) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_placement");
+                return;
+            }
+        }
+
         try {
             switch (action) {
                 case "take":
@@ -64,8 +80,8 @@ public class PlacementTestServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            req.setAttribute("errorMsg", "Đã xảy ra lỗi: " + e.getMessage());
-            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
+            resp.setContentType("text/plain;charset=UTF-8");
+            e.printStackTrace(resp.getWriter());
         }
     }
 
@@ -85,6 +101,22 @@ public class PlacementTestServlet extends HttpServlet {
         String action = req.getParameter("action");
         if (action == null) action = "";
 
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+
+        if (!hasActiveSub) {
+            if ("result".equals(action)) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_result");
+                return;
+            }
+            java.util.List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
+            if (!history.isEmpty()) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_placement");
+                return;
+            }
+        }
+
         try {
             switch (action) {
                 case "start":
@@ -101,8 +133,8 @@ public class PlacementTestServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            req.setAttribute("errorMsg", "Đã xảy ra lỗi: " + e.getMessage());
-            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
+            resp.setContentType("text/plain;charset=UTF-8");
+            e.printStackTrace(resp.getWriter());
         }
     }
 
@@ -185,19 +217,40 @@ public class PlacementTestServlet extends HttpServlet {
         for (Question q : questions) {
             String skill  = q.getSkill()        != null ? q.getSkill().trim()        : "";
             String qType  = q.getQuestionType() != null ? q.getQuestionType().trim() : "";
-            String answer = req.getParameter("q_" + q.getQuestionId());
-
-            if (("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
-                && answer != null && !answer.isBlank()) {
-                try {
-                    int ansId = Integer.parseInt(answer.trim());
-                    for (model.Answer a : q.getAnswers()) {
-                        if (a.getAnswerId() == ansId) {
-                            answer = a.getContent();
-                            break;
-                        }
+            
+            // Xử lý parameter gửi lên từ form
+            String[] answersArray = req.getParameterValues("q_" + q.getQuestionId());
+            String answer = null;
+            if (answersArray != null && answersArray.length > 0) {
+                if (answersArray.length == 1) {
+                    answer = answersArray[0];
+                } else {
+                    // Nếu là nhiều đáp án, gom thành JSON Array string
+                    try {
+                        answer = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(answersArray);
+                    } catch (Exception e) {
+                        answer = answersArray[0];
                     }
-                } catch (NumberFormatException ignored) {}
+                }
+            }
+
+            // Only apply answer-ID-to-content conversion for objective (non-AI) skills
+            boolean isAiSkill = "Speaking".equalsIgnoreCase(skill) || "Writing".equalsIgnoreCase(skill);
+            if (!isAiSkill && ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
+                && answer != null && !answer.isBlank()) {
+                
+                // Nếu chỉ có 1 đáp án dạng ID, convert sang nội dung text (như code cũ)
+                if (!answer.trim().startsWith("[")) {
+                    try {
+                        int ansId = Integer.parseInt(answer.trim());
+                        for (model.Answer a : q.getAnswers()) {
+                            if (a.getAnswerId() == ansId) {
+                                answer = a.getContent();
+                                break;
+                            }
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
             }
 
             SubmissionDetail detail = new SubmissionDetail();
@@ -205,19 +258,28 @@ public class PlacementTestServlet extends HttpServlet {
             detail.setQuestionId(q.getQuestionId());
             detail.setCandidateAnswer(answer);
 
-            if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) {
-                boolean correct = mockTestService.isAnswerCorrect(q, answer);
-                detail.setIsCorrect(correct);
-                detail.setScore(correct ? 1.0 : 0.0);
+            // Route to objective grading only if the skill is NOT Speaking/Writing.
+            // Speaking questions may have QuestionType='FillInBlanks' in the DB,
+            // so skill must take precedence over qType here.
+            if (!isAiSkill && ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType))) {
+                int correctCount = mockTestService.isAnswerCorrect(q, answer);
+                detail.setIsCorrect(correctCount > 0);
+                detail.setScore((double) correctCount);
                 detail.setGradingStatus("Graded");
-                if ("Reading".equals(skill))   { totalReading++;   if (correct) correctReading++;   }
-                if ("Listening".equals(skill)) { totalListening++; if (correct) correctListening++; }
+                if ("Reading".equalsIgnoreCase(skill))   { 
+                    totalReading += q.getQuestionCount();   
+                    correctReading += correctCount;   
+                }
+                if ("Listening".equalsIgnoreCase(skill)) { 
+                    totalListening += q.getQuestionCount(); 
+                    correctListening += correctCount; 
+                }
                 mockTestService.saveDetail(detail);
             } else {
                 detail.setGradingStatus("Pending_AI");
                 String transcript = null;
                 double azureScore = 0.0;
-                if ("Speaking".equals(skill)) {
+                if ("Speaking".equalsIgnoreCase(skill) || "Speaking".equalsIgnoreCase(qType)) {
                     detail.setSpeakingUrl(req.getParameter("speaking_url_" + q.getQuestionId()));
                     transcript = req.getParameter("transcript_" + q.getQuestionId());
                     detail.setCandidateTranscript(transcript);
@@ -228,12 +290,12 @@ public class PlacementTestServlet extends HttpServlet {
                 }
                 int detailId = mockTestService.saveDetail(detail);
 
-                if ("Writing".equals(skill)) {
+                if ("Writing".equalsIgnoreCase(skill) || "Writing".equalsIgnoreCase(qType) || "Essay".equalsIgnoreCase(qType)) {
                     countWriting++;
                     writingDetailIds.add(new int[]{detailId});
                     writingTopics.add(q.getContent());
                     writingAnswers.add(answer);
-                } else if ("Speaking".equals(skill)) {
+                } else if ("Speaking".equalsIgnoreCase(skill) || "Speaking".equalsIgnoreCase(qType)) {
                     countSpeaking++;
                     speakingDetailIds.add(new int[]{detailId});
                     speakingTopics.add(q.getContent());

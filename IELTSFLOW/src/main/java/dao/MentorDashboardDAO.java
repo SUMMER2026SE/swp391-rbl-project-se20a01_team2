@@ -97,7 +97,7 @@ public class MentorDashboardDAO {
     public List<Ticket> getRecentOpenTickets(int limit) {
         return JpaHelper.query(em -> {
             List<Ticket> tickets = em.createQuery(
-                    "SELECT t FROM Ticket t WHERE t.status = 'Open' ORDER BY t.createdAt DESC",
+                    "SELECT t FROM Ticket t JOIN FETCH t.user WHERE t.status = 'Open' ORDER BY t.createdAt DESC",
                     Ticket.class)
                     .setMaxResults(limit)
                     .getResultList();

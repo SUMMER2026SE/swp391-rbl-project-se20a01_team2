@@ -101,10 +101,22 @@
                             <c:forEach var="q" items="${questions}">
                                 <tr>
                                     <td>
-                                        <input class="form-check-input question-cb" type="checkbox" name="questionIds" value="${q.questionId}">
+                                        <c:choose>
+                                            <c:when test="${existingQuestionIds.contains(q.questionId)}">
+                                                <input class="form-check-input" type="checkbox" disabled title="Đã có trong section này">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <input class="form-check-input question-cb" type="checkbox" name="questionIds" value="${q.questionId}">
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
                                     <td class="text-secondary fw-bold">#${q.questionId}</td>
-                                    <td><span class="badge bg-info text-dark">${q.questionType}</span></td>
+                                    <td>
+                                        <span class="badge bg-info text-dark mb-1">${q.questionType}</span>
+                                        <c:if test="${existingQuestionIds.contains(q.questionId)}">
+                                            <br><span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Đã thêm</span>
+                                        </c:if>
+                                    </td>
                                     <td class="text-truncate" style="max-width: 350px;">
                                         <c:choose>
                                             <c:when test="${not empty q.content}">${q.content}</c:when>

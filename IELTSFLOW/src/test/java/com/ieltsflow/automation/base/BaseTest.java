@@ -9,14 +9,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestWatcher;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,22 +45,13 @@ public class BaseTest {
         }
         test = extent.createTest(testName);
 
-        // Khởi tạo WebDriver (Chrome)
-        ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless"); // Bỏ comment nếu muốn chạy ngầm không hiện UI
-        options.addArguments("--start-maximized");
-        options.addArguments("--disable-notifications");
-
-        driver = new ChromeDriver(options);
-        // Thiết lập Implicit Wait (Khuyên dùng Explicit Wait trong các bài test cụ thể)
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        // Khởi tạo WebDriver thông qua DriverFactory
+        driver = com.ieltsflow.automation.utils.DriverFactory.initDriver();
     }
 
     @AfterEach
     public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        com.ieltsflow.automation.utils.DriverFactory.quitDriver();
     }
 
     @AfterAll
@@ -72,23 +61,17 @@ public class BaseTest {
         }
     }
 
-    // Cơ chế chụp màn hình khi test Fail (Sử dụng JUnit 5 TestWatcher)
+    // Cơ chế chụp màn hình khi test Fail (Chạy trước @AfterEach để giữ WebDriver sống)
     @RegisterExtension
-    TestWatcher watcher = new TestWatcher() {
+    AfterTestExecutionCallback callback = new AfterTestExecutionCallback() {
         @Override
-        public void testFailed(ExtensionContext context, Throwable cause) {
-            test.log(Status.FAIL, "Test Failed: " + cause.getMessage());
-            takeScreenshot(context.getDisplayName());
-        }
-
-        @Override
-        public void testSuccessful(ExtensionContext context) {
-            test.log(Status.PASS, "Test Passed");
-        }
-
-        @Override
-        public void testAborted(ExtensionContext context, Throwable cause) {
-            test.log(Status.SKIP, "Test Aborted");
+        public void afterTestExecution(ExtensionContext context) throws Exception {
+            if (context.getExecutionException().isPresent()) {
+                test.log(Status.FAIL, "Test Failed: " + context.getExecutionException().get().getMessage());
+                takeScreenshot(context.getDisplayName());
+            } else {
+                test.log(Status.PASS, "Test Passed");
+            }
         }
     };
 

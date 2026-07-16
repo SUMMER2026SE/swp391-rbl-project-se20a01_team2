@@ -10,6 +10,7 @@ public class FeedbackSpeaking {
     private double overallBand;
     private String overallFeedback;
     private List<FeedbackMistake> mistakes;
+    private List<String> improvementSuggestions;
 
     public FeedbackSpeaking() {}
 
@@ -34,4 +35,7 @@ public class FeedbackSpeaking {
 
     public List<FeedbackMistake> getMistakes() { return mistakes; }
     public void setMistakes(List<FeedbackMistake> mistakes) { this.mistakes = mistakes; }
+
+    public List<String> getImprovementSuggestions() { return improvementSuggestions; }
+    public void setImprovementSuggestions(List<String> improvementSuggestions) { this.improvementSuggestions = improvementSuggestions; }
 }

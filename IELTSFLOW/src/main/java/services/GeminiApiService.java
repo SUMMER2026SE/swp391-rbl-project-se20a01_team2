@@ -25,7 +25,7 @@ public class GeminiApiService {
     private static final Logger LOGGER = Logger.getLogger(GeminiApiService.class.getName());
 
     // Đã verify ngày 25/06/2026: gemini-2.5-flash hoạt động với structured output
-    private static final String MODEL_NAME = "gemini-2.5-flash";
+    private static final String MODEL_NAME = "gemma-4-31b-it";
     private static final String BASE_URL   =
             "https://generativelanguage.googleapis.com/v1beta/models/"
             + MODEL_NAME + ":generateContent?key=";
@@ -162,6 +162,92 @@ public class GeminiApiService {
                 + "}";
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to build Gemini payload", e);
+            return null;
+        }
+    }
+
+    /**
+     * Gọi Gemini API cho tính năng Chat (Plain text).
+     *
+     * @param systemInstruction Vai trò và hướng dẫn cho AI
+     * @param userMessage        Tin nhắn của người dùng
+     * @return Chuỗi text phản hồi từ AI, hoặc null nếu thất bại
+     */
+    public String generateChatReply(String systemInstruction, String userMessage) {
+        String[] keys = getAllKeys();
+        int maxAttempts = keys.length * 2; 
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            String apiKey = getNextKey(keys);
+            try {
+                String fullPayload = buildChatPayload(systemInstruction, userMessage);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(BASE_URL + apiKey))
+                        .header("Content-Type", "application/json; charset=UTF-8")
+                        .timeout(Duration.ofSeconds(60))
+                        .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request,
+                        HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8));
+
+                int status = response.statusCode();
+
+                if (status == 200) {
+                    String jsonText = extractTextFromResponse(response.body());
+                    if (jsonText != null) {
+                        try {
+                            com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(jsonText);
+                            if (root.has("reply")) {
+                                return root.get("reply").asText();
+                            }
+                        } catch (Exception e) {
+                            LOGGER.warning("Failed to parse chat json response: " + jsonText);
+                        }
+                    }
+                    return jsonText;
+                } else if (status == 429 || status == 503 || status >= 500) {
+                    int sleepMs = Math.min(2000 * attempt, 10000); 
+                    Thread.sleep(sleepMs);
+                } else {
+                    LOGGER.severe(String.format("[Gemini Chat] Fatal error %d: %s", status, response.body()));
+                    return null;
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                return null;
+            } catch (Exception e) {
+                if (attempt < maxAttempts) {
+                    try { Thread.sleep(1000); } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Build JSON payload đơn giản cho Chat.
+     */
+    private String buildChatPayload(String systemInstruction, String userMessage) {
+        try {
+            String sysText = objectMapper.writeValueAsString(systemInstruction);
+            String userText = objectMapper.writeValueAsString(userMessage);
+            String schema = "{\"type\":\"object\",\"properties\":{\"thinking\":{\"type\":\"string\",\"description\":\"Internal thoughts and reasoning\"},\"reply\":{\"type\":\"string\",\"description\":\"The final response to the user\"}},\"required\":[\"thinking\",\"reply\"]}";
+            return "{"
+                + "\"systemInstruction\":{\"parts\":[{\"text\":" + sysText + "}]},"
+                + "\"contents\":[{\"parts\":[{\"text\":" + userText + "}]}],"
+                + "\"generationConfig\":{"
+                + "\"temperature\":0.7,"
+                + "\"responseMimeType\":\"application/json\","
+                + "\"responseSchema\":" + schema
+                + "}"
+                + "}";
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to build Chat payload", e);
             return null;
         }
     }

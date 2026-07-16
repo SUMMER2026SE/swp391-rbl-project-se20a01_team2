@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         .mentor-stat-card {
             background: var(--bg-surface);
@@ -151,7 +150,7 @@
                     <div class="stat-label">Tổng câu hỏi</div>
                     <div class="stat-value">
                         ${questionCountTotal}
-                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${questionCountPersonal} của bạn)</span>
+                        <!-- <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${questionCountPersonal} của bạn)</span> -->
                     </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/questions">
@@ -168,7 +167,7 @@
                     <div class="stat-label">Tổng bài học</div>
                     <div class="stat-value">
                         ${lessonCountTotal}
-                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${lessonCountPersonal} của bạn)</span>
+                        <!-- <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${lessonCountPersonal} của bạn)</span> -->
                     </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/lessons">
@@ -185,7 +184,7 @@
                     <div class="stat-label">Tổng đề thi</div>
                     <div class="stat-value">
                         ${examCountTotal}
-                        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${examCountPersonal} của bạn)</span>
+                        <!-- <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${examCountPersonal} của bạn)</span> -->
                     </div>
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/exams">
@@ -201,13 +200,13 @@
                     </div>
                     <div class="stat-label">Lượt nộp bài</div>
                     <div class="stat-value">${submissionCount}</div>
-                    <div class="stat-footer">Tổng bài nộp trên đề của bạn</div>
+                    <!-- <div class="stat-footer">Tổng bài nộp trên đề của bạn</div> -->
                 </div>
 
             </div>
 
             <%-- ===== AI SKILL STATS ===== --%>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div style="display: none; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
 
                 <c:forEach var="entry" items="${stats}">
                     <c:set var="sk" value="${entry.value}"/>
@@ -411,6 +410,9 @@
 
         </main>
     </div>
+
+    <!-- AI Chatbox Widget -->
+    <jsp:include page="/jsp/components/chat-widget.jsp" />
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
