@@ -106,7 +106,7 @@
                 </div>
                 <div>
                     <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: ${not empty sessionScope.targetBand ? sessionScope.targetBand : 'Chưa thiết lập'}</p>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Mục tiêu: ${not empty sessionScope.targetBand ? sessionScope.targetBand : 'Chưa thiết lập'}</p>
                 </div>
             </div>
             <nav class="nav-menu">

@@ -32,19 +32,21 @@ public class CandidateDashboardDAO {
                 stats.put("latestMockTest", 0.0);
             }
             
-            // 3. Study Hours (This Week) - MOCK DATA
+            // 3. Study Hours (This Week)
+            /*
             try {
-                // Number studyMinutes = (Number) em.createNativeQuery(
-                //     "SELECT ISNULL(SUM(DATEDIFF(minute, StartTime, EndTime)), 0) FROM TestSubmissions WHERE UserID = :userId AND StartTime >= DATEADD(day, -7, GETDATE())")
-                //     .setParameter("userId", userId)
-                //     .getSingleResult();
-                // double studyHours = studyMinutes != null ? studyMinutes.doubleValue() / 60.0 : 0.0;
+                Number studyMinutes = (Number) em.createNativeQuery(
+                    "SELECT ISNULL(SUM(DATEDIFF(minute, StartTime, EndTime)), 0) FROM TestSubmissions WHERE UserID = :userId AND StartTime >= DATEADD(day, -7, GETDATE())")
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+                double studyHours = studyMinutes != null ? studyMinutes.doubleValue() / 60.0 : 0.0;
                 // Round to 1 decimal place
-                // studyHours = Math.round(studyHours * 10.0) / 10.0;
-                stats.put("studyHours", 12.5); // Mock data as requested
+                studyHours = Math.round(studyHours * 10.0) / 10.0;
+                stats.put("studyHours", studyHours);
             } catch (Exception e) {
-                stats.put("studyHours", 12.5);
+                stats.put("studyHours", 0.0);
             }
+            */
             
             // 4. Target Band & Current Band
             try {

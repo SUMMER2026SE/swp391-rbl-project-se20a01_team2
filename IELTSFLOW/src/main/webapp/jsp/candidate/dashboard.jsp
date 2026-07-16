@@ -32,7 +32,7 @@
                 </div>
                 <div>
                     <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Mục tiêu: ${not empty stats.targetBand and stats.targetBand > 0 ? stats.targetBand : 'N/A'}</p>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Mục tiêu: ${not empty sessionScope.targetBand ? sessionScope.targetBand : 'Chưa thiết lập'}</p>
                 </div>
             </div>
             <nav class="nav-menu">
@@ -97,10 +97,12 @@
             </div>
 
             <div class="stats-grid animate-fade-up" style="animation-delay: 0.1s;">
-                <div class="stat-card">
+                <%-- 
+                <div class="stat-card" style="display: none;">
                     <p>Giờ học (Tuần này)</p>
                     <h3 style="color: var(--accent-blue);">${stats.studyHours}h</h3>
                 </div>
+                --%>
                 <div class="stat-card">
                     <p>Bài học đã hoàn thành</p>
                     <h3 style="color: var(--accent-green);">${stats.lessonsCompleted}</h3>
