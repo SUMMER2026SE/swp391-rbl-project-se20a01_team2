@@ -59,10 +59,15 @@ public class AIEvaluationService {
         +       "},"
         +       "\"required\":[\"mistake\",\"reason\",\"correction\"]"
         +     "}"
+        +   "},"
+        +   "\"improvementSuggestions\":{"
+        +     "\"type\":\"array\","
+        +     "\"items\":{\"type\":\"string\"},"
+        +     "\"description\":\"Danh sách các gợi ý cải thiện điểm (từ vựng, cấu trúc ngữ pháp, diễn đạt, v.v.) viết bằng tiếng Việt.\""
         +   "}"
         + "},"
         + "\"required\":[\"taskResponse\",\"coherenceAndCohesion\",\"lexicalResource\","
-        +              "\"grammaticalRangeAndAccuracy\",\"overallBand\",\"overallFeedback\",\"mistakes\"]"
+        +              "\"grammaticalRangeAndAccuracy\",\"overallBand\",\"overallFeedback\",\"mistakes\",\"improvementSuggestions\"]"
         + "}";
 
     // =========================================================================
@@ -89,10 +94,15 @@ public class AIEvaluationService {
         +       "},"
         +       "\"required\":[\"mistake\",\"reason\",\"correction\"]"
         +     "}"
+        +   "},"
+        +   "\"improvementSuggestions\":{"
+        +     "\"type\":\"array\","
+        +     "\"items\":{\"type\":\"string\"},"
+        +     "\"description\":\"Danh sách các gợi ý cải thiện điểm (từ vựng, cấu trúc ngữ pháp, diễn đạt, v.v.) viết bằng tiếng Việt.\""
         +   "}"
         + "},"
         + "\"required\":[\"fluencyAndCoherence\",\"lexicalResource\",\"grammaticalRangeAndAccuracy\","
-        +              "\"pronunciation\",\"overallBand\",\"overallFeedback\",\"mistakes\"]"
+        +              "\"pronunciation\",\"overallBand\",\"overallFeedback\",\"mistakes\",\"improvementSuggestions\"]"
         + "}";
 
     public AIEvaluationService() {
@@ -129,10 +139,11 @@ public class AIEvaluationService {
                 "Bạn là giám khảo chấm thi IELTS Writing chuyên nghiệp với 20 năm kinh nghiệm.\n"
                 + "NHIỆM VỤ: Đánh giá bài IELTS Writing dựa trên 4 tiêu chí chuẩn của British Council.\n"
                 + "QUY TẮC BẮT BUỘC:\n"
-                + "1. Nếu bài làm trống hoặc dưới 10 từ: chấm 0 điểm tất cả, overallFeedback = 'Bài làm trống hoặc quá ngắn.', mistakes = []\n"
+                + "1. Nếu bài làm trống hoặc dưới 10 từ: chấm 0 điểm tất cả, overallFeedback = 'Bài làm trống hoặc quá ngắn.', mistakes = [], improvementSuggestions = []\n"
                 + "2. KHÔNG tự sáng tác bài làm từ đề bài.\n"
                 + "3. TẤT CẢ nhận xét viết bằng Tiếng Việt (trừ khi trích dẫn lỗi sai tiếng Anh).\n"
-                + "4. Trả về ĐÚNG format JSON được yêu cầu, KHÔNG thêm text ngoài JSON.";
+                + "4. BẮT BUỘC cung cấp các gợi ý cụ thể để cải thiện điểm (từ vựng, cấu trúc ngữ pháp, cách diễn đạt...) trong mảng improvementSuggestions.\n"
+                + "5. Trả về ĐÚNG format JSON được yêu cầu, KHÔNG thêm text ngoài JSON.";
 
             String userPrompt = "ĐỀ BÀI:\n" + topic + "\n\nBÀI LÀM:\n" + safeEssay;
 
@@ -203,10 +214,11 @@ public class AIEvaluationService {
                 + String.format("%.1f", azurePronScore) + "/100. "
                 + "Quy đổi điểm này sang thang IELTS 0-9 để điền vào tiêu chí 'pronunciation'.\n"
                 + "QUY TẮC BẮT BUỘC:\n"
-                + "1. Nếu transcript trống hoặc dưới 5 từ: chấm 0 điểm tất cả, overallFeedback = 'Thí sinh chưa nói hoặc ghi âm quá ngắn.', mistakes = []\n"
+                + "1. Nếu transcript trống hoặc dưới 5 từ: chấm 0 điểm tất cả, overallFeedback = 'Thí sinh chưa nói hoặc ghi âm quá ngắn.', mistakes = [], improvementSuggestions = []\n"
                 + "2. KHÔNG tự sáng tác transcript.\n"
                 + "3. TẤT CẢ nhận xét viết bằng Tiếng Việt (trừ khi trích dẫn lỗi sai tiếng Anh).\n"
-                + "4. Trả về ĐÚNG format JSON được yêu cầu, KHÔNG thêm text ngoài JSON.";
+                + "4. BẮT BUỘC cung cấp các gợi ý cụ thể để cải thiện điểm (từ vựng, cấu trúc ngữ pháp, cách diễn đạt...) trong mảng improvementSuggestions.\n"
+                + "5. Trả về ĐÚNG format JSON được yêu cầu, KHÔNG thêm text ngoài JSON.";
 
             String userPrompt = "CÂU HỎI:\n" + topic + "\n\nLỜI NÓI (TRANSCRIPT):\n" + safeTranscript;
 
