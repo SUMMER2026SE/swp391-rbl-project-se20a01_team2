@@ -149,10 +149,10 @@
                         <i class="fa-solid fa-circle-question"></i>
                     </div>
                     <div class="stat-label">Tổng câu hỏi</div>
-                    <div class="stat-value">
+                    <!-- <div class="stat-value">
                         ${questionCountTotal}
                         <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${questionCountPersonal} của bạn)</span>
-                    </div>
+                    </div> -->
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/questions">
                             Quản lý câu hỏi <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
@@ -166,10 +166,10 @@
                         <i class="fa-solid fa-book-open"></i>
                     </div>
                     <div class="stat-label">Tổng bài học</div>
-                    <div class="stat-value">
+                    <!-- <div class="stat-value">
                         ${lessonCountTotal}
                         <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${lessonCountPersonal} của bạn)</span>
-                    </div>
+                    </div> -->
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/lessons">
                             Quản lý bài học <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
@@ -183,10 +183,10 @@
                         <i class="fa-solid fa-file-pen"></i>
                     </div>
                     <div class="stat-label">Tổng đề thi</div>
-                    <div class="stat-value">
+                    <!-- <div class="stat-value">
                         ${examCountTotal}
                         <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-secondary);">(${examCountPersonal} của bạn)</span>
-                    </div>
+                    </div> -->
                     <div class="stat-footer">
                         <a href="${pageContext.request.contextPath}/mentor/exams">
                             Quản lý đề thi <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i>
@@ -201,7 +201,7 @@
                     </div>
                     <div class="stat-label">Lượt nộp bài</div>
                     <div class="stat-value">${submissionCount}</div>
-                    <div class="stat-footer">Tổng bài nộp trên đề của bạn</div>
+                    <!-- <div class="stat-footer">Tổng bài nộp trên đề của bạn</div> -->
                 </div>
 
             </div>
