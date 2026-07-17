@@ -27,7 +27,7 @@ public class AccountManagementTest extends BaseTest {
         targetBandPage = new TargetBandPage(driver);
         
         // Log in before testing account features
-        loginPage.login(ConfigReader.getAdminEmail(), ConfigReader.getAdminPassword());
+        loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
     }
 
@@ -46,7 +46,7 @@ public class AccountManagementTest extends BaseTest {
     @DisplayName("Verify change password functionality")
     public void testChangePassword() {
         changePasswordPage.navigate();
-        changePasswordPage.changePassword(ConfigReader.getAdminPassword(), "NewPass123!", "Mismatch123!");
+        changePasswordPage.changePassword(ConfigReader.getCandidatePassword(), "NewPass123!", "Mismatch123!");
         
         // Error should be displayed
         assertTrue(changePasswordPage.isToastMessageDisplayed() ||
