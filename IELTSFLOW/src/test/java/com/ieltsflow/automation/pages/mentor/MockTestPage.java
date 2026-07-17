@@ -1,6 +1,6 @@
 package com.ieltsflow.automation.pages.mentor;
 
-import com.ieltsflow.automation.pages.BasePage;
+import com.ieltsflow.automation.base.BasePage;
 import com.ieltsflow.automation.utils.ConfigReader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;

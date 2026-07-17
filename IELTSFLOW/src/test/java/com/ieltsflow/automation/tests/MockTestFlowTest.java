@@ -4,6 +4,11 @@ import com.ieltsflow.automation.base.BaseTest;
 import com.ieltsflow.automation.pages.LoginPage;
 import com.ieltsflow.automation.pages.MockTestPage;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import com.ieltsflow.automation.utils.ConfigReader;
 import com.ieltsflow.automation.pages.LoginPage;
 
@@ -17,7 +22,6 @@ public class MockTestFlowTest extends BaseTest {
         MockTestPage mockTestPage = new MockTestPage(driver);
 
         // ── BƯỚC 1: ĐĂNG NHẬP ──────────────────────────────────────────────
-        LoginPage loginPage = new LoginPage(driver);
         loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
         System.out.println("====== BƯỚC 1 OK: Đăng nhập thành công ======");
@@ -55,17 +59,13 @@ public class MockTestFlowTest extends BaseTest {
         MockTestPage mockTestPage = new MockTestPage(driver);
 
         // ── BƯỚC 1: ĐĂNG NHẬP VÀ VÀO PHÒNG THI ─────────────────────────────
-        LoginPage loginPage = new LoginPage(driver);
         loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
 
         driver.get(ConfigReader.getBaseUrl() + "/candidate/mock-test");
-        WebElement btnStartMock = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("btn-start-mock-test")));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].closest('form').submit();", btnStartMock);
-
-        WebElement btnStartExam = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("btn-start-exam")));
-        jsClick(btnStartExam);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("timer")));
+        mockTestPage.clickStartMockTest();
+        mockTestPage.clickStartExamSecurity();
+        mockTestPage.waitForTimerToAppear();
         System.out.println("====== Đã vào phòng thi và đếm giờ ======");
 
         // ── BƯỚC 2: GIẢ LẬP VI PHẠM (ĐỔI TAB/THU NHỎ) LẦN 1 ────────────────
