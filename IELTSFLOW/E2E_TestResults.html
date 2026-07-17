@@ -35,7 +35,7 @@
 <a href="#"><span class="badge badge-primary">E2E Testing Results</span></a>
 </li>
 <li class="m-r-10">
-<a href="#"><span class="badge badge-primary">Jul 17, 2026 10:32:18 AM</span></a>
+<a href="#"><span class="badge badge-primary">Jul 17, 2026 10:34:40 AM</span></a>
 </li>
 </ul>
 </div>
@@ -75,54 +75,68 @@
 </ul>
 </div>    <div class="test-list-wrapper scrollable">
       <ul class="test-list-item">
-        <li class="test-item"  status="fail" test-id="1"
+        <li class="test-item"  status="pass" test-id="1"
           author=""
           tag=""
           device="">
           <div class="test-detail">
             <p class="name">testUploadDocument</p>
             <p class="text-sm">
-              <span>10:32:18 AM</span> / <span>00:00:22:278</span>
-              <span class="badge fail-bg log float-right">Fail</span>
+              <span>9:55:03 AM</span> / <span>00:00:12:867</span>
+              <span class="badge pass-bg log float-right">Pass</span>
             </p>
           </div>
           <div class="test-contents d-none">
 <div class="detail-head">
 <div class="p-v-10">
 <div class="info">
-<h5 class="test-status text-fail">testUploadDocument</h5>
-<span class='badge badge-success'>07.17.2026 10:32:18 AM</span>
-<span class='badge badge-danger'>07.17.2026 10:32:40 AM</span>
-<span class='badge badge-default'>00:00:22:278</span>
+<h5 class="test-status text-pass">testListeningMultipleChoiceValid_EP</h5>
+<span class='badge badge-success'>07.17.2026 9:55:03 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:55:16 AM</span>
+<span class='badge badge-default'>00:00:12:867</span>
 &middot; <span class='uri-anchor badge badge-default'>#test-id=1</span>
 <span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
 <span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
 <span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
 </div>
 </div>
-</div>    <div class="row mb-3"><div class="col-md-3">
-    
-
-<img data-featherlight='screenshots/Upload_a_new_PDF_document_1784259160434.png' src="screenshots/Upload_a_new_PDF_document_1784259160434.png">
-  
-    
-
-    </div></div>
-<div class="detail-body mt-4">
+</div><div class="detail-body mt-4">
 <table class="table table-sm">
   <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
   <tbody>
       <tr class="event-row">
-        <td><span class="badge log fail-bg">Fail</span></td>
-        <td>10:32:40 AM</td>
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:04 AM</td>
         <td>
-          Test Failed: Expected condition failed: waiting for alert to be present
-(tried for 15 seconds with 500 milliseconds interval)
-Build info: version: '4.45.0', revision: 'cd6a3cd cd6a3cdfca6970f62e5bc8344109d0fe0e2af05e'
-System info: os.name: 'Linux', os.arch: 'amd64', os.version: '7.1.3-arch2-1', java.version: '26.0.1'
-Driver info: org.openqa.selenium.chrome.ChromeDriver
-Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 151.0.7922.34, chrome: {chromedriverVersion: 151.0.7922.34 (782af9cb30a5..., userDataDir: /tmp/org.chromium.Chromium....}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:36143}, goog:processID: 32840, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: linux, proxy: Proxy(), se:cdp: ws://localhost:36143/devtoo..., se:cdpVersion: 151.0.7922.34, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
-Session ID: 969d4d9436a17c9d01b4bb2eb4f0c011
+          Thực thi TC_PRAC_LIS_001: Chọn đáp án trắc nghiệm hợp lệ
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:07 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:09 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:15 AM</td>
+        <td>
+          Đã chọn đáp án đầu tiên trong phần Listening
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:55:16 AM</td>
+        <td>
+          Test Passed
         </td>
       </tr>
   </tbody>
@@ -130,56 +144,75 @@ Session ID: 969d4d9436a17c9d01b4bb2eb4f0c011
 </div>
           </div>
         </li>
-        <li class="test-item"  status="fail" test-id="2"
+        <li class="test-item"  status="pass" test-id="2"
           author=""
           tag=""
           device="">
           <div class="test-detail">
             <p class="name">testCreateMatchingQuestion</p>
             <p class="text-sm">
-              <span>10:32:40 AM</span> / <span>00:00:06:641</span>
-              <span class="badge fail-bg log float-right">Fail</span>
+              <span>9:55:16 AM</span> / <span>00:00:11:000</span>
+              <span class="badge pass-bg log float-right">Pass</span>
             </p>
           </div>
           <div class="test-contents d-none">
 <div class="detail-head">
 <div class="p-v-10">
 <div class="info">
-<h5 class="test-status text-fail">testCreateMatchingQuestion</h5>
-<span class='badge badge-success'>07.17.2026 10:32:40 AM</span>
-<span class='badge badge-danger'>07.17.2026 10:32:47 AM</span>
-<span class='badge badge-default'>00:00:06:641</span>
+<h5 class="test-status text-pass">testListeningChangeSelection_DecisionTable</h5>
+<span class='badge badge-success'>07.17.2026 9:55:16 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:55:27 AM</span>
+<span class='badge badge-default'>00:00:11:000</span>
 &middot; <span class='uri-anchor badge badge-default'>#test-id=2</span>
 <span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
 <span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
 <span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
 </div>
 </div>
-</div>    <div class="row mb-3"><div class="col-md-3">
-    
-
-<img data-featherlight='screenshots/Create_a_complex_Matching_Question_1784259167360.png' src="screenshots/Create_a_complex_Matching_Question_1784259167360.png">
-  
-    
-
-    </div></div>
-<div class="detail-body mt-4">
+</div><div class="detail-body mt-4">
 <table class="table table-sm">
   <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
   <tbody>
       <tr class="event-row">
-        <td><span class="badge log fail-bg">Fail</span></td>
-        <td>10:32:47 AM</td>
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:17 AM</td>
         <td>
-          Test Failed: invalid element state
-  (Session info: chrome=151.0.7922.34)
-Build info: version: '4.45.0', revision: 'cd6a3cd cd6a3cdfca6970f62e5bc8344109d0fe0e2af05e'
-System info: os.name: 'Linux', os.arch: 'amd64', os.version: '7.1.3-arch2-1', java.version: '26.0.1'
-Driver info: org.openqa.selenium.chrome.ChromeDriver
-Command: [b2611c3028ba6a1d9991c54286cf3822, clearElement {id=f.92328F59A1D12D28BA463E15C4F5ED3D.d.9E8D317D25E86EB0751B1F1B48C999B6.e.204}]
-Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 151.0.7922.34, chrome: {chromedriverVersion: 151.0.7922.34 (782af9cb30a5..., userDataDir: /tmp/org.chromium.Chromium....}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:37149}, goog:processID: 33090, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: linux, proxy: Proxy(), se:cdp: ws://localhost:37149/devtoo..., se:cdpVersion: 151.0.7922.34, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
-Element: [[ChromeDriver: chrome on linux (b2611c3028ba6a1d9991c54286cf3822)] -> name: questionType]
-Session ID: b2611c3028ba6a1d9991c54286cf3822
+          Thực thi TC_PRAC_LIS_002: Kiểm tra chuyển đổi lựa chọn đáp án trắc nghiệm
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:19 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:20 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:27 AM</td>
+        <td>
+          Chọn đáp án A (index 0)
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:27 AM</td>
+        <td>
+          Chuyển sang chọn đáp án B (index 1)
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:55:27 AM</td>
+        <td>
+          Test Passed
         </td>
       </tr>
   </tbody>
@@ -194,7 +227,7 @@ Session ID: b2611c3028ba6a1d9991c54286cf3822
           <div class="test-detail">
             <p class="name">testDeleteQuestion</p>
             <p class="text-sm">
-              <span>10:32:47 AM</span> / <span>00:00:10:710</span>
+              <span>9:55:27 AM</span> / <span>00:00:11:768</span>
               <span class="badge pass-bg log float-right">Pass</span>
             </p>
           </div>
@@ -202,10 +235,10 @@ Session ID: b2611c3028ba6a1d9991c54286cf3822
 <div class="detail-head">
 <div class="p-v-10">
 <div class="info">
-<h5 class="test-status text-pass">testDeleteQuestion</h5>
-<span class='badge badge-success'>07.17.2026 10:32:47 AM</span>
-<span class='badge badge-danger'>07.17.2026 10:32:58 AM</span>
-<span class='badge badge-default'>00:00:10:710</span>
+<h5 class="test-status text-pass">testListeningSubmitPartial_EP</h5>
+<span class='badge badge-success'>07.17.2026 9:55:27 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:55:39 AM</span>
+<span class='badge badge-default'>00:00:11:768</span>
 &middot; <span class='uri-anchor badge badge-default'>#test-id=3</span>
 <span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
 <span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
@@ -217,8 +250,36 @@ Session ID: b2611c3028ba6a1d9991c54286cf3822
   <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
   <tbody>
       <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:28 AM</td>
+        <td>
+          Thực thi TC_PRAC_LIS_003: Nộp bài khi chưa trả lời hết các câu hỏi
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:30 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:32 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:39 AM</td>
+        <td>
+          Đã bấm Submit khi mới làm 1 câu (EP Partial/Empty Class)
+        </td>
+      </tr>
+      <tr class="event-row">
         <td><span class="badge log pass-bg">Pass</span></td>
-        <td>10:32:58 AM</td>
+        <td>9:55:39 AM</td>
         <td>
           Test Passed
         </td>
@@ -228,26 +289,164 @@ Session ID: b2611c3028ba6a1d9991c54286cf3822
 </div>
           </div>
         </li>
-        <li class="test-item"  status="fail" test-id="4"
+        <li class="test-item"  status="pass" test-id="4"
           author=""
           tag=""
           device="">
           <div class="test-detail">
             <p class="name">testCreateFillInBlanksQuestion</p>
             <p class="text-sm">
-              <span>10:32:58 AM</span> / <span>00:00:07:096</span>
-              <span class="badge fail-bg log float-right">Fail</span>
+              <span>9:55:39 AM</span> / <span>00:00:10:868</span>
+              <span class="badge pass-bg log float-right">Pass</span>
             </p>
           </div>
           <div class="test-contents d-none">
 <div class="detail-head">
 <div class="p-v-10">
 <div class="info">
-<h5 class="test-status text-fail">testCreateFillInBlanksQuestion</h5>
-<span class='badge badge-success'>07.17.2026 10:32:58 AM</span>
-<span class='badge badge-danger'>07.17.2026 10:33:05 AM</span>
-<span class='badge badge-default'>00:00:07:096</span>
+<h5 class="test-status text-pass">testReadingFillInBlanksValid_EP</h5>
+<span class='badge badge-success'>07.17.2026 9:55:39 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:55:50 AM</span>
+<span class='badge badge-default'>00:00:10:868</span>
 &middot; <span class='uri-anchor badge badge-default'>#test-id=4</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:40 AM</td>
+        <td>
+          Thực thi TC_PRAC_REA_001: Điền từ hợp lệ vào bài Reading
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:42 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:43 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:50 AM</td>
+        <td>
+          Đã điền từ 'climate stability' vào ô trống
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:55:50 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="5"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testCreateMockTestFlow</p>
+            <p class="text-sm">
+              <span>9:55:50 AM</span> / <span>00:00:11:024</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testReadingTrimWhitespace_BVA</h5>
+<span class='badge badge-success'>07.17.2026 9:55:50 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:56:01 AM</span>
+<span class='badge badge-default'>00:00:11:024</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=5</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:51 AM</td>
+        <td>
+          Thực thi TC_PRAC_REA_002: Kiểm tra xử lý khoảng trắng thừa khi điền từ
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:53 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:55:55 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:56:01 AM</td>
+        <td>
+          Đã nhập từ có khoảng trắng thừa và Submit
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:56:01 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="fail" test-id="6"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testReplyToTicket</p>
+            <p class="text-sm">
+              <span>9:56:01 AM</span> / <span>00:00:34:620</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testReadingExceedWordLimit_BVA</h5>
+<span class='badge badge-success'>07.17.2026 9:56:01 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:56:36 AM</span>
+<span class='badge badge-default'>00:00:34:620</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=6</span>
 <span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
 <span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
 <span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
@@ -256,7 +455,7 @@ Session ID: b2611c3028ba6a1d9991c54286cf3822
 </div>    <div class="row mb-3"><div class="col-md-3">
     
 
-<img data-featherlight='screenshots/Create_a_complex_Fill_in_the_Blanks_Question_1784259185306.png' src="screenshots/Create_a_complex_Fill_in_the_Blanks_Question_1784259185306.png">
+<img data-featherlight='screenshots/Reply_and_resolve_a_ticket_1784259335269.png' src="screenshots/Reply_and_resolve_a_ticket_1784259335269.png">
   
     
 
@@ -266,18 +465,611 @@ Session ID: b2611c3028ba6a1d9991c54286cf3822
   <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
   <tbody>
       <tr class="event-row">
-        <td><span class="badge log fail-bg">Fail</span></td>
-        <td>10:33:05 AM</td>
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:56:02 AM</td>
         <td>
-          Test Failed: invalid element state
+          Thực thi TC_PRAC_REA_003: Kiểm thử nhập vượt quá số từ yêu cầu (VD: NO MORE THAN TWO WORDS)
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:56:04 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:56:05 AM</td>
+        <td>
+          Ghi nhận trạng thái điều hướng trang luyện tập: element click intercepted: Element is not clickable at point (923, 547)
   (Session info: chrome=151.0.7922.34)
+Build info: version: '4.45.0', revision: 'cd6a3cd cd6a3cdfca6970f62e5bc8344109d0fe0e2af05e'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '25.0.2'
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Command: [461ad550499639592298f43dfdc84c03, clickElement {id=f.5B7315C9D1EC86564257BAB7E5F8FD26.d.5A257F6A157186CAC84A89C5BAD17C82.e.14}]
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 151.0.7922.34, chrome: {chromedriverVersion: 151.0.7922.34 (782af9cb30a5..., userDataDir: C:\Users\minht\AppData\Loca...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:54210}, goog:processID: 24100, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: windows, proxy: Proxy(), se:cdp: ws://localhost:54210/devtoo..., se:cdpVersion: 151.0.7922.34, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
+Element: [[ChromeDriver: chrome on windows (461ad550499639592298f43dfdc84c03)] -> css selector: #loginForm button[type='submit']]
+Session ID: 461ad550499639592298f43dfdc84c03
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:56:36 AM</td>
+        <td>
+          Đã điền chuỗi 5 từ vào câu hỏi giới hạn 2 từ (BVA N+1)
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:56:36 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="7"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testWritingRealtimeWordCount_EP</p>
+            <p class="text-sm">
+              <span>9:56:36 AM</span> / <span>00:00:44:255</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testWritingRealtimeWordCount_EP</h5>
+<span class='badge badge-success'>07.17.2026 9:56:36 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:57:20 AM</span>
+<span class='badge badge-default'>00:00:44:255</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=7</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:56:37 AM</td>
+        <td>
+          Thực thi TC_PRAC_WRI_001: Nhập văn bản và kiểm tra Real-time Word Count
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:56:38 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:56:39 AM</td>
+        <td>
+          Ghi nhận trạng thái điều hướng trang luyện tập: element click intercepted: Element is not clickable at point (923, 547)
+  (Session info: chrome=151.0.7922.34)
+Build info: version: '4.45.0', revision: 'cd6a3cd cd6a3cdfca6970f62e5bc8344109d0fe0e2af05e'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '25.0.2'
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Command: [e557c183c39eabdbff4be24faad2c0f2, clickElement {id=f.2421D70F30E47678A1A56884ED4D6BC9.d.0D55600EBE0C51320263F7B07EEB1000.e.14}]
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 151.0.7922.34, chrome: {chromedriverVersion: 151.0.7922.34 (782af9cb30a5..., userDataDir: C:\Users\minht\AppData\Loca...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:59207}, goog:processID: 13728, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: windows, proxy: Proxy(), se:cdp: ws://localhost:59207/devtoo..., se:cdpVersion: 151.0.7922.34, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
+Element: [[ChromeDriver: chrome on windows (e557c183c39eabdbff4be24faad2c0f2)] -> css selector: #loginForm button[type='submit']]
+Session ID: e557c183c39eabdbff4be24faad2c0f2
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:20 AM</td>
+        <td>
+          Số từ đếm được tức thì trên giao diện: 1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:57:20 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="8"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testWritingZeroWordCountBoundary_BVA</p>
+            <p class="text-sm">
+              <span>9:57:21 AM</span> / <span>00:00:09:708</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testWritingZeroWordCountBoundary_BVA</h5>
+<span class='badge badge-success'>07.17.2026 9:57:21 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:57:30 AM</span>
+<span class='badge badge-default'>00:00:09:708</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=8</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:21 AM</td>
+        <td>
+          Thực thi TC_PRAC_WRI_002: Kiểm tra cận dưới đếm từ khi xóa trắng ô soạn thảo
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:23 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:24 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:30 AM</td>
+        <td>
+          Số từ sau khi clear toàn bộ văn bản: 5
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:57:30 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="9"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testWritingSubmitAndAiGrading_Integration</p>
+            <p class="text-sm">
+              <span>9:57:31 AM</span> / <span>00:00:11:432</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testWritingSubmitAndAiGrading_Integration</h5>
+<span class='badge badge-success'>07.17.2026 9:57:31 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:57:42 AM</span>
+<span class='badge badge-default'>00:00:11:432</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=9</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:31 AM</td>
+        <td>
+          Thực thi TC_PRAC_WRI_003: Nộp bài tự luận đầy đủ và xác minh API AI chấm điểm
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:33 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:35 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:42 AM</td>
+        <td>
+          Đã nộp bài Writing đủ độ dài, xác minh luồng gọi API chấm điểm AI E2E
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:57:42 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="10"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testWritingShortEssayBelowThreshold_BVA</p>
+            <p class="text-sm">
+              <span>9:57:42 AM</span> / <span>00:00:11:921</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testWritingShortEssayBelowThreshold_BVA</h5>
+<span class='badge badge-success'>07.17.2026 9:57:42 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:57:54 AM</span>
+<span class='badge badge-default'>00:00:11:921</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=10</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:43 AM</td>
+        <td>
+          Thực thi TC_PRAC_WRI_004: Kiểm thử nộp bài tự luận ngắn dưới ngưỡng tối thiểu (VD: < 30 từ)
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:46 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:48 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:54 AM</td>
+        <td>
+          Đã nộp bài tự luận rất ngắn (3 từ) kiểm tra xử lý ngưỡng tối thiểu của AI
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:57:54 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="11"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testSpeakingStartRecording_StateTransition</p>
+            <p class="text-sm">
+              <span>9:57:54 AM</span> / <span>00:00:20:042</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testSpeakingStartRecording_StateTransition</h5>
+<span class='badge badge-success'>07.17.2026 9:57:54 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:58:14 AM</span>
+<span class='badge badge-default'>00:00:20:042</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=11</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:55 AM</td>
+        <td>
+          Thực thi TC_PRAC_SPE_001: Kiểm tra chuyển trạng thái UI khi bấm Start Recording
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:56 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:57:58 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:14 AM</td>
+        <td>
+          Ghi nhận chuyển trạng thái Recording: Expected condition failed: waiting for element found by By.id: btn-rec-401 to be clickable, but the element was not found: org.openqa.selenium.NoSuchElementException: no such element: Unable to locate element: {"method":"css selector","selector":"#btn\-rec\-401"}.
+(tried for 10 seconds with 500 milliseconds interval)
 Build info: version: '4.45.0', revision: 'cd6a3cd cd6a3cdfca6970f62e5bc8344109d0fe0e2af05e'
 System info: os.name: 'Linux', os.arch: 'amd64', os.version: '7.1.3-arch2-1', java.version: '26.0.1'
 Driver info: org.openqa.selenium.chrome.ChromeDriver
-Command: [d6b459e6b650fb85dee0cd23fe843061, clearElement {id=f.7107C53BE53AB368C33E205F54733BE2.d.6E5138662472FE886C5BD5E16DFBDC74.e.196}]
-Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 151.0.7922.34, chrome: {chromedriverVersion: 151.0.7922.34 (782af9cb30a5..., userDataDir: /tmp/org.chromium.Chromium....}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:45421}, goog:processID: 33570, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: linux, proxy: Proxy(), se:cdp: ws://localhost:45421/devtoo..., se:cdpVersion: 151.0.7922.34, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
-Element: [[ChromeDriver: chrome on linux (d6b459e6b650fb85dee0cd23fe843061)] -> name: questionType]
-Session ID: d6b459e6b650fb85dee0cd23fe843061
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 151.0.7922.34, chrome: {chromedriverVersion: 151.0.7922.34 (782af9cb30a5..., userDataDir: C:\Users\minht\AppData\Loca...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:54731}, goog:processID: 11632, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: windows, proxy: Proxy(), se:cdp: ws://localhost:54731/devtoo..., se:cdpVersion: 151.0.7922.34, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
+Session ID: 5e5d151bc9801302b6def74f41b17b56
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:58:14 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="12"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testSpeakingMockSpeechToText_Mocking</p>
+            <p class="text-sm">
+              <span>9:58:15 AM</span> / <span>00:00:19:807</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testSpeakingMockSpeechToText_Mocking</h5>
+<span class='badge badge-success'>07.17.2026 9:58:15 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:58:35 AM</span>
+<span class='badge badge-default'>00:00:19:807</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=12</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:15 AM</td>
+        <td>
+          Thực thi TC_PRAC_SPE_002: Mô phỏng Speech-to-Text qua DOM trong môi trường CI/CD
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:16 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:18 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:35 AM</td>
+        <td>
+          Ghi nhận Mock STT DOM: Expected condition failed: waiting for element found by By.id: btn-rec-401 to be clickable, but the element was not found: org.openqa.selenium.NoSuchElementException: no such element: Unable to locate element: {"method":"css selector","selector":"#btn\-rec\-401"}.
+(tried for 10 seconds with 500 milliseconds interval)
+Build info: version: '4.45.0', revision: 'cd6a3cd cd6a3cdfca6970f62e5bc8344109d0fe0e2af05e'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '25.0.2'
+Driver info: org.openqa.selenium.chrome.ChromeDriver
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 151.0.7922.34, chrome: {chromedriverVersion: 151.0.7922.34 (782af9cb30a5..., userDataDir: C:\Users\minht\AppData\Loca...}, fedcm:accounts: true, goog:chromeOptions: {debuggerAddress: localhost:58864}, goog:processID: 25968, networkConnectionEnabled: false, pageLoadStrategy: normal, platformName: windows, proxy: Proxy(), se:cdp: ws://localhost:58864/devtoo..., se:cdpVersion: 151.0.7922.34, setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:credBlob: true, webauthn:extension:largeBlob: true, webauthn:extension:minPinLength: true, webauthn:extension:prf: true, webauthn:virtualAuthenticators: true}
+Session ID: d1b58062258f7f67e6c2a2ed00ff0e6b
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:58:35 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="13"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testSystemSessionLossAndRedirect_Flow</p>
+            <p class="text-sm">
+              <span>9:58:35 AM</span> / <span>00:00:08:530</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testSystemSessionLossAndRedirect_Flow</h5>
+<span class='badge badge-success'>07.17.2026 9:58:35 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:58:43 AM</span>
+<span class='badge badge-default'>00:00:08:530</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=13</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:36 AM</td>
+        <td>
+          Thực thi TC_PRAC_SYS_001: Kiểm tra tự động đăng nhập ngầm và điều hướng thẳng vào phòng thi
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:36 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:38 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:58:43 AM</td>
+        <td>
+          Test Passed
+        </td>
+      </tr>
+  </tbody>
+</table>
+</div>
+          </div>
+        </li>
+        <li class="test-item"  status="pass" test-id="14"
+          author=""
+          tag=""
+          device="">
+          <div class="test-detail">
+            <p class="name">testSystemOverlayDismissAndSubmit_Robustness</p>
+            <p class="text-sm">
+              <span>9:58:44 AM</span> / <span>00:00:09:512</span>
+              <span class="badge pass-bg log float-right">Pass</span>
+            </p>
+          </div>
+          <div class="test-contents d-none">
+<div class="detail-head">
+<div class="p-v-10">
+<div class="info">
+<h5 class="test-status text-pass">testSystemOverlayDismissAndSubmit_Robustness</h5>
+<span class='badge badge-success'>07.17.2026 9:58:44 AM</span>
+<span class='badge badge-danger'>07.17.2026 9:58:53 AM</span>
+<span class='badge badge-default'>00:00:09:512</span>
+&middot; <span class='uri-anchor badge badge-default'>#test-id=14</span>
+<span title='Skip to the next failed step' class='badge badge-danger pointer float-right ne ml-1'><i class="fa fa-fast-forward"></i></span>
+<span title='Collapse all nodes' class='badge badge-default pointer float-right ct ml-1'><i class="fa fa-compress"></i></span>
+<span title='Expand all nodes' class='badge badge-default pointer float-right et'><i class="fa fa-expand"></i></span>
+</div>
+</div>
+</div><div class="detail-body mt-4">
+<table class="table table-sm">
+  <thead><tr><th class="status-col">Status</th><th class="timestamp-col">Timestamp</th><th class="details-col">Details</th></tr></thead>
+  <tbody>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:44 AM</td>
+        <td>
+          Thực thi TC_PRAC_SYS_002: Kiểm tra kiên cố đóng modal/overlay và Submit tổng thể
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:46 AM</td>
+        <td>
+          Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:47 AM</td>
+        <td>
+          Đã đăng nhập thành công và chuyển thẳng vào trang Luyện tập: https://ieltsflow.tanmanh350.ovh/candidate/mock-test?action=take&examId=1
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log info-bg">Info</span></td>
+        <td>9:58:53 AM</td>
+        <td>
+          Đã xử lý đóng lớp phủ và click Submit chính
+        </td>
+      </tr>
+      <tr class="event-row">
+        <td><span class="badge log pass-bg">Pass</span></td>
+        <td>9:58:53 AM</td>
+        <td>
+          Test Passed
         </td>
       </tr>
   </tbody>
@@ -299,25 +1091,25 @@ Session ID: d6b459e6b650fb85dee0cd23fe843061
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0">Started</p>
-<h3>Jul 17, 2026 10:32:18 AM</h3>
+<h3>Jul 17, 2026 09:55:02 AM</h3>
 </div></div>
 </div>
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0">Ended</p>
-<h3>Jul 17, 2026 10:33:05 AM</h3>
+<h3>Jul 17, 2026 09:58:53 AM</h3>
 </div></div>
 </div>
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0 text-pass">Tests Passed</p>
-<h3>1</h3>
+<h3>5</h3>
 </div></div>
 </div>
 <div class="col-md-3">
 <div class="card"><div class="card-body">
 <p class="m-b-0 text-fail">Tests Failed</p>
-<h3>3</h3>
+<h3>1</h3>
 </div></div>
 </div>
 </div>
@@ -333,12 +1125,12 @@ Session ID: d6b459e6b650fb85dee0cd23fe843061
 </div>
 </div>
 <div class="card-footer">
-<div><small data-tooltip='25%'>
-<b>1</b> tests passed
+<div><small data-tooltip='83%'>
+<b>5</b> tests passed
 </small>
 </div>
 <div>
-<small data-tooltip='75%'><b>3</b> tests failed,
+<small data-tooltip='16%'><b>1</b> tests failed,
 <b>0</b> skipped, <b data-tooltip='0%'>0</b> others
 </small>
 </div>
@@ -356,9 +1148,9 @@ Session ID: d6b459e6b650fb85dee0cd23fe843061
 </div>
 </div>
 <div class="card-footer">
-<div><small data-tooltip='25%'><b>1</b> events passed</small></div>
+<div><small data-tooltip='83%'><b>5</b> events passed</small></div>
 <div>
-<small data-tooltip='75%'><b>3</b> events failed,
+<small data-tooltip='16%'><b>1</b> events failed,
 <b data-tooltip='%'>0</b> others
 </small>
 </div>
@@ -375,7 +1167,7 @@ Session ID: d6b459e6b650fb85dee0cd23fe843061
 </div></div>
 <script>
 var timeline = {
-"testUploadDocument":22.278,"testCreateMatchingQuestion":6.641,"testDeleteQuestion":10.71,"testCreateFillInBlanksQuestion":7.096
+"testListeningMultipleChoiceValid_EP":12.867,"testListeningChangeSelection_DecisionTable":11,"testListeningSubmitPartial_EP":11.768,"testReadingFillInBlanksValid_EP":10.868,"testReadingTrimWhitespace_BVA":11.024,"testReadingExceedWordLimit_BVA":34.62,"testWritingRealtimeWordCount_EP":44.255,"testWritingZeroWordCountBoundary_BVA":9.708,"testWritingSubmitAndAiGrading_Integration":11.432,"testWritingShortEssayBelowThreshold_BVA":11.921,"testSpeakingStartRecording_StateTransition":20.042,"testSpeakingMockSpeechToText_Mocking":19.807,"testSystemSessionLossAndRedirect_Flow":8.53,"testSystemOverlayDismissAndSubmit_Robustness":9.512
 };
 </script>
 <div class="row">
@@ -410,8 +1202,8 @@ var timeline = {
 <script>
 var statusGroup = {
 parentCount: 5,
-passParent: 1,
-failParent: 3,
+passParent: 5,
+failParent: 1,
 warningParent: 0,
 skipParent: 0,
 childCount: 5,
@@ -427,8 +1219,8 @@ warningGrandChild: 0,
 skipGrandChild: 0,
 infoGrandChild: 0,
 eventsCount: 5,
-passEvents: 1,
-failEvents: 3,
+passEvents: 5,
+failEvents: 1,
 warningEvents: 0,
 skipEvents: 0,
 infoEvents: 0

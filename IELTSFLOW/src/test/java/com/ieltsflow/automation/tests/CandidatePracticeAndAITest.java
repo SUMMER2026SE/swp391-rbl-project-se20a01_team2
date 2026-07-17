@@ -43,7 +43,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
         if (driver.getCurrentUrl().contains("/auth") || driver.getCurrentUrl().contains("/login")) {
             test.info("Phát hiện chưa có Session -> Tự động đăng nhập tài khoản học viên để vào làm bài...");
             try {
-                org.openqa.selenium.support.ui.WebDriverWait loginWait = new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(15));
+                org.openqa.selenium.support.ui.WebDriverWait loginWait = new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(25));
 
                 org.openqa.selenium.WebElement emailInput = loginWait.until(org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated(org.openqa.selenium.By.id("loginEmail")));
                 emailInput.clear();
@@ -335,6 +335,12 @@ public class CandidatePracticeAndAITest extends BaseTest {
         test.info("Thực thi TC_PRAC_SYS_001: Kiểm tra tự động đăng nhập ngầm và điều hướng thẳng vào phòng thi");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
         ensureLoggedInAndNavigateToPractice(testUrl);
+
+        try {
+            org.openqa.selenium.support.ui.WebDriverWait urlWait = new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(10));
+            urlWait.until(org.openqa.selenium.support.ui.ExpectedConditions.not(
+                    org.openqa.selenium.support.ui.ExpectedConditions.urlContains("/auth")));
+        } catch (Exception ignored) {}
 
         assertTrue(!driver.getCurrentUrl().contains("/auth"), "Sau khi đăng nhập ngầm, URL không còn ở trang /auth");
     }

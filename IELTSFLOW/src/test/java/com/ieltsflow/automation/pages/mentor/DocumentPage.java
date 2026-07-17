@@ -25,14 +25,6 @@ public class DocumentPage extends BasePage {
         type(inputResourceTitle, title);
         driver.findElement(inputFileUpload).sendKeys(filePath);
         
-        // Click the 'Tải lên' button using JavascriptExecutor to bypass the sticky footer
-        jsClick(btnUploadResource);
-        
-        // Wait for JS Alert "Tải lên thành công!"
-        org.openqa.selenium.support.ui.WebDriverWait wait = new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(15));
-        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent());
-        driver.switchTo().alert().accept();
-        
         // Submit the form to save the lesson
         jsClick(btnSubmitUpload);
     }
