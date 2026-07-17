@@ -1,0 +1,4 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_MBANK_01","Create a complex Matching Question","Mentor logged in","1. Go to Questions Bank page\n2. Click Create Question\n3. Fill Matching Question data (left: A, right: B)\n4. Save Question","Question successfully saved to bank","Pass",""
+"TC_MBANK_02","Create a complex Fill in the Blanks Question","Mentor logged in","1. Go to Questions Bank page\n2. Click Create Question\n3. Fill Blanks Question data\n4. Save Question","Question successfully saved to bank","Pass",""
+"TC_MBANK_03","Delete a Question from Bank","Mentor logged in, Question exists","1. Go to Questions Bank page\n2. Select a question\n3. Click Delete","Question successfully deleted from bank","Pass",""

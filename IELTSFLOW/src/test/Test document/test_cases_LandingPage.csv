@@ -1,0 +1,3 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_LAND_01","Verify Landing Page UI Elements","","1. Navigate to Landing Page","Logo and hero title should be displayed","Pass",""
+"TC_LAND_02","Verify Navigation to Login","","1. Navigate to Landing Page\n2. Click Login button","URL should contain 'auth', successfully navigated to login page","Pass",""

@@ -49,10 +49,9 @@ public class AuthenticationTest extends BaseTest {
         String uniqueEmail = "testuser" + System.currentTimeMillis() + "@example.com";
         registerPage.register("Test User", uniqueEmail, "Password123!", "Password123!", true);
         
-        // Wait for redirect to login or success message
-        // Usually, registration redirects to auth with a success message or automatically logs in
-        loginPage.waitForLoginSuccess();
-        assertTrue(!driver.getCurrentUrl().contains("/auth"), "Should redirect to dashboard after successful registration");
+        // Registration returns to auth page with a success message asking user to verify email
+        assertTrue(registerPage.isSuccessDisplayed(), "Should display success message after registration");
+        assertTrue(driver.getCurrentUrl().contains("/auth"), "URL should remain on auth page for email verification");
     }
 
     @Test

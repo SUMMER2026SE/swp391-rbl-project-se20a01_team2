@@ -54,6 +54,12 @@ public class RegisterPage extends BasePage {
         return getText(errorAlert);
     }
 
+    public boolean isSuccessDisplayed() {
+        By successAlert = By.className("alert-success");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(successAlert));
+        return isElementDisplayed(successAlert);
+    }
+
     public String getPasswordStrength() {
         return getText(strengthText);
     }
