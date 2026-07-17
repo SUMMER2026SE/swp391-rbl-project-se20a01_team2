@@ -3,6 +3,7 @@ package com.ieltsflow.automation.tests;
 import com.ieltsflow.automation.base.BaseTest;
 import com.ieltsflow.automation.pages.LoginPage;
 import com.ieltsflow.automation.pages.MockTestPage;
+import com.ieltsflow.automation.utils.ConfigReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ public class MockTestFlowTest extends BaseTest {
         MockTestPage mockTestPage = new MockTestPage(driver);
 
         // ── BƯỚC 1: ĐĂNG NHẬP ──────────────────────────────────────────────
-        loginPage.login("test1@gmail.com", "Admin1234");
+        loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
         System.out.println("====== BƯỚC 1 OK: Đăng nhập thành công ======");
 
@@ -53,7 +54,7 @@ public class MockTestFlowTest extends BaseTest {
         MockTestPage mockTestPage = new MockTestPage(driver);
 
         // ── BƯỚC 1: ĐĂNG NHẬP VÀ VÀO PHÒNG THI ─────────────────────────────
-        loginPage.login("test1@gmail.com", "Admin1234");
+        loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
 
         mockTestPage.navigateToMockTestInfo();
