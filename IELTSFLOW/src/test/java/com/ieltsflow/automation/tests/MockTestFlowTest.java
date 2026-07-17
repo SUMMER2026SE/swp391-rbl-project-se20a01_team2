@@ -10,6 +10,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import org.junit.jupiter.api.Assertions;
+import com.ieltsflow.automation.utils.ConfigReader;
+import com.ieltsflow.automation.pages.LoginPage;
 
 public class MockTestFlowTest extends BaseTest {
 
@@ -24,19 +26,13 @@ public class MockTestFlowTest extends BaseTest {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
         // ── BƯỚC 1: ĐĂNG NHẬP ──────────────────────────────────────────────
-        driver.get("http://localhost:8080/IELTSFLOW/auth");
-        WebElement emailInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("loginEmail")));
-        emailInput.sendKeys("test1@gmail.com");
-        driver.findElement(By.id("loginPassword")).sendKeys("Admin1234");
-        // Dùng JS click để tránh popup Chrome chặn
-        jsClick(driver.findElement(By.cssSelector("#loginForm button[type='submit']")));
-
-        // Chờ đăng nhập xong
-        wait.until(ExpectedConditions.urlContains("/candidate/"));
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
+        loginPage.waitForLoginSuccess();
         System.out.println("====== BƯỚC 1 OK: Đăng nhập thành công ======");
 
         // ── BƯỚC 2: VÀO TRANG THÔNG TIN ĐỀ THI ──────────────────────────
-        driver.get("http://localhost:8080/IELTSFLOW/candidate/mock-test");
+        driver.get(ConfigReader.getBaseUrl() + "/candidate/mock-test");
         
         // ── BƯỚC 3: CLICK "Bắt đầu thi ngay" BẰNG JAVASCRIPT ────────────
         // Dùng JS submit form trực tiếp để popup Chrome không chặn được
@@ -74,14 +70,11 @@ public class MockTestFlowTest extends BaseTest {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
         // ── BƯỚC 1: ĐĂNG NHẬP VÀ VÀO PHÒNG THI ─────────────────────────────
-        driver.get("http://localhost:8080/IELTSFLOW/auth");
-        WebElement emailInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("loginEmail")));
-        emailInput.sendKeys("test1@gmail.com");
-        driver.findElement(By.id("loginPassword")).sendKeys("Admin1234");
-        jsClick(driver.findElement(By.cssSelector("#loginForm button[type='submit']")));
-        wait.until(ExpectedConditions.urlContains("/candidate/"));
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
+        loginPage.waitForLoginSuccess();
 
-        driver.get("http://localhost:8080/IELTSFLOW/candidate/mock-test");
+        driver.get(ConfigReader.getBaseUrl() + "/candidate/mock-test");
         WebElement btnStartMock = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("btn-start-mock-test")));
         ((JavascriptExecutor) driver).executeScript("arguments[0].closest('form').submit();", btnStartMock);
 
