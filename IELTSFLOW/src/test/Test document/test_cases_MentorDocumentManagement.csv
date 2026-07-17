@@ -1,2 +1,2 @@
 "Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
-"TC_MDOC_01","Upload a new PDF document","Mentor logged in","1. Go to Lessons page\n2. Upload a dummy PDF document\n3. Submit","Upload success message should be displayed","Pass",""
+"TC_MDOC_01","testUploadDocument (Upload a new PDF document)","Mentor logged in","1. Navigate to documents 2. Upload valid PDF 3. Submit","Document uploaded and visible in the list","Automated","EP"

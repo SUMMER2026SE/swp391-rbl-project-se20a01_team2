@@ -1,2 +1,0 @@
-"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
-"TC_DUMMY_01","Open Google and Pass","","1. Open google.com\n2. Check title","Title contains Google","Pass",""

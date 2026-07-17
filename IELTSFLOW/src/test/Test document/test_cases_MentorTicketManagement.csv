@@ -1,2 +1,2 @@
 "Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
-"TC_MTICKET_01","Reply and resolve a ticket","Mentor logged in","1. Go to Tickets page\n2. Select a ticket\n3. Submit a reply","Reply is successfully submitted to the ticket","Pass",""
+"TC_TICKET_01","testReplyToTicket (Reply and resolve a ticket)","Ticket exists, Mentor logged in","1. Navigate to tickets 2. Open a ticket 3. Add reply 4. Resolve","Ticket is marked as resolved and candidate sees reply","Automated","EP"

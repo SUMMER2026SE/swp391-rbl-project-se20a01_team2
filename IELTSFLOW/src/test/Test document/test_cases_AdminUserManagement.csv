@@ -1,6 +1,0 @@
-"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
-"TC_ADMUSER_01","[Happy Path] Test Case 1.1: Ban/Lock User & Verify Login","Admin is logged in, Candidate user exists","1. Find user by email\n2. Lock user\n3. Attempt to login as candidate","Status changes to Inactive/Banned, login fails with error for locked user","Pass",""
-"TC_ADMUSER_02","[Happy Path] Test Case 1.2: Unlock User","Admin is logged in, Candidate user is locked","1. Find user by email\n2. Unlock user","Status changes to Active","Pass",""
-"TC_ADMUSER_03","[Happy Path] Test Case 1.3: Change Role to Mentor & Verify Login","Admin is logged in, Candidate user exists","1. Find user by email\n2. Change role to Mentor\n3. Login as candidate","Role changes to Mentor, user redirected to mentor dashboard on login","Pass",""
-"TC_ADMUSER_04","[Happy Path] Test Case 1.4: Revoke Mentor Role","Admin is logged in, User is Mentor","1. Find user by email\n2. Change role back to Candidate\n3. Login as candidate","Role changes to Candidate, user not redirected to mentor dashboard","Pass",""
-"TC_ADMUSER_05","[Unhappy Path] Test Case 1.5: Search non-existent user","Admin is logged in","1. Search for 'invalid_user_123'","No result message displayed, row count is 0","Pass",""
