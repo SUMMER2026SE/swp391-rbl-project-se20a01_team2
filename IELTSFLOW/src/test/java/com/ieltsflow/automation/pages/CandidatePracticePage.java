@@ -353,5 +353,56 @@ public class CandidatePracticePage {
         } catch (Exception ignored) {}
         return this;
     }
+
+    /**
+     * Xóa trắng nội dung trong ô tự luận Writing để kiểm thử cận dưới (0 từ).
+     * Trả về `this` (Fluent Interface).
+     */
+    public CandidatePracticePage clearWritingEssayText() {
+        try {
+            for (WebElement ta : essayTextareas) {
+                if (ta.isDisplayed() && ta.isEnabled()) {
+                    ta.clear();
+                    break;
+                }
+            }
+        } catch (Exception ignored) {}
+        return this;
+    }
+
+    /**
+     * Chọn nút radio theo chỉ số (index 0, 1, 2...) đang hiển thị để kiểm thử đổi đáp án.
+     * Trả về `this` (Fluent Interface).
+     */
+    public CandidatePracticePage selectRadioAnswerByIndex(int index) {
+        try {
+            int count = 0;
+            for (WebElement radio : radioAnswers) {
+                if (radio.isDisplayed() && radio.isEnabled()) {
+                    if (count == index) {
+                        radio.click();
+                        break;
+                    }
+                    count++;
+                }
+            }
+        } catch (Exception ignored) {}
+        return this;
+    }
+
+    /**
+     * Đếm số lượng đáp án radio đang được chọn (checked) để kiểm tra logic Decision Table.
+     */
+    public int getRadioSelectionCount() {
+        int count = 0;
+        try {
+            for (WebElement radio : radioAnswers) {
+                if (radio.isDisplayed() && radio.isSelected()) {
+                    count++;
+                }
+            }
+        } catch (Exception ignored) {}
+        return count;
+    }
 }
 
