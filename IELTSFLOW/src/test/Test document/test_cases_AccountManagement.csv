@@ -1,0 +1,4 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_ACC_01","Verify update profile full name","User is logged in","1. Navigate to Account Page\n2. Update full name with new value\n3. Save","Success message should be displayed after updating profile","Pass",""
+"TC_ACC_02","Verify change password functionality","User is logged in","1. Navigate to Change Password Page\n2. Enter new password and a mismatched confirm password\n3. Save","Error message should be shown on password mismatch","Pass",""
+"TC_ACC_03","Verify set Target Band","User is logged in","1. Navigate to Target Band Page\n2. Select target band 7.0\n3. Save","Success message should be displayed after setting target band","Pass",""

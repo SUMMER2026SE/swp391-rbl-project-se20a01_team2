@@ -1,0 +1,6 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_ADMSUB_01","[Happy Path] Test Case 2.1: Create new package","Admin is logged in","1. Navigate to Create Package form\n2. Fill valid details (Name, duration, price, desc)\n3. Submit","Package count increases by 1, new package is in list","Pass",""
+"TC_ADMSUB_02","[Happy Path] Test Case 2.2: Update existing package","Package created in TC 2.1","1. Click Edit for package\n2. Update price\n3. Submit","Package price updated in list","Pass",""
+"TC_ADMSUB_03","[Unhappy Path] Test Case 2.3: Empty mandatory fields","Admin is logged in","1. Navigate to Create Package form\n2. Submit empty form","Validation prevents submission, stays on form page","Pass",""
+"TC_ADMSUB_04","[Unhappy Path] Test Case 2.4: Invalid negative values","Admin is logged in","1. Navigate to Create Package form\n2. Fill negative values for price/duration\n3. Submit","Validation prevents submission, stays on form page","Pass","BVA"
+"TC_ADMSUB_05","[Happy Path] Test Case 2.5: Delete (Soft-Delete) Package","Package created in TC 2.1","1. Click Delete for package\n2. Confirm delete","Package is no longer active in list (soft deleted)","Pass",""

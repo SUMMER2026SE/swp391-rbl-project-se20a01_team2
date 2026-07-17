@@ -3,6 +3,7 @@ package com.ieltsflow.automation.tests;
 import com.ieltsflow.automation.base.BaseTest;
 import com.ieltsflow.automation.pages.LoginPage;
 import com.ieltsflow.automation.pages.MockTestPage;
+import com.ieltsflow.automation.utils.ConfigReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
