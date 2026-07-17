@@ -14,7 +14,7 @@ public class TargetBandPage extends BasePage {
         super(driver);
     }
 
-    private By bandOptions = By.cssSelector(".band-option");
+    private By bandOptions = By.cssSelector("#targetBandSelector button");
     private By saveBtn = By.id("saveGoalBtn");
     private By toastMessage = By.cssSelector(".toast");
 

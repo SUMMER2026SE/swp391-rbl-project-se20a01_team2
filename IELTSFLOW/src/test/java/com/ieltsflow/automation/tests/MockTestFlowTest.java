@@ -6,6 +6,12 @@ import com.ieltsflow.automation.pages.MockTestPage;
 import com.ieltsflow.automation.utils.ConfigReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import com.ieltsflow.automation.utils.ConfigReader;
+import com.ieltsflow.automation.pages.LoginPage;
 
 public class MockTestFlowTest extends BaseTest {
 
@@ -22,7 +28,7 @@ public class MockTestFlowTest extends BaseTest {
         System.out.println("====== BƯỚC 1 OK: Đăng nhập thành công ======");
 
         // ── BƯỚC 2: VÀO TRANG THÔNG TIN ĐỀ THI ──────────────────────────
-        mockTestPage.navigateToMockTestInfo();
+        driver.get(ConfigReader.getBaseUrl() + "/candidate/mock-test");
         
         // ── BƯỚC 3: CLICK "Bắt đầu thi ngay" ────────────────────────────
         System.out.println("====== BƯỚC 3: Tìm thấy nút, đang submit form... ======");
@@ -57,7 +63,7 @@ public class MockTestFlowTest extends BaseTest {
         loginPage.login(ConfigReader.getCandidateEmail(), ConfigReader.getCandidatePassword());
         loginPage.waitForLoginSuccess();
 
-        mockTestPage.navigateToMockTestInfo();
+        driver.get(ConfigReader.getBaseUrl() + "/candidate/mock-test");
         mockTestPage.clickStartMockTest();
         mockTestPage.clickStartExamSecurity();
         mockTestPage.waitForTimerToAppear();
