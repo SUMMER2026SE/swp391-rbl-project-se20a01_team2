@@ -296,12 +296,18 @@ window.showPreviewModal = function() {
 
     if (qType === 'MultipleChoice') {
         html += `<div class="choices d-flex flex-column gap-2">`;
+        let correctCount = 0;
+        document.querySelectorAll('.answer-item').forEach(item => {
+            if (item.style.display !== 'none' && item.querySelector('.answer-correct-checkbox').checked) correctCount++;
+        });
+        const inputType = correctCount > 1 ? 'checkbox' : 'radio';
+
         document.querySelectorAll('.answer-item').forEach((item, i) => {
             if (item.style.display !== 'none') {
                 const text = item.querySelector('.answer-content-input').value;
                 html += `
                     <label class="choice border p-2 rounded d-flex align-items-center gap-2" style="cursor: pointer;">
-                        <input type="radio" name="preview_mc">
+                        <input type="\${inputType}" name="preview_mc" value="\${i}">
                         <span class="choice-text">\${text}</span>
                     </label>
                 `;
@@ -414,28 +420,37 @@ window.checkPreviewAnswers = function() {
     }
 
     if (qType === 'MultipleChoice') {
-        const radios = container.querySelectorAll('input[type="radio"]');
-        let selectedIndex = -1;
-        radios.forEach((r, i) => { if (r.checked) selectedIndex = i; });
+        const inputs = container.querySelectorAll('input[name="preview_mc"]');
+        let selectedIndices = [];
+        inputs.forEach((inp) => { if (inp.checked) selectedIndices.push(parseInt(inp.value)); });
 
-        if (selectedIndex === -1) {
-            Swal.fire('Chưa trả lời', 'Vui lòng chọn một đáp án!', 'warning');
+        if (selectedIndices.length === 0) {
+            Swal.fire('Chưa trả lời', 'Vui lòng chọn đáp án!', 'warning');
             return;
         }
 
-        let correctIndex = -1;
+        let correctIndices = [];
         let count = 0;
         document.querySelectorAll('.answer-item').forEach(item => {
             if (item.style.display !== 'none') {
-                if (item.querySelector('.answer-correct-checkbox').checked) correctIndex = count;
+                if (item.querySelector('.answer-correct-checkbox').checked) correctIndices.push(count);
                 count++;
             }
         });
 
-        if (selectedIndex === correctIndex) {
+        selectedIndices.sort((a,b) => a - b);
+        correctIndices.sort((a,b) => a - b);
+        let isCorrect = (selectedIndices.length === correctIndices.length) && selectedIndices.every((val, index) => val === correctIndices[index]);
+
+        if (isCorrect) {
             Swal.fire('Chính xác!', 'Bạn đã chọn đúng đáp án.', 'success');
         } else {
-            Swal.fire('Sai rồi!', 'Đáp án chưa chính xác.', 'error');
+            let correctCount = selectedIndices.filter(x => correctIndices.includes(x)).length;
+            if (correctIndices.length > 1) {
+                Swal.fire('Chưa chính xác!', `Bạn đã chọn đúng \${correctCount}/\${correctIndices.length} đáp án đúng.`, 'error');
+            } else {
+                Swal.fire('Sai rồi!', 'Đáp án chưa chính xác.', 'error');
+            }
         }
     } else if (qType === 'Matching') {
         const selects = container.querySelectorAll('.matching-preview select');

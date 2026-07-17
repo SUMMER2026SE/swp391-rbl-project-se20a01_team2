@@ -89,6 +89,7 @@ public class GeminiApiService {
         String[] keys = getAllKeys();
         int maxAttempts = keys.length * 2; // Thử tối đa 2 vòng key rotation
 
+        Exception lastException = null;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             String apiKey = getNextKey(keys);
             LOGGER.info(String.format("[Gemini] Attempt %d/%d - Key: ...%s",
@@ -96,6 +97,9 @@ public class GeminiApiService {
             try {
                 // Build full JSON payload cho Gemini API request
                 String fullPayload = buildPayload(systemInstruction, userPrompt, responseSchemaJson);
+                if (fullPayload == null) {
+                    throw new RuntimeException("Failed to build JSON payload for Gemini");
+                }
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(BASE_URL + apiKey))
@@ -115,33 +119,35 @@ public class GeminiApiService {
                 } else if (status == 429 || status == 503 || status >= 500) {
                     // Rate limit hoặc server overload: rotate key và thử lại sau delay
                     LOGGER.warning(String.format("[Gemini] Status %d on attempt %d. Rotating key and retrying after delay.", status, attempt));
+                    lastException = new RuntimeException("Gemini HTTP " + status);
                     int sleepMs = Math.min(3000 * attempt, 15000); // max 15s wait
                     Thread.sleep(sleepMs);
                     // Tiếp tục vòng lặp với key mới
                 } else {
                     // Lỗi client (400, 401, 403) - không retry vì retry sẽ không giúp ích
                     LOGGER.severe(String.format("[Gemini] Fatal error %d: %s", status, response.body()));
-                    return null;
+                    throw new RuntimeException(String.format("Gemini API error %d: %s", status, response.body()));
                 }
 
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 LOGGER.warning("[Gemini] Thread interrupted during retry sleep.");
-                return null;
+                throw new RuntimeException("Thread interrupted while calling Gemini");
             } catch (Exception e) {
+                lastException = e;
                 LOGGER.log(Level.WARNING,
                         String.format("[Gemini] Exception on attempt %d: %s", attempt, e.getMessage()), e);
                 if (attempt < maxAttempts) {
                     try { Thread.sleep(2000); } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
-                        return null;
+                        throw new RuntimeException("Interrupted");
                     }
                 }
             }
         }
 
         LOGGER.severe("[Gemini] All " + maxAttempts + " attempts exhausted. Returning null.");
-        return null;
+        throw new RuntimeException("Gemini API requests exhausted. Last error: " + (lastException != null ? lastException.getMessage() : "Unknown"));
     }
 
     /**
@@ -273,7 +279,7 @@ public class GeminiApiService {
             String finishReason = firstCandidate.path("finishReason").asText("");
             if ("SAFETY".equals(finishReason) || "RECITATION".equals(finishReason)) {
                 LOGGER.warning("[Gemini] Response blocked by safety filter. finishReason: " + finishReason);
-                return null;
+                throw new RuntimeException("Gemini blocked response due to safety filter (" + finishReason + ")");
             }
 
             var parts = firstCandidate.path("content").path("parts");
