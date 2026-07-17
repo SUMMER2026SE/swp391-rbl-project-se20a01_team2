@@ -51,6 +51,43 @@ public class MockExamDAO {
     }
 
     /**
+     * Lấy toàn bộ đề thi loại 'Mock Test'.
+     */
+    public List<Exam> getAllMockTests() {
+        return JpaHelper.query(em -> {
+            String sql = "SELECT ExamID, Title, Type, SkillFocus, Duration, MentorID, CreatedAt " +
+                         "FROM Exams WHERE Type = 'Mock Test' AND (Deleted = 0 OR Deleted IS NULL) ORDER BY CreatedAt DESC";
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(sql).getResultList();
+
+            List<Exam> exams = new ArrayList<>();
+            for (Object[] row : rows) {
+                exams.add(mapExam(row));
+            }
+            return exams;
+        });
+    }
+
+    /**
+     * Lấy đề thi theo ID.
+     */
+    public Exam getMockTestById(int examId) {
+        return JpaHelper.query(em -> {
+            String sql = "SELECT ExamID, Title, Type, SkillFocus, Duration, MentorID, CreatedAt " +
+                         "FROM Exams WHERE ExamID = :examId AND (Deleted = 0 OR Deleted IS NULL)";
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(sql)
+                    .setParameter("examId", examId)
+                    .getResultList();
+
+            if (rows.isEmpty()) return null;
+            return mapExam(rows.get(0));
+        });
+    }
+
+    /**
      * Lấy toàn bộ câu hỏi (kèm đáp án) của một đề thi. (Không shuffle để giữ thứ tự section)
      */
     public List<Question> getQuestionsForExam(int examId) {
@@ -141,7 +178,7 @@ public class MockExamDAO {
 
     @SuppressWarnings("unchecked")
     private List<Answer> getAnswersForQuestion(jakarta.persistence.EntityManager em, int questionId) {
-        String sql = "SELECT AnswerID, QuestionID, Content, IsCorrect " +
+        String sql = "SELECT AnswerID, QuestionID, Content, IsCorrect, ContentJson " +
                      "FROM Answers WHERE QuestionID = :questionId";
         List<Object[]> rows = em.createNativeQuery(sql)
                 .setParameter("questionId", questionId)
@@ -156,6 +193,7 @@ public class MockExamDAO {
             // SQL Server: IsCorrect là BIT → có thể là Boolean hoặc Boolean
             a.setCorrect(Boolean.TRUE.equals(row[3]) || Integer.valueOf(1).equals(row[3])
                     || (row[3] instanceof Number && ((Number) row[3]).intValue() == 1));
+            a.setContentJson(row[4] != null ? row[4].toString() : null);
             answers.add(a);
         }
         return answers;

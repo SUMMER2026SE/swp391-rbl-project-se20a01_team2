@@ -56,7 +56,7 @@
         .rec-btn.start { background: #ef4444; }
         .rec-btn.stop { background: #4b5563; }
         .rec-btn:hover { transform: scale(1.05); }
-        .transcript-display { margin-top: 1.5rem; padding: 1rem; background: #f3f4f6; border-radius: 6px; font-style: italic; color: #4b5563; }
+        .status-display { margin-top: 1.5rem; padding: 1rem; background: #f3f4f6; border-radius: 6px; font-style: italic; color: #4b5563; }
         
         /* BOTTOM NAV - CD IELTS Style */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0; height: 80px; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
@@ -117,7 +117,7 @@
         .rec-btn.start { background: linear-gradient(135deg, #ef4444, #dc2626); }
         .rec-btn.stop { background: linear-gradient(135deg, #64748b, #475569); }
         .rec-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-        .transcript-display { margin-top: 2rem; padding: 1.5rem; background: #f1f5f9; border-radius: 8px; font-style: italic; color: #334155; font-size: 1.1rem; border-left: 4px solid #3b82f6; text-align: left; min-height: 80px; }
+        .status-display { margin-top: 2rem; padding: 1.5rem; background: #f1f5f9; border-radius: 8px; font-style: italic; color: #334155; font-size: 1.1rem; border-left: 4px solid #3b82f6; text-align: left; min-height: 80px; }
 
 </style>
             </head>
@@ -213,9 +213,7 @@
                                                 <c:if test="${sk == 'Writing'}">
                                                     <!-- Special layout for Writing: Show all question prompts here, toggled by JS -->
                                                     <c:forEach var="xQ" items="${sec.examQuestions}" varStatus="ws">
-                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem; white-space: pre-wrap;">
-                                                            ${xQ.question.content}
-                                                        </div>
+                                                        <div class="writing-prompt-box" id="prompt_${xQ.question.questionId}" style="display: ${ws.first ? 'block' : 'none'}; font-size: 1.05rem; line-height: 1.6; color: #111827; margin-top: 1.5rem; white-space: pre-wrap;">${xQ.question.content}</div>
                                                     </c:forEach>
                                                 </c:if>
                                                 
@@ -270,13 +268,28 @@
                                                             <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">✍️ Your Answer - Task ${qSt.index + 1}</div>
                                                         </c:if>
                                                         <c:if test="${sk == 'Speaking'}">
-                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0; white-space: pre-wrap;">
-                                                                ${q.content}
-                                                            </div>
+                                                            <div style="margin-bottom: 2rem; text-align: left; font-size: 1.15rem; font-weight: 500; color: #1e293b; line-height: 1.6; background: #f8fafc; padding: 1.5rem; border-radius: 6px; border: 1px solid #e2e8f0; white-space: pre-wrap;">${q.content}</div>
                                                         </c:if>
                                                         
                                                         <!-- Input fields -->
                                                         <c:choose>
+                                                            <c:when test="${sk == 'Writing' || q.questionType == 'Essay' || q.questionType == 'Writing'}">
+                                                                <textarea class="essay-area" style="height: calc(100vh - 280px); width: 100%; border: 1px solid #94a3b8; border-radius: 2px; padding: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-family: Arial; font-size: 1.05rem; resize: none; background: #fff;" name="q_${q.questionId}" id="essay_${q.questionId}" placeholder="" oninput="countWords(this, 'wc_${q.questionId}')"></textarea>
+                                                                <div class="word-count" id="wc_${q.questionId}" style="text-align: left; margin-top: 0.5rem; font-weight: 700; color: #4b5563;">Word count: 0</div>
+                                                            </c:when>
+                                                            <c:when test="${sk == 'Speaking' || q.questionType == 'Speaking'}">
+                                                                <div class="speaking-controls">
+                                                                    <div class="timer-circle" id="rec-timer-${q.questionId}">00:00</div>
+                                                                    <div>
+                                                                        <button type="button" class="rec-btn start" onclick="startRecording(${q.questionId})" id="btn-rec-${q.questionId}">Start Recording</button>
+                                                                        <button type="button" class="rec-btn stop" onclick="stopRecording(${q.questionId})" id="btn-stop-${q.questionId}" style="display:none">Stop Recording</button>
+                                                                    </div>
+                                                                    <div class="status-display" id="status-${q.questionId}">Status: Not recorded</div>
+                                                                    <input type="hidden" name="transcript_${q.questionId}" id="hidden-transcript-${q.questionId}">
+                                                                    <input type="hidden" name="azure_${q.questionId}" id="hidden-azure-${q.questionId}" value="0">
+                                                                    <input type="hidden" name="q_${q.questionId}" value="">
+                                                                </div>
+                                                            </c:when>
                                                             <c:when test="${q.questionType == 'Multiple_Choice' || q.questionType == 'MultipleChoice'}">
                                                                 <div class="choices">
                                                                     <c:set var="correctCount" value="0" />
@@ -299,23 +312,6 @@
                                                                             <span class="choice-text">${ans.content}</span>
                                                                         </label>
                                                                     </c:forEach>
-                                                                </div>
-                                                            </c:when>
-                                                            <c:when test="${q.questionType == 'Essay' || q.questionType == 'Writing' || sk == 'Writing'}">
-                                                                <textarea class="essay-area" style="height: calc(100vh - 280px); width: 100%; border: 1px solid #94a3b8; border-radius: 2px; padding: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-family: Arial; font-size: 1.05rem; resize: none; background: #fff;" name="q_${q.questionId}" id="essay_${q.questionId}" placeholder="" oninput="countWords(this, 'wc_${q.questionId}')"></textarea>
-                                                                <div class="word-count" id="wc_${q.questionId}" style="text-align: left; margin-top: 0.5rem; font-weight: 700; color: #4b5563;">Word count: 0</div>
-                                                            </c:when>
-                                                            <c:when test="${q.questionType == 'Speaking'}">
-                                                                <div class="speaking-controls">
-                                                                    <div class="timer-circle" id="rec-timer-${q.questionId}">00:00</div>
-                                                                    <div>
-                                                                        <button type="button" class="rec-btn start" onclick="startRecording(${q.questionId})" id="btn-rec-${q.questionId}">Start Recording</button>
-                                                                        <button type="button" class="rec-btn stop" onclick="stopRecording(${q.questionId})" id="btn-stop-${q.questionId}" style="display:none">Stop Recording</button>
-                                                                    </div>
-                                                                    <div class="transcript-display" id="transcript-${q.questionId}">Status: Not recorded</div>
-                                                                    <input type="hidden" name="transcript_${q.questionId}" id="hidden-transcript-${q.questionId}">
-                                                                    <input type="hidden" name="azure_${q.questionId}" id="hidden-azure-${q.questionId}" value="0">
-                                                                    <input type="hidden" name="q_${q.questionId}" value="">
                                                                 </div>
                                                             </c:when>
                                                             <c:when test="${q.questionType == 'FillInBlanks' || q.questionType == 'FillBlank'}">
@@ -380,7 +376,12 @@
                         timerEl.textContent = formatTime(secondsLeft);
                         if (secondsLeft <= 300) timerEl.classList.add('warning');
                         if (secondsLeft <= 60) { timerEl.classList.remove('warning'); timerEl.classList.add('danger'); }
-                        if (secondsLeft <= 0) { clearInterval(countdown); isExamStarted = false; document.getElementById('exam-form').submit(); }
+                        if (secondsLeft <= 0) { 
+                            clearInterval(countdown); 
+                            isExamStarted = false; 
+                            if(typeof prepareFIBAnswers === 'function') prepareFIBAnswers();
+                            document.getElementById('exam-form').submit(); 
+                        }
                     }, 1000);
 
                     // ── FOCUS MODE — Fullscreen + Tab detection ───────────────────────
@@ -428,6 +429,7 @@
                                 if (data.cheated) {
                                     isExamStarted = false;
                                     document.getElementById('forced-overlay').classList.add('active');
+                                    if(typeof prepareFIBAnswers === 'function') prepareFIBAnswers();
                                     document.getElementById('exam-form').submit();
                                 } else {
                                     document.getElementById('violation-overlay').classList.add('active');
@@ -615,22 +617,32 @@
                         }
                     });
 
-                    document.getElementById('exam-form').addEventListener('submit', function() {
+                    function prepareFIBAnswers() {
                         const fibCards = document.querySelectorAll('.q-card[data-qtype="FillInBlanks"], .q-card[data-qtype="FillBlank"]');
                         fibCards.forEach(card => {
                             const qId = card.getAttribute('data-qid');
                             const inputs = card.querySelectorAll('.fib-input');
                             if (inputs.length > 0) {
-                                const ansObj = {};
+                                const ansArray = [];
                                 inputs.forEach(inp => {
-                                    ansObj[inp.getAttribute('data-blank-id')] = inp.value.trim();
+                                    const blankId = parseInt(inp.getAttribute('data-blank-id'));
+                                    if (!isNaN(blankId)) {
+                                        ansArray[blankId - 1] = inp.value.trim();
+                                    }
                                 });
+                                for (let i = 0; i < ansArray.length; i++) {
+                                    if (typeof ansArray[i] === 'undefined') ansArray[i] = "";
+                                }
                                 let hiddenInput = document.getElementById('hidden_fib_' + qId);
                                 if (hiddenInput) {
-                                    hiddenInput.value = JSON.stringify(ansObj);
+                                    hiddenInput.value = JSON.stringify(ansArray);
                                 }
                             }
                         });
+                    }
+
+                    document.getElementById('exam-form').addEventListener('submit', function() {
+                        prepareFIBAnswers();
                     });
 
                     // ── WORD COUNT (Writing) ──────────────────────────────────────────
@@ -657,7 +669,7 @@
                             };
 
                             mediaRecorder.onstop = async () => {
-                                document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Đang xử lý âm thanh với hệ thống...';
+                                document.getElementById('status-' + qId).textContent = 'Trạng thái: Đang xử lý âm thanh với hệ thống...';
                                 const rawBlob = new Blob(audioChunksMap[qId], { type: 'audio/webm' });
                                 
                                 try {
@@ -676,19 +688,19 @@
                                         if(data.success && data.data) {
                                             document.getElementById('hidden-transcript-' + qId).value = data.data.recognizedText || '';
                                             document.getElementById('hidden-azure-' + qId).value = data.data.pronunciationScore || 0;
-                                            document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Đã ghi âm và xử lý xong.';
+                                            document.getElementById('status-' + qId).textContent = 'Trạng thái: Đã ghi âm và xử lý xong.';
                                             updateNavStatus();
                                         } else {
-                                            document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi xử lý âm thanh (' + (data.error || 'Unknown') + ')';
+                                            document.getElementById('status-' + qId).textContent = 'Trạng thái: Lỗi xử lý âm thanh (' + (data.error || 'Unknown') + ')';
                                         }
                                     })
                                     .catch(err => {
                                         console.error(err);
-                                        document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi kết nối đến máy chủ!';
+                                        document.getElementById('status-' + qId).textContent = 'Trạng thái: Lỗi kết nối đến máy chủ!';
                                     });
                                 } catch(e) {
                                     console.error('Lỗi khi convert sang WAV:', e);
-                                    document.getElementById('transcript-' + qId).textContent = 'Trạng thái: Lỗi convert âm thanh!';
+                                    document.getElementById('status-' + qId).textContent = 'Trạng thái: Lỗi convert âm thanh!';
                                 }
 
                                 // Dọn dẹp stream
@@ -699,7 +711,7 @@
                             mediaRecorders[qId] = mediaRecorder;
                             
                             document.querySelector('[name="q_' + qId + '"]').value = 'recorded';
-                            document.getElementById('transcript-' + qId).textContent = 'Đang ghi âm... (Vui lòng nói rõ ràng)';
+                            document.getElementById('status-' + qId).textContent = 'Đang ghi âm... (Vui lòng nói rõ ràng)';
                             document.getElementById('btn-rec-' + qId).style.display = 'none';
                             document.getElementById('btn-stop-' + qId).style.display = '';
 
@@ -730,7 +742,10 @@
                     // ── SUBMIT CONFIRM ─────────────────────────────────────────────────
                     function confirmSubmit() {
                         const ok = confirm('Bạn có chắc chắn muốn nộp bài? Hành động này không thể hoàn tác.');
-                        if (ok) isExamStarted = false;
+                        if (ok) {
+                            if(typeof prepareFIBAnswers === 'function') prepareFIBAnswers();
+                            isExamStarted = false;
+                        }
                         return ok;
                     }
 

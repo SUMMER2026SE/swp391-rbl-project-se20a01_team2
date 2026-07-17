@@ -1,5 +1,6 @@
 package com.ieltsflow.automation.pages;
 
+import com.ieltsflow.automation.base.BasePage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;

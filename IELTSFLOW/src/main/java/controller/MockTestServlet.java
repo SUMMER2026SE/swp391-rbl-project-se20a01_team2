@@ -48,6 +48,14 @@ public class MockTestServlet extends HttpServlet {
             return;
         }
 
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+        if (!hasActiveSub) {
+            resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_mocktest");
+            return;
+        }
+
         String action = req.getParameter("action");
         if (action == null) action = "";
 
@@ -82,6 +90,14 @@ public class MockTestServlet extends HttpServlet {
             return;
         }
 
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+        if (!hasActiveSub) {
+            resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_mocktest");
+            return;
+        }
+
         String action = req.getParameter("action");
         if (action == null) action = "";
 
@@ -111,8 +127,8 @@ public class MockTestServlet extends HttpServlet {
     /** Hiển thị trang chọn đề thi */
     private void handleIndex(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
-        Exam exam = mockTestService.getRandomMockTest();
-        req.setAttribute("exam", exam);
+        List<Exam> exams = mockTestService.getAllMockTests();
+        req.setAttribute("exams", exams);
         req.getRequestDispatcher("/jsp/mock-test/index.jsp").forward(req, resp);
     }
 
@@ -120,16 +136,44 @@ public class MockTestServlet extends HttpServlet {
     private void handleStart(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
         int userId = (int) req.getSession().getAttribute("userId");
-        Exam exam = mockTestService.getRandomMockTest();
+        
+        String examIdStr = req.getParameter("examId");
+        String skillStr = req.getParameter("skillFocus");
+        
+        Exam exam = null;
+        if (examIdStr != null && !examIdStr.isEmpty()) {
+            try {
+                exam = mockTestService.getMockTestById(Integer.parseInt(examIdStr));
+            } catch (Exception ignored) {}
+        }
+        
+        if (exam == null) {
+            exam = mockTestService.getRandomMockTest();
+        }
+        
         if (exam == null) {
             req.setAttribute("errorMsg", "Hiện tại chưa có đề thi nào. Vui lòng thử lại sau.");
             req.getRequestDispatcher("/jsp/mock-test/index.jsp").forward(req, resp);
             return;
         }
 
+        if (skillStr != null && !skillStr.isEmpty() && !skillStr.equals("All")) {
+            exam.setSkillFocus(skillStr);
+        }
+
         int submissionId = mockTestService.createSubmission(userId, exam.getExamId());
         List<Question> questions = mockTestService.getQuestionsForExam(exam.getExamId());
         List<model.ExamSection> sections = mockTestService.getSectionsWithQuestionsForExam(exam.getExamId());
+
+        if (skillStr != null && !skillStr.isEmpty() && !skillStr.equals("All")) {
+            final String filterSkill = skillStr;
+            sections = sections.stream()
+                               .filter(s -> filterSkill.equalsIgnoreCase(s.getSkill()))
+                               .collect(java.util.stream.Collectors.toList());
+            questions = questions.stream()
+                                 .filter(q -> filterSkill.equalsIgnoreCase(q.getSkill()))
+                                 .collect(java.util.stream.Collectors.toList());
+        }
 
         HttpSession session = req.getSession();
         session.setAttribute("mt_currentExam", exam);
@@ -188,19 +232,40 @@ public class MockTestServlet extends HttpServlet {
         for (Question q : questions) {
             String skill  = q.getSkill()        != null ? q.getSkill().trim()        : "";
             String qType  = q.getQuestionType() != null ? q.getQuestionType().trim() : "";
-            String answer = req.getParameter("q_" + q.getQuestionId());
-
-            if (("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
-                && answer != null && !answer.isBlank()) {
-                try {
-                    int ansId = Integer.parseInt(answer.trim());
-                    for (model.Answer a : q.getAnswers()) {
-                        if (a.getAnswerId() == ansId) {
-                            answer = a.getContent();
-                            break;
-                        }
+            
+            // Xử lý parameter gửi lên từ form
+            String[] answersArray = req.getParameterValues("q_" + q.getQuestionId());
+            String answer = null;
+            if (answersArray != null && answersArray.length > 0) {
+                if (answersArray.length == 1) {
+                    answer = answersArray[0];
+                } else {
+                    // Nếu là nhiều đáp án, gom thành JSON Array string
+                    try {
+                        answer = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(answersArray);
+                    } catch (Exception e) {
+                        answer = answersArray[0];
                     }
-                } catch (NumberFormatException ignored) {}
+                }
+            }
+
+            // Only apply answer-ID-to-content conversion for objective (non-AI) skills
+            boolean isAiSkill = "Speaking".equalsIgnoreCase(skill) || "Writing".equalsIgnoreCase(skill);
+            if (!isAiSkill && ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
+                && answer != null && !answer.isBlank()) {
+                
+                // Nếu chỉ có 1 đáp án dạng ID, convert sang nội dung text (như code cũ)
+                if (!answer.trim().startsWith("[")) {
+                    try {
+                        int ansId = Integer.parseInt(answer.trim());
+                        for (model.Answer a : q.getAnswers()) {
+                            if (a.getAnswerId() == ansId) {
+                                answer = a.getContent();
+                                break;
+                            }
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
             }
 
             SubmissionDetail detail = new SubmissionDetail();
@@ -208,19 +273,28 @@ public class MockTestServlet extends HttpServlet {
             detail.setQuestionId(q.getQuestionId());
             detail.setCandidateAnswer(answer);
 
-            if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) {
-                boolean correct = mockTestService.isAnswerCorrect(q, answer);
-                detail.setIsCorrect(correct);
-                detail.setScore(correct ? 1.0 : 0.0);
+            // Route to objective grading only if the skill is NOT Speaking/Writing.
+            // Speaking questions may have QuestionType='FillInBlanks' in the DB,
+            // so skill must take precedence over qType here.
+            if (!isAiSkill && ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType))) {
+                int correctCount = mockTestService.isAnswerCorrect(q, answer);
+                detail.setIsCorrect(correctCount > 0);
+                detail.setScore((double) correctCount);
                 detail.setGradingStatus("Graded");
-                if ("Reading".equals(skill))   { totalReading++;   if (correct) correctReading++;   }
-                if ("Listening".equals(skill)) { totalListening++; if (correct) correctListening++; }
+                if ("Reading".equalsIgnoreCase(skill))   { 
+                    totalReading += q.getQuestionCount();   
+                    correctReading += correctCount;   
+                }
+                if ("Listening".equalsIgnoreCase(skill)) { 
+                    totalListening += q.getQuestionCount(); 
+                    correctListening += correctCount; 
+                }
                 mockTestService.saveDetail(detail);
             } else {
                 detail.setGradingStatus("Pending_AI");
                 String transcript = null;
                 double azureScore = 0.0;
-                if ("Speaking".equals(skill)) {
+                if ("Speaking".equalsIgnoreCase(skill) || "Speaking".equalsIgnoreCase(qType)) {
                     detail.setSpeakingUrl(req.getParameter("speaking_url_" + q.getQuestionId()));
                     transcript = req.getParameter("transcript_" + q.getQuestionId());
                     detail.setCandidateTranscript(transcript);
@@ -231,12 +305,12 @@ public class MockTestServlet extends HttpServlet {
                 }
                 int detailId = mockTestService.saveDetail(detail);
 
-                if ("Writing".equals(skill)) {
+                if ("Writing".equalsIgnoreCase(skill) || "Writing".equalsIgnoreCase(qType) || "Essay".equalsIgnoreCase(qType)) {
                     countWriting++;
                     writingDetailIds.add(new int[]{detailId});
                     writingTopics.add(q.getContent());
                     writingAnswers.add(answer);
-                } else if ("Speaking".equals(skill)) {
+                } else if ("Speaking".equalsIgnoreCase(skill) || "Speaking".equalsIgnoreCase(qType)) {
                     countSpeaking++;
                     speakingDetailIds.add(new int[]{detailId});
                     speakingTopics.add(q.getContent());
