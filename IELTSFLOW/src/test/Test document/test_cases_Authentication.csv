@@ -1,0 +1,6 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_AUTH_01","Verify valid login","Admin or user exists","1. Navigate to Login Page\n2. Enter valid email and password\n3. Click Login","User should be logged in and redirected from auth page","Pass",""
+"TC_AUTH_02","Verify invalid login - Wrong password","","1. Navigate to Login Page\n2. Enter wrong email and password\n3. Click Login","Error message should be displayed","Pass",""
+"TC_AUTH_03","Verify valid registration","","1. Navigate to Register Page\n2. Enter valid details with unique email\n3. Click Register","Success message displayed, user asked to verify email","Pass",""
+"TC_AUTH_04","Verify invalid registration - Password mismatch","","1. Navigate to Register Page\n2. Enter mismatched passwords\n3. Click Register","Error message displayed for password mismatch","Pass",""
+"TC_AUTH_05","Verify invalid registration - Existing email","Admin email exists","1. Navigate to Register Page\n2. Enter existing admin email\n3. Click Register","Error message displayed for existing email","Pass",""
