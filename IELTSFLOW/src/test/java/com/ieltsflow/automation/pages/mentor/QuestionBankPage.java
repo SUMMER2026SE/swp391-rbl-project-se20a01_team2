@@ -29,13 +29,13 @@ public class QuestionBankPage extends BasePage {
 
     public void fillMatchingQuestion(String content, String jsonData) {
         type(inputQuestionContent, content);
-        type(selectQuestionType, "Matching");
+        selectByValue(selectQuestionType, "Matching");
         toggleAndFillJson(jsonData);
     }
 
     public void fillFillInBlanksQuestion(String content, String blanksData) {
         type(inputQuestionContent, content);
-        type(selectQuestionType, "Fill In Blanks");
+        selectByValue(selectQuestionType, "FillInBlanks");
         toggleAndFillJson(blanksData);
     }
     

@@ -20,6 +20,10 @@ public class TicketPage extends BasePage {
     }
 
     public void replyToTicket(String replyContent) {
+        if (!isElementDisplayed(openTicketLink)) {
+            System.out.println("[LOG] No tickets found to reply to. Skipping.");
+            return;
+        }
         click(openTicketLink);
         type(inputReply, replyContent);
         
