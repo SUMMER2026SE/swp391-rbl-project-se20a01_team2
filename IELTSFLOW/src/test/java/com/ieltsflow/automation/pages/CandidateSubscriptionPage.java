@@ -25,7 +25,8 @@ public class CandidateSubscriptionPage extends BasePage {
         List<WebElement> cards = getElements(pricingCards);
         for (WebElement card : cards) {
             if (card.getAttribute("class").contains("pro")) {
-                card.findElement(By.cssSelector("button[type='submit']")).click();
+                WebElement btn = card.findElement(By.cssSelector("button[type='submit']"));
+                jsClick(btn);
                 return;
             }
         }
@@ -36,7 +37,8 @@ public class CandidateSubscriptionPage extends BasePage {
         for (WebElement card : cards) {
             String priceText = card.findElement(By.className("pricing-price")).getText();
             if (priceText.contains(price)) {
-                card.findElement(By.cssSelector("button[type='submit']")).click();
+                WebElement btn = card.findElement(By.cssSelector("button[type='submit']"));
+                jsClick(btn);
                 return;
             }
         }
