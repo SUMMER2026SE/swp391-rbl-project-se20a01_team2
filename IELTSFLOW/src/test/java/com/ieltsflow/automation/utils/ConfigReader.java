@@ -79,31 +79,31 @@ public class ConfigReader {
     }
 
     public static String getBaseUrl() {
-        return getProperty("TEST_BASE_URL", "http://localhost:8080/IELTSFLOW");
+        return getProperty("TEST_BASE_URL", "https://ieltsflow.tanmanh350.ovh");
     }
 
     // Các hàm tài khoản (thay thế cho ConfigReader cũ)
     public static String getAdminEmail() {
-        return getProperty("TEST_ADMIN_EMAIL", "admin@gmail.com");
+        return getProperty("TEST_ADMIN_EMAIL", "admin@tanmanh350.ovh");
     }
 
     public static String getAdminPassword() {
-        return getProperty("TEST_ADMIN_PASSWORD", "admin123");
+        return getProperty("TEST_ADMIN_PASSWORD", "Alonept2");
     }
 
     public static String getCandidateEmail() {
-        return getProperty("TEST_CANDIDATE_EMAIL", "candidate1@gmail.com");
+        return getProperty("TEST_CANDIDATE_EMAIL", "Candidate@tanmanh350.ovh");
     }
 
     public static String getCandidatePassword() {
-        return getProperty("TEST_CANDIDATE_PASSWORD", "12345678");
+        return getProperty("TEST_CANDIDATE_PASSWORD", "Alonept2");
     }
 
     public static String getMentorEmail() {
-        return getProperty("TEST_MENTOR_EMAIL", "mentor1@gmail.com");
+        return getProperty("TEST_MENTOR_EMAIL", "mentor@tanmanh350.ovh");
     }
 
     public static String getMentorPassword() {
-        return getProperty("TEST_MENTOR_PASSWORD", "12345678");
+        return getProperty("TEST_MENTOR_PASSWORD", "Alonept2");
     }
 }
