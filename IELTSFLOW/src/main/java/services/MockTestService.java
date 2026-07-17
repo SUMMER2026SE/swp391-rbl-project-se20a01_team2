@@ -39,6 +39,16 @@ public class MockTestService {
         return examDAO.getRandomPlacementTest();
     }
 
+    /** Lấy tất cả đề Mock Test. */
+    public List<Exam> getAllMockTests() {
+        return examDAO.getAllMockTests();
+    }
+
+    /** Lấy đề thi theo ID. */
+    public Exam getMockTestById(int examId) {
+        return examDAO.getMockTestById(examId);
+    }
+
     /** Lấy toàn bộ câu hỏi (đã shuffle) của một đề thi. */
     public List<Question> getQuestionsForExam(int examId) {
         return examDAO.getQuestionsForExam(examId);

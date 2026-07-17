@@ -139,6 +139,90 @@
             box-shadow: 0 12px 30px rgba(99,102,241,.35);
         }
 
+        /* Select box styles */
+        .mock-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.8);
+            font-size: 1rem;
+            font-weight: 500;
+            font-family: inherit;
+            color: var(--text-primary);
+            margin-top: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .mock-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99,102,241,.15);
+            background: #fff;
+        }
+
+        /* Skill Radio Cards */
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .skill-card {
+            position: relative;
+            cursor: pointer;
+        }
+        .skill-card input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .skill-card .card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 8px;
+            background: var(--bg-surface);
+            border: 2px solid var(--glass-border);
+            border-radius: 14px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .skill-card:hover:not(.disabled) .card-content {
+            border-color: rgba(99,102,241, 0.4);
+            background: rgba(99,102,241, 0.03);
+            transform: translateY(-2px);
+        }
+        .skill-card input:checked ~ .card-content {
+            border-color: #6366f1;
+            background: rgba(99,102,241, 0.08);
+            color: #6366f1;
+            box-shadow: 0 8px 20px rgba(99,102,241, 0.15);
+            transform: translateY(-2px);
+        }
+        .skill-card input:disabled ~ .card-content {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: rgba(0,0,0,0.02);
+            border-color: transparent;
+            transform: none;
+        }
+        .skill-icon {
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+        
+        @media (max-width: 600px) {
+            .skill-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
         /* No exam state */
         .no-exam-card {
             text-align: center;
@@ -193,39 +277,71 @@
 
             <div class="animate-fade-up" style="animation-delay:0.1s;">
                 <c:choose>
-                    <c:when test="${exam != null}">
+                    <c:when test="${not empty exams}">
                         <div class="exam-card">
-                            <div class="exam-meta-grid">
-                                <div class="meta-item">
-                                    <div class="meta-label">Đề thi</div>
-                                    <div class="meta-value">${exam.title}</div>
-                                </div>
-                                <div class="meta-item">
-                                    <div class="meta-label">Thời gian</div>
-                                    <div class="meta-value" style="color:var(--accent-blue);">${exam.duration} phút</div>
-                                </div>
-                                <div class="meta-item">
-                                    <div class="meta-label">Loại đề</div>
-                                    <div class="meta-value">${exam.type}</div>
-                                </div>
-                                <div class="meta-item">
-                                    <div class="meta-label">Kỹ năng</div>
-                                    <div class="meta-value">${exam.skillFocus}</div>
-                                </div>
-                            </div>
-
-                            <div class="rules-box">
-                                <h3>⚠️ Quy định phòng thi</h3>
-                                <ul>
-                                    <li>Bài thi sẽ bắt đầu ở chế độ <strong>Toàn màn hình</strong>.</li>
-                                    <li>Nếu bạn thoát toàn màn hình hoặc chuyển tab quá <strong>3 lần</strong>, bài thi sẽ tự động nộp và bị đánh dấu vi phạm.</li>
-                                    <li>Câu hỏi được <strong>sắp xếp ngẫu nhiên</strong> mỗi lần thi.</li>
-                                    <li>Bạn có thể xem lại đáp án chi tiết và AI Feedback sau khi nộp bài.</li>
-                                </ul>
-                            </div>
-
-                            <form action="${pageContext.request.contextPath}/candidate/mock-test" method="post">
+                            <form action="${pageContext.request.contextPath}/candidate/mock-test" method="post" id="mockTestForm">
                                 <input type="hidden" name="action" value="start">
+                                <div class="exam-meta-grid">
+                                    <div class="meta-item" style="grid-column: span 2; background: rgba(255,255,255,0.4);">
+                                        <div class="meta-label">📚 Chọn đề thi</div>
+                                        <select name="examId" id="examSelect" class="mock-select" required onchange="handleExamChange()">
+                                            <c:forEach var="ex" items="${exams}">
+                                                <option value="${ex.examId}" data-skill="${ex.skillFocus}">${ex.title} (Thời gian: ${ex.duration} phút)</option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
+                                    <div class="meta-item" style="grid-column: span 2; background: transparent; border: none; padding: 0;">
+                                        <div class="meta-label" style="font-size: 0.8rem;">🎯 Chọn kỹ năng luyện tập</div>
+                                        <div class="skill-grid" id="skillGrid">
+                                            <label class="skill-card">
+                                                <input type="radio" name="skillFocus" value="All" checked>
+                                                <div class="card-content">
+                                                    <span class="skill-icon">🏆</span>
+                                                    <span>Full Test</span>
+                                                </div>
+                                            </label>
+                                            <label class="skill-card">
+                                                <input type="radio" name="skillFocus" value="Listening">
+                                                <div class="card-content">
+                                                    <span class="skill-icon">🎧</span>
+                                                    <span>Listening</span>
+                                                </div>
+                                            </label>
+                                            <label class="skill-card">
+                                                <input type="radio" name="skillFocus" value="Reading">
+                                                <div class="card-content">
+                                                    <span class="skill-icon">📖</span>
+                                                    <span>Reading</span>
+                                                </div>
+                                            </label>
+                                            <label class="skill-card">
+                                                <input type="radio" name="skillFocus" value="Writing">
+                                                <div class="card-content">
+                                                    <span class="skill-icon">✍️</span>
+                                                    <span>Writing</span>
+                                                </div>
+                                            </label>
+                                            <label class="skill-card">
+                                                <input type="radio" name="skillFocus" value="Speaking">
+                                                <div class="card-content">
+                                                    <span class="skill-icon">🎙️</span>
+                                                    <span>Speaking</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rules-box">
+                                    <h3>⚠️ Quy định phòng thi</h3>
+                                    <ul>
+                                        <li>Bài thi sẽ bắt đầu ở chế độ <strong>Toàn màn hình</strong>.</li>
+                                        <li>Nếu bạn thoát toàn màn hình hoặc chuyển tab quá <strong>3 lần</strong>, bài thi sẽ tự động nộp và bị đánh dấu vi phạm.</li>
+                                        <li>Câu hỏi được <strong>sắp xếp ngẫu nhiên</strong> mỗi lần thi (nếu là Full Test).</li>
+                                        <li>Bạn có thể xem lại đáp án chi tiết và AI Feedback sau khi nộp bài.</li>
+                                    </ul>
+                                </div>
+
                                 <button type="submit" class="btn-start-mock" id="btn-start-mock-test">
                                     🚀 Bắt đầu thi ngay
                                 </button>
@@ -251,6 +367,50 @@
     </div>
     <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
     <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
+    <script>
+        function handleExamChange() {
+            const select = document.getElementById('examSelect');
+            if (!select) return;
+            const selectedOption = select.options[select.selectedIndex];
+            const examSkill = selectedOption.getAttribute('data-skill');
+            
+            const radios = document.querySelectorAll('input[name="skillFocus"]');
+            let anyEnabledAndChecked = false;
+            
+            radios.forEach(radio => {
+                const label = radio.closest('.skill-card');
+                if (!examSkill || examSkill === 'All' || examSkill === '') {
+                    // Full test, all options available
+                    radio.disabled = false;
+                    label.classList.remove('disabled');
+                } else {
+                    // Specific skill test, disable others
+                    if (radio.value === examSkill) {
+                        radio.disabled = false;
+                        radio.checked = true;
+                        label.classList.remove('disabled');
+                    } else {
+                        radio.disabled = true;
+                        label.classList.add('disabled');
+                    }
+                }
+                
+                if (!radio.disabled && radio.checked) {
+                    anyEnabledAndChecked = true;
+                }
+            });
+            
+            // Default to 'All' if the currently checked one became disabled
+            if (!anyEnabledAndChecked) {
+                const allRadio = document.querySelector('input[name="skillFocus"][value="All"]');
+                if (allRadio && !allRadio.disabled) {
+                    allRadio.checked = true;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', handleExamChange);
+    </script>
 </body>
 </html>
 

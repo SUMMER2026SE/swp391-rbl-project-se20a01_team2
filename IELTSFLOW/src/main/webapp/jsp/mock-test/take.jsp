@@ -187,7 +187,14 @@
 
                 <!-- MAIN CONTENT -->
                 <div class="main">
-<c:set var="skills" value="${['Listening','Reading','Writing','Speaking']}" />
+<c:choose>
+    <c:when test="${exam.skillFocus != null && exam.skillFocus != 'All'}">
+        <c:set var="skills" value="${[exam.skillFocus]}" />
+    </c:when>
+    <c:otherwise>
+        <c:set var="skills" value="${['Listening','Reading','Writing','Speaking']}" />
+    </c:otherwise>
+</c:choose>
                     <form method="post" action="${pageContext.request.contextPath}/candidate/mock-test?action=submit" id="exam-form" style="height: 100%;">
                         <input type="hidden" name="action" value="submit">
                         <input type="hidden" name="submissionId" value="${submissionId}">
