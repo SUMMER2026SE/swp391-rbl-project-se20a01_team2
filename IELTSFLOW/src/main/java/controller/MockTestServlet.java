@@ -127,8 +127,8 @@ public class MockTestServlet extends HttpServlet {
     /** Hiển thị trang chọn đề thi */
     private void handleIndex(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
-        Exam exam = mockTestService.getRandomMockTest();
-        req.setAttribute("exam", exam);
+        List<Exam> exams = mockTestService.getAllMockTests();
+        req.setAttribute("exams", exams);
         req.getRequestDispatcher("/jsp/mock-test/index.jsp").forward(req, resp);
     }
 
@@ -136,16 +136,44 @@ public class MockTestServlet extends HttpServlet {
     private void handleStart(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
         int userId = (int) req.getSession().getAttribute("userId");
-        Exam exam = mockTestService.getRandomMockTest();
+        
+        String examIdStr = req.getParameter("examId");
+        String skillStr = req.getParameter("skillFocus");
+        
+        Exam exam = null;
+        if (examIdStr != null && !examIdStr.isEmpty()) {
+            try {
+                exam = mockTestService.getMockTestById(Integer.parseInt(examIdStr));
+            } catch (Exception ignored) {}
+        }
+        
+        if (exam == null) {
+            exam = mockTestService.getRandomMockTest();
+        }
+        
         if (exam == null) {
             req.setAttribute("errorMsg", "Hiện tại chưa có đề thi nào. Vui lòng thử lại sau.");
             req.getRequestDispatcher("/jsp/mock-test/index.jsp").forward(req, resp);
             return;
         }
 
+        if (skillStr != null && !skillStr.isEmpty() && !skillStr.equals("All")) {
+            exam.setSkillFocus(skillStr);
+        }
+
         int submissionId = mockTestService.createSubmission(userId, exam.getExamId());
         List<Question> questions = mockTestService.getQuestionsForExam(exam.getExamId());
         List<model.ExamSection> sections = mockTestService.getSectionsWithQuestionsForExam(exam.getExamId());
+
+        if (skillStr != null && !skillStr.isEmpty() && !skillStr.equals("All")) {
+            final String filterSkill = skillStr;
+            sections = sections.stream()
+                               .filter(s -> filterSkill.equalsIgnoreCase(s.getSkill()))
+                               .collect(java.util.stream.Collectors.toList());
+            questions = questions.stream()
+                                 .filter(q -> filterSkill.equalsIgnoreCase(q.getSkill()))
+                                 .collect(java.util.stream.Collectors.toList());
+        }
 
         HttpSession session = req.getSession();
         session.setAttribute("mt_currentExam", exam);

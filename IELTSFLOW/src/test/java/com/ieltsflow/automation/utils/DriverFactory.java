@@ -47,6 +47,10 @@ public class DriverFactory {
                 chromeOptions.addArguments("--start-maximized");
                 chromeOptions.addArguments("--disable-notifications");
                 
+                // Tự động cấp quyền Micro để tránh lỗi màn hình trắng (Permission check failed)
+                chromeOptions.addArguments("--use-fake-ui-for-media-stream");
+                chromeOptions.addArguments("--use-fake-device-for-media-stream");
+                
                 String chromeBinary = ConfigReader.getChromeBinaryPath();
                 if (chromeBinary != null && !chromeBinary.isEmpty()) {
                     chromeOptions.setBinary(chromeBinary);
@@ -57,6 +61,7 @@ public class DriverFactory {
                 java.util.Map<String, Object> prefs = new java.util.HashMap<>();
                 prefs.put("credentials_enable_service", false);
                 prefs.put("profile.password_manager_enabled", false);
+                prefs.put("profile.default_content_setting_values.media_stream_mic", 1); // Cấp quyền micro mặc định
                 chromeOptions.setExperimentalOption("prefs", prefs);
 
                 driver = new ChromeDriver(chromeOptions);
