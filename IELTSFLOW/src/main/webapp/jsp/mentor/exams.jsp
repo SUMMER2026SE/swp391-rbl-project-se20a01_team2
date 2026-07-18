@@ -195,21 +195,7 @@
             </div>
         </div>
 
-        <!-- Step 2: Preview & Edit JSON -->
-        <div id="aiPreviewStep" class="d-none">
-            <div id="aiSaveError" class="alert alert-danger d-none shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> <span id="aiSaveErrorMsg"></span></div>
-            <div class="alert alert-info shadow-sm">
-                <i class="fa-solid fa-circle-check"></i> Phân tích hoàn tất! Vui lòng kiểm tra và có thể chỉnh sửa cấu trúc bên dưới trước khi lưu.
-            </div>
-            <textarea id="aiJsonEditor" class="form-control" rows="20" style="font-family: monospace; font-size: 0.85rem;"></textarea>
-            
-            <div class="mt-3 text-end">
-                <button type="button" class="btn btn-outline-secondary rounded-pill me-2" onclick="document.getElementById('aiPreviewStep').classList.add('d-none'); document.getElementById('aiUploadStep').classList.remove('d-none');">Thử Lại</button>
-                <button type="button" class="btn btn-success rounded-pill shadow-sm" id="btnSaveAiExam">
-                    Lưu Đề Thi <i class="fa-solid fa-save ms-2"></i>
-                </button>
-            </div>
-        </div>
+
 
       </div>
     </div>
@@ -247,9 +233,11 @@
             return response.json();
         })
         .then(data => {
-            editor.value = JSON.stringify(data, null, 2);
-            uploadStep.classList.add('d-none');
-            previewStep.classList.remove('d-none');
+            if (data.success && data.examId) {
+                window.location.href = window.contextPath + '/mentor/exams/' + data.examId;
+            } else {
+                throw new Error("Lỗi không xác định khi lưu đề thi.");
+            }
         })
         .catch(err => {
             errorMsg.textContent = 'Lỗi khi phân tích bằng AI: ' + err.message;
@@ -261,53 +249,6 @@
         });
     });
 
-    document.getElementById('btnSaveAiExam').addEventListener('click', function() {
-        const editor = document.getElementById('aiJsonEditor');
-        const btnSave = this;
-        const errorAlert = document.getElementById('aiSaveError');
-        const errorMsg = document.getElementById('aiSaveErrorMsg');
-        let jsonData;
-        
-        errorAlert.className = 'alert alert-danger d-none shadow-sm';
-
-        try {
-            jsonData = JSON.parse(editor.value);
-        } catch (e) {
-            errorMsg.textContent = 'JSON không hợp lệ! Vui lòng kiểm tra lại cấu trúc: ' + e.message;
-            errorAlert.classList.remove('d-none');
-            return;
-        }
-
-        btnSave.disabled = true;
-        btnSave.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang lưu...';
-
-        fetch(window.contextPath + '/mentor/exam-import?action=save', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(jsonData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                errorAlert.className = 'alert alert-success shadow-sm';
-                errorAlert.innerHTML = '<i class="fa-solid fa-check"></i> Tạo đề thi thành công! Đang tải lại...';
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                errorMsg.textContent = 'Có lỗi xảy ra: ' + data.error;
-                errorAlert.classList.remove('d-none');
-                btnSave.disabled = false;
-                btnSave.innerHTML = 'Lưu Đề Thi <i class="fa-solid fa-save ms-2"></i>';
-            }
-        })
-        .catch(err => {
-            errorMsg.textContent = 'Lỗi hệ thống: ' + err.message;
-            errorAlert.classList.remove('d-none');
-            btnSave.disabled = false;
-            btnSave.innerHTML = 'Lưu Đề Thi <i class="fa-solid fa-save ms-2"></i>';
-        });
-    });
 </script>
 
 </body>
