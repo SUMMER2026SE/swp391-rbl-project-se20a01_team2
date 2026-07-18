@@ -104,7 +104,7 @@ public class GeminiApiService {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(BASE_URL + apiKey))
                         .header("Content-Type", "application/json; charset=UTF-8")
-                        .timeout(Duration.ofSeconds(90))
+                        .timeout(Duration.ofSeconds(300))
                         .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
                         .build();
 
@@ -191,7 +191,7 @@ public class GeminiApiService {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(BASE_URL + apiKey))
                         .header("Content-Type", "application/json; charset=UTF-8")
-                        .timeout(Duration.ofSeconds(60))
+                        .timeout(Duration.ofSeconds(120))
                         .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
                         .build();
 
