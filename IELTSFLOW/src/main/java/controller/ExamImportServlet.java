@@ -48,8 +48,6 @@ public class ExamImportServlet extends HttpServlet {
         try {
             if ("upload".equals(action)) {
                 handleUpload(req, resp);
-            } else if ("save".equals(action)) {
-                handleSave(req, resp);
             } else {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
             }
@@ -95,16 +93,20 @@ public class ExamImportServlet extends HttpServlet {
         if (jsonResult == null) {
             throw new RuntimeException("AI failed to parse the document.");
         }
+        
+        JsonNode rootNode = mapper.readTree(jsonResult);
+        if (rootNode.has("isExamMaterial") && !rootNode.get("isExamMaterial").asBoolean(true)) {
+            throw new IllegalArgumentException("Tài liệu tải lên không phải là đề thi hoặc tài liệu học tập hợp lệ.");
+        }
+        
+        int examId = saveExamFromNode(rootNode, req);
 
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
-        resp.getWriter().write(jsonResult);
+        resp.getWriter().write("{\"success\": true, \"examId\": " + examId + "}");
     }
 
-    private void handleSave(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        String jsonBody = req.getReader().lines().reduce("", (accumulator, actual) -> accumulator + actual);
-        JsonNode rootNode = mapper.readTree(jsonBody);
-
+    private int saveExamFromNode(JsonNode rootNode, HttpServletRequest req) throws Exception {
         HttpSession session = req.getSession(false);
         Integer userId = (session != null) ? (Integer) session.getAttribute("userId") : null;
 
@@ -173,7 +175,6 @@ public class ExamImportServlet extends HttpServlet {
             }
         }
 
-        resp.setContentType("application/json");
-        resp.getWriter().write("{\"success\": true, \"examId\": " + exam.getExamId() + "}");
+        return exam.getExamId();
     }
 }
