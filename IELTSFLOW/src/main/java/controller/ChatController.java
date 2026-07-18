@@ -2,6 +2,7 @@ package controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,7 +13,7 @@ import services.GeminiApiService;
 
 import java.io.IOException;
 
-@WebServlet("/api/chat")
+@WebServlet(value = "/api/chat", asyncSupported = true)
 public class ChatController extends HttpServlet {
 
     private GeminiApiService geminiApiService;
@@ -26,8 +27,7 @@ public class ChatController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json; charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
+        // Content type will be set based on success or error
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("roleId") == null) {
@@ -43,6 +43,7 @@ public class ChatController extends HttpServlet {
             String userMessage = rootNode.path("message").asText();
 
             if (userMessage == null || userMessage.trim().isEmpty()) {
+                response.setContentType("application/json; charset=UTF-8");
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("{\"error\": \"Message is empty\"}");
                 return;
@@ -55,15 +56,26 @@ public class ChatController extends HttpServlet {
                 systemInstruction = "Bạn là một trợ lý ảo chuyên về IELTS (IELTSFLOW AI). Bạn đang trò chuyện với một Học viên (Candidate). Hãy giải đáp các thắc mắc về kiến thức tiếng Anh, ngữ pháp, từ vựng, mẹo làm bài thi IELTS một cách dễ hiểu, nhiệt tình và truyền cảm hứng. Lưu ý dùng định dạng Markdown ngắn gọn nếu cần nhấn mạnh.";
             }
 
-            String reply = geminiApiService.generateChatReply(systemInstruction, userMessage);
+            response.setContentType("text/event-stream");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Cache-Control", "no-cache");
+            response.setHeader("Connection", "keep-alive");
+            response.setHeader("X-Accel-Buffering", "no");
 
-            if (reply != null) {
-                String jsonResponse = objectMapper.writeValueAsString(new ChatResponse(reply));
-                response.getWriter().write(jsonResponse);
-            } else {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("{\"error\": \"Failed to get response from AI\"}");
-            }
+            final String instruction = systemInstruction;
+            final String msg = userMessage;
+
+            AsyncContext asyncCtx = request.startAsync();
+            asyncCtx.setTimeout(130_000);
+            asyncCtx.start(() -> {
+                try {
+                    geminiApiService.streamChatReply(instruction, msg, asyncCtx.getResponse().getWriter());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    asyncCtx.complete();
+                }
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -72,10 +84,4 @@ public class ChatController extends HttpServlet {
         }
     }
 
-    private static class ChatResponse {
-        public String reply;
-        public ChatResponse(String reply) {
-            this.reply = reply;
-        }
-    }
 }

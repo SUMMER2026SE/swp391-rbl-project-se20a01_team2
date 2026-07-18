@@ -136,18 +136,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Server error');
             }
 
-            const data = await response.json();
-            
-            // Hide typing indicator
+            // Hide typing indicator as we start receiving stream
             typingIndicator.classList.remove('active');
             
-            // Show bot message
-            if (data.reply) {
-                appendMessage(data.reply, 'bot');
-            } else {
-                appendMessage('Xin lỗi, tôi không thể trả lời lúc này.', 'bot');
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            
+            // Create empty bot message div
+            const botMsgDiv = document.createElement('div');
+            botMsgDiv.className = 'ai-message bot';
+            messagesContainer.insertBefore(botMsgDiv, typingIndicator);
+            
+            let accumulatedText = "";
+            let buffer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop(); // keep the incomplete last line
+                
+                for (const line of lines) {
+                    if (line.startsWith("data: ")) {
+                        const dataStr = line.substring(6).trim();
+                        if (dataStr === "[DONE]") {
+                            break;
+                        }
+                        if (!dataStr) continue;
+                        
+                        try {
+                            const dataObj = JSON.parse(dataStr);
+                            if (dataObj.error) {
+                                accumulatedText += "\n\n*Lỗi: " + dataObj.error + "*";
+                                botMsgDiv.innerHTML = formatMarkdown(accumulatedText);
+                                break;
+                            }
+                            if (dataObj.text) {
+                                accumulatedText += dataObj.text;
+                                botMsgDiv.innerHTML = formatMarkdown(accumulatedText);
+                                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            }
+                        } catch (e) {
+                            console.error("Failed to parse SSE data", dataStr, e);
+                        }
+                    }
+                }
             }
 
+            if (!accumulatedText) {
+                botMsgDiv.innerHTML = formatMarkdown("Xin lỗi, tôi không thể trả lời lúc này.");
+            }
         } catch (error) {
             console.error('Chat error:', error);
             typingIndicator.classList.remove('active');
