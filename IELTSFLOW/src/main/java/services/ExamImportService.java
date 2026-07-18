@@ -79,13 +79,15 @@ public class ExamImportService {
     public String parseTextToExamJson(String rawText) {
         String systemInstruction = "You are an AI assistant specialized in parsing IELTS and English test exams. "
                 + "You will be provided with raw unstructured text extracted from a test document (PDF, Word, or Excel). "
-                + "Your task is to identify the Exam title, sections (e.g. Listening, Reading), passages (resource text), and questions with their options and correct answers. "
+                + "If the provided text is clearly NOT an exam, test, or educational learning material, you must set isExamMaterial to false and return empty/default values for the rest. "
+                + "Otherwise, set isExamMaterial to true and identify the Exam title, sections (e.g. Listening, Reading), passages (resource text), and questions with their options and correct answers. "
                 + "Return a strictly formatted JSON object matching the provided schema. Do your best to extract all questions accurately.";
 
         // We define a strict schema matching our frontend preview and backend models
         String responseSchemaJson = "{\n" +
                 "  \"type\": \"object\",\n" +
                 "  \"properties\": {\n" +
+                "    \"isExamMaterial\": { \"type\": \"boolean\", \"description\": \"Set to false if the document is NOT an exam, test, or educational material.\" },\n" +
                 "    \"title\": { \"type\": \"string\" },\n" +
                 "    \"skillFocus\": { \"type\": \"string\", \"enum\": [\"Reading\", \"Listening\", \"Writing\", \"Speaking\", \"All\"] },\n" +
                 "    \"duration\": { \"type\": \"integer\", \"description\": \"Duration in minutes\" },\n" +
@@ -126,7 +128,7 @@ public class ExamImportService {
                 "      }\n" +
                 "    }\n" +
                 "  },\n" +
-                "  \"required\": [\"title\", \"skillFocus\", \"duration\", \"sections\"]\n" +
+                "  \"required\": [\"isExamMaterial\", \"title\", \"skillFocus\", \"duration\", \"sections\"]\n" +
                 "}";
 
         return geminiApiService.generateStructuredContent(systemInstruction, rawText, responseSchemaJson);
