@@ -41,12 +41,50 @@ public class NotificationService {
         Notification n = notificationDAO.findById(notificationId)
             .orElseThrow(() -> new Exception("Không tìm thấy thông báo"));
 
-        // Kiểm tra quyền: chỉ chủ sở hữu mới được đọc
+        // Kiểm tra quyền: chỉ chủ sở hữu mới được đánh dấu
         if (n.getUser().getUserId() != userId) {
             throw new Exception("Không có quyền truy cập thông báo này");
         }
 
         notificationDAO.markAsRead(notificationId);
+    }
+
+    /**
+     * Tạo một thông báo mới
+     */
+    public void createNotification(int userId, String title, String content, String type) {
+        try {
+            User user = userDAO.findById(userId).orElse(null);
+            if (user != null) {
+                Notification n = new Notification();
+                n.setUser(user);
+                n.setTitle(title);
+                n.setContent(content);
+                n.setType(type);
+                n.setCreatedAt(java.time.LocalDateTime.now());
+                n.setRead(false);
+                notificationDAO.create(n);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendWelcomeNotifications(int userId) {
+        createNotification(userId, "Chào mừng đến với IELTSFlow!", "Hãy bắt đầu bằng việc thiết lập Mục tiêu Band điểm của bạn nhé.", "System");
+        createNotification(userId, "Bài kiểm tra đầu vào", "Vui lòng làm bài kiểm tra đầu vào (Placement Test) để hệ thống đánh giá trình độ hiện tại của bạn.", "System");
+    }
+
+    public void sendReadyToGeneratePlanNotification(int userId) {
+        createNotification(userId, "Bạn đã đủ điều kiện!", "Hãy vào mục Kế hoạch tuần (Weekly Plan) để tạo lộ trình học cá nhân hóa ngay.", "System");
+    }
+
+    public void sendPlanGeneratedNotification(int userId) {
+        createNotification(userId, "Lộ trình học đã sẵn sàng!", "Lộ trình học AI của bạn đã được tạo thành công. Hãy vào mục Kế hoạch tuần để xem nhé.", "System");
+    }
+
+    public void sendTargetChangedNotification(int userId) {
+        createNotification(userId, "Mục tiêu đã thay đổi", "Mục tiêu của bạn đã thay đổi. Vui lòng cập nhật Lộ trình học (Weekly Plan) để hệ thống điều chỉnh theo mục tiêu mới.", "Reminder");
     }
 
     /**

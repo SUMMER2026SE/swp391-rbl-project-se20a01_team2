@@ -107,6 +107,29 @@
                 </c:when>
 
                 <c:otherwise>
+                    <c:if test="${targetBandMismatched}">
+                        <div class="animate-fade-up" style="margin-bottom: 30px; padding: 25px; background: rgba(245, 158, 11, 0.1); border: 2px solid rgba(245, 158, 11, 0.5); border-radius: 12px;">
+                            <h2 style="color: #d97706; margin-top: 0; margin-bottom: 10px; font-size: 1.5rem;">⚠️ Mục tiêu của bạn đã thay đổi!</h2>
+                            <p style="color: black; margin-bottom: 20px; font-size: 1.05rem;">
+                                Mục tiêu IELTS của bạn đã thay đổi (từ <strong>${oldTargetBand}</strong> lên <strong>${targetBand}</strong>). Lộ trình hiện tại dưới đây không còn phù hợp (Không khuyến nghị sử dụng tiếp).
+                            </p>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <form action="${pageContext.request.contextPath}/candidate/weekly-plan" method="post" style="margin: 0;">
+                                    <input type="hidden" name="action" value="generate">
+                                    <input type="hidden" name="submissionId" value="${submissionId}">
+                                    <input type="hidden" name="targetBand" value="${targetBand}">
+                                    <input type="hidden" name="useOldTest" value="true">
+                                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #d97706, #f59e0b); border: none; padding: 12px 25px; border-radius: 8px;">
+                                        Tạo lại lộ trình với kết quả Test cũ
+                                    </button>
+                                </form>
+                                <a href="${pageContext.request.contextPath}/candidate/placement-test" class="btn btn-outline" style="padding: 12px 25px; border-radius: 8px; border: 1px solid #d97706; color: #d97706; text-decoration: none;">
+                                    Làm lại bài Test đầu vào
+                                </a>
+                            </div>
+                        </div>
+                    </c:if>
+
                     <div class="animate-fade-up" style="margin-bottom: 40px;">
                         <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Your Pathway 🚀</h1>
                         <div style="display: flex; gap: 20px;">

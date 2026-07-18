@@ -144,6 +144,13 @@ public class CandidatePagesServlet extends HttpServlet {
                                 }
                             }
                         } else {
+                            if (currentPathway.getTargetBand() != null && currentPathway.getTargetBand().compareTo(targetOpt.get().getTargetBand()) != 0) {
+                                req.setAttribute("targetBandMismatched", true);
+                                req.setAttribute("submissionId", latestTest.getSubmissionId());
+                                req.setAttribute("targetBand", targetOpt.get().getTargetBand());
+                                req.setAttribute("oldTargetBand", currentPathway.getTargetBand());
+                            }
+                            
                             List<WeeklyPlan> plans = pwService.getWeeklyPlans(currentPathway.getPathwayId());
                             req.setAttribute("weeklyPlans", plans);
                             req.setAttribute("pathway", currentPathway);
@@ -221,6 +228,20 @@ public class CandidatePagesServlet extends HttpServlet {
                 aiService.generatePathwayAsync(submission, targetBand, wrongTagsCount)
                     .thenAccept(weeklyPlans -> {
                         if (weeklyPlans != null && !weeklyPlans.isEmpty()) {
+                            
+                            // Delete old pathway if regenerating with old test
+                            if ("true".equals(req.getParameter("useOldTest"))) {
+                                List<Pathway> existing = pwService.getPathwaysByUser(userId);
+                                existing.stream()
+                                    .filter(p -> p.getPlacementTestId() != null && p.getPlacementTestId().equals(submission.getSubmissionId()))
+                                    .findFirst()
+                                    .ifPresent(p -> {
+                                        try {
+                                            pwService.deletePathway(p.getPathwayId());
+                                        } catch (Exception ignored) {}
+                                    });
+                            }
+                            
                             Pathway newPathway = new Pathway();
                             newPathway.setUserId(userId);
                             newPathway.setPlacementTestId(submission.getSubmissionId());
@@ -230,6 +251,11 @@ public class CandidatePagesServlet extends HttpServlet {
                             try {
                                 pwService.createPathway(newPathway, weeklyPlans);
                                 System.out.println("Đã lưu Lộ trình vào Database thành công cho User " + userId);
+                                
+                                // Send notification
+                                services.NotificationService notifService = new services.NotificationService();
+                                notifService.sendPlanGeneratedNotification(userId);
+                                
                             } catch (Exception e) {
                                 System.err.println("Lỗi khi lưu lộ trình DB: " + e.getMessage());
                             }

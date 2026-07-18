@@ -352,6 +352,21 @@ public class PlacementTestServlet extends HttpServlet {
         finalSub.setCheated(forcedSubmit);
         finalSub.setStatus(forcedSubmit ? "Abandoned" : "Completed");
         mockTestService.finaliseSubmission(finalSub);
+        
+        // Notify user if ready to generate weekly plan (Wait for all AI grading to finish)
+        Object uidObj = session.getAttribute("userId");
+        if (!forcedSubmit && uidObj != null) {
+            int uId = (int) uidObj;
+            allAiTasks.thenRun(() -> {
+                try {
+                    dao.CandidateTargetDAO targetDAO = new dao.CandidateTargetDAO();
+                    if (targetDAO.findActiveByUserId(uId).isPresent()) {
+                        services.NotificationService notifService = new services.NotificationService();
+                        notifService.sendReadyToGeneratePlanNotification(uId);
+                    }
+                } catch (Exception ignored) {}
+            });
+        }
 
         req.setAttribute("writingFeedbacks", writingFeedbacks);
         req.setAttribute("speakingFeedbacks", speakingFeedbacks);
