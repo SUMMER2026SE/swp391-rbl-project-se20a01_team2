@@ -103,6 +103,15 @@ public class CandidatePagesServlet extends HttpServlet {
                         }
                     }
                 } catch (Exception e) {}
+                
+                String errorMsg = (String) session.getAttribute("pathwayGeneratingError_" + userId);
+                if (errorMsg != null) {
+                    // Escape double quotes if any
+                    errorMsg = errorMsg.replace("\"", "\\\"");
+                    resp.getWriter().write("{\"status\":\"error\", \"message\":\"" + errorMsg + "\"}");
+                    return;
+                }
+                
                 resp.getWriter().write("{\"status\":\"pending\"}");
                 return;
             }
@@ -141,6 +150,12 @@ public class CandidatePagesServlet extends HttpServlet {
                                 Boolean isGenerating = (Boolean) session.getAttribute("pathwayGenerating_" + userId);
                                 if (Boolean.TRUE.equals(isGenerating)) {
                                     req.setAttribute("isGenerating", true);
+                                }
+                                
+                                String genError = (String) session.getAttribute("pathwayGeneratingError_" + userId);
+                                if (genError != null) {
+                                    req.setAttribute("generationError", genError);
+                                    session.removeAttribute("pathwayGeneratingError_" + userId);
                                 }
                             }
                         } else {
@@ -256,14 +271,21 @@ public class CandidatePagesServlet extends HttpServlet {
                                 services.NotificationService notifService = new services.NotificationService();
                                 notifService.sendPlanGeneratedNotification(userId);
                                 
+                                session.removeAttribute("pathwayGeneratingError_" + userId);
+                                
                             } catch (Exception e) {
                                 System.err.println("Lỗi khi lưu lộ trình DB: " + e.getMessage());
                             }
                         } else {
                             System.err.println("Sinh lộ trình AI thất bại hoặc rỗng cho User " + userId);
-                            // Xử lý lỗi nếu AI thất bại, remove cờ generates (ở thực tế có thể cần set cờ báo lỗi)
-                            //session.removeAttribute("pathwayGenerating_" + userId);
+                            session.setAttribute("pathwayGeneratingError_" + userId, "Có lỗi xảy ra trong quá trình sinh lộ trình. Vui lòng thử lại sau.");
+                            session.removeAttribute("pathwayGenerating_" + userId);
                         }
+                    }).exceptionally(ex -> {
+                        System.err.println("Exception khi sinh lộ trình AI: " + ex.getMessage());
+                        session.setAttribute("pathwayGeneratingError_" + userId, "Có lỗi xảy ra trong quá trình sinh lộ trình. Vui lòng thử lại sau.");
+                        session.removeAttribute("pathwayGenerating_" + userId);
+                        return null;
                     });
                     
             } catch (Exception e) {

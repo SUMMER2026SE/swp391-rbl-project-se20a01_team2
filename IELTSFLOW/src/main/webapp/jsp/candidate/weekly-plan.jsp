@@ -49,22 +49,27 @@
                                 <script>
                                     // Tự động kiểm tra trạng thái mỗi 5 giây
                                     setInterval(function() {
-                                        fetch('${pageContext.request.contextPath}/candidate/weekly-plan?action=check-status')
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                if (data.status === 'ready') {
-                                                    window.location.reload();
-                                                }
-                                            })
+                                          fetch('${pageContext.request.contextPath}/candidate/weekly-plan?action=check-status')
+                                              .then(response => response.json())
+                                              .then(data => {
+                                                  if (data.status === 'ready' || data.status === 'error') {
+                                                      window.location.reload();
+                                                  }
+                                              })
                                             .catch(err => console.error(err));
                                     }, 5000);
                                 </script>
                                 <style>
                                     @keyframes spin { 100% { transform: rotate(360deg); } }
                                 </style>
-                            </c:when>
-                            <c:otherwise>
-                                <form action="${pageContext.request.contextPath}/candidate/weekly-plan" method="post">
+                              </c:when>
+                              <c:otherwise>
+                                  <c:if test="${not empty generationError}">
+                                      <div style="background-color: #fee2e2; color: #dc2626; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 500; border: 1px solid #f87171;">
+                                          ⚠️ ${generationError}
+                                      </div>
+                                  </c:if>
+                                  <form action="${pageContext.request.contextPath}/candidate/weekly-plan" method="post">
                                     <input type="hidden" name="action" value="generate">
                                     <input type="hidden" name="submissionId" value="${submissionId}">
                                     <input type="hidden" name="targetBand" value="${targetBand}">
