@@ -200,39 +200,9 @@
 
     <div class="layout-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar" id="appSidebar">
-            <button class="toggle-sidebar-btn" onclick="toggleSidebar()">◀</button>
-            <div class="brand">IELTSFLOW</div>
-            <div class="user-profile">
-                <div class="avatar" style="overflow: hidden;">
-                    <c:choose>
-                        <c:when test="${not empty sessionScope.profilePic}">
-                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                        </c:when>
-                        <c:otherwise>
-                            ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                <div>
-                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Mục tiêu: ${not empty sessionScope.targetBand ? sessionScope.targetBand : 'Chưa thiết lập'}</p>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link" title="Bảng điều khiển">🏠 <span class="nav-text">Bảng điều khiển</span></a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link" title="Kế hoạch tuần">📅 <span class="nav-text">Kế hoạch tuần</span></a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link" title="Thư viện">📚 <span class="nav-text">Thư viện</span></a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link" title="Bài thi">🎯 <span class="nav-text">Bài thi</span></a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link active" title="Lịch sử & Làm lại">🔄 <span class="nav-text">Lịch sử & Làm lại</span></a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link" title="Thông báo">🔔 <span class="nav-text">Thông báo</span></a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link" title="Ticket hỗ trợ">🎫 <span class="nav-text">Ticket hỗ trợ</span></a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link" title="Cài đặt tài khoản">⚙️ <span class="nav-text">Cài đặt tài khoản</span></a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);" title="Đăng xuất">🚪 <span class="nav-text">Đăng xuất</span></a>
-            </div>
-        </aside>
+        <jsp:include page="/jsp/candidate/sidebar.jsp">
+            <jsp:param name="activePage" value="redo-exercises" />
+        </jsp:include>
 
         <!-- Main Content -->
         <main class="main-content" id="appMainContent">
@@ -482,10 +452,7 @@
         }
     })();
     
-    function toggleSidebar() {
-        document.getElementById('appSidebar').classList.toggle('collapsed');
-        document.getElementById('appMainContent').classList.toggle('expanded');
-    }
+
     </script>
     <script src="${pageContext.request.contextPath}/js/api.js?v=${System.currentTimeMillis()}"></script>
     <!-- AI Chatbox Widget -->
