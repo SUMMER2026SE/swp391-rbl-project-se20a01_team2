@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .table-custom th { background-color: var(--sidebar-bg); color: var(--text-secondary); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; border-bottom: 2px solid var(--border-color); }
         .table-custom td { vertical-align: middle; border-bottom: 1px solid var(--border-color); }
@@ -37,6 +38,9 @@
                 <p class="text-secondary mt-1 mb-0">Quản lý các đoạn văn (Passage) và tệp nghe (Audio) dùng chung cho nhiều câu hỏi.</p>
             </div>
             <div class="header-actions">
+                <button type="button" id="btnBulkDelete" class="btn btn-danger rounded-pill shadow-sm fw-bold me-2" style="display: none;" onclick="confirmBulkDelete()">
+                    Xóa đã chọn (<span id="selectedCount">0</span>) <i class="fa-solid fa-trash ms-1"></i>
+                </button>
                 <a href="${pageContext.request.contextPath}/mentor/resources?action=new" class="btn btn-primary rounded-pill shadow-sm fw-bold" style="background-color: var(--accent-purple); border-color: var(--accent-purple);">
                     Tạo Tài Nguyên <i class="fa-solid fa-plus ms-2"></i>
                 </a>
@@ -84,7 +88,8 @@
                 <table class="table table-custom mb-0">
                     <thead>
                         <tr>
-                            <th class="ps-4">Resource ID</th>
+                            <th style="width: 40px;" class="text-center ps-4"><input type="checkbox" id="selectAll" class="form-check-input"></th>
+                            <th>Resource ID</th>
                             <th>Tên Tài Nguyên</th>
                             <th>Loại</th>
                             <th class="text-center pe-4">Thao Tác</th>
@@ -93,7 +98,8 @@
                     <tbody>
                         <c:forEach var="res" items="${resources}">
                             <tr>
-                                <td class="ps-4 fw-bold" style="color: var(--accent-purple);">#${res.resourceId}</td>
+                                <td class="text-center ps-4"><input type="checkbox" class="form-check-input item-checkbox" value="${res.resourceId}"></td>
+                                <td class="fw-bold" style="color: var(--accent-purple);">#${res.resourceId}</td>
                                 <td class="fw-bold text-dark">${res.resourceName != null ? res.resourceName : '<span class="text-muted fst-italic">Chưa đặt tên</span>'}</td>
                                 <td>
                                     <c:set var="badgeClass" value="bg-primary bg-opacity-10 text-primary" />
@@ -127,7 +133,7 @@
                         </c:forEach>
                         <c:if test="${empty resources}">
                             <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">Chưa có tài nguyên nào. Nhấn "Tạo Tài Nguyên" để thêm.</td>
+                                <td colspan="5" class="text-center py-5 text-muted">Chưa có tài nguyên nào. Nhấn "Tạo Tài Nguyên" để thêm.</td>
                             </tr>
                         </c:if>
                     </tbody>
@@ -161,6 +167,10 @@
         </div>
     </main>
 </div>
+
+<form id="bulkDeleteForm" action="${pageContext.request.contextPath}/mentor/resources" method="POST" style="display: none;">
+    <input type="hidden" name="action" value="bulk_delete">
+</form>
 
 <c:forEach var="res" items="${resources}">
     <!-- Preview Modal for Resource ${res.resourceId} -->
@@ -241,11 +251,69 @@ function ajaxSearch(form) {
                 results.innerHTML = newResults.innerHTML;
                 results.style.opacity = '1';
                 window.history.replaceState({}, '', url);
+                updateBulkDeleteBtn();
             } else {
                 form.submit();
             }
         })
         .catch(err => form.submit());
+}
+</script>
+</script>
+<script>
+function updateBulkDeleteBtn() {
+    const btnBulkDelete = document.getElementById('btnBulkDelete');
+    const selectedCount = document.getElementById('selectedCount');
+    if (!btnBulkDelete || !selectedCount) return;
+    const checked = document.querySelectorAll('.item-checkbox:checked');
+    if (checked.length > 0) {
+        btnBulkDelete.style.display = 'inline-block';
+        selectedCount.textContent = checked.length;
+    } else {
+        btnBulkDelete.style.display = 'none';
+    }
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'selectAll') {
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+        updateBulkDeleteBtn();
+    } else if (e.target && e.target.classList.contains('item-checkbox')) {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        if (!e.target.checked && selectAll) selectAll.checked = false;
+        if (document.querySelectorAll('.item-checkbox:checked').length === checkboxes.length && selectAll) selectAll.checked = true;
+        updateBulkDeleteBtn();
+    }
+});
+
+function confirmBulkDelete() {
+    const checked = document.querySelectorAll('.item-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    Swal.fire({
+        title: 'Bạn có chắc chắn?',
+        text: 'Bạn đang chuẩn bị xóa ' + checked.length + ' tài nguyên. Hành động này không thể hoàn tác và có thể ảnh hưởng đến các câu hỏi liên quan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Có, xóa tất cả!',
+        cancelButtonText: 'Hủy'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.getElementById('bulkDeleteForm');
+            checked.forEach(cb => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'resourceIds';
+                input.value = cb.value;
+                form.appendChild(input);
+            });
+            form.submit();
+        }
+    });
 }
 </script>
 </body>

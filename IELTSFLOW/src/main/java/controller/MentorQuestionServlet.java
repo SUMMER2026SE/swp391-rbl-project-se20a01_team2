@@ -105,6 +105,17 @@ public class MentorQuestionServlet extends HttpServlet {
                 questionService.deleteQuestion(id);
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Xóa câu hỏi thành công", "UTF-8"));
 
+            } else if ("bulk_delete".equals(action)) {
+                String[] qIds = req.getParameterValues("questionIds");
+                if (qIds != null) {
+                    for (String idStr : qIds) {
+                        try {
+                            questionService.deleteQuestion(Integer.parseInt(idStr));
+                        } catch (Exception ignored) {}
+                    }
+                }
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Xóa hàng loạt câu hỏi thành công", "UTF-8"));
+
             } else if ("addTag".equals(action)) {
                 int questionId = Integer.parseInt(req.getParameter("questionId"));
                 int tagId      = Integer.parseInt(req.getParameter("tagId"));

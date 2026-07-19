@@ -17,6 +17,7 @@ import model.Answer;
 import services.ExamImportService;
 import services.ExamService;
 import services.QuestionService;
+import dao.QuestionResourceDAO;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class ExamImportServlet extends HttpServlet {
     private final ExamImportService importService = new ExamImportService();
     private final ExamService examService = new ExamService();
     private final QuestionService questionService = new QuestionService();
+    private final QuestionResourceDAO resourceDAO = new QuestionResourceDAO();
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -130,7 +132,18 @@ public class ExamImportServlet extends HttpServlet {
                 section.setSectionName(sectionNode.path("sectionName").asText("Section " + orderIndex));
                 section.setSkill(sectionNode.path("skill").asText(exam.getSkillFocus()));
                 section.setOrderIndex(orderIndex++);
-                // Optionally save resourceText if we had a Resource creation logic, but for simplicity we skip resource linking or save directly.
+                
+                String resourceText = sectionNode.path("resourceText").asText("").trim();
+                if (!resourceText.isEmpty()) {
+                    model.QuestionResource resource = new model.QuestionResource();
+                    resource.setResourceName(exam.getTitle() + " - " + section.getSectionName());
+                    resource.setResourceText(resourceText);
+                    resource.setType("Passage");
+                    resource.setCreatedBy(userId);
+                    resourceDAO.save(resource);
+                    section.setResourceId(resource.getResourceId());
+                }
+                
                 examService.addSection(section); 
                 
                 // Note: examService.addSection usually sets sectionId but if not, we have to reload.
@@ -155,14 +168,51 @@ public class ExamImportServlet extends HttpServlet {
                         
                         List<Answer> answers = new ArrayList<>();
                         JsonNode answersNode = qNode.path("answers");
-                        if (answersNode.isArray()) {
-                            for (JsonNode aNode : answersNode) {
-                                Answer a = new Answer();
-                                a.setContent(aNode.path("content").asText());
-                                a.setCorrect(aNode.path("isCorrect").asBoolean());
-                                answers.add(a);
+                        
+                        if ("FillInBlanks".equals(q.getQuestionType())) {
+                            com.fasterxml.jackson.databind.node.ObjectNode qContentJson = mapper.createObjectNode();
+                            com.fasterxml.jackson.databind.node.ObjectNode blanksNode = mapper.createObjectNode();
+                            com.fasterxml.jackson.databind.node.ObjectNode aContentJson = mapper.createObjectNode();
+                            
+                            int index = 0;
+                            if (answersNode.isArray()) {
+                                for (JsonNode aNode : answersNode) {
+                                    String ansStr = aNode.path("content").asText();
+                                    
+                                    // Question blank config
+                                    com.fasterxml.jackson.databind.node.ObjectNode blankConfig = mapper.createObjectNode();
+                                    blankConfig.put("type", "text");
+                                    blankConfig.put("placeholder", "");
+                                    blanksNode.set(String.valueOf(index), blankConfig);
+                                    
+                                    // Answer array
+                                    com.fasterxml.jackson.databind.node.ArrayNode ansArray = mapper.createArrayNode();
+                                    ansArray.add(ansStr);
+                                    aContentJson.set(String.valueOf(index), ansArray);
+                                    
+                                    index++;
+                                }
+                            }
+                            qContentJson.set("blanks", blanksNode);
+                            q.setContentJson(qContentJson.toString());
+                            
+                            Answer a = new Answer();
+                            a.setContent("FillInBlanks Answer Map");
+                            a.setCorrect(true);
+                            a.setContentJson(aContentJson.toString());
+                            answers.add(a);
+                        } else {
+                            if (answersNode.isArray()) {
+                                for (JsonNode aNode : answersNode) {
+                                    Answer a = new Answer();
+                                    a.setContent(aNode.path("content").asText());
+                                    a.setCorrect(aNode.path("isCorrect").asBoolean());
+                                    a.setContentJson("{}");
+                                    answers.add(a);
+                                }
                             }
                         }
+                        
                         q.setAnswers(answers);
                         questionService.createQuestion(q, answers, null);
                         

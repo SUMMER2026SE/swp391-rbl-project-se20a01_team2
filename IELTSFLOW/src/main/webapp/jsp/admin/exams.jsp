@@ -147,12 +147,12 @@
         <!-- Step 1: Upload Form -->
         <div id="aiUploadStep">
             <div id="aiUploadError" class="alert alert-danger d-none shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> <span id="aiUploadErrorMsg"></span></div>
-            <p class="text-muted">Tải lên file tài liệu chứa nội dung đề thi (.pdf, .docx, .xlsx). AI sẽ tự động trích xuất các phần thi, đoạn văn bản, và câu hỏi (bao gồm đáp án) cho bạn.</p>
+            <p class="text-muted">Tải lên file tài liệu chứa nội dung đề thi (.pdf, .docx, .xlsx, .md, .txt). AI sẽ tự động trích xuất các phần thi, đoạn văn bản, và câu hỏi (bao gồm đáp án) cho bạn.</p>
             <form id="aiUploadForm" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="upload">
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Chọn File (PDF/Docx/Excel)</label>
-                    <input class="form-control" type="file" id="examFile" name="file" accept=".pdf,.docx,.xlsx" required>
+                    <label class="form-label fw-bold">Chọn File (PDF/Docx/Excel/MD/TXT)</label>
+                    <input class="form-control" type="file" id="examFile" name="file" accept=".pdf,.docx,.xlsx,.xls,.md,.txt" required>
                 </div>
                 <button type="submit" class="btn btn-primary shadow-sm rounded-pill w-100" id="btnUploadAi">
                     Phân tích bằng AI <i class="fa-solid fa-microchip ms-2"></i>
