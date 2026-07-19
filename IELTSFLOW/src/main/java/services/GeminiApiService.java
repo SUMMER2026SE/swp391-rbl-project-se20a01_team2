@@ -372,6 +372,7 @@ public class GeminiApiService {
      * Gemini trả về text nằm trong candidates[0].content.parts[0].text
      */
     private String extractTextFromResponse(String responseBody) {
+        System.out.println("[Gemini] Raw response: " + responseBody);
         try {
             var rootNode = objectMapper.readTree(responseBody);
 
