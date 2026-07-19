@@ -161,6 +161,18 @@ public class ExamController extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + redirectPrefix);
                 return;
 
+            } else if ("bulk_delete".equals(action)) {
+                String[] eIds = req.getParameterValues("examIds");
+                if (eIds != null) {
+                    for (String idStr : eIds) {
+                        try {
+                            examService.deleteExam(Integer.parseInt(idStr));
+                        } catch (Exception ignored) {}
+                    }
+                }
+                resp.sendRedirect(req.getContextPath() + redirectPrefix + "?success=" + java.net.URLEncoder.encode("Xóa hàng loạt đề thi thành công", "UTF-8"));
+                return;
+
             } else if ("addSection".equals(action)) {
                 int examId = Integer.parseInt(req.getParameter("examId"));
                 model.ExamSection sec = new model.ExamSection();

@@ -100,6 +100,17 @@ public class MentorResourceServlet extends HttpServlet {
                 resourceService.deleteResource(id);
                 resp.sendRedirect(req.getContextPath() + "/mentor/resources?success=" + java.net.URLEncoder.encode("Xóa tài nguyên thành công", "UTF-8"));
 
+            } else if ("bulk_delete".equals(action)) {
+                String[] rIds = req.getParameterValues("resourceIds");
+                if (rIds != null) {
+                    for (String idStr : rIds) {
+                        try {
+                            resourceService.deleteResource(Integer.parseInt(idStr));
+                        } catch (Exception ignored) {}
+                    }
+                }
+                resp.sendRedirect(req.getContextPath() + "/mentor/resources?success=" + java.net.URLEncoder.encode("Xóa hàng loạt tài nguyên thành công", "UTF-8"));
+
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/resources");
             }

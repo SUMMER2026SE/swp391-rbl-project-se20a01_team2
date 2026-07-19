@@ -35,6 +35,8 @@ public class ExamImportService {
             return extractTextFromDocx(is);
         } else if (lowerName.endsWith(".xlsx") || lowerName.endsWith(".xls")) {
             return extractTextFromExcel(is);
+        } else if (lowerName.endsWith(".md") || lowerName.endsWith(".txt")) {
+            return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         } else {
             throw new IllegalArgumentException("Unsupported file type: " + fileName);
         }
@@ -77,60 +79,21 @@ public class ExamImportService {
      * Parses the extracted text into a structured JSON Exam using Gemini.
      */
     public String parseTextToExamJson(String rawText) {
-        String systemInstruction = "You are an AI assistant specialized in parsing IELTS and English test exams. "
-                + "You will be provided with raw unstructured text extracted from a test document (PDF, Word, or Excel). "
-                + "If the provided text is clearly NOT an exam, test, or educational learning material, you must set isExamMaterial to false and return empty/default values for the rest. "
-                + "Otherwise, set isExamMaterial to true and identify the Exam title, sections (e.g. Listening, Reading), passages (resource text), and questions with their options and correct answers. "
-                + "Return a strictly formatted JSON object matching the provided schema. Do your best to extract all questions accurately.";
-
-        // We define a strict schema matching our frontend preview and backend models
-        String responseSchemaJson = "{\n" +
-                "  \"type\": \"object\",\n" +
-                "  \"properties\": {\n" +
-                "    \"isExamMaterial\": { \"type\": \"boolean\", \"description\": \"Set to false if the document is NOT an exam, test, or educational material.\" },\n" +
-                "    \"title\": { \"type\": \"string\" },\n" +
-                "    \"skillFocus\": { \"type\": \"string\", \"enum\": [\"Reading\", \"Listening\", \"Writing\", \"Speaking\", \"All\"] },\n" +
-                "    \"duration\": { \"type\": \"integer\", \"description\": \"Duration in minutes\" },\n" +
-                "    \"sections\": {\n" +
-                "      \"type\": \"array\",\n" +
-                "      \"items\": {\n" +
-                "        \"type\": \"object\",\n" +
-                "        \"properties\": {\n" +
-                "          \"sectionName\": { \"type\": \"string\" },\n" +
-                "          \"skill\": { \"type\": \"string\" },\n" +
-                "          \"resourceText\": { \"type\": \"string\", \"description\": \"Reading passage or listening transcript. Return empty string if none.\" },\n" +
-                "          \"questions\": {\n" +
-                "            \"type\": \"array\",\n" +
-                "            \"items\": {\n" +
-                "              \"type\": \"object\",\n" +
-                "              \"properties\": {\n" +
-                "                \"content\": { \"type\": \"string\", \"description\": \"The question text\" },\n" +
-                "                \"questionType\": { \"type\": \"string\", \"enum\": [\"MultipleChoice\", \"FillInBlanks\", \"Matching\", \"TrueFalse\"] },\n" +
-                "                \"difficulty\": { \"type\": \"string\", \"enum\": [\"Easy\", \"Medium\", \"Hard\"] },\n" +
-                "                \"explanation\": { \"type\": \"string\" },\n" +
-                "                \"answers\": {\n" +
-                "                  \"type\": \"array\",\n" +
-                "                  \"items\": {\n" +
-                "                    \"type\": \"object\",\n" +
-                "                    \"properties\": {\n" +
-                "                      \"content\": { \"type\": \"string\", \"description\": \"Answer text (e.g., option A, B, C or fill in blank answer)\" },\n" +
-                "                      \"isCorrect\": { \"type\": \"boolean\" }\n" +
-                "                    },\n" +
-                "                    \"required\": [\"content\", \"isCorrect\"]\n" +
-                "                  }\n" +
-                "                }\n" +
-                "              },\n" +
-                "              \"required\": [\"content\", \"questionType\", \"answers\"]\n" +
-                "            }\n" +
-                "          }\n" +
-                "        },\n" +
-                "        \"required\": [\"sectionName\", \"skill\", \"questions\"]\n" +
-                "      }\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"required\": [\"isExamMaterial\", \"title\", \"skillFocus\", \"duration\", \"sections\"]\n" +
-                "}";
+        String systemInstruction = loadResourceFile("prompts/exam_import_prompt.txt");
+        String responseSchemaJson = loadResourceFile("prompts/exam_import_schema.json");
 
         return geminiApiService.generateStructuredContent(systemInstruction, rawText, responseSchemaJson);
+    }
+    
+    private String loadResourceFile(String path) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(path)) {
+            if (is == null) {
+                throw new IOException("Resource not found: " + path);
+            }
+            return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Failed to load resource file: " + path, e);
+            return "";
+        }
     }
 }
