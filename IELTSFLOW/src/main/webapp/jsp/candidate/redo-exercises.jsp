@@ -482,9 +482,23 @@
         }
     })();
     
+    document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            var sidebar = document.getElementById('appSidebar');
+            var main = document.getElementById('appMainContent');
+            if (sidebar) sidebar.classList.add('collapsed');
+            if (main) main.classList.add('expanded');
+        }
+    });
+
     function toggleSidebar() {
-        document.getElementById('appSidebar').classList.toggle('collapsed');
-        document.getElementById('appMainContent').classList.toggle('expanded');
+        var sidebar = document.getElementById('appSidebar');
+        var main = document.getElementById('appMainContent');
+        if (sidebar && main) {
+            sidebar.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        }
     }
     </script>
     <script src="${pageContext.request.contextPath}/js/api.js?v=${System.currentTimeMillis()}"></script>

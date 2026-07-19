@@ -243,7 +243,8 @@
 
     <div class="layout-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="appSidebar">
+            <button class="toggle-sidebar-btn" onclick="toggleSidebar()">◀</button>
             <div class="brand">IELTSFLOW</div>
             <div class="user-profile">
                 <div class="avatar">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}</div>
@@ -253,26 +254,26 @@
                 </div>
             </div>
             <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link active">🏠 Bảng điều khiển</a>
-                <!-- <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Kế hoạch tuần</a> -->
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Thư viện</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link">🎯 Bài thi</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 Lịch sử & Làm lại</a>
-                <!-- <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a> -->
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
+                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link" title="Bảng điều khiển">🏠 <span class="nav-text">Bảng điều khiển</span></a>
+                <!-- <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link" title="Kế hoạch tuần">📅 <span class="nav-text">Kế hoạch tuần</span></a> -->
+                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link" title="Thư viện">📚 <span class="nav-text">Thư viện</span></a>
+                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link" title="Bài thi">🎯 <span class="nav-text">Bài thi</span></a>
+                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link" title="Lịch sử & Làm lại">🔄 <span class="nav-text">Lịch sử & Làm lại</span></a>
+                <!-- <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link" title="Thông báo">🔔 <span class="nav-text">Thông báo</span></a> -->
+                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link" title="Ticket hỗ trợ">🎫 <span class="nav-text">Ticket hỗ trợ</span></a>
+                <a href="${pageContext.request.contextPath}/account" class="nav-link" title="Cài đặt tài khoản">⚙️ <span class="nav-text">Cài đặt tài khoản</span></a>
             </nav>
             <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Logout</a>
+                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);" title="Đăng xuất">🚪 <span class="nav-text">Logout</span></a>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" id="appMainContent">
             <div class="mock-hero animate-fade-up">
-                <div class="hero-badge">🎯 Mock Test</div>
-                <h1>Thi Thử IELTS</h1>
-                <p>Trải nghiệm thi thực tế với đề ngẫu nhiên từ ngân hàng đề của Mentor. Kết quả được ghi vào hồ sơ học tập.</p>
+                <div class="hero-badge">🎯 ${empty param.mode or param.mode eq 'practice' ? 'Practice Test' : 'Mock Test'}</div>
+                <h1>${empty param.mode or param.mode eq 'practice' ? 'Luyện Tập Kỹ Năng' : 'Thi Thử IELTS'}</h1>
+                <p>${empty param.mode or param.mode eq 'practice' ? 'Luyện tập các kỹ năng IELTS với đề thi được chọn.' : 'Trải nghiệm thi thực tế với đề ngẫu nhiên từ ngân hàng đề của Mentor. Kết quả được ghi vào hồ sơ học tập.'}</p>
             </div>
 
             <div class="animate-fade-up" style="animation-delay:0.1s;">
@@ -282,7 +283,8 @@
                             <form action="${pageContext.request.contextPath}/candidate/mock-test" method="post" id="mockTestForm">
                                 <input type="hidden" name="action" value="start">
                                 <div class="exam-meta-grid">
-                                    <div class="meta-item" style="grid-column: span 2; background: rgba(255,255,255,0.4);">
+                                    <div class="meta-item" id="examSelectionItem" style="grid-column: span 2; background: rgba(255,255,255,0.4); transition: all 0.3s;">
+                                        <input type="hidden" name="testMode" id="hiddenTestMode" value="${empty param.mode ? 'practice' : param.mode}">
                                         <div class="meta-label">📚 Chọn đề thi</div>
                                         <select name="examId" id="examSelect" class="mock-select" required onchange="handleExamChange()">
                                             <c:forEach var="ex" items="${exams}">
@@ -290,7 +292,7 @@
                                             </c:forEach>
                                         </select>
                                     </div>
-                                    <div class="meta-item" style="grid-column: span 2; background: transparent; border: none; padding: 0;">
+                                    <div class="meta-item" id="skillSelectionItem" style="grid-column: span 2; background: transparent; border: none; padding: 0; transition: all 0.3s;">
                                         <div class="meta-label" style="font-size: 0.8rem;">🎯 Chọn kỹ năng luyện tập</div>
                                         <div class="skill-grid" id="skillGrid">
                                             <label class="skill-card">
@@ -337,8 +339,6 @@
                                     <ul>
                                         <li>Bài thi sẽ bắt đầu ở chế độ <strong>Toàn màn hình</strong>.</li>
                                         <li>Nếu bạn thoát toàn màn hình hoặc chuyển tab quá <strong>3 lần</strong>, bài thi sẽ tự động nộp và bị đánh dấu vi phạm.</li>
-                                        <li>Câu hỏi được <strong>sắp xếp ngẫu nhiên</strong> mỗi lần thi (nếu là Full Test).</li>
-                                        <li>Bạn có thể xem lại đáp án chi tiết và AI Feedback sau khi nộp bài.</li>
                                     </ul>
                                 </div>
 
@@ -409,7 +409,57 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', handleExamChange);
+        function handleModeChange() {
+            const modeVal = document.getElementById('hiddenTestMode').value;
+            
+            const examSelect = document.getElementById('examSelect');
+            const skillRadios = document.querySelectorAll('input[name="skillFocus"]');
+            const examItem = document.getElementById('examSelectionItem');
+            const skillItem = document.getElementById('skillSelectionItem');
+
+            if (modeVal === 'mocktest') {
+                skillRadios.forEach(r => {
+                    if (r.value === 'All') {
+                        r.checked = true;
+                        r.disabled = false;
+                        r.closest('.skill-card').classList.remove('disabled');
+                    } else {
+                        r.disabled = true;
+                        r.closest('.skill-card').classList.add('disabled');
+                    }
+                });
+                skillItem.style.opacity = '0.5';
+                skillItem.style.pointerEvents = 'none';
+            } else {
+                skillItem.style.opacity = '1';
+                skillItem.style.pointerEvents = 'auto';
+                
+                handleExamChange();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            handleModeChange();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                var sidebar = document.getElementById('appSidebar');
+                var main = document.getElementById('appMainContent');
+                if (sidebar) sidebar.classList.add('collapsed');
+                if (main) main.classList.add('expanded');
+            }
+        });
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('appSidebar');
+            var main = document.getElementById('appMainContent');
+            if (sidebar && main) {
+                sidebar.classList.toggle('collapsed');
+                main.classList.toggle('expanded');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            }
+        }
     </script>
 </body>
 </html>

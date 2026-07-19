@@ -137,14 +137,27 @@ public class MockTestServlet extends HttpServlet {
             throws Exception {
         int userId = (int) req.getSession().getAttribute("userId");
         
+        String testMode = req.getParameter("testMode");
         String examIdStr = req.getParameter("examId");
         String skillStr = req.getParameter("skillFocus");
         
         Exam exam = null;
-        if (examIdStr != null && !examIdStr.isEmpty()) {
-            try {
-                exam = mockTestService.getMockTestById(Integer.parseInt(examIdStr));
-            } catch (Exception ignored) {}
+        if ("placement".equals(testMode)) {
+            exam = mockTestService.getRandomPlacementTest();
+            if (exam == null) { 
+                exam = mockTestService.getRandomMockTest();
+            }
+            skillStr = "All";
+        } else if ("mocktest".equals(testMode)) {
+            if (examIdStr != null && !examIdStr.isEmpty()) {
+                try { exam = mockTestService.getMockTestById(Integer.parseInt(examIdStr)); } catch (Exception ignored) {}
+            }
+            skillStr = "All";
+        } else {
+            // practice test is default
+            if (examIdStr != null && !examIdStr.isEmpty()) {
+                try { exam = mockTestService.getMockTestById(Integer.parseInt(examIdStr)); } catch (Exception ignored) {}
+            }
         }
         
         if (exam == null) {
