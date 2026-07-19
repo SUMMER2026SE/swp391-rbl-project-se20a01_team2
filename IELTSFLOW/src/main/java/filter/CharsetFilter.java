@@ -15,7 +15,7 @@ import java.io.IOException;
  * Filter thiết lập mã hóa UTF-8 cho toàn bộ request và response
  * Giúp hiển thị tiếng Việt chính xác.
  */
-@WebFilter("/*")
+@WebFilter(value = "/*", asyncSupported = true)
 public class CharsetFilter implements Filter {
 
     private String encoding;

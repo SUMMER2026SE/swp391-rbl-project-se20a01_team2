@@ -1,0 +1,4 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_PAY_01","[Happy Path] Test Case 3.1: Pro Package Purchase & Valid Mock Webhook","Candidate logged in","1. Select Pro package 2. Proceed to checkout 3. Mock webhook success","Payment completes and package is activated","Automated","EP"
+"TC_PAY_02","[Unhappy Path] Test Case 3.2: Cancel Checkout","Candidate logged in","1. Select package 2. Proceed to checkout 3. Cancel payment","Payment is cancelled, user returned to packages","Automated","Decision table"
+"TC_PAY_03","[Unhappy Path] Test Case 3.3: Checkout Timeout","Candidate logged in","1. Select package 2. Proceed to checkout 3. Wait for timeout","Checkout session expires with timeout message","Automated","BVA"

@@ -28,6 +28,8 @@ replay_pid*
 .env
 IELTSFLOW/target/
 
+IELTSFLOW/E2E_TestResults.html
+
 IELTSFLOW/.idea
 .agent/skills/
 IELTSFLOW/.agent/skills/
@@ -45,3 +47,5 @@ goalapi_testcase.md
 dashboard & analystic.drawio
 IELTSFLOW/E2E_TestResults.html
 IELTSFLOW/src/test/resources/config/dev.properties
+
+screenshots/

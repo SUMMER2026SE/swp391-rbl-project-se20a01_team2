@@ -159,7 +159,15 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!userDAO.updateStatus(user.getUserId(), "Active")) {
-            throw new Exception("L-i h th`ng khi c-p nh-t trng thA?i.");
+            throw new Exception("Lỗi hệ thống khi cập nhật trạng thái.");
+        }
+        
+        // Gửi thông báo chào mừng
+        try {
+            services.NotificationService notifService = new services.NotificationService();
+            notifService.sendWelcomeNotifications(user.getUserId());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

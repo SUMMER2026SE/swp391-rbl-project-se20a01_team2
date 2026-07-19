@@ -1,0 +1,2 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_MMOCK_01","testCreateMockTestFlow (Create Mock Test and Add Questions)","Mentor logged in","1. Navigate to Mock Tests 2. Create new Mock Test 3. Add questions 4. Save","Mock test created and ready with questions","Automated","EP"

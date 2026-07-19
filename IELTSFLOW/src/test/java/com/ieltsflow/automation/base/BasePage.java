@@ -59,6 +59,11 @@ public class BasePage {
         executor.executeScript("arguments[0].click();", element);
     }
 
+    protected void jsClick(WebElement element) {
+        JavascriptExecutor executor = (JavascriptExecutor) driver;
+        executor.executeScript("arguments[0].click();", element);
+    }
+
     protected List<WebElement> getElements(By locator) {
         return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
     }

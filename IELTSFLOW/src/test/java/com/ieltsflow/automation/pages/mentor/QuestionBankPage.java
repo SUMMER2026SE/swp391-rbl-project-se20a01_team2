@@ -1,11 +1,11 @@
 package com.ieltsflow.automation.pages.mentor;
 
-import com.ieltsflow.automation.utils.WaitUtils;
+import com.ieltsflow.automation.base.BasePage;
+import com.ieltsflow.automation.utils.ConfigReader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-public class QuestionBankPage {
-    private WebDriver driver;
+public class QuestionBankPage extends BasePage {
 
     private By btnAddQuestion = By.xpath("//a[contains(@href, 'action=new')]");
     private By inputQuestionContent = By.name("content");
@@ -16,41 +16,43 @@ public class QuestionBankPage {
     private By btnDeleteQuestion = By.xpath("(//form[input[@name='action' and @value='delete']]//button[@type='submit'])[1]");
 
     public QuestionBankPage(WebDriver driver) {
-        this.driver = driver;
+        super(driver);
+    }
+
+    public void navigate() {
+        navigateTo(ConfigReader.getBaseUrl() + "/mentor/questions");
     }
 
     public void navigateToCreateQuestion() {
-        WaitUtils.waitForElementClickable(driver, btnAddQuestion, 3).click();
+        click(btnAddQuestion);
     }
 
     public void fillMatchingQuestion(String content, String jsonData) {
-        WaitUtils.waitForElementVisible(driver, inputQuestionContent, 3).sendKeys(content);
-        driver.findElement(selectQuestionType).sendKeys("Matching");
+        type(inputQuestionContent, content);
+        selectByValue(selectQuestionType, "Matching");
         toggleAndFillJson(jsonData);
     }
 
     public void fillFillInBlanksQuestion(String content, String blanksData) {
-        WaitUtils.waitForElementVisible(driver, inputQuestionContent, 3).sendKeys(content);
-        driver.findElement(selectQuestionType).sendKeys("Fill In Blanks");
+        type(inputQuestionContent, content);
+        selectByValue(selectQuestionType, "FillInBlanks");
         toggleAndFillJson(blanksData);
     }
     
     private void toggleAndFillJson(String jsonData) {
         // Toggle raw JSON view
-        org.openqa.selenium.WebElement toggle = WaitUtils.waitForElementClickable(driver, toggleRawJson, 3);
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", toggle);
+        jsClick(toggleRawJson);
         
-        org.openqa.selenium.WebElement jsonInput = WaitUtils.waitForElementVisible(driver, inputJsonData, 3);
+        org.openqa.selenium.WebElement jsonInput = wait.until(org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated(inputJsonData));
         ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].value = arguments[1];", jsonInput, jsonData);
     }
 
     public void saveQuestion() {
-        org.openqa.selenium.WebElement saveBtn = WaitUtils.waitForElementClickable(driver, btnSaveQuestion, 3);
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", saveBtn);
+        jsClick(btnSaveQuestion);
     }
 
     public void deleteQuestion() {
-        WaitUtils.waitForElementClickable(driver, btnDeleteQuestion, 3).click();
+        click(btnDeleteQuestion);
         
         // Handle JS confirm alert
         org.openqa.selenium.support.ui.WebDriverWait wait = new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(5));

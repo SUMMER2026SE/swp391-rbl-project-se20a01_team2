@@ -1,0 +1,3 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_MOCK_01","testMockTestTimer (Verify Timer on Mock Test)","Candidate logged in","1. Go to mock test page 2. Click start 3. Activate security 4. Check timer","Timer should start counting down from full time","Automated","EP"
+"TC_MOCK_02","testFocusModeViolation (Verify Anti-cheat Focus Mode)","Candidate in mock test","1. Trigger tab switch violation 2. Repeat 3 times","System warns 2 times and auto-submits on 3rd violation","Automated","BVA"

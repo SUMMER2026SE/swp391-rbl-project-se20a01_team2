@@ -23,7 +23,7 @@ import java.io.IOException;
  *  - /jsp/change-password.jsp → Yêu cầu đăng nhập
  *  - Còn lại              → Cho phép tự do (Guest)
  */
-@WebFilter("/*")
+@WebFilter(value = "/*", asyncSupported = true)
 public class AuthFilter implements Filter {
 
     // Các đường dẫn yêu cầu đăng nhập (bất kỳ role nào)

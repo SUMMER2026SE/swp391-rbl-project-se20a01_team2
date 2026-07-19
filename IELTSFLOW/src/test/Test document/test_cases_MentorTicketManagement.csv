@@ -1,0 +1,2 @@
+"Test case: ID","Description","Precondition","Test Steps","Expected Result","Status","Note (BVA, EP, Decision table, ...)"
+"TC_TICKET_01","testReplyToTicket (Reply and resolve a ticket)","Ticket exists, Mentor logged in","1. Navigate to tickets 2. Open a ticket 3. Add reply 4. Resolve","Ticket is marked as resolved and candidate sees reply","Automated","EP"

@@ -31,6 +31,9 @@
         <header class="main-header animate-fade-up" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
             <h1 class="page-title" style="font-size: 2rem; margin: 0;">Quản lý Đề thi 📝</h1>
             <div class="header-actions">
+                <button type="button" class="btn btn-outline-primary rounded-pill shadow-sm fw-bold me-2" data-bs-toggle="modal" data-bs-target="#importAiModal">
+                    Import AI <i class="fa-solid fa-wand-magic-sparkles ms-2"></i>
+                </button>
                 <a href="${pageContext.request.contextPath}/admin/exams?action=new" class="btn btn-primary rounded-pill shadow-sm fw-bold" style="background-color: var(--accent-purple); border-color: var(--accent-purple);">
                     Tạo Đề Thi <i class="fa-solid fa-plus ms-2"></i>
                 </a>
@@ -130,6 +133,93 @@
         </div>
     </main>
 </div>
+
+<!-- AI Import Modal -->
+<div class="modal fade" id="importAiModal" tabindex="-1" aria-labelledby="importAiModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="importAiModalLabel"><i class="fa-solid fa-wand-magic-sparkles text-primary"></i> Import Đề Thi bằng AI</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Step 1: Upload Form -->
+        <div id="aiUploadStep">
+            <div id="aiUploadError" class="alert alert-danger d-none shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> <span id="aiUploadErrorMsg"></span></div>
+            <p class="text-muted">Tải lên file tài liệu chứa nội dung đề thi (.pdf, .docx, .xlsx). AI sẽ tự động trích xuất các phần thi, đoạn văn bản, và câu hỏi (bao gồm đáp án) cho bạn.</p>
+            <form id="aiUploadForm" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="upload">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Chọn File (PDF/Docx/Excel)</label>
+                    <input class="form-control" type="file" id="examFile" name="file" accept=".pdf,.docx,.xlsx" required>
+                </div>
+                <button type="submit" class="btn btn-primary shadow-sm rounded-pill w-100" id="btnUploadAi">
+                    Phân tích bằng AI <i class="fa-solid fa-microchip ms-2"></i>
+                </button>
+            </form>
+            <div class="text-center mt-3 d-none" id="aiLoadingIndicator">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="text-muted mt-2">AI đang phân tích dữ liệu, vui lòng chờ... (có thể mất 15-30 giây)</p>
+            </div>
+        </div>
+
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('aiUploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('examFile');
+        if (!fileInput.files.length) return;
+
+        const formData = new FormData(this);
+        const btnSubmit = document.getElementById('btnUploadAi');
+        const loading = document.getElementById('aiLoadingIndicator');
+        const uploadStep = document.getElementById('aiUploadStep');
+        const previewStep = document.getElementById('aiPreviewStep');
+        const editor = document.getElementById('aiJsonEditor');
+        const errorAlert = document.getElementById('aiUploadError');
+        const errorMsg = document.getElementById('aiUploadErrorMsg');
+
+        errorAlert.classList.add('d-none');
+        btnSubmit.disabled = true;
+        loading.classList.remove('d-none');
+
+        fetch(window.contextPath + '/admin/exam-import', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'Network error'); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.examId) {
+                window.location.href = window.contextPath + '/admin/exams/' + data.examId;
+            } else {
+                throw new Error("Lỗi không xác định khi lưu đề thi.");
+            }
+        })
+        .catch(err => {
+            errorMsg.textContent = 'Lỗi khi phân tích bằng AI: ' + err.message;
+            errorAlert.classList.remove('d-none');
+        })
+        .finally(() => {
+            btnSubmit.disabled = false;
+            loading.classList.add('d-none');
+        });
+    });
+
+
+</script>
 
 </body>
 </html>

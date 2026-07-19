@@ -30,10 +30,7 @@ public class GeminiApiService {
             "https://generativelanguage.googleapis.com/v1beta/models/"
             + MODEL_NAME + ":generateContent?key=";
 
-    // Fallback keys - hardcoded để hệ thống luôn hoạt động kể cả khi .env chưa load
-    private static final String[] FALLBACK_KEYS = {
-        "YOUR_GEMINI_API_KEY_HERE"
-    };
+    // Removed hardcoded fallback keys for security
 
     // Static để tất cả instances dùng chung 1 counter tránh key bị hammer cùng lúc
     private static final AtomicInteger KEY_COUNTER = new AtomicInteger(0);
@@ -62,9 +59,9 @@ public class GeminiApiService {
                         .toArray(String[]::new);
             }
         }
-        // Fallback: Tomcat chưa restart hoặc .env chưa được load
-        LOGGER.warning("GEMINI_API_KEYS not in System properties. Using hardcoded fallback keys.");
-        return FALLBACK_KEYS;
+        // No valid keys found
+        LOGGER.severe("GEMINI_API_KEYS not set in System properties. Please check .env configuration.");
+        throw new IllegalStateException("Gemini API keys are not configured.");
     }
 
     /**
@@ -89,6 +86,7 @@ public class GeminiApiService {
         String[] keys = getAllKeys();
         int maxAttempts = keys.length * 2; // Thử tối đa 2 vòng key rotation
 
+        Exception lastException = null;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             String apiKey = getNextKey(keys);
             LOGGER.info(String.format("[Gemini] Attempt %d/%d - Key: ...%s",
@@ -96,11 +94,14 @@ public class GeminiApiService {
             try {
                 // Build full JSON payload cho Gemini API request
                 String fullPayload = buildPayload(systemInstruction, userPrompt, responseSchemaJson);
+                if (fullPayload == null) {
+                    throw new RuntimeException("Failed to build JSON payload for Gemini");
+                }
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(BASE_URL + apiKey))
                         .header("Content-Type", "application/json; charset=UTF-8")
-                        .timeout(Duration.ofSeconds(90))
+                        .timeout(Duration.ofSeconds(300))
                         .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
                         .build();
 
@@ -115,33 +116,35 @@ public class GeminiApiService {
                 } else if (status == 429 || status == 503 || status >= 500) {
                     // Rate limit hoặc server overload: rotate key và thử lại sau delay
                     LOGGER.warning(String.format("[Gemini] Status %d on attempt %d. Rotating key and retrying after delay.", status, attempt));
+                    lastException = new RuntimeException("Gemini HTTP " + status);
                     int sleepMs = Math.min(3000 * attempt, 15000); // max 15s wait
                     Thread.sleep(sleepMs);
                     // Tiếp tục vòng lặp với key mới
                 } else {
                     // Lỗi client (400, 401, 403) - không retry vì retry sẽ không giúp ích
                     LOGGER.severe(String.format("[Gemini] Fatal error %d: %s", status, response.body()));
-                    return null;
+                    throw new RuntimeException(String.format("Gemini API error %d: %s", status, response.body()));
                 }
 
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 LOGGER.warning("[Gemini] Thread interrupted during retry sleep.");
-                return null;
+                throw new RuntimeException("Thread interrupted while calling Gemini");
             } catch (Exception e) {
+                lastException = e;
                 LOGGER.log(Level.WARNING,
                         String.format("[Gemini] Exception on attempt %d: %s", attempt, e.getMessage()), e);
                 if (attempt < maxAttempts) {
                     try { Thread.sleep(2000); } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
-                        return null;
+                        throw new RuntimeException("Interrupted");
                     }
                 }
             }
         }
 
         LOGGER.severe("[Gemini] All " + maxAttempts + " attempts exhausted. Returning null.");
-        return null;
+        throw new RuntimeException("Gemini API requests exhausted. Last error: " + (lastException != null ? lastException.getMessage() : "Unknown"));
     }
 
     /**
@@ -185,7 +188,7 @@ public class GeminiApiService {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(BASE_URL + apiKey))
                         .header("Content-Type", "application/json; charset=UTF-8")
-                        .timeout(Duration.ofSeconds(60))
+                        .timeout(Duration.ofSeconds(120))
                         .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
                         .build();
 
@@ -253,6 +256,118 @@ public class GeminiApiService {
     }
 
     /**
+     * Gọi Gemini API cho tính năng Chat (Streaming).
+     */
+    public void streamChatReply(String systemInstruction, String userMessage, java.io.PrintWriter clientWriter) {
+        String[] keys = getAllKeys();
+        int maxAttempts = keys.length * 2;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            String apiKey = getNextKey(keys);
+            try {
+                String fullPayload = buildStreamChatPayload(systemInstruction, userMessage);
+                if (fullPayload == null) {
+                    clientWriter.print("data: {\"error\": \"Failed to build payload\"}\n\n");
+                    clientWriter.flush();
+                    return;
+                }
+
+                String url = BASE_URL.replace(":generateContent?key=", ":streamGenerateContent?alt=sse&key=") + apiKey;
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .header("Content-Type", "application/json; charset=UTF-8")
+                        .timeout(Duration.ofSeconds(120))
+                        .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
+                        .build();
+
+                HttpResponse<java.util.stream.Stream<String>> response = httpClient.send(request,
+                        HttpResponse.BodyHandlers.ofLines());
+
+                int status = response.statusCode();
+
+                if (status == 200) {
+                    response.body().forEach(line -> {
+                        if (line.startsWith("data: ")) {
+                            String data = line.substring(6);
+                            if (!"[DONE]".equals(data)) {
+                                try {
+                                    com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(data);
+                                    com.fasterxml.jackson.databind.JsonNode candidates = root.path("candidates");
+                                    if (candidates.isArray() && !candidates.isEmpty()) {
+                                        com.fasterxml.jackson.databind.JsonNode parts = candidates.get(0).path("content").path("parts");
+                                        if (parts.isArray() && !parts.isEmpty()) {
+                                            String text = parts.get(0).path("text").asText();
+                                            if (text != null && !text.isEmpty()) {
+                                                String chunkJson = objectMapper.writeValueAsString(new ChatChunk(text));
+                                                clientWriter.print("data: " + chunkJson + "\n\n");
+                                                clientWriter.flush();
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    LOGGER.warning("Failed to parse SSE line: " + line);
+                                }
+                            }
+                        }
+                    });
+                    
+                    clientWriter.print("data: [DONE]\n\n");
+                    clientWriter.flush();
+                    return;
+                } else if (status == 429 || status == 503 || status >= 500) {
+                    int sleepMs = Math.min(2000 * attempt, 10000);
+                    Thread.sleep(sleepMs);
+                } else {
+                    LOGGER.severe(String.format("[Gemini Stream] Fatal error %d", status));
+                    clientWriter.print("data: {\"error\": \"Fatal error from AI\"}\n\n");
+                    clientWriter.flush();
+                    return;
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                return;
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Error in streamChatReply", e);
+                if (attempt < maxAttempts) {
+                    try { Thread.sleep(1000); } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                } else {
+                    clientWriter.print("data: {\"error\": \"Connection failed\"}\n\n");
+                    clientWriter.flush();
+                }
+            }
+        }
+    }
+
+    private String buildStreamChatPayload(String systemInstruction, String userMessage) {
+        try {
+            String sysText = objectMapper.writeValueAsString(systemInstruction);
+            String userText = objectMapper.writeValueAsString(userMessage);
+            return "{"
+                + "\"systemInstruction\":{\"parts\":[{\"text\":" + sysText + "}]},"
+                + "\"contents\":[{\"parts\":[{\"text\":" + userText + "}]}],"
+                + "\"generationConfig\":{"
+                + "\"temperature\":0.7"
+                + "}"
+                + "}";
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to build stream Chat payload", e);
+            return null;
+        }
+    }
+
+    public static class ChatChunk {
+        public String text;
+        public ChatChunk(String text) {
+            this.text = text;
+        }
+    }
+
+
+    /**
      * Parse kết quả từ Gemini API response body.
      * Gemini trả về text nằm trong candidates[0].content.parts[0].text
      */
@@ -273,7 +388,7 @@ public class GeminiApiService {
             String finishReason = firstCandidate.path("finishReason").asText("");
             if ("SAFETY".equals(finishReason) || "RECITATION".equals(finishReason)) {
                 LOGGER.warning("[Gemini] Response blocked by safety filter. finishReason: " + finishReason);
-                return null;
+                throw new RuntimeException("Gemini blocked response due to safety filter (" + finishReason + ")");
             }
 
             var parts = firstCandidate.path("content").path("parts");

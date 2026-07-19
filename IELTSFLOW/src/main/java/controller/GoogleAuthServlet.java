@@ -117,7 +117,13 @@ public class GoogleAuthServlet extends HttpServlet {
                     userDAO.create(user);
                     
                     userOpt = userDAO.findByEmail(email);
-                    if (userOpt.isPresent()) user = userOpt.get();
+                    if (userOpt.isPresent()) {
+                        user = userOpt.get();
+                        try {
+                            services.NotificationService notifService = new services.NotificationService();
+                            notifService.sendWelcomeNotifications(user.getUserId());
+                        } catch (Exception e) {}
+                    }
                 }
 
                 HttpSession session = request.getSession(true);
