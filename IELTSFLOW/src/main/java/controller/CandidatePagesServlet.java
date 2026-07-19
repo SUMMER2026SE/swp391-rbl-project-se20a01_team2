@@ -129,7 +129,7 @@ public class CandidatePagesServlet extends HttpServlet {
                         req.setAttribute("hasNoPlacementTest", true);
                     } else {
                         boolean isExpired = latestTest.getEndTime() == null || 
-                            ChronoUnit.DAYS.between(latestTest.getEndTime(), LocalDateTime.now()) > 90;
+                            ChronoUnit.DAYS.between(latestTest.getEndTime(), LocalDateTime.now()) > 30;
                             
                         PathwayService pwService = new PathwayService();
                         List<Pathway> existingPathways = pwService.getPathwaysByUser(userId);
@@ -240,12 +240,14 @@ public class CandidatePagesServlet extends HttpServlet {
                 AIPathwayService aiService = new AIPathwayService();
                 PathwayService pwService = new PathwayService();
                 
+                final boolean isRegeneratingOldTest = "true".equals(req.getParameter("useOldTest"));
+                
                 aiService.generatePathwayAsync(submission, targetBand, wrongTagsCount)
                     .thenAccept(weeklyPlans -> {
                         if (weeklyPlans != null && !weeklyPlans.isEmpty()) {
                             
                             // Delete old pathway if regenerating with old test
-                            if ("true".equals(req.getParameter("useOldTest"))) {
+                            if (isRegeneratingOldTest) {
                                 List<Pathway> existing = pwService.getPathwaysByUser(userId);
                                 existing.stream()
                                     .filter(p -> p.getPlacementTestId() != null && p.getPlacementTestId().equals(submission.getSubmissionId()))

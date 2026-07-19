@@ -38,10 +38,10 @@ public class PathwayService {
         return pathwayDAO.findCurrentWeekPlan(latest.getPathwayId());
     }
 
-    // Tạo lộ trình mới kèm weekly plans (Tối đa 12 tuần = 3 tháng)
+    // Tạo lộ trình mới kèm weekly plans (Tối đa 4 tuần = 1 tháng)
     public void createPathway(Pathway pathway, List<WeeklyPlan> plans) {
-        if (plans != null && plans.size() > 12) {
-            throw new IllegalArgumentException("Hệ thống chỉ hỗ trợ xây dựng lộ trình tối đa 3 tháng (12 tuần). Vui lòng thực hiện re-test sau khi hoàn thành.");
+        if (plans != null && plans.size() > 4) {
+            throw new IllegalArgumentException("Hệ thống chỉ hỗ trợ xây dựng lộ trình tối đa 1 tháng (4 tuần). Vui lòng thực hiện re-test sau khi hoàn thành.");
         }
         pathwayDAO.savePathway(pathway);
         for (WeeklyPlan plan : plans) {

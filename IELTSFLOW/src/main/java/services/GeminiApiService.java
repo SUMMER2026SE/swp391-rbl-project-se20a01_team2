@@ -98,21 +98,67 @@ public class GeminiApiService {
                     throw new RuntimeException("Failed to build JSON payload for Gemini");
                 }
 
+                String url = BASE_URL.replace(":generateContent?key=", ":streamGenerateContent?alt=sse&key=") + apiKey;
+
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(BASE_URL + apiKey))
+                        .uri(URI.create(url))
                         .header("Content-Type", "application/json; charset=UTF-8")
                         .timeout(Duration.ofSeconds(300))
                         .POST(HttpRequest.BodyPublishers.ofString(fullPayload, java.nio.charset.StandardCharsets.UTF_8))
                         .build();
 
-                HttpResponse<String> response = httpClient.send(request,
-                        HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8));
+                HttpResponse<java.util.stream.Stream<String>> response = httpClient.send(request,
+                        HttpResponse.BodyHandlers.ofLines());
 
                 int status = response.statusCode();
                 LOGGER.info(String.format("[Gemini] Response status: %d for attempt %d", status, attempt));
 
                 if (status == 200) {
-                    return extractTextFromResponse(response.body());
+                    StringBuilder resultBuilder = new StringBuilder();
+                    response.body().forEach(line -> {
+                        if (line.startsWith("data: ")) {
+                            String data = line.substring(6);
+                            if (!"[DONE]".equals(data)) {
+                                System.out.println("Reciving AI Response...");
+                                try {
+                                    com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(data);
+                                    com.fasterxml.jackson.databind.JsonNode candidates = root.path("candidates");
+                                    if (candidates.isArray() && !candidates.isEmpty()) {
+                                        com.fasterxml.jackson.databind.JsonNode parts = candidates.get(0).path("content").path("parts");
+                                        if (parts.isArray()) {
+                                            for (com.fasterxml.jackson.databind.JsonNode part : parts) {
+                                                boolean isThought = part.path("thought").asBoolean(false);
+                                                if (!isThought) {
+                                                    String text = part.path("text").asText("");
+                                                    if (!text.isEmpty()) {
+                                                        resultBuilder.append(text);
+                                                        System.out.println("What we got so far: " + resultBuilder.toString());
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    LOGGER.warning("Failed to parse SSE line: " + line);
+                                }
+                            } else {
+                                System.out.println("Recived Full AI Response");
+                            }
+                        }
+                    });
+                    
+                    String fullResponse = resultBuilder.toString().trim();
+                    // Clean up markdown json blocks if present
+                    if (fullResponse.startsWith("```json")) {
+                        fullResponse = fullResponse.substring(7);
+                    } else if (fullResponse.startsWith("```")) {
+                        fullResponse = fullResponse.substring(3);
+                    }
+                    if (fullResponse.endsWith("```")) {
+                        fullResponse = fullResponse.substring(0, fullResponse.length() - 3);
+                    }
+                    return fullResponse.trim();
+                    
                 } else if (status == 429 || status == 503 || status >= 500) {
                     // Rate limit hoặc server overload: rotate key và thử lại sau delay
                     LOGGER.warning(String.format("[Gemini] Status %d on attempt %d. Rotating key and retrying after delay.", status, attempt));
@@ -122,8 +168,8 @@ public class GeminiApiService {
                     // Tiếp tục vòng lặp với key mới
                 } else {
                     // Lỗi client (400, 401, 403) - không retry vì retry sẽ không giúp ích
-                    LOGGER.severe(String.format("[Gemini] Fatal error %d: %s", status, response.body()));
-                    throw new RuntimeException(String.format("Gemini API error %d: %s", status, response.body()));
+                    LOGGER.severe(String.format("[Gemini] Fatal error %d", status));
+                    throw new RuntimeException(String.format("Gemini API error %d", status));
                 }
 
             } catch (InterruptedException ie) {
@@ -296,12 +342,17 @@ public class GeminiApiService {
                                     com.fasterxml.jackson.databind.JsonNode candidates = root.path("candidates");
                                     if (candidates.isArray() && !candidates.isEmpty()) {
                                         com.fasterxml.jackson.databind.JsonNode parts = candidates.get(0).path("content").path("parts");
-                                        if (parts.isArray() && !parts.isEmpty()) {
-                                            String text = parts.get(0).path("text").asText();
-                                            if (text != null && !text.isEmpty()) {
-                                                String chunkJson = objectMapper.writeValueAsString(new ChatChunk(text));
-                                                clientWriter.print("data: " + chunkJson + "\n\n");
-                                                clientWriter.flush();
+                                        if (parts.isArray()) {
+                                            for (com.fasterxml.jackson.databind.JsonNode part : parts) {
+                                                boolean isThought = part.path("thought").asBoolean(false);
+                                                if (!isThought) {
+                                                    String text = part.path("text").asText("");
+                                                    if (!text.isEmpty()) {
+                                                        String chunkJson = objectMapper.writeValueAsString(new ChatChunk(text));
+                                                        clientWriter.print("data: " + chunkJson + "\n\n");
+                                                        clientWriter.flush();
+                                                    }
+                                                }
                                             }
                                         }
                                     }

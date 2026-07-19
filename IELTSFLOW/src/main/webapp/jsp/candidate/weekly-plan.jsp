@@ -39,7 +39,7 @@
                 <c:when test="${canGeneratePathway}">
                     <div class="animate-fade-up" style="margin-bottom: 40px; text-align: center; margin-top: 50px;">
                         <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Sẵn sàng tạo Lộ trình 🚀</h1>
-                        <p style="color: black; margin-bottom: 20px;">Hệ thống đã nhận diện được kết quả bài test gần nhất và mục tiêu của bạn.<br>Hãy nhấn nút bên dưới để AI bắt đầu phân tích và tạo lộ trình học 12 tuần.</p>
+                        <p style="color: black; margin-bottom: 20px;">Hệ thống đã nhận diện được kết quả bài test gần nhất và mục tiêu của bạn.<br>Hãy nhấn nút bên dưới để AI bắt đầu phân tích và tạo lộ trình học 4 tuần.</p>
                         <c:choose>
                             <c:when test="${isGenerating}">
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
@@ -126,30 +126,14 @@
                         <!-- Plans will be rendered here by JS -->
                     </div>
 
-                    <c:if test="${isPathwayExpired}">
-                        <div class="timeline-node animate-fade-up" style="animation-delay: 0.5s;">
-                            <div class="timeline-dot" style="border-color: var(--accent-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);"></div>
-                            <div class="glass-panel" style="padding: 30px; transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
-                                <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
-                                    <div>
-                                        <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Phase Đã hoàn thành (3 Months)</span>
-                                        <h2 style="margin: 15px 0 10px; color: var(--accent-red); font-size: 1.8rem;">Time for a Re-test! 🎯</h2>
-                                        <p style="color: black; font-size: 1rem; line-height: 1.6;">You've reached the end of the 12-week study phase. To continue your journey and let our AI build the next personalized pathway, a re-evaluation is required.</p>
-                                    </div>
-                                    <a href="${pageContext.request.contextPath}/candidate/placement-test" class="btn btn-primary" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); white-space: nowrap; padding: 15px 30px; font-size: 1.1rem; border-radius: 12px; cursor: pointer; text-decoration: none;">
-                                        Take Re-test Now →
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </c:if>
-
                     <script>
                         const plansData = [
                             <c:forEach items="${weeklyPlans}" var="plan" varStatus="loop">
                                 ${plan.planContent}${!loop.last ? ',' : ''}
                             </c:forEach>
                         ];
+                        const isPathwayExpired = ${not empty isPathwayExpired and isPathwayExpired};
+                        const retestUrl = '${pageContext.request.contextPath}/candidate/placement-test';
                         
                         const container = document.getElementById('weekly-plans-container');
                         let html = '';
@@ -158,7 +142,6 @@
                         
                         plansData.forEach((plan, index) => {
                             const badgeClass = badges[index % badges.length];
-                            // Determine opacity based on current week (Mocking current week as Week 1)
                             const isCurrent = index === 0;
                             const opacity = isCurrent ? 1 : 0.6 - (index * 0.03);
                             
@@ -178,7 +161,7 @@
                             <div class="timeline-node">
                                 <div class="timeline-dot \${isCurrent ? 'active' : ''}"></div>
                                 <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: \${opacity};">
-                                    <span class="badge \${badgeClass}">Week \${plan.weekNumber} \${isCurrent ? '(Current)' : ''}</span>
+                                    <span class="badge \${badgeClass}">Tuần \${plan.weekNumber} \${isCurrent ? '(Hiện tại)' : ''}</span>
                                     <h2 style="margin: 10px 0;">\${plan.skillsFocus}</h2>
                                     <p style="color: var(--accent-blue); font-weight: 500;">Mục tiêu: \${plan.objectives}</p>
                                     <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
@@ -188,6 +171,34 @@
                             </div>
                             `;
                         });
+
+                        // Always append the re-test banner at the end, faded if not yet expired
+                        const dotStyle = 'border-color: var(--accent-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);';
+                        const panelStyle = isPathwayExpired
+                            ? 'padding: 30px; transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);'
+                            : 'padding: 30px; transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); opacity: 0.4; filter: grayscale(60%);';
+                        const btnStyle = isPathwayExpired
+                            ? 'background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); cursor: pointer;'
+                            : 'background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); opacity: 0.5; cursor: not-allowed;';
+                        const btnHref = isPathwayExpired ? `href="\${retestUrl}"` : '';
+
+                        html += `
+                        <div class="timeline-node">
+                            <div class="timeline-dot" style="\${dotStyle}"></div>
+                            <div class="glass-panel" style="\${panelStyle}">
+                                <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                                    <div>
+                                        <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Giai đoạn hoàn thành (1 tháng)</span>
+                                        <h2 style="margin: 15px 0 10px; color: var(--accent-red); font-size: 1.8rem;">Đến lúc thi lại rồi! 🎯</h2>
+                                        <p style="color: black; font-size: 1rem; line-height: 1.6;">Bạn đã hoàn thành lộ trình học 4 tuần. Để tiếp tục hành trình và để AI tạo lộ trình cá nhân hóa tiếp theo, bạn cần thực hiện bài đánh giá lại.</p>
+                                    </div>
+                                    <a \${btnHref} class="btn btn-primary" style="\${btnStyle} white-space: nowrap; padding: 15px 30px; font-size: 1.1rem; border-radius: 12px; text-decoration: none;">
+                                        Thi lại ngay →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        `;
                         
                         container.innerHTML = html;
                     </script>
