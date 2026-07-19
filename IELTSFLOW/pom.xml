@@ -157,7 +157,6 @@
     </dependencies>
 
     <build>
-        <finalName>IELTSFLOW</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
