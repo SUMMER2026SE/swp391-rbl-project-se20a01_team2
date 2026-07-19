@@ -420,7 +420,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             handleModeChange();
         });
-        }
     </script>
 </body>
 </html>

@@ -229,9 +229,7 @@
     </div>
     <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
     <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
-    <script>
-    }
-    </script>
+    
 </body>
 </html>
 

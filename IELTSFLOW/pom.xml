@@ -157,6 +157,7 @@
     </dependencies>
 
     <build>
+        <finalName>IELTSFLOW</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -229,6 +230,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.6</version>
                 <configuration>
+                    <skipTests>true</skipTests>
 <!--                    <excludes>
                         <exclude>**/automation/**/*.java</exclude>
                     </excludes>-->

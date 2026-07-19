@@ -397,8 +397,7 @@
                         if (dateVal) el.textContent = timeAgo(dateVal);
                     });
                 });
-                }
-            </script>
+                </script>
         </body>
 
         </html>
