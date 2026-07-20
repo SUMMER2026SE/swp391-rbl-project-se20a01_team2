@@ -44,6 +44,11 @@ public class MockTestService {
         return examDAO.getAllMockTests();
     }
 
+    /** Lấy tất cả đề Practice Test. */
+    public List<Exam> getAllPracticeTests() {
+        return examDAO.getAllPracticeTests();
+    }
+
     /** Lấy đề thi theo ID. */
     public Exam getMockTestById(int examId) {
         return examDAO.getMockTestById(examId);

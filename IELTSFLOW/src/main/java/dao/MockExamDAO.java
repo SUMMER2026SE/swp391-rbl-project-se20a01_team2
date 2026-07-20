@@ -70,6 +70,25 @@ public class MockExamDAO {
     }
 
     /**
+     * Lấy toàn bộ đề thi loại 'Practice Test' (hoặc 'Practice').
+     */
+    public List<Exam> getAllPracticeTests() {
+        return JpaHelper.query(em -> {
+            String sql = "SELECT ExamID, Title, Type, SkillFocus, Duration, MentorID, CreatedAt " +
+                         "FROM Exams WHERE (Type = 'Practice Test' OR Type = 'Practice') AND (Deleted = 0 OR Deleted IS NULL) ORDER BY CreatedAt DESC";
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(sql).getResultList();
+
+            List<Exam> exams = new ArrayList<>();
+            for (Object[] row : rows) {
+                exams.add(mapExam(row));
+            }
+            return exams;
+        });
+    }
+
+    /**
      * Lấy đề thi theo ID.
      */
     public Exam getMockTestById(int examId) {
