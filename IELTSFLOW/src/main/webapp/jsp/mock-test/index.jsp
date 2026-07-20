@@ -497,19 +497,34 @@
             const modeVal = document.getElementById('hiddenTestMode');
             if (!modeVal) return;
             const fullTestChip = document.getElementById('fullTestChip');
+            const filterChipsContainer = document.getElementById('filterChips');
             
             if (modeVal.value === 'practice') {
                 if (fullTestChip) fullTestChip.style.display = 'none';
+                if (filterChipsContainer) filterChipsContainer.style.display = 'flex';
                 
                 // Hide Full tests in practice mode
                 document.querySelectorAll('.exam-item-card').forEach(card => {
                     const skill = card.getAttribute('data-skill');
                     if (skill === 'All' || !skill) {
                         card.classList.add('hidden-by-mode');
+                    } else {
+                        card.classList.remove('hidden-by-mode');
                     }
                 });
             } else {
-                if (fullTestChip) fullTestChip.style.display = 'block';
+                // Mock Test mode
+                if (filterChipsContainer) filterChipsContainer.style.display = 'none';
+                
+                // Hide non-Full tests in Mock test mode
+                document.querySelectorAll('.exam-item-card').forEach(card => {
+                    const skill = card.getAttribute('data-skill');
+                    if (skill !== 'All' && skill) {
+                        card.classList.add('hidden-by-mode');
+                    } else {
+                        card.classList.remove('hidden-by-mode');
+                    }
+                });
             }
             
             filterExams();
