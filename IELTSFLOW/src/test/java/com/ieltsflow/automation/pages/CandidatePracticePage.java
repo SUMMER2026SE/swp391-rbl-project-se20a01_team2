@@ -65,7 +65,9 @@ public class CandidatePracticePage {
         try {
             if (!introStartBtns.isEmpty() && introStartBtns.get(0).isDisplayed()) {
                 introStartBtns.get(0).click();
-                Thread.sleep(800); // Chờ chuyển sang trang take.jsp
+                try {
+                    wait.until(ExpectedConditions.urlContains("take"));
+                } catch (Exception ignored) {}
             }
         } catch (Exception ignored) {}
 
