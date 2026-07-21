@@ -123,7 +123,7 @@
     <div class="layout-wrapper">
         <!-- Sidebar -->
         <jsp:include page="/jsp/candidate/sidebar.jsp">
-            <jsp:param name="activePage" value="dashboard" />
+            <jsp:param name="activePage" value="tests" />
         </jsp:include>
 
         <!-- Main Content -->
