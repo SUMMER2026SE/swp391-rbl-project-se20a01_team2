@@ -53,6 +53,12 @@ public class BasePage {
         select.selectByValue(value);
     }
 
+    protected void selectByVisibleText(By locator, String text) {
+        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        Select select = new Select(element);
+        select.selectByVisibleText(text);
+    }
+
     protected void jsClick(By locator) {
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
         JavascriptExecutor executor = (JavascriptExecutor) driver;

@@ -52,6 +52,11 @@ public class AdminSubscriptionPage extends BasePage {
     }
 
     public void clickEditForPackage(String packageName) {
+        try {
+            wait.until(org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//td[contains(text(), \"" + packageName + "\")]")));
+        } catch (Exception e) {}
+        
         List<WebElement> rows = getElements(tableRows);
         for (WebElement row : rows) {
             String name = row.findElement(By.xpath("./td[2]")).getText().trim();
@@ -64,6 +69,11 @@ public class AdminSubscriptionPage extends BasePage {
         throw new RuntimeException("Package not found: " + packageName);
     }
     public void clickDeleteForPackage(String packageName) {
+        try {
+            wait.until(org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//td[contains(text(), \"" + packageName + "\")]")));
+        } catch (Exception e) {}
+        
         List<WebElement> rows = getElements(tableRows);
         for (WebElement row : rows) {
             String name = row.findElement(By.xpath("./td[2]")).getText().trim();

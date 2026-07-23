@@ -378,11 +378,12 @@ public class CandidatePracticePage {
      */
     public CandidatePracticePage selectRadioAnswerByIndex(int index) {
         try {
+            Thread.sleep(1000); // wait for tab animation
             int count = 0;
             for (WebElement radio : radioAnswers) {
                 if (radio.isDisplayed() && radio.isEnabled()) {
                     if (count == index) {
-                        radio.click();
+                        ((JavascriptExecutor)driver).executeScript("arguments[0].click();", radio);
                         break;
                     }
                     count++;
@@ -398,6 +399,7 @@ public class CandidatePracticePage {
     public int getRadioSelectionCount() {
         int count = 0;
         try {
+            Thread.sleep(500); // Wait a bit
             for (WebElement radio : radioAnswers) {
                 if (radio.isDisplayed() && radio.isSelected()) {
                     count++;
