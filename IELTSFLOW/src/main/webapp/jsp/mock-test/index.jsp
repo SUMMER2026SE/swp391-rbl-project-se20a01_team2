@@ -139,10 +139,38 @@
             box-shadow: 0 12px 30px rgba(99,102,241,.35);
         }
 
-        /* Select box styles */
-        .mock-select {
+        /* Select box styles (Legacy - removed) */
+
+        /* New Search & Grid Styles */
+        .exam-list-container {
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .search-filter-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .search-input-wrapper {
+            position: relative;
             width: 100%;
-            padding: 12px 16px;
+        }
+        .search-input-wrapper svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
             border: 2px solid var(--glass-border);
             border-radius: 12px;
             background: rgba(255,255,255,0.8);
@@ -150,78 +178,132 @@
             font-weight: 500;
             font-family: inherit;
             color: var(--text-primary);
-            margin-top: 8px;
             outline: none;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
-        .mock-select:focus {
+        .search-input:focus {
             border-color: #6366f1;
             box-shadow: 0 0 0 4px rgba(99,102,241,.15);
             background: #fff;
         }
-
-        /* Skill Radio Cards */
-        .skill-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .skill-card {
-            position: relative;
-            cursor: pointer;
-        }
-        .skill-card input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-        }
-        .skill-card .card-content {
+        
+        .filter-chips {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 8px;
-            background: var(--bg-surface);
-            border: 2px solid var(--glass-border);
-            border-radius: 14px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.5);
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
         }
-        .skill-card:hover:not(.disabled) .card-content {
-            border-color: rgba(99,102,241, 0.4);
-            background: rgba(99,102,241, 0.03);
-            transform: translateY(-2px);
-        }
-        .skill-card input:checked ~ .card-content {
+        .filter-chip.active {
+            background: #6366f1;
+            color: white;
             border-color: #6366f1;
-            background: rgba(99,102,241, 0.08);
-            color: #6366f1;
-            box-shadow: 0 8px 20px rgba(99,102,241, 0.15);
+            box-shadow: 0 4px 12px rgba(99,102,241, 0.2);
+        }
+        .filter-chip:hover:not(.active) {
+            background: rgba(99,102,241,0.1);
+        }
+
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        .exam-grid::-webkit-scrollbar { width: 6px; }
+        .exam-grid::-webkit-scrollbar-track { background: transparent; }
+        .exam-grid::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+        .exam-grid::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+
+        .exam-item-card {
+            background: #fff;
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .exam-item-card:hover {
+            border-color: rgba(99,102,241, 0.4);
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
         }
-        .skill-card input:disabled ~ .card-content {
-            opacity: 0.4;
-            cursor: not-allowed;
-            background: rgba(0,0,0,0.02);
-            border-color: transparent;
-            transform: none;
+        .exam-item-card.selected {
+            border-color: #6366f1;
+            background: rgba(99,102,241, 0.03);
+            box-shadow: 0 8px 20px rgba(99,102,241, 0.15);
         }
-        .skill-icon {
-            font-size: 1.6rem;
-            margin-bottom: 6px;
-            display: block;
+        .exam-item-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #6366f1;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: bold;
         }
-        
-        @media (max-width: 600px) {
-            .skill-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .exam-item-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+            line-height: 1.4;
+            padding-right: 24px;
         }
+        .exam-item-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+        .exam-skill-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(99,102,241, 0.1);
+            color: #6366f1;
+            text-transform: uppercase;
+        }
+        .exam-duration {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .no-results {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+            font-weight: 500;
+        }
+
+        /* Skill Radio Cards (Legacy - removed) */
 
         /* No exam state */
         .no-exam-card {
@@ -244,7 +326,7 @@
     <div class="layout-wrapper">
         <!-- Sidebar -->
 <jsp:include page="/jsp/candidate/sidebar.jsp">
-            <jsp:param name="activePage" value="dashboard" />
+            <jsp:param name="activePage" value="tests" />
         </jsp:include>
 
         <!-- Main Content -->
@@ -258,58 +340,51 @@
             <div class="animate-fade-up" style="animation-delay:0.1s;">
                 <c:choose>
                     <c:when test="${not empty exams}">
-                        <div class="exam-card">
+                        <div class="exam-list-container">
                             <form action="${pageContext.request.contextPath}/candidate/mock-test" method="post" id="mockTestForm">
                                 <input type="hidden" name="action" value="start">
-                                <div class="exam-meta-grid">
-                                    <div class="meta-item" id="examSelectionItem" style="grid-column: span 2; background: rgba(255,255,255,0.4); transition: all 0.3s;">
-                                        <input type="hidden" name="testMode" id="hiddenTestMode" value="${empty param.mode ? 'practice' : param.mode}">
-                                        <div class="meta-label">📚 Chọn đề thi</div>
-                                        <select name="examId" id="examSelect" class="mock-select" required onchange="handleExamChange()">
-                                            <c:forEach var="ex" items="${exams}">
-                                                <option value="${ex.examId}" data-skill="${ex.skillFocus}">${ex.title} (Thời gian: ${ex.duration} phút)</option>
-                                            </c:forEach>
-                                        </select>
+                                <input type="hidden" name="testMode" id="hiddenTestMode" value="${empty param.mode ? 'practice' : param.mode}">
+                                <input type="hidden" name="examId" id="selectedExamId" value="" required>
+                                <input type="hidden" name="skillFocus" id="selectedSkillFocus" value="All">
+                                
+                                <div class="search-filter-bar">
+                                    <div class="search-input-wrapper">
+                                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        <input type="text" id="searchInput" class="search-input" placeholder="Tìm kiếm đề thi..." onkeyup="filterExams()">
                                     </div>
-                                    <div class="meta-item" id="skillSelectionItem" style="grid-column: span 2; background: transparent; border: none; padding: 0; transition: all 0.3s;">
-                                        <div class="meta-label" style="font-size: 0.8rem;">🎯 Chọn kỹ năng luyện tập</div>
-                                        <div class="skill-grid" id="skillGrid">
-                                            <label class="skill-card">
-                                                <input type="radio" name="skillFocus" value="All" checked>
-                                                <div class="card-content">
-                                                    <span class="skill-icon">🏆</span>
-                                                    <span>Full Test</span>
+                                    <div class="filter-chips" id="filterChips">
+                                        <div class="filter-chip active" data-skill="All" onclick="setFilter('All')">Tất cả</div>
+                                        <div class="filter-chip" data-skill="Listening" onclick="setFilter('Listening')">Listening</div>
+                                        <div class="filter-chip" data-skill="Reading" onclick="setFilter('Reading')">Reading</div>
+                                        <div class="filter-chip" data-skill="Writing" onclick="setFilter('Writing')">Writing</div>
+                                        <div class="filter-chip" data-skill="Speaking" onclick="setFilter('Speaking')">Speaking</div>
+                                        <div class="filter-chip" id="fullTestChip" data-skill="FullTest" onclick="setFilter('FullTest')">Full Test</div>
+                                    </div>
+                                </div>
+
+                                <div class="exam-grid" id="examGrid">
+                                    <c:forEach var="ex" items="${exams}">
+                                        <div class="exam-item-card" 
+                                             data-id="${ex.examId}" 
+                                             data-skill="${ex.skillFocus}" 
+                                             data-title="${ex.title.toLowerCase()}"
+                                             onclick="selectExam(this, '${ex.examId}', '${empty ex.skillFocus ? 'All' : ex.skillFocus}')">
+                                            <div class="exam-item-title">${ex.title}</div>
+                                            <div class="exam-item-meta">
+                                                <div class="exam-skill-badge">${empty ex.skillFocus or ex.skillFocus eq 'All' ? 'Full Test' : ex.skillFocus}</div>
+                                                <div class="exam-duration">
+                                                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    ${ex.duration} phút
                                                 </div>
-                                            </label>
-                                            <label class="skill-card">
-                                                <input type="radio" name="skillFocus" value="Listening">
-                                                <div class="card-content">
-                                                    <span class="skill-icon">🎧</span>
-                                                    <span>Listening</span>
-                                                </div>
-                                            </label>
-                                            <label class="skill-card">
-                                                <input type="radio" name="skillFocus" value="Reading">
-                                                <div class="card-content">
-                                                    <span class="skill-icon">📖</span>
-                                                    <span>Reading</span>
-                                                </div>
-                                            </label>
-                                            <label class="skill-card">
-                                                <input type="radio" name="skillFocus" value="Writing">
-                                                <div class="card-content">
-                                                    <span class="skill-icon">✍️</span>
-                                                    <span>Writing</span>
-                                                </div>
-                                            </label>
-                                            <label class="skill-card">
-                                                <input type="radio" name="skillFocus" value="Speaking">
-                                                <div class="card-content">
-                                                    <span class="skill-icon">🎙️</span>
-                                                    <span>Speaking</span>
-                                                </div>
-                                            </label>
+                                            </div>
                                         </div>
+                                    </c:forEach>
+                                    <div id="noResultsMsg" class="no-results" style="display: none;">
+                                        Không tìm thấy đề thi phù hợp.
                                     </div>
                                 </div>
 
@@ -321,7 +396,7 @@
                                     </ul>
                                 </div>
 
-                                <button type="submit" class="btn-start-mock" id="btn-start-mock-test">
+                                <button type="submit" class="btn-start-mock" id="btn-start-mock-test" disabled style="opacity: 0.6; cursor: not-allowed;">
                                     🚀 Bắt đầu thi ngay
                                 </button>
                             </form>
@@ -347,74 +422,112 @@
     <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
     <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
     <script>
-        function handleExamChange() {
-            const select = document.getElementById('examSelect');
-            if (!select) return;
-            const selectedOption = select.options[select.selectedIndex];
-            const examSkill = selectedOption.getAttribute('data-skill');
-            
-            const radios = document.querySelectorAll('input[name="skillFocus"]');
-            let anyEnabledAndChecked = false;
-            
-            radios.forEach(radio => {
-                const label = radio.closest('.skill-card');
-                if (!examSkill || examSkill === 'All' || examSkill === '') {
-                    // Full test, all options available
-                    radio.disabled = false;
-                    label.classList.remove('disabled');
+        let currentFilter = 'All';
+
+        function setFilter(skill) {
+            currentFilter = skill;
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                if (chip.getAttribute('data-skill') === skill) {
+                    chip.classList.add('active');
                 } else {
-                    // Specific skill test, disable others
-                    if (radio.value === examSkill) {
-                        radio.disabled = false;
-                        radio.checked = true;
-                        label.classList.remove('disabled');
-                    } else {
-                        radio.disabled = true;
-                        label.classList.add('disabled');
-                    }
-                }
-                
-                if (!radio.disabled && radio.checked) {
-                    anyEnabledAndChecked = true;
+                    chip.classList.remove('active');
                 }
             });
-            
-            // Default to 'All' if the currently checked one became disabled
-            if (!anyEnabledAndChecked) {
-                const allRadio = document.querySelector('input[name="skillFocus"][value="All"]');
-                if (allRadio && !allRadio.disabled) {
-                    allRadio.checked = true;
+            filterExams();
+        }
+
+        function filterExams() {
+            const searchInput = document.getElementById('searchInput');
+            if (!searchInput) return; // Guard in case of empty exams
+            const searchTerm = searchInput.value.toLowerCase();
+            const cards = document.querySelectorAll('.exam-item-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                // If hidden by mode, skip
+                if (card.classList.contains('hidden-by-mode')) {
+                    card.style.display = 'none';
+                    return;
                 }
+                
+                const title = card.getAttribute('data-title');
+                const skill = card.getAttribute('data-skill'); 
+                
+                let matchesSearch = title.includes(searchTerm);
+                let matchesFilter = false;
+                
+                if (currentFilter === 'All') {
+                    matchesFilter = true;
+                } else if (currentFilter === 'FullTest') {
+                    matchesFilter = (skill === 'All' || !skill);
+                } else {
+                    matchesFilter = (skill === currentFilter);
+                }
+
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const noResultsMsg = document.getElementById('noResultsMsg');
+            if (noResultsMsg) {
+                noResultsMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        }
+
+        function selectExam(card, id, skill) {
+            document.querySelectorAll('.exam-item-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            document.getElementById('selectedExamId').value = id;
+            document.getElementById('selectedSkillFocus').value = skill;
+
+            const btn = document.getElementById('btn-start-mock-test');
+            if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
             }
         }
 
         function handleModeChange() {
-            const modeVal = document.getElementById('hiddenTestMode').value;
+            const modeVal = document.getElementById('hiddenTestMode');
+            if (!modeVal) return;
+            const fullTestChip = document.getElementById('fullTestChip');
+            const filterChipsContainer = document.getElementById('filterChips');
             
-            const examSelect = document.getElementById('examSelect');
-            const skillRadios = document.querySelectorAll('input[name="skillFocus"]');
-            const examItem = document.getElementById('examSelectionItem');
-            const skillItem = document.getElementById('skillSelectionItem');
-
-            if (modeVal === 'mocktest') {
-                skillRadios.forEach(r => {
-                    if (r.value === 'All') {
-                        r.checked = true;
-                        r.disabled = false;
-                        r.closest('.skill-card').classList.remove('disabled');
+            if (modeVal.value === 'practice') {
+                if (fullTestChip) fullTestChip.style.display = 'none';
+                if (filterChipsContainer) filterChipsContainer.style.display = 'flex';
+                
+                // Hide Full tests in practice mode
+                document.querySelectorAll('.exam-item-card').forEach(card => {
+                    const skill = card.getAttribute('data-skill');
+                    if (skill === 'All' || !skill) {
+                        card.classList.add('hidden-by-mode');
                     } else {
-                        r.disabled = true;
-                        r.closest('.skill-card').classList.add('disabled');
+                        card.classList.remove('hidden-by-mode');
                     }
                 });
-                skillItem.style.opacity = '0.5';
-                skillItem.style.pointerEvents = 'none';
             } else {
-                skillItem.style.opacity = '1';
-                skillItem.style.pointerEvents = 'auto';
+                // Mock Test mode
+                if (filterChipsContainer) filterChipsContainer.style.display = 'none';
                 
-                handleExamChange();
+                // Hide non-Full tests in Mock test mode
+                document.querySelectorAll('.exam-item-card').forEach(card => {
+                    const skill = card.getAttribute('data-skill');
+                    if (skill !== 'All' && skill) {
+                        card.classList.add('hidden-by-mode');
+                    } else {
+                        card.classList.remove('hidden-by-mode');
+                    }
+                });
             }
+            
+            filterExams();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

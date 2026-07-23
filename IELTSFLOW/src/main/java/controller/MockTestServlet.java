@@ -127,7 +127,15 @@ public class MockTestServlet extends HttpServlet {
     /** Hiển thị trang chọn đề thi */
     private void handleIndex(HttpServletRequest req, HttpServletResponse resp)
             throws Exception {
-        List<Exam> exams = mockTestService.getAllMockTests();
+        String mode = req.getParameter("mode");
+        List<Exam> exams;
+        
+        if ("practice".equals(mode)) {
+            exams = mockTestService.getAllPracticeTests();
+        } else {
+            exams = mockTestService.getAllMockTests();
+        }
+        
         req.setAttribute("exams", exams);
         req.getRequestDispatcher("/jsp/mock-test/index.jsp").forward(req, resp);
     }

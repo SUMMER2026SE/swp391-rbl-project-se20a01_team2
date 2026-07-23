@@ -34,7 +34,6 @@
                                 <option value="Reading" style="color: black;">Reading</option>
                                 <option value="Writing" style="color: black;">Writing</option>
                                 <option value="Speaking" style="color: black;">Speaking</option>
-                                <option value="Vocabulary" style="color: black;">Vocabulary</option>
                             </select>
                             <select id="type-filter" onchange="searchLessons()">
                                 <option value="All Types" style="color: black;">All Types</option>

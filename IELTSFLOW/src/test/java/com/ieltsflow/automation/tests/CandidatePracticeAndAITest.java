@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
  *    và kiểm tra kết quả phân tích Speech-to-text.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@DisplayName("Thành viên 3 - E2E Tests: Phân hệ Candidate - Luyện tập & AI (Practice & Learning)")
 public class CandidatePracticeAndAITest extends BaseTest {
 
     private CandidatePracticePage practicePage;
@@ -84,7 +83,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(1)
-    @DisplayName("TC_PRAC_LIS_001 - Chọn đáp án trắc nghiệm (Multiple Choice) hợp lệ (EP Valid Class)")
+    @DisplayName("TC_PRAC_LIS_001: Listening Multiple Choice Valid (EP Valid Class)")
     public void testListeningMultipleChoiceValid_EP() {
         test.info("Thực thi TC_PRAC_LIS_001: Chọn đáp án trắc nghiệm hợp lệ");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -102,7 +101,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(2)
-    @DisplayName("TC_PRAC_LIS_002 - Thay đổi đáp án trắc nghiệm đã chọn trước khi nộp (Decision Table)")
+    @DisplayName("TC_PRAC_LIS_002: Change Radio Selection (Decision Table)")
     public void testListeningChangeSelection_DecisionTable() {
         test.info("Thực thi TC_PRAC_LIS_002: Kiểm tra chuyển đổi lựa chọn đáp án trắc nghiệm");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -123,7 +122,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(3)
-    @DisplayName("TC_PRAC_LIS_003 - Nộp bài luyện tập Listening khi bỏ trống câu hỏi (EP Partial Class)")
+    @DisplayName("TC_PRAC_LIS_003: Submit Practice Exam Partial (EP Partial Class)")
     public void testListeningSubmitPartial_EP() {
         test.info("Thực thi TC_PRAC_LIS_003: Nộp bài khi chưa trả lời hết các câu hỏi");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -146,7 +145,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(4)
-    @DisplayName("TC_PRAC_REA_001 - Điền từ hợp lệ vào ô trống Reading (EP Valid String Class)")
+    @DisplayName("TC_PRAC_REA_001: Fill in Blanks Valid String (EP Valid Class)")
     public void testReadingFillInBlanksValid_EP() {
         test.info("Thực thi TC_PRAC_REA_001: Điền từ hợp lệ vào bài Reading");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -164,7 +163,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(5)
-    @DisplayName("TC_PRAC_REA_002 - Xử lý khoảng trắng thừa ở đầu/cuối từ (BVA / Error Guessing)")
+    @DisplayName("TC_PRAC_REA_002: Trim Whitespace Handling (BVA Error Guessing)")
     public void testReadingTrimWhitespace_BVA() {
         test.info("Thực thi TC_PRAC_REA_002: Kiểm tra xử lý khoảng trắng thừa khi điền từ");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -183,7 +182,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(6)
-    @DisplayName("TC_PRAC_REA_003 - Nhập vượt quá giới hạn số từ cho phép theo đề bài (BVA Upper Limit)")
+    @DisplayName("TC_PRAC_REA_003: Exceed Word Limit Check (BVA Upper Limit)")
     public void testReadingExceedWordLimit_BVA() {
         test.info("Thực thi TC_PRAC_REA_003: Kiểm thử nhập vượt quá số từ yêu cầu (VD: NO MORE THAN TWO WORDS)");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -205,7 +204,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(7)
-    @DisplayName("TC_PRAC_WRI_001 - Nhập bài tự luận Writing và kiểm tra đếm từ tức thì (EP / UI Dynamic)")
+    @DisplayName("TC_PRAC_WRI_001: Real-time Word Count Check (EP / UI Dynamic)")
     public void testWritingRealtimeWordCount_EP() {
         test.info("Thực thi TC_PRAC_WRI_001: Nhập văn bản và kiểm tra Real-time Word Count");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -225,7 +224,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(8)
-    @DisplayName("TC_PRAC_WRI_002 - Kiểm tra bộ đếm từ khi xóa trắng toàn bộ nội dung (BVA Lower Boundary = 0)")
+    @DisplayName("TC_PRAC_WRI_002: Zero Word Count Boundary (BVA Lower Boundary = 0)")
     public void testWritingZeroWordCountBoundary_BVA() {
         test.info("Thực thi TC_PRAC_WRI_002: Kiểm tra cận dưới đếm từ khi xóa trắng ô soạn thảo");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -245,7 +244,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(9)
-    @DisplayName("TC_PRAC_WRI_003 - Nộp bài Writing đạt đủ số từ và xác minh hệ thống gọi AI chấm điểm (API Integration)")
+    @DisplayName("TC_PRAC_WRI_003: Submit Essay & AI Evaluation Call (API Integration)")
     public void testWritingSubmitAndAiGrading_Integration() {
         test.info("Thực thi TC_PRAC_WRI_003: Nộp bài tự luận đầy đủ và xác minh API AI chấm điểm");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -265,7 +264,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(10)
-    @DisplayName("TC_PRAC_WRI_004 - Nộp bài Writing quá ngắn dưới ngưỡng tối thiểu (BVA Below Threshold)")
+    @DisplayName("TC_PRAC_WRI_004: Short Essay Below Threshold (BVA Below Threshold)")
     public void testWritingShortEssayBelowThreshold_BVA() {
         test.info("Thực thi TC_PRAC_WRI_004: Kiểm thử nộp bài tự luận ngắn dưới ngưỡng tối thiểu (VD: < 30 từ)");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -288,7 +287,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(11)
-    @DisplayName("TC_PRAC_SPE_001 - Kích hoạt nút Start Recording thu âm (State Transition Test)")
+    @DisplayName("TC_PRAC_SPE_001: Start Recording Button Action (State Transition Test)")
     public void testSpeakingStartRecording_StateTransition() {
         test.info("Thực thi TC_PRAC_SPE_001: Kiểm tra chuyển trạng thái UI khi bấm Start Recording");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -306,7 +305,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(12)
-    @DisplayName("TC_PRAC_SPE_002 - Mô phỏng (Mock) đẩy dữ liệu transcript qua DOM và xác minh STT (API Mocking)")
+    @DisplayName("TC_PRAC_SPE_002: Mock Speech to Text Transcript (API Mocking)")
     public void testSpeakingMockSpeechToText_Mocking() {
         test.info("Thực thi TC_PRAC_SPE_002: Mô phỏng Speech-to-Text qua DOM trong môi trường CI/CD");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -330,7 +329,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(13)
-    @DisplayName("TC_PRAC_SYS_001 - Tự động phát hiện mất phiên và điều hướng đăng nhập ngầm (Flow Test)")
+    @DisplayName("TC_PRAC_SYS_001: Session Loss & Auto Login Redirect (Flow Test)")
     public void testSystemSessionLossAndRedirect_Flow() {
         test.info("Thực thi TC_PRAC_SYS_001: Kiểm tra tự động đăng nhập ngầm và điều hướng thẳng vào phòng thi");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
@@ -347,7 +346,7 @@ public class CandidatePracticeAndAITest extends BaseTest {
 
     @Test
     @Order(14)
-    @DisplayName("TC_PRAC_SYS_002 - Tự động đóng lớp phủ hướng dẫn (Overlay) và xác nhận nộp bài (Robustness Test)")
+    @DisplayName("TC_PRAC_SYS_002: Overlay Dismiss & Practice Submit (Robustness Test)")
     public void testSystemOverlayDismissAndSubmit_Robustness() {
         test.info("Thực thi TC_PRAC_SYS_002: Kiểm tra kiên cố đóng modal/overlay và Submit tổng thể");
         String testUrl = baseUrl + "/candidate/mock-test?action=take&examId=1";
