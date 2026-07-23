@@ -123,12 +123,12 @@
                     </div>
                 </c:if>
 
-                <div style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.85); min-height: 100px; margin-bottom: 20px;">
+                <div style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary); min-height: 100px; margin-bottom: 20px;">
                     ${lesson.content}
                 </div>
 
                 <% if (hasDoc) { %>
-                    <div style="margin-bottom: 30px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid var(--accent-green);">
+                    <div style="margin-bottom: 30px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border-left: 4px solid var(--accent-green);">
                         <div style="margin-bottom: 15px;">
                             <span style="color: var(--text-secondary); margin-right: 10px;">Tài liệu đính kèm:</span>
                             <a href="<%= finalDocUrl.startsWith("http") ? finalDocUrl : request.getContextPath() + finalDocUrl %>" download target="_blank" style="color: var(--accent-green); text-decoration: underline; font-weight: 500;">
