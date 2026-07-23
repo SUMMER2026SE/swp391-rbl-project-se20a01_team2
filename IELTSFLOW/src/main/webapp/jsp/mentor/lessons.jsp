@@ -136,55 +136,6 @@
                                     </td>
                                 </tr>
 
-                                <!-- Preview Modal for Lesson ${lesson.lessonId} -->
-                                <div class="modal fade" id="previewLessonModal${lesson.lessonId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title fw-bold">Xem Trước Bài Học: ${lesson.title}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body" style="background-color: #f8f9fa;">
-                                                <div class="container-fluid">
-                                                    <c:if test="${not empty lesson.videoUrl}">
-                                                        <div class="mb-4 bg-dark rounded shadow-sm overflow-hidden" style="position: relative; padding-top: 56.25%;">
-                                                            <c:choose>
-                                                                <c:when test="${lesson.videoUrl.contains('youtube.com') || lesson.videoUrl.contains('youtu.be')}">
-                                                                    <iframe src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" 
-                                                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-                                                                            frameborder="0" allowfullscreen>
-                                                                    </iframe>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
-                                                                        <source src="${pageContext.request.contextPath}${lesson.videoUrl}" type="video/mp4">
-                                                                        Trình duyệt của bạn không hỗ trợ video HTML5.
-                                                                    </video>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </div>
-                                                    </c:if>
-
-                                                    <c:if test="${not empty lesson.documentUrl}">
-                                                        <div class="mb-4">
-                                                            <a href="${lesson.documentUrl}" target="_blank" class="btn btn-outline-primary w-100">
-                                                                <i class="fa-solid fa-file-pdf me-2"></i> Xem tài liệu đính kèm
-                                                            </a>
-                                                        </div>
-                                                    </c:if>
-
-                                                    <div class="bg-white p-4 border rounded shadow-sm" style="line-height: 1.8;">
-                                                        ${lesson.content}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                             </c:if>
                         </c:forEach>
                         <c:if test="${empty lessons}">
@@ -195,7 +146,61 @@
                     </tbody>
                 </table>
             </div>
+
+            <c:forEach var="lesson" items="${lessons}">
+                <c:if test="${!lesson.deleted}">
+                    <!-- Preview Modal for Lesson ${lesson.lessonId} -->
+                    <div class="modal fade" id="previewLessonModal${lesson.lessonId}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-bold">Xem Trước Bài Học: ${lesson.title}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body" style="background-color: #f8f9fa;">
+                                    <div class="container-fluid">
+                                        <c:if test="${not empty lesson.videoUrl}">
+                                            <div class="mb-4 bg-dark rounded shadow-sm overflow-hidden" style="position: relative; padding-top: 56.25%;">
+                                                <c:choose>
+                                                    <c:when test="${lesson.videoUrl.contains('youtube.com') || lesson.videoUrl.contains('youtu.be')}">
+                                                        <iframe src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" 
+                                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                                                                frameborder="0" allowfullscreen>
+                                                        </iframe>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
+                                                            <source src="${pageContext.request.contextPath}${lesson.videoUrl}" type="video/mp4">
+                                                            Trình duyệt của bạn không hỗ trợ video HTML5.
+                                                        </video>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </c:if>
+
+                                        <c:if test="${not empty lesson.documentUrl}">
+                                            <div class="mb-4">
+                                                <a href="${lesson.documentUrl}" target="_blank" class="btn btn-outline-primary w-100">
+                                                    <i class="fa-solid fa-file-pdf me-2"></i> Xem tài liệu đính kèm
+                                                </a>
+                                            </div>
+                                        </c:if>
+
+                                        <div class="bg-white p-4 border rounded shadow-sm" style="line-height: 1.8;">
+                                            ${lesson.content}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </c:if>
+            </c:forEach>
             
+
             <c:if test="${lessonsPage != null && lessonsPage.totalPages > 1}">
                 <c:set var="startPage" value="${lessonsPage.currentPage - 2}" />
                 <c:if test="${startPage < 1}"><c:set var="startPage" value="1" /></c:if>
@@ -224,6 +229,7 @@
     </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 <script>
 function ajaxSearch(form) {
