@@ -6,25 +6,57 @@ import jakarta.servlet.http.*;
 import model.User;
 import services.UserService;
 import services.UserServiceImpl;
+import dao.SystemLogDAO;
+import model.SystemLog;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
 
-/**
- * UserManagementController - SSR refactored:
- *   GET /admin/users          : Lấy danh sách user và forward to JSP
- *   GET /admin/users/mentors  : Lấy danh sách mentor và forward to JSP
- *   POST /admin/users         : Xử lý Add/Edit/Delete/Lock qua form parameter (action)
- */
 @WebServlet({"/admin/users/*", "/api/admin/users/ban"})
 public class UserManagementController extends HttpServlet {
 
     private final UserService userService = new UserServiceImpl();
+    private final SystemLogDAO systemLogDAO = new SystemLogDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        if ("export".equals(action)) {
+            exportCsv(req, resp);
+            return;
+        }
+
         try {
-            List<User> users = userService.getAllUsers();
+            int page = 1;
+            int limit = 10;
+            if (req.getParameter("page") != null) {
+                try { page = Integer.parseInt(req.getParameter("page")); } catch(Exception ignored) {}
+            }
+            if (req.getParameter("limit") != null) {
+                try { limit = Integer.parseInt(req.getParameter("limit")); } catch(Exception ignored) {}
+            }
+            
+            String search = req.getParameter("search");
+            String roleFilter = req.getParameter("roleFilter");
+            String statusFilter = req.getParameter("statusFilter");
+            String sortBy = req.getParameter("sortBy");
+            String sortOrder = req.getParameter("sortOrder");
+            
+            List<User> users = userService.findUsers(page, limit, search, roleFilter, statusFilter, sortBy, sortOrder);
+            long totalUsers = userService.countUsers(search, roleFilter, statusFilter);
+            int totalPages = (int) Math.ceil((double) totalUsers / limit);
+            if (totalPages == 0) totalPages = 1;
+            
             req.setAttribute("users", users);
+            req.setAttribute("currentPage", page);
+            req.setAttribute("totalPages", totalPages);
+            req.setAttribute("limit", limit);
+            req.setAttribute("search", search);
+            req.setAttribute("roleFilter", roleFilter);
+            req.setAttribute("statusFilter", statusFilter);
+            req.setAttribute("sortBy", sortBy);
+            req.setAttribute("sortOrder", sortOrder);
+            
             req.setAttribute("isMentorView", false);
             req.getRequestDispatcher("/jsp/admin/users.jsp").forward(req, resp);
         } catch (Exception e) {
@@ -33,9 +65,29 @@ public class UserManagementController extends HttpServlet {
         }
     }
 
+    private void exportCsv(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("text/csv; charset=UTF-8");
+        resp.setHeader("Content-Disposition", "attachment; filename=\"users_export.csv\"");
+        java.io.PrintWriter writer = resp.getWriter();
+        writer.write('\uFEFF'); // BOM
+        writer.println("ID,Họ và tên,Email,Trạng thái,Vai trò,Ngày tạo");
+        
+        List<User> users = userService.getAllUsers();
+        for (User u : users) {
+            String roleStr = (u.getRoleId() == 1) ? "Admin" : ((u.getRoleId() == 2) ? "Mentor" : "Candidate");
+            String dateStr = u.getCreatedAt() != null ? u.getCreatedAt().toString() : "";
+            writer.println(String.format("%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"", 
+                u.getUserId(), u.getFullName().replace("\"", "\"\""), u.getEmail(), u.getStatus(), roleStr, dateStr));
+        }
+        writer.flush();
+        writer.close();
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String servletPath = req.getServletPath();
+        User loggedInAdmin = (User) req.getSession().getAttribute("user");
+        int adminId = (loggedInAdmin != null) ? loggedInAdmin.getUserId() : 1;
         if ("/api/admin/users/ban".equals(servletPath)) {
             resp.setContentType("application/json;charset=UTF-8");
             try {
@@ -45,7 +97,7 @@ public class UserManagementController extends HttpServlet {
                 String actionApi = (String) body.get("action"); // "ban" hoặc "unban"
                 String newStatus = "ban".equals(actionApi) ? "Banned" : "Active";
                 
-                userService.updateUserStatus(targetUserId, newStatus);
+                userService.adminUpdateUserStatus(adminId, targetUserId, newStatus);
                 
                 mapper.writeValue(resp.getOutputStream(),
                         java.util.Map.of("success", true, "message",
@@ -61,7 +113,6 @@ public class UserManagementController extends HttpServlet {
         }
 
         String action = req.getParameter("action");
-        String pathInfo = req.getPathInfo();
         
         try {
             if ("create".equals(action)) {
@@ -71,34 +122,68 @@ public class UserManagementController extends HttpServlet {
                 user.setRoleId(Integer.parseInt(req.getParameter("roleId")));
                 user.setStatus(req.getParameter("status"));
                 userService.createUser(user);
+                systemLogDAO.createSystemLog(new SystemLog(adminId, "CREATE", "User", "Tạo tài khoản mới: " + user.getEmail()));
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-                int roleId = Integer.parseInt(req.getParameter("roleId"));
-                userService.updateUser(
-                        id,
-                        req.getParameter("fullName"),
-                        req.getParameter("email"),
-                        req.getParameter("status"),
-                        roleId
-                );
+                String newFullName = req.getParameter("fullName");
+                String newEmail = req.getParameter("email");
+                String newStatus = req.getParameter("status");
+                int newRoleId = Integer.parseInt(req.getParameter("roleId"));
+                
+                User oldUser = userService.getUserById(id);
+                userService.updateUser(id, newFullName, newEmail, newStatus, newRoleId);
+                
+                StringBuilder details = new StringBuilder("Thay đổi: ");
+                String oldFullName = oldUser.getFullName() != null ? oldUser.getFullName() : "";
+                if (!oldFullName.equals(newFullName)) details.append("fullName từ '").append(oldFullName).append("' sang '").append(newFullName).append("', ");
+                
+                String oldEmail = oldUser.getEmail() != null ? oldUser.getEmail() : "";
+                if (!oldEmail.equals(newEmail)) details.append("email từ '").append(oldEmail).append("' sang '").append(newEmail).append("', ");
+                
+                String oldStatus = oldUser.getStatus() != null ? oldUser.getStatus() : "";
+                if (!oldStatus.equals(newStatus)) details.append("status từ '").append(oldStatus).append("' sang '").append(newStatus).append("', ");
+                
+                if (oldUser.getRoleId() != newRoleId) details.append("roleId từ '").append(oldUser.getRoleId()).append("' sang '").append(newRoleId).append("', ");
+                
+                if (details.length() > 10) {
+                    details.setLength(details.length() - 2); // Xoá dấu phẩy cuối
+                    systemLogDAO.createSystemLog(new SystemLog(adminId, "UPDATE", "User", details.toString()));
+                }
             } else if ("lock".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-                userService.updateUserStatus(id, "Inactive");
+                userService.adminUpdateUserStatus(adminId, id, "Inactive");
             } else if ("unlock".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-                userService.updateUserStatus(id, "Active");
+                userService.adminUpdateUserStatus(adminId, id, "Active");
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-                userService.deleteUser(id);
+                userService.adminDeleteUser(adminId, id);
+            } else if ("change_password".equals(action)) {
+                int id = Integer.parseInt(req.getParameter("id"));
+                String newPassword = req.getParameter("newPassword");
+                userService.adminChangePassword(adminId, id, newPassword);
+            } else if ("bulk_action".equals(action)) {
+                String actionType = req.getParameter("actionType");
+                String[] userIdsStr = req.getParameterValues("userIds");
+                if (userIdsStr != null && userIdsStr.length > 0) {
+                    List<Integer> userIds = new ArrayList<>();
+                    for (String s : userIdsStr) userIds.add(Integer.parseInt(s));
+                    userService.bulkAction(adminId, actionType, userIds);
+                }
+
             } else if ("assign_mentor".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
+                User oldUser = userService.getUserById(id);
                 userService.assignMentorRole(id);
+                systemLogDAO.createSystemLog(new SystemLog(adminId, "ASSIGN_MENTOR", "User", "Thay đổi: roleId từ '" + oldUser.getRoleId() + "' sang '" + UserServiceImpl.ROLE_MENTOR + "'"));
             } else if ("revoke_mentor".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
+                User oldUser = userService.getUserById(id);
                 userService.revokeMentorRole(id);
+                systemLogDAO.createSystemLog(new SystemLog(adminId, "REVOKE_MENTOR", "User", "Thay đổi: roleId từ '" + oldUser.getRoleId() + "' sang '" + UserServiceImpl.ROLE_CANDIDATE + "'"));
             }
             
-            // Redirect to avoid form resubmission
+            // Generate query string for pagination state retention (from referrer or just redirect back)
             resp.sendRedirect(req.getContextPath() + "/admin/users");
             
         } catch (Exception e) {

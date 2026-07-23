@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông báo - IELTSFlow</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=<%= System.currentTimeMillis() %>">
     <style>
 
         .card { background: var(--bg-surface); border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
@@ -48,38 +48,9 @@
     <div class="bg-blob blob-1"></div>
     <div class="bg-blob blob-2"></div>
     <div class="layout-wrapper">
-        <aside class="sidebar">
-            <div class="brand">IELTSFLOW</div>
-            <div class="user-profile">
-                <div class="avatar" style="overflow: hidden;">
-                    <c:choose>
-                        <c:when test="${not empty sessionScope.profilePic}">
-                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                        </c:when>
-                        <c:otherwise>
-                            ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                <div>
-                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Mục tiêu: 7.0</p>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Bảng điều khiển</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Kế hoạch tuần</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Thư viện</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link">🎯 Bài thi</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 Lịch sử & Làm lại</a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link active">🔔 Thông báo</a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Đăng xuất</a>
-            </div>
-        </aside>
+        <jsp:include page="/jsp/candidate/sidebar.jsp">
+            <jsp:param name="activePage" value="notifications" />
+        </jsp:include>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -153,5 +124,7 @@
         </section>
     </main>
     </div>
+    <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
 </body>
 </html>

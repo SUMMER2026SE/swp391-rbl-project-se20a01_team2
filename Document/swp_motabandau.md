@@ -37,8 +37,8 @@ Hệ thống bao gồm 5 nhóm tác nhân chính:
 
 * **Placement Test:** Làm bài test đầu vào đủ 4 kỹ năng.  
 * **Pathway Generation:** Dựa trên điểm Placement Test và Target Band, AI sinh ra lộ trình học từng tuần (Weekly Plan).Với các logic  sau:  
-      \-  AI chỉ xây dựng lộ trình học theo từng tuần (với 2 kỹ năng được AI đề xuất mỗi tuần).Logic: AI tính toán từ điểm bài test và band điểm mong muốn, tính toán lộ trình để đạt được trong thời gian đó nhưng chỉ bắt AI  trả về lộ trình từng tuần trong  3 tháng đầu tiên trong lộ trình AI suy tính  cho hệ thống .  
-      \-Mỗi khi kết thúc giai đoạn 3 tháng này, người học bắt buộc phải thực hiện bài kiểm tra đánh giá lại (re-test) nếu muốn xem tiếp lộ trình, để hệ thống có cơ sở cập nhật và hiển thị các giai đoạn tiếp theo của lộ trình.Lộ trình mới sẽ nối tiếp lộ trình trước đó  
+      -  AI chỉ xây dựng lộ trình học theo từng tuần (với 2 kỹ năng được AI đề xuất mỗi tuần).Logic: AI tính toán từ điểm bài test và band điểm mong muốn, tính toán lộ trình để đạt được trong thời gian đó nhưng chỉ bắt AI  trả về lộ trình từng tuần trong  3 tháng đầu tiên trong lộ trình AI suy tính  cho hệ thống .  
+      -Mỗi khi kết thúc giai đoạn 3 tháng này, người học bắt buộc phải thực hiện bài kiểm tra đánh giá lại (re-test) nếu muốn xem tiếp lộ trình, để hệ thống có cơ sở cập nhật và hiển thị các giai đoạn tiếp theo của lộ trình.Lộ trình mới sẽ nối tiếp lộ trình trước đó  
                 
    Ví dụ:     .
 
@@ -190,7 +190,7 @@ Mục tiêu:
 
 * **Quản lý Ngân hàng đề (Bank Management):** Tạo/Sửa/Xóa câu hỏi cho Listening, Reading, Writing, Speaking. Phân loại câu hỏi theo Tags (Dạng bài, Độ khó, Chủ đề).  
 * **Quản lý Đề thi:** Ghép các câu hỏi thành 1 Mock Test hoàn chỉnh.  
-* **Quản lý Tài liệu:** Đăng tải bài giảng (Video/PDF).  
+* **Quản lý Tài liệu:** Đăng tải bài giảng (Video/PDF). Hỗ trợ cơ chế tải lên phân mảnh (Chunked Upload) đối với các tài liệu có kích thước lớn hơn 10MB, đảm bảo tốc độ và khả năng tiếp tục khi gặp sự cố mạng (Resumable Upload).
 * **Hỗ trợ học viên:** Xem thống kê lỗi sai phổ biến của hệ thống để điều chỉnh bài giảng; Trả lời câu hỏi/ticket của học viên.
 
 ### **3.4. Phân hệ Admin (Quản trị)**
@@ -208,10 +208,10 @@ Hệ thống backend sẽ gọi API qua các Prompt mẫu được thiết kế 
 
 * \* \*\*Với Writing:\*\* Backend gửi đề bài \+ Bài làm của Candidate. AI trả về JSON chứa: Điểm 4 tiêu chí, Nhận xét chung, Danh sách các câu sai ngữ pháp và Gợi ý sửa.    
 * \* \*\*Với Speaking (Luồng Tối Ưu Mới):\*\*   
-    \- Bước 1: Frontend thu âm và tự chạy tính năng Speech-to-Text (STT) để lấy văn bản thô (Raw Transcript).  
-    \- Bước 2: Frontend gửi gói tin gồm \`Audio\` \+ \`Raw Transcript\` (vào biến \`referenceText\`) \+ cờ \`isUnscripted=true\` lên API Backend.  
-    \- Bước 3: Backend dùng Azure AI để chấm điểm \*\*Phát âm (Pronunciation)\*\* và bắt lỗi từng từ dựa trên file Audio và Transcript.  
-    \- Bước 4: Backend chạy ngầm AI Model (Gemini) để phân tích Ngữ pháp, Từ vựng, Mạch lạc dựa trên Transcript và điểm phát âm từ Azure.  
+    - Bước 1: Frontend thu âm và tự chạy tính năng Speech-to-Text (STT) để lấy văn bản thô (Raw Transcript).  
+    - Bước 2: Frontend gửi gói tin gồm \`Audio\` \+ \`Raw Transcript\` (vào biến \`referenceText\`) \+ cờ \`isUnscripted=true\` lên API Backend.  
+    - Bước 3: Backend dùng Azure AI để chấm điểm \*\*Phát âm (Pronunciation)\*\* và bắt lỗi từng từ dựa trên file Audio và Transcript.  
+    - Bước 4: Backend chạy ngầm AI Model (Gemini) để phân tích Ngữ pháp, Từ vựng, Mạch lạc dựa trên Transcript và điểm phát âm từ Azure.  
 * \* \*\*Với Study Pathway:\*\* Gửi điểm đầu vào \+ mục tiêu \+ quỹ thời gian. AI trả về 1 mảng JSON chứa lộ trình học từng tuần( hệ thông đọc json và trả về một trình theo tuần) ..
 
 ---
@@ -222,19 +222,19 @@ Tôi đã phân tích và thực hiện một số tinh chỉnh so với mô t�
 
 ### **🌟 Những điểm LƯỢC BỚT hoặc LÀM RÕ (Để tránh code quá khó):**
 
-1. "Secure Exam Mode" (Chế độ thi an toàn): Thay vì tích hợp các phần mềm giám sát (Proctoring) dùng Camera/AI nhận diện khuôn mặt (rất khó, đắt đỏ và nặng server), tôi tối ưu thành **"Focus Mode"**. Tức là trình duyệt yêu cầu Full-screen, dùng Javascript bắt sự kiện visibilitychange. Nếu User chuyển Tab hoặc thoát Full-screen quá 3 lần \-\> Tự động nộp bài và đánh dấu gian lận.  
+1. "Secure Exam Mode" (Chế độ thi an toàn): Thay vì tích hợp các phần mềm giám sát (Proctoring) dùng Camera/AI nhận diện khuôn mặt (rất khó, đắt đỏ và nặng server), tôi tối ưu thành **"Focus Mode"**. Tức là trình duyệt yêu cầu Full-screen, dùng Javascript bắt sự kiện visibilitychange. Nếu User chuyển Tab hoặc thoát Full-screen quá 3 lần -\> Tự động nộp bài và đánh dấu gian lận.  
 2. AI chấm Speaking: AI thuần túy (như ChatGPT) không nghe được âm điệu (intonation). Do đó, tôi làm rõ luồng: Bắt buộc phải qua 1 lớp API Speech-to-text trước. Phần đánh giá "Phát âm" sẽ dựa vào tỷ lệ nhận diện đúng của Speech-to-text (Nếu AI dịch đúng ý tức là phát âm rõ ràng).
 
 ### **🌟 Những điểm THÊM VÀO (Để hệ thống hoàn chỉnh và thương mại hóa được):**
 
-1. **Thêm Cổng thanh toán (Payment Gateway):** Vì có các gói "Candidate Pro", hệ thống bắt buộc phải thiết kế luồng tích hợp với VNPay, MoMo hoặc Stripe. (Đã bổ sung vào phần Candidate/Admin).  
+1. **Thêm Cổng thanh toán (Payment Gateway):** Vì có các gói "Candidate Pro", hệ thống bắt buộc phải thiết kế luồng tích hợp với SePay (Đã bổ sung vào phần Candidate/Admin).  
 2. **Thêm hệ thống Ticket (Hỗ trợ Q\&A):** Thay vì Mentor và Candidate chat realtime (tốn resource, khó quản lý), tôi thiết kế thành "Hỗ trợ học viên qua Ticket/Comments" để Candidate để lại câu hỏi, Mentor vào trả lời sau.  
 3. **Chuẩn hóa Data AI (JSON Output):** Đã note rõ cho Dev Backend rằng kết quả trả về từ AI phải được ép kiểu về chuẩn JSON (thay vì Text tự do) để Frontend dễ dàng vẽ biểu đồ và highlight lỗi sai.
 
    ## **6\. Luồng lấy, lưu dữ liệu bài thi**
 
 **6.1. Đối với câu hỏi dạng matching:**  
-**1\. Luồng Lưu Dữ Liệu (Save / Create) \- Dành cho Admin/Mentor**
+**1\. Luồng Lưu Dữ Liệu (Save / Create) - Dành cho Admin/Mentor**
 
 Khi Mentor tạo một câu hỏi Matching, frontend của hệ thống quản lý sẽ gửi xuống backend toàn bộ dữ liệu (câu hỏi, các vế trái/phải, và đáp án đúng). Backend của cậu phải xử lý theo luồng sau:
 
@@ -243,7 +243,7 @@ Khi Mentor tạo một câu hỏi Matching, frontend của hệ thống quản l
    * Trích xuất các cặp map đúng đóng gói thành một object JSON dành riêng cho bảng `Answers` chứa mapping đúng.  
 3. **Database Transaction:** Mở một SQL Transaction để lưu
 
-### **2\. Luồng Lấy Đề Thi (Retrieve / Fetch) \- Dành cho Học viên**
+### **2\. Luồng Lấy Đề Thi (Retrieve / Fetch) - Dành cho Học viên**
 
 Đây là chỗ dễ sai lầm nhất. Nếu không cẩn thận, cậu sẽ leak đáp án.
 
@@ -264,7 +264,7 @@ Khi học viên bấm "Nộp bài", frontend sẽ gửi một payload chứa nh�
 
 ### **4\. Cấu trúc JSON:** **câu hỏi:** 
 
-| {   "left\_side": \[     {"id": "1", "text": "option 1"},     {"id": "2", "text": "option 2"}   \],   "right\_side": \[     {"id": "a", "text": "option A"},     {"id": "b", "text": "option B"},     {"id": "c", "text": "distractor option"}    \] }  |
+| {   "left\_side": [     {"id": "1", "text": "option 1"},     {"id": "2", "text": "option 2"}   \],   "right\_side": \[     {"id": "a", "text": "option A"},     {"id": "b", "text": "option B"},     {"id": "c", "text": "distractor option"}    ] }  |
 | :---- |
 
 ### matching đúng (lưu bảng answer): 
@@ -298,22 +298,52 @@ Khi hiển thị đề cho học viên, nguyên tắc tối thượng vẫn là 
 1. **Frontend gửi data lên backend.**  
 2. **Truy Xuất Tương Đáp Án:** Backend lấy chuỗi JSON từ bảng `Answers` và parse thành đối tượng Dictionary chứa Array.  
 3. **Logic Chấm Điểm (Evaluation Engine):**  
-   * Duyệt qua từng key trong `user_answers`.  
+   * Frontend gửi lên một mảng JSON các đáp án theo thứ tự (ví dụ: `["python", "java"]`).
+   * Duyệt qua từng đáp án trong mảng của user bằng chỉ số (index).
    * **Tiền xử lý (Sanitize):** Nếu là text input, backend bắt buộc phải `Trim()` (cắt khoảng trắng 2 đầu) và `ToLower()` cả chuỗi của user lẫn mảng đáp án chuẩn   
-   * **So sánh:** Kiểm tra xem chuỗi user đã nhập (sau khi đã sanitize) có tồn tại trong mảng đáp án chuẩn hay không  
+   * **So sánh:** Kiểm tra xem chuỗi user đã nhập (sau khi đã sanitize) có tồn tại trong mảng đáp án chuẩn (lấy theo key `index + 1` của dictionary đáp án chuẩn) hay không  
    * Cộng điểm thành phần cho mỗi ô điền đúng.
 
 ### **4\. Cấu trúc JSON:** **câu hỏi:** 
 
-| {   "blanks": {     "1": { "type": "text", "placeholder": "Nhập tên ngôn ngữ..." },     "2": { "type": "dropdown", "options": \["C\#", "Java", "PHP", "C++"\] }   } }  |
+| {   "blanks": {     "1": { "type": "text", "placeholder": "Nhập tên ngôn ngữ..." },     "2": { "type": "dropdown", "options": ["C\#", "Java", "PHP", "C++"] }   } }  |
 | :---- |
 
 ### matching đúng (lưu bảng answer):
 
-| {   "1": \["Python", "python", "PYTHON"\],   "2": \["C\#", "Java"\]  }  |
+| {   "1": ["Python", "python", "PYTHON"],   "2": ["C#", "Java"]  }  |
+| :---- |
+
+### student answer (Frontend gửi lên JSON Array):
+| ["python", "Java"] |
 | :---- |
 
 **6.3. Đối với câu hỏi dạng Multiple Choise:**
+/////////////////////
+note thêm:
+đổi với dạng đề:
+- lableing a map/plan/diagram: sẽ sử dụng matching. trên ảnh sẽ đánh dấu sẵn (mentor) các vị trí cần nối. ở dưới sẽ hiện sắn các đáp án để nối với số tương ứng trên ảnh
+- drag and drop: tương tự: cũng sử dụng matching như trên
+-Lưu câu hỏi lớn (như ) vào trong Explanation  bảng Questions
+
+Câu hỏi lớn (1 phần chung gồm vài câu hỏi cùng loại) sẽ có 1 phần hướng dẫn về dạng bài lưu trong explanation. Nếu dạng bài mới so với câu trước (khác question type) -> in ra giải thích dạng.
+vd: Giả sử: khi chương trình chạy 
+câu 1-7 dạng matching -> in giải thích về dạng matching lưu trong explanation (db question) của câu 1,hệ thống đọc câu 2 và thấy cùng QuestionType với câu 1,bỏ qua và check tiếp tới câu 3 
+câu 8-11: dạng fill in blank→hệ thống nhận thấy QuestionType của câu 8 khác với các câu trước sẽ thực hiện  in giải thích về dạng fill in blank lưu trong explanation (db question) của câu 8
+
+Format đề sẽ như sau:
+Question 1-7: (dạng matching)
+(giải thích về dạng) Hãy nối Bên A với bên B tương ứng
+1.
+2. 
+…
+7. 
+Question 8-11: (dạng yes/no) (đã đổi so với dạng trước đó là matching)
+(giải thích về dạng -> thêm cái này vào đầu mỗi dạng) Hãy chọn yes/no/NG
+8.
+9.
+…
+11.
 
 ## **7\. Use case:**
 
@@ -386,7 +416,9 @@ Khi hiển thị đề cho học viên, nguyên tắc tối thượng vẫn là 
 4. Xây dựng lộ trình học  
 5. Gợi ý cải thiện kỹ năng
 
-\-- Tạo cơ sở dữ liệu
+
+```
+-- Tạo cơ sở dữ liệu
 
 CREATE DATABASE IELTSFlow;
 
@@ -396,17 +428,17 @@ USE IELTSFlow;
 
 GO
 
-\-- \==========================================
+-- ==========================================
 
-\-- NHÓM QUẢN TRỊ NGƯỜI DÙNG & HỒ SƠ
+-- NHÓM QUẢN TRỊ NGƯỜI DÙNG & HỒ SƠ
 
-\-- \==========================================
+-- ==========================================
 
 CREATE TABLE Roles (
 
     RoleID INT IDENTITY(1,1) PRIMARY KEY,
 
-    RoleName NVARCHAR(50) NOT NULL UNIQUE, \-- Admin, Mentor, Candidate
+    RoleName NVARCHAR(50) NOT NULL UNIQUE, -- Admin, Mentor, Candidate
 
     Description NVARCHAR(255)
 
@@ -420,21 +452,23 @@ CREATE TABLE Users (
 
     Email NVARCHAR(255) NOT NULL UNIQUE,
 
-    PasswordHash NVARCHAR(255) NULL, \-- Cho phép NULL để hỗ trợ Social Login
+    PasswordHash NVARCHAR(255) NULL, -- Cho phép NULL để hỗ trợ Social Login
 
-    AuthProvider NVARCHAR(50) DEFAULT 'Local', \-- Local, Google, Facebook
+    AuthProvider NVARCHAR(50) DEFAULT 'Local', -- Local, Google, Facebook
 
-    ProviderID NVARCHAR(100) NULL, \-- ID trả về từ Google/Facebook
+    ProviderID NVARCHAR(100) NULL, -- ID trả về từ Google/Facebook
 
     FullName NVARCHAR(100) NOT NULL,
 
-    Status NVARCHAR(20) DEFAULT 'Active', \-- Active, Inactive, Banned
+    Status NVARCHAR(20) DEFAULT 'Active', -- Active, Inactive, Banned
 
     CreatedAt DATETIME DEFAULT GETDATE(),
 
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID),
 
-    Deleted BIT DEFAULT 0
+    Deleted BIT DEFAULT 0,
+
+    ProfilePic NVARCHAR(500) NULL
 
 );
 
@@ -444,23 +478,21 @@ CREATE TABLE CandidateTargets (
 
     UserID INT NOT NULL,
 
-    TargetBand DECIMAL(3,1) NOT NULL, \-- Ví dụ: 6.5, 7.0
+    TargetBand DECIMAL(3,1) NOT NULL, -- Ví dụ: 6.5, 7.0
 
     CurrentBand DECIMAL(3,1),
 
-    ExamDate DATE,
-
-    IsActive BIT DEFAULT 1, \-- \[CẬP NHẬT\] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
+    IsActive BIT DEFAULT 1, -- [CẬP NHẬT] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
 
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 
 );
 
-\-- \==========================================
+-- ==========================================
 
-\-- NHÓM GÓI CƯỚC & THANH TOÁN
+-- NHÓM GÓI CƯỚC & THANH TOÁN
 
-\-- \==========================================
+-- ==========================================
 
 CREATE TABLE SubscriptionPackages (
 
@@ -488,15 +520,15 @@ CREATE TABLE Transactions (
 
     Amount DECIMAL(18,2) NOT NULL,
 
-    PaymentMethod NVARCHAR(50), \-- VNPay, MoMo, Stripe
+    PaymentMethod NVARCHAR(50), -- SePay
 
-    GatewayTransactionID NVARCHAR(100) NULL, \-- Mã đối soát từ Cổng thanh toán (TxnRef)
+    GatewayTransactionID NVARCHAR(100) NULL, -- Mã đối soát từ Cổng thanh toán (TxnRef)
 
-    GatewayPayload NVARCHAR(MAX) NULL, \-- \[CẬP NHẬT\] Lưu trữ JSON payload gốc từ webhook để đối soát khi có lỗi
+    GatewayPayload NVARCHAR(MAX) NULL, -- [CẬP NHẬT] Lưu trữ JSON payload gốc từ webhook để đối soát khi có lỗi
 
-    Status NVARCHAR(50) DEFAULT 'Pending', \-- Pending, Success, Failed
+    Status NVARCHAR(50) DEFAULT 'Pending', -- Pending, Success, Failed
 
-    PaymentDate DATETIME NULL, \-- Thời gian thanh toán thực tế ghi nhận từ Webhook
+    PaymentDate DATETIME NULL, -- Thời gian thanh toán thực tế ghi nhận từ Webhook
 
     CreatedAt DATETIME DEFAULT GETDATE(),
 
@@ -518,7 +550,7 @@ CREATE TABLE UserSubscriptions (
 
     EndDate DATETIME NOT NULL,
 
-    Status NVARCHAR(50) DEFAULT 'Active', \-- Active, Expired, Cancelled
+    Status NVARCHAR(50) DEFAULT 'Active', -- Active, Expired, Cancelled
 
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
 
@@ -526,25 +558,27 @@ CREATE TABLE UserSubscriptions (
 
 );
 
-\-- \==========================================
+-- ==========================================
 
-\-- NHÓM NGÂN HÀNG ĐỀ THI & HỌC LIỆU
+-- NHÓM NGÂN HÀNG ĐỀ THI & HỌC LIỆU
 
-\-- \==========================================
+-- ==========================================
 
 CREATE TABLE QuestionResource (
 
     ResourceID INT IDENTITY(1,1) PRIMARY KEY,
 
+    ResourceName NVARCHAR(255),
+
     ResourceText NVARCHAR(MAX),
 
     ResourceAudioURL NVARCHAR(500),
 
-    ResourceImageURL NVARCHAR(500),
+    ResourceImageURL NVARCHAR(MAX),
 
-    Type NVARCHAR(50) NOT NULL, \-- Passage, Audio
+    Type NVARCHAR(50) NOT NULL, -- Passage, Audio
 
-    CreatedBy INT NULL, \-- Theo dõi Mentor nào tạo
+    CreatedBy INT NULL, -- Theo dõi Mentor nào tạo
 
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
 
@@ -560,19 +594,21 @@ CREATE TABLE Questions (
 
     Content NVARCHAR(MAX) NOT NULL,
 
-    QuestionType NVARCHAR(50) NOT NULL, \-- MultipleChoice, Matching, FillInBlanks. Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
+    QuestionType NVARCHAR(50) NOT NULL, -- MultipleChoice, Matching, FillInBlanks,.... Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
 
-    Skill NVARCHAR(20) NOT NULL, \-- Listening, Reading, Writing, Speaking
+    Skill NVARCHAR(20) NOT NULL, -- Listening, Reading, Writing, Speaking
 
-    Difficulty NVARCHAR(20), \-- Easy, Medium, Hard
+    Difficulty NVARCHAR(20), -- Easy, Medium, Hard
 
     Explanation NVARCHAR(MAX),
 
-    OrderInResource INT NULL, \-- \[CẬP NHẬT\] Thứ tự câu hỏi đi theo 1 bài đọc (Passage) hoặc audio
+    OrderInResource INT NULL, -- [CẬP NHẬT] Thứ tự câu hỏi đi theo 1 bài đọc (Passage) hoặc audio
 
     contentJSON NVARCHAR(MAX) NOT NULL, 
 
-    CreatedBy INT NULL, \-- Theo dõi Mentor nào tạo
+    QuestionCount INT DEFAULT 1,
+
+    CreatedBy INT NULL, -- Theo dõi Mentor nào tạo
 
     FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID),
 
@@ -588,9 +624,9 @@ CREATE TABLE Answers (
 
     QuestionID INT NOT NULL,
 
-    Content NVARCHAR(MAX) NOT NULL, \-- text, 
+    Content NVARCHAR(MAX) NOT NULL, -- text, 
 
-    ContentJson NVARCHAR(MAX) NOT NULL, \-- JSON
+    ContentJson NVARCHAR(MAX) NOT NULL, -- JSON
 
     IsCorrect BIT NOT NULL DEFAULT 0,
 
@@ -604,7 +640,9 @@ CREATE TABLE Tags (
 
     Name NVARCHAR(100) NOT NULL,
 
-    Type NVARCHAR(50) \-- Topic, Grammar, Vocabulary...
+    Type NVARCHAR(50), -- Topic, Grammar, Vocabulary...
+
+    Deleted BIT DEFAULT 0
 
 );
 
@@ -632,9 +670,9 @@ CREATE TABLE Lessons (
 
     VideoURL NVARCHAR(500),
 
-    DocumentURL NVARCHAR(500) NULL, \-- Lưu trữ PDF/Tài liệu
+    DocumentURL NVARCHAR(500) NULL, -- Lưu trữ PDF/Tài liệu
 
-    CreatedBy INT NULL, \-- Theo dõi Mentor đăng bài
+    CreatedBy INT NULL, -- Theo dõi Mentor đăng bài
 
     CreatedAt DATETIME DEFAULT GETDATE(),
 
@@ -646,7 +684,7 @@ CREATE TABLE Lessons (
 
 );
 
-\-- Bảng quản lý Tiến độ & Đánh dấu bài học
+-- Bảng quản lý Tiến độ & Đánh dấu bài học
 
 CREATE TABLE UserLessonProgress (
 
@@ -656,9 +694,9 @@ CREATE TABLE UserLessonProgress (
 
     LessonID INT NOT NULL,
 
-    IsCompleted BIT DEFAULT 0, \-- Đã học xong chưa
+    IsCompleted BIT DEFAULT 0, -- Đã học xong chưa
 
-    IsBookmarked BIT DEFAULT 0, \-- Đánh dấu bài học
+    IsBookmarked BIT DEFAULT 0, -- Đánh dấu bài học
 
     LastAccessed DATETIME DEFAULT GETDATE(),
 
@@ -668,7 +706,7 @@ CREATE TABLE UserLessonProgress (
 
 );
 
-\-- \[CẬP NHẬT BẢNG MỚI\] Bảng lưu lại các câu hỏi/bài tập học viên muốn đánh dấu học lại
+-- [CẬP NHẬT BẢNG MỚI] Bảng lưu lại các câu hỏi/bài tập học viên muốn đánh dấu học lại
 
 CREATE TABLE UserQuestionBookmarks (
 
@@ -684,15 +722,15 @@ CREATE TABLE UserQuestionBookmarks (
 
     FOREIGN KEY (QuestionID) REFERENCES Questions(QuestionID) ON DELETE CASCADE,
 
-    CONSTRAINT UQ\_User\_Question UNIQUE (UserID, QuestionID)
+    CONSTRAINT UQ_User_Question UNIQUE (UserID, QuestionID)
 
 );
 
-\-- \==========================================
+-- ==========================================
 
-\-- NHÓM BÀI THI & CHẤM ĐIỂM
+-- NHÓM BÀI THI & CHẤM ĐIỂM
 
-\-- \==========================================
+-- ==========================================
 
 CREATE TABLE Exams (
 
@@ -700,9 +738,9 @@ CREATE TABLE Exams (
 
     Title NVARCHAR(200) NOT NULL,
 
-    Type NVARCHAR(50) NOT NULL, \-- Mock Test, Placement Test, Practice
+    Type NVARCHAR(50) NOT NULL, -- Mock Test, Placement Test, Practice
 
-    SkillFocus NVARCHAR(20) DEFAULT 'All', \-- \[CẬP NHẬT\] Đánh dấu đề là Reading, Listening, Writing, Speaking hay Full Test (All)
+    SkillFocus NVARCHAR(20) DEFAULT 'All', -- [CẬP NHẬT] Đánh dấu đề là Reading, Listening, Writing, Speaking hay Full Test (All)
 
     Duration INT NOT NULL, 
 
@@ -722,11 +760,13 @@ CREATE TABLE ExamSections (
 
     ExamID INT NOT NULL,
 
-    SectionName NVARCHAR(100) NOT NULL, \-- Ví dụ: "Reading \- Passage 1", "Listening \- Part 3"
+    SectionName NVARCHAR(100) NOT NULL, -- Ví dụ: "Reading - Passage 1", "Listening - Part 3"
 
-    ResourceID INT NULL, \-- Gắn Passage/Audio thẳng vào Section (nếu có)
+    ResourceID INT NULL, -- Gắn Passage/Audio thẳng vào Section (nếu có)
 
     OrderIndex INT NOT NULL, 
+
+    Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening',
 
     FOREIGN KEY (ExamID) REFERENCES Exams(ExamID) ON DELETE CASCADE,
 
@@ -764,7 +804,7 @@ CREATE TABLE TestSubmissions (
 
     
 
-    \-- Điểm thành phần để vẽ biểu đồ
+    -- Điểm thành phần để vẽ biểu đồ
 
     ListeningBand DECIMAL(3,1) NULL,
 
@@ -780,15 +820,15 @@ CREATE TABLE TestSubmissions (
 
     
 
-    \-- Chống gian lận & Trạng thái làm bài
+    -- Chống gian lận & Trạng thái làm bài
 
     ViolationCount INT DEFAULT 0, 
 
     IsCheated BIT DEFAULT 0, 
 
-    Status NVARCHAR(20) DEFAULT 'InProgress', \-- InProgress, Completed, Abandoned
+    Status NVARCHAR(20) DEFAULT 'InProgress', -- InProgress, Completed, Abandoned
 
-    \-- AI feedback
+    -- AI feedback
 
     OverallAIFeedback NVARCHAR(MAX),
 
@@ -810,13 +850,13 @@ CREATE TABLE SubmissionDetails (
 
     SpeakingUrl NVARCHAR(500), 
 
-    CandidateTranscript NVARCHAR(MAX) NULL, \-- \[CẬP NHẬT\] Lưu text sau khi Speech-to-text dịch ra để user xem lại và AI đọc
+    CandidateTranscript NVARCHAR(MAX) NULL, -- [CẬP NHẬT] Lưu text sau khi Speech-to-text dịch ra để user xem lại và AI đọc
 
     IsCorrect BIT,
 
     Score DECIMAL(5,2),
 
-    GradingStatus NVARCHAR(50) DEFAULT 'Graded', \-- 'Pending\_AI', 'Processing', 'Graded', 'Failed'
+    GradingStatus NVARCHAR(50) DEFAULT 'Graded', -- 'Pending_AI', 'Processing', 'Graded', 'Failed'
 
     FOREIGN KEY (SubmissionID) REFERENCES TestSubmissions(SubmissionID) ON DELETE CASCADE,
 
@@ -836,15 +876,15 @@ CREATE TABLE AIEvaluations (
 
     FOREIGN KEY (DetailID) REFERENCES SubmissionDetails(DetailID) ON DELETE CASCADE,
 
-    CONSTRAINT CHK\_FeedbackJSON CHECK (ISJSON(FeedbackJSON) \= 1\) 
+    CONSTRAINT CHK_FeedbackJSON CHECK (ISJSON(FeedbackJSON) = 1) 
 
 );
 
-\-- \==========================================
+-- ==========================================
 
-\-- NHÓM LỘ TRÌNH HỌC TẬP (AI SINH RA)
+-- NHÓM LỘ TRÌNH HỌC TẬP (AI SINH RA)
 
-\-- \==========================================
+-- ==========================================
 
 CREATE TABLE Pathways (
 
@@ -852,7 +892,7 @@ CREATE TABLE Pathways (
 
     UserID INT NOT NULL,
 
-    PlacementTestID INT NULL, \-- Link với bài test đầu vào để biết điểm yếu
+    PlacementTestID INT NULL, -- Link với bài test đầu vào để biết điểm yếu
 
     TargetBand DECIMAL(3,1) NOT NULL,
 
@@ -876,17 +916,19 @@ CREATE TABLE WeeklyPlans (
 
     IsCompleted BIT DEFAULT 0,
 
+    IsCurrentWeek BIT DEFAULT 0, -- Theo dõi trạng thái tuần học hiện tại
+
     FOREIGN KEY (PathwayID) REFERENCES Pathways(PathwayID) ON DELETE CASCADE,
 
-    CONSTRAINT CHK\_PlanContent CHECK (ISJSON(PlanContent) \= 1\) 
+    CONSTRAINT CHK_PlanContent CHECK (ISJSON(PlanContent) = 1) 
 
 );
 
-\-- \==========================================
+-- ==========================================
 
-\-- NHÓM HỖ TRỢ, THÔNG BÁO & LOG HỆ THỐNG
+-- NHÓM HỖ TRỢ, THÔNG BÁO & LOG HỆ THỐNG
 
-\-- \==========================================
+-- ==========================================
 
 CREATE TABLE Tickets (
 
@@ -922,7 +964,7 @@ CREATE TABLE TicketReplies (
 
 );
 
-\-- Bảng quản lý Thông báo
+-- Bảng quản lý Thông báo
 
 CREATE TABLE Notifications (
 
@@ -934,7 +976,7 @@ CREATE TABLE Notifications (
 
     Content NVARCHAR(MAX) NOT NULL,
 
-    Type NVARCHAR(50) DEFAULT 'System', \-- System, Reminder, Payment, Exam
+    Type NVARCHAR(50) DEFAULT 'System', -- System, Reminder, Payment, Exam
 
     IsRead BIT DEFAULT 0,
 
@@ -944,19 +986,19 @@ CREATE TABLE Notifications (
 
 );
 
-\-- Bảng lưu Log hệ thống cho Admin
+-- Bảng lưu Log hệ thống cho Admin
 
 CREATE TABLE SystemLogs (
 
     LogID INT IDENTITY(1,1) PRIMARY KEY,
 
-    UserID INT NULL, \-- ID người thực hiện (NULL nếu là auto system event)
+    UserID INT NULL, -- ID người thực hiện (NULL nếu là auto system event)
 
-    Action NVARCHAR(100) NOT NULL, \-- Ví dụ: 'DELETE\_USER', 'API\_ERROR'
+    Action NVARCHAR(100) NOT NULL, -- Ví dụ: 'DELETE_USER', 'API_ERROR'
 
-    Entity NVARCHAR(50), \-- Bảng hoặc Module bị tác động
+    Entity NVARCHAR(50), -- Bảng hoặc Module bị tác động
 
-    Details NVARCHAR(MAX), \-- Lưu raw error message hoặc JSON thao tác
+    Details NVARCHAR(MAX), -- Lưu raw error message hoặc JSON thao tác
 
     CreatedAt DATETIME DEFAULT GETDATE(),
 
@@ -966,13 +1008,46 @@ CREATE TABLE SystemLogs (
 
 GO
 
-\-- \==========================================
+-- ==========================================
 
-\-- DỮ LIỆU MẶC ĐỊNH
+-- BẢNG LIÊN QUAN ĐẾN FILE UPLOAD
 
-\-- \==========================================
+-- ==========================================
 
-IF NOT EXISTS (SELECT \* FROM Roles WHERE RoleName \= 'Admin')
+CREATE TABLE UploadedFiles (
+
+    FileID INT IDENTITY(1,1) PRIMARY KEY,
+
+    OriginalName NVARCHAR(255) NOT NULL,
+
+    SavedPath NVARCHAR(500) NOT NULL,
+
+    FileType NVARCHAR(50) NOT NULL, --  'profile_pic', 'material', ‘video’
+
+    UploadedBy INT NOT NULL,
+
+    UploadedAt DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (UploadedBy) REFERENCES Users(UserID)
+
+);
+
+GO
+
+CREATE TABLE upload_sessions (
+    upload_id VARCHAR(255) PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    total_chunks INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+
+-- DỮ LIỆU MẶC ĐỊNH
+
+-- ==========================================
+
+IF NOT EXISTS (SELECT * FROM Roles WHERE RoleName = 'Admin')
 
 INSERT INTO Roles (RoleName, Description) VALUES
 
@@ -983,6 +1058,7 @@ INSERT INTO Roles (RoleName, Description) VALUES
     ('Candidate', N'Học viên luyện thi IELTS');
 
 GO
+```
 
 :**Lưu ý bổ sung về lộ trình học:**
 
@@ -991,23 +1067,24 @@ GO
 * Cần bổ sung thêm trường dữ liệu (cột) trong bảng *WeeklyPlans* để ghi nhận và theo dõi trạng thái tuần học hiện tại của người dùng.
 
 cập nhập cho người chưa tạo:ExamSections   
+```
 USE IELTSFlow;
 
 GO
 
-\-- 1\. Xóa bảng ExamQuestions cũ 
+-- 1. Xóa bảng ExamQuestions cũ 
 
-\-- LƯU Ý: Nếu đã có dữ liệu test, việc drop bảng này sẽ xóa các link câu hỏi của đề thi cũ.
+-- LƯU Ý: Nếu đã có dữ liệu test, việc drop bảng này sẽ xóa các link câu hỏi của đề thi cũ.
 
-\-- Vì dự án đang ở giai đoạn đầu, drop/recreate là cách nhanh nhất.
+-- Vì dự án đang ở giai đoạn đầu, drop/recreate là cách nhanh nhất.
 
-IF OBJECT\_ID('ExamQuestions', 'U') IS NOT NULL
+IF OBJECT_ID('ExamQuestions', 'U') IS NOT NULL
 
     DROP TABLE ExamQuestions;
 
 GO
 
-\-- 2\. Tạo bảng ExamSections mới
+-- 2. Tạo bảng ExamSections mới
 
 CREATE TABLE ExamSections (
 
@@ -1015,11 +1092,13 @@ CREATE TABLE ExamSections (
 
     ExamID INT NOT NULL,
 
-    SectionName NVARCHAR(100) NOT NULL, \-- Ví dụ: "Reading \- Passage 1", "Listening \- Part 3"
+    SectionName NVARCHAR(100) NOT NULL, -- Ví dụ: "Reading - Passage 1", "Listening - Part 3"
 
-    ResourceID INT NULL, \-- Gắn Passage/Audio thẳng vào Section (nếu có)
+    ResourceID INT NULL, -- Gắn Passage/Audio thẳng vào Section (nếu có)
 
     OrderIndex INT NOT NULL, 
+
+    Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening',
 
     FOREIGN KEY (ExamID) REFERENCES Exams(ExamID) ON DELETE CASCADE,
 
@@ -1029,7 +1108,7 @@ CREATE TABLE ExamSections (
 
 GO
 
-\-- 3\. Tạo lại bảng ExamQuestions theo cấu trúc mới
+-- 3. Tạo lại bảng ExamQuestions theo cấu trúc mới
 
 CREATE TABLE ExamQuestions (
 
@@ -1049,5 +1128,101 @@ CREATE TABLE ExamQuestions (
 
 GO
 
-PRINT N'Đã cập nhật cấu trúc bảng ExamSections và ExamQuestions thành công\!';
+PRINT N'Đã cập nhật cấu trúc bảng ExamSections và ExamQuestions thành công!';
+```
 
+04/07
+Thêm bảng upload_sessions
+```
+CREATE TABLE upload_sessions (
+    upload_id VARCHAR(255) PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    total_chunks INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+```
+
+// =========================================================================
+// SCRIPT THÊM DỮ LIỆU MẪU CHO BẢNG Tags (CHẠY ĐƯỢC NHIỀU LẦN KHÔNG BỊ TRÙNG LẶP)
+// Dành cho cả database mới tinh và database đã có sẵn dữ liệu.
+// Đoạn SQL dưới đây sử dụng WHERE NOT EXISTS để bỏ qua các Tag đã tồn tại.
+// =========================================================================
+```sql
+-- 1. NHÓM DẠNG BÀI (QUESTION TYPE)
+INSERT INTO Tags ([Name], [Type], [Deleted])
+SELECT Name, Type, Deleted FROM (
+    VALUES 
+    ('Matching Headings', 'QuestionType', 0),
+    ('True/False/Not Given', 'QuestionType', 0),
+    ('Yes/No/Not Given', 'QuestionType', 0),
+    ('Multiple Choice', 'QuestionType', 0),
+    ('Summary Completion', 'QuestionType', 0),
+    ('Sentence Completion', 'QuestionType', 0),
+    ('Table Completion', 'QuestionType', 0),
+    ('Flow-chart Completion', 'QuestionType', 0),
+    ('Diagram Label Completion', 'QuestionType', 0),
+    ('Short-answer Questions', 'QuestionType', 0),
+    ('Matching Features', 'QuestionType', 0),
+    ('Matching Information', 'QuestionType', 0),
+    ('Matching Sentence Endings', 'QuestionType', 0),
+    ('Map/Plan Labeling', 'QuestionType', 0),
+    ('Note Completion', 'QuestionType', 0),
+    ('Form Completion', 'QuestionType', 0)
+) AS v(Name, Type, Deleted)
+WHERE NOT EXISTS (SELECT 1 FROM Tags t WHERE t.Name = v.Name);
+
+-- 2. NHÓM ĐIỂM NGỮ PHÁP (GRAMMAR)
+INSERT INTO Tags ([Name], [Type], [Deleted])
+SELECT Name, Type, Deleted FROM (
+    VALUES 
+    ('Present Simple Tense', 'Grammar', 0),
+    ('Present Continuous Tense', 'Grammar', 0),
+    ('Present Perfect Tense', 'Grammar', 0),
+    ('Present Perfect Continuous', 'Grammar', 0),
+    ('Past Simple Tense', 'Grammar', 0),
+    ('Past Continuous Tense', 'Grammar', 0),
+    ('Past Perfect Tense', 'Grammar', 0),
+    ('Future Tenses', 'Grammar', 0),
+    ('Conditionals (Type 0,1,2,3)', 'Grammar', 0),
+    ('Mixed Conditionals', 'Grammar', 0),
+    ('Relative Clauses', 'Grammar', 0),
+    ('Passive Voice', 'Grammar', 0),
+    ('Reported Speech', 'Grammar', 0),
+    ('Articles (a, an, the)', 'Grammar', 0),
+    ('Prepositions', 'Grammar', 0),
+    ('Gerunds and Infinitives', 'Grammar', 0),
+    ('Modal Verbs', 'Grammar', 0),
+    ('Subject-Verb Agreement', 'Grammar', 0),
+    ('Comparatives & Superlatives', 'Grammar', 0),
+    ('Linking Words / Conjunctions', 'Grammar', 0)
+) AS v(Name, Type, Deleted)
+WHERE NOT EXISTS (SELECT 1 FROM Tags t WHERE t.Name = v.Name);
+
+-- 3. NHÓM CHỦ ĐỀ VÀ TỪ VỰNG (TOPIC / VOCABULARY)
+INSERT INTO Tags ([Name], [Type], [Deleted])
+SELECT Name, Type, Deleted FROM (
+    VALUES 
+    ('Environment & Climate Change', 'Topic', 0),
+    ('Education & Learning', 'Topic', 0),
+    ('Work, Business & Career', 'Topic', 0),
+    ('Health, Fitness & Diet', 'Topic', 0),
+    ('Technology & The Internet', 'Topic', 0),
+    ('Science & Inventions', 'Topic', 0),
+    ('Crime, Law & Justice', 'Topic', 0),
+    ('Arts, Culture & Museums', 'Topic', 0),
+    ('Travel, Tourism & Holidays', 'Topic', 0),
+    ('Globalization & Society', 'Topic', 0),
+    ('Media, Advertising & News', 'Topic', 0),
+    ('Family, Children & Relationships', 'Topic', 0),
+    ('Sports, Leisure & Hobbies', 'Topic', 0),
+    ('Space Exploration', 'Topic', 0),
+    ('History & Archaeology', 'Topic', 0),
+    ('Transport & Infrastructure', 'Topic', 0),
+    ('Language & Communication', 'Topic', 0),
+    ('Architecture & Buildings', 'Topic', 0),
+    ('Nature, Wildlife & Animals', 'Topic', 0),
+    ('Government & Politics', 'Topic', 0)
+) AS v(Name, Type, Deleted)
+WHERE NOT EXISTS (SELECT 1 FROM Tags t WHERE t.Name = v.Name);
+```

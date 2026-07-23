@@ -1,17 +1,17 @@
 // API logic for new UI
-const MOCK_TODAY_LESSONS = [
+const MOCK_TODAY_LESSONS = window.MOCK_TODAY_LESSONS || [
     { id: 101, title: 'IELTS Listening - Section 1 Tips', type: 'Video', skill: 'Listening', time: '15 mins', color: 'blue', icon: '🎧' },
     { id: 102, title: 'Academic Vocabulary List 1', type: 'Document', skill: 'Vocabulary', time: '20 mins', color: 'purple', icon: '📚' }
 ];
 
-const MOCK_LESSONS = [
+const MOCK_LESSONS = window.MOCK_LESSONS || [
     { id: 101, title: 'IELTS Listening - Section 1 Tips', type: 'Video', skill: 'Listening', status: 'Unlearned', color: 'blue', icon: '🎧' },
     { id: 102, title: 'Academic Vocabulary List 1', type: 'Document', skill: 'Vocabulary', status: 'Learned', color: 'purple', icon: '📚' },
     { id: 103, title: 'Speaking Part 2: Describe a person', type: 'Video', skill: 'Speaking', status: 'Unlearned', color: 'orange', icon: '🎙️' },
     { id: 104, title: 'Writing Task 1 - Line Graph', type: 'Document', skill: 'Writing', status: 'Unlearned', color: 'green', icon: '✍️' }
 ];
 
-const MOCK_REDO_EXAMS = [
+const MOCK_REDO_EXAMS = window.MOCK_REDO_EXAMS || [
     { id: 1, title: 'Mock Test 1 - Full Exam', date: 'Oct 12, 2023', score: 6.5, maxScore: 9.0, type: 'Mock Test' },
     { id: 2, title: 'Reading Practice Test A', date: 'Sep 25, 2023', score: 7.0, maxScore: 9.0, type: 'Practice' },
     { id: 3, title: 'Placement Test', date: 'Sep 01, 2023', score: 5.5, maxScore: 9.0, type: 'Placement' }
@@ -21,6 +21,53 @@ let initializedLearned = localStorage.getItem('learnedLessons');
 if (!initializedLearned) {
     const initialLearned = MOCK_LESSONS.filter(l => l.status === 'Learned').map(l => l.id);
     localStorage.setItem('learnedLessons', JSON.stringify(initialLearned));
+}
+
+// Inline Toast Notification System
+function showToast(message, type = 'success') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999;';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'rgba(16, 185, 129, 0.95)' : (type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(59, 130, 246, 0.95)');
+    toast.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 0.95rem;
+        backdrop-filter: blur(8px);
+        transform: translateX(120%);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+    
+    container.appendChild(toast);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+    });
+
+    // Animate out and remove
+    setTimeout(() => {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
 }
 
 function renderDashboardGrid() {
@@ -51,7 +98,7 @@ function renderDashboardGrid() {
         const bookmarkBadge = isBookmarked ? '<span class="badge badge-red" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">❤️ Bookmarked</span>' : '';
 
         html += `
-            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail.jsp?id=${l.id}'">
+            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail?id=${l.id}'">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="card-icon-wrapper" style="background: rgba(var(--accent-${l.color}-rgb), 0.2); border: 1px solid var(--accent-${l.color});">
                         ${l.icon}
@@ -112,7 +159,7 @@ function renderLessonLibrary(filterSkill = 'All Skills', filterText = '', filter
         const bookmarkBadge = isBookmarked ? '<span class="badge badge-red" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">❤️ Bookmarked</span>' : '';
 
         html += `
-            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail.jsp?id=${l.id}'">
+            <div class="lesson-card-3d animate-fade-up" style="animation-delay: ${idx * 0.1}s" onclick="window.location.href='lesson-detail?id=${l.id}'">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div class="card-icon-wrapper" style="background: rgba(255,255,255,0.05); font-size: 20px;">
                         ${l.icon}
@@ -197,7 +244,7 @@ function toggleBookmark() {
             btn.innerHTML = '❤️ Bookmark';
             btn.style.background = 'rgba(255, 255, 255, 0.05)';
         }
-        alert('Đã xoá khỏi danh sách Bookmark!');
+        showToast('Đã xoá khỏi danh sách Bookmark!', 'info');
     } else {
         // Add bookmark
         bookmarks.push(id);
@@ -205,7 +252,7 @@ function toggleBookmark() {
             btn.innerHTML = '❤️ Bookmarked';
             btn.style.background = 'rgba(239, 68, 68, 0.2)';
         }
-        alert('Đã thêm vào danh sách Bookmark thành công!');
+        showToast('Đã thêm vào danh sách Bookmark thành công!', 'success');
     }
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
 }
@@ -225,7 +272,7 @@ function toggleLearned() {
             btn.innerHTML = '✓ Mark as Learned';
             btn.style.background = ''; // default primary
         }
-        alert('Unmarked as learned!');
+        showToast('Đã bỏ đánh dấu hoàn thành!', 'info');
     } else {
         // Mark
         learnedList.push(id);
@@ -233,7 +280,7 @@ function toggleLearned() {
             btn.innerHTML = '❌ Unmark as Learned';
             btn.style.background = 'var(--accent-red)';
         }
-        alert('Marked as learned! Your progress is updated.');
+        showToast('Đã đánh dấu hoàn thành bài học!', 'success');
     }
     localStorage.setItem('learnedLessons', JSON.stringify(learnedList));
 }
@@ -263,7 +310,7 @@ function renderRedoHistory() {
                         <div class="progress-fill" style="width: ${percentage}%; background: ${scoreColor};"></div>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="alert('Starting retake...')">Retake Now</button>
+                <button class="btn btn-primary" onclick="showToast('Starting retake...', 'info')">Retake Now</button>
             </div>
         `;
     });
@@ -275,4 +322,117 @@ document.addEventListener('DOMContentLoaded', () => {
     renderLessonLibrary();
     renderRedoHistory();
     loadLessonDetail();
+    setupMobileLayout();
 });
+
+// --- Mobile Responsive Architecture ---
+function setupMobileLayout() {
+    // Determine the active sidebar (Candidate or Admin)
+    const sidebar = document.querySelector('.sidebar') || document.querySelector('.admin-sidebar');
+    const layoutWrapper = document.querySelector('.layout-wrapper');
+    
+    if (!sidebar || !layoutWrapper) return;
+
+    // Prevent duplicate injections
+    if (document.querySelector('.mobile-topbar')) return;
+
+    // 1. Create Mobile Topbar
+    const topbar = document.createElement('div');
+    topbar.className = 'mobile-topbar hidden-desktop';
+    
+    // Hamburger Button
+    const hamburgerBtn = document.createElement('button');
+    hamburgerBtn.className = 'mobile-menu-btn';
+    hamburgerBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>';
+    
+    // Brand Text
+    const brandContainer = document.createElement('div');
+    brandContainer.className = 'mobile-brand';
+    brandContainer.innerHTML = '<strong>IELTSFLOW</strong>';
+    
+    topbar.appendChild(hamburgerBtn);
+    topbar.appendChild(brandContainer);
+    
+    // 2. Create Overlay for Off-canvas menu
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    
+    // 3. Inject into DOM
+    layoutWrapper.insertBefore(topbar, layoutWrapper.firstChild);
+    document.body.appendChild(overlay);
+    
+    // 4. Interaction Logic
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        
+        // Body Scroll-Lock
+        if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    }
+    
+    hamburgerBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // 5. Auto-wrap tables for responsiveness
+    document.querySelectorAll('table').forEach(table => {
+        if (!table.parentElement.classList.contains('table-responsive')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-responsive';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        }
+    });
+}
+
+
+(function() {
+    function showErrorBanner(msg, source, lineno, colno, error) {
+        // Prevent recursive errors
+        if (msg && msg.toString().includes('ResizeObserver')) return;
+        
+        if (document.getElementById('global-error-banner')) {
+            document.getElementById('global-error-banner-msg').innerText = msg + '\n' + (error && error.stack ? error.stack : '');
+            return;
+        }
+        const banner = document.createElement('div');
+        banner.id = 'global-error-banner';
+        banner.style.position = 'fixed';
+        banner.style.top = '0';
+        banner.style.left = '0';
+        banner.style.width = '100%';
+        banner.style.backgroundColor = '#ff4d4f';
+        banner.style.color = '#fff';
+        banner.style.padding = '15px';
+        banner.style.zIndex = '999999';
+        banner.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        banner.style.fontFamily = 'monospace';
+        banner.style.fontSize = '14px';
+        banner.style.maxHeight = '300px';
+        banner.style.overflowY = 'auto';
+        
+        banner.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 10px;">
+                <strong style="font-size: 16px;">🚨 JavaScript Error:</strong>
+                <button onclick="this.parentElement.parentElement.remove()" style="background:transparent; border:none; color:white; font-size:16px; cursor:pointer;">✖</button>
+            </div>
+            <pre id="global-error-banner-msg" style="margin:0; white-space:pre-wrap; word-wrap:break-word;">${msg}\n${error && error.stack ? error.stack : ''}</pre>
+        `;
+        if (document.body) {
+            document.body.appendChild(banner);
+        } else {
+            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(banner));
+        }
+    }
+
+    window.addEventListener('error', function(e) {
+        showErrorBanner(e.message, e.filename, e.lineno, e.colno, e.error);
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+        showErrorBanner(e.reason ? e.reason.toString() : 'Unhandled Promise Rejection', null, null, null, e.reason);
+    });
+})();

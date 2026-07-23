@@ -1,0 +1,25 @@
+# Browser Configuration (chrome, firefox, edge)
+browser=chrome
+# Headless mode for CI/CD (true/false)
+headless=true
+
+# Environment Settings (dev, staging, prod)
+env=dev
+
+# Automation Test Base URL (e.g. http://localhost:8080/IELTSFLOW)
+base.url=http://localhost:8080/IELTSFLOW
+
+# Admin Credentials
+admin.email=admin@gmail.com
+admin.password=admin123
+
+# Candidate Credentials
+candidate.email=candidate1@gmail.com
+candidate.password=12345678
+
+# Mentor Credentials
+mentor.email=mentor1@gmail.com
+mentor.password=12345678
+
+# Custom Browser Path (e.g., Chrome for Testing/Chromium)
+chrome.binary.path=

@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "skillFocus": { "type": "string", "enum": ["Reading", "Listening", "Writing", "Speaking", "All"] },
+    "duration": { "type": "integer", "description": "Duration in minutes" },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sectionName": { "type": "string" },
+          "skill": { "type": "string" },
+          "resourceText": { "type": "string", "description": "Reading passage or listening transcript. Return empty string if none." },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": { "type": "string", "description": "The question text" },
+                "questionType": { "type": "string", "enum": ["MultipleChoice", "FillInBlanks", "Matching", "TrueFalse"] },
+                "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"] },
+                "explanation": { "type": "string" },
+                "answers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "content": { "type": "string", "description": "Answer text (e.g., option A, B, C or fill in blank answer)" },
+                      "isCorrect": { "type": "boolean" }
+                    },
+                    "required": ["content", "isCorrect"]
+                  }
+                }
+              },
+              "required": ["content", "questionType", "answers"]
+            }
+          }
+        },
+        "required": ["sectionName", "skill", "questions"]
+      }
+    }
+  },
+  "required": ["title", "skillFocus", "duration", "sections"]
+}

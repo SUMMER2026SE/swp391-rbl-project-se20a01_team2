@@ -15,7 +15,7 @@ public class JpaHelper {
     // Dùng Initialization-on-demand holder pattern để lazy + thread-safe
     private static class Holder {
         static final EntityManagerFactory FACTORY =
-                Persistence.createEntityManagerFactory("IELTSFLOW", buildJpaOverrides());
+                Persistence.createEntityManagerFactory(readConfig("PERSISTENCE_UNIT", "IELTSFLOW"), buildJpaOverrides());
     }
 
     private static Map<String, String> buildJpaOverrides() {

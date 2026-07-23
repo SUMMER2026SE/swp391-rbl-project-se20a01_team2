@@ -20,17 +20,17 @@ public class AIPathwayService {
     private final ObjectMapper objectMapper;
     
     private static final String PATHWAY_SCHEMA = "{" +
-            "  \"type\": \"ARRAY\"," +
-            "  \"description\": \"Lộ trình học theo từng tuần, tối đa 12 tuần\"," +
+            "  \"type\": \"array\"," +
+            "  \"description\": \"Lộ trình học theo từng tuần, chính xác 4 tuần (1 tháng)\"," +
             "  \"items\": {" +
-            "    \"type\": \"OBJECT\"," +
+            "    \"type\": \"object\"," +
             "    \"properties\": {" +
-            "      \"weekNumber\": { \"type\": \"INTEGER\" }," +
-            "      \"skillsFocus\": { \"type\": \"STRING\", \"description\": \"Tên 2 kỹ năng ưu tiên trong tuần\" }," +
-            "      \"objectives\": { \"type\": \"STRING\", \"description\": \"Mục tiêu ngắn gọn\" }," +
+            "      \"weekNumber\": { \"type\": \"integer\" }," +
+            "      \"skillsFocus\": { \"type\": \"string\", \"description\": \"Tên 2 kỹ năng ưu tiên trong tuần\" }," +
+            "      \"objectives\": { \"type\": \"string\", \"description\": \"Mục tiêu ngắn gọn\" }," +
             "      \"activities\": {" +
-            "        \"type\": \"ARRAY\"," +
-            "        \"items\": { \"type\": \"STRING\" }" +
+            "        \"type\": \"array\"," +
+            "        \"items\": { \"type\": \"string\" }" +
             "      }" +
             "    }," +
             "    \"required\": [\"weekNumber\", \"skillsFocus\", \"objectives\", \"activities\"]" +
@@ -59,10 +59,10 @@ public class AIPathwayService {
             LOGGER.info("Bắt đầu sinh lộ trình AI cho SubmissionID: " + submission.getSubmissionId());
             
             String systemInstruction = "Role: Bạn là một chuyên gia cố vấn học tập IELTS cực kỳ xuất sắc và am hiểu sư phạm.\n" +
-                                       "Objective: Dựa trên điểm số đầu vào 4 kỹ năng, mục tiêu điểm số và ĐẶC BIỆT là các điểm yếu (được phân tích từ loại câu hỏi học viên trả lời sai nhiều nhất), hãy lập lộ trình học 12 tuần (3 tháng) siêu cá nhân hóa.\n" +
+                                       "Objective: Dựa trên điểm số đầu vào 4 kỹ năng, mục tiêu điểm số và ĐẶC BIỆT là các điểm yếu (được phân tích từ loại câu hỏi học viên trả lời sai nhiều nhất), hãy lập lộ trình học 4 tuần (1 tháng) siêu cá nhân hóa.\n" +
                                        "Rules:\n" +
-                                       "- Lộ trình tối đa 12 tuần.\n" +
-                                       "- Mỗi tuần CHỈ tập trung vào 2 kỹ năng ưu tiên nhất.\n" +
+                                       "- Lộ trình phải có ĐÚNG 4 tuần.\n" +
+                                       "- Mỗi tuần CHỈ tập trung vào 2 kỹ năng ưu tiên nhất và CÓ ĐÚNG 3 hoạt động (activities) mỗi tuần.\n" +
                                        "- Phải thiết kế bài học dựa trên các lỗ hổng kiến thức được cung cấp (ví dụ: nếu sai nhiều Grammar thì tuần đầu phải ôn Grammar).\n" +
                                        "- Trả về MẢNG JSON theo đúng schema, KHÔNG GIẢI THÍCH THÊM.";
             
@@ -84,7 +84,7 @@ public class AIPathwayService {
                 promptBuilder.append("- Lỗ hổng kiến thức: (Không có dữ liệu chi tiết, hãy dựa vào điểm số 4 kỹ năng thấp nhất để phán đoán).\n");
             }
             
-            promptBuilder.append("Hãy tạo lộ trình chi tiết cho 12 tuần.");
+            promptBuilder.append("Hãy tạo lộ trình chi tiết cho 4 tuần, với chính xác 3 hoạt động mỗi tuần.");
             
             String userPrompt = promptBuilder.toString();
             

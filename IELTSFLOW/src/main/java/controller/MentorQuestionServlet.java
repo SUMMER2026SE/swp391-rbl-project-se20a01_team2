@@ -28,14 +28,28 @@ public class MentorQuestionServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
+                String action = req.getParameter("action");
+                if ("new".equals(action)) {
+                    req.setAttribute("allTags", questionService.getAllTags());
+                    req.setAttribute("allResources", new services.QuestionResourceService().getAllResources());
+                    req.getRequestDispatcher("/jsp/mentor/question-detail.jsp").forward(req, resp);
+                    return;
+                }
+
                 String keyword = req.getParameter("keyword");
                 String skill   = req.getParameter("skill");
-                boolean hasFilter = (keyword != null && !keyword.isBlank())
-                        || (skill   != null && !skill.isBlank());
-                req.setAttribute("questions",
-                        hasFilter
-                                ? questionService.searchQuestions(keyword, skill)
-                                : questionService.getQuestionsByMentor(mentorId));
+                String difficulty = req.getParameter("difficulty");
+                String type    = req.getParameter("type");
+
+                int page = 1;
+                int pageSize = 20;
+
+                try { if (req.getParameter("page") != null) page = Integer.parseInt(req.getParameter("page")); } catch (Exception ignored) {}
+                try { if (req.getParameter("limit") != null) pageSize = Integer.parseInt(req.getParameter("limit")); } catch (Exception ignored) {}
+
+                util.PaginatedList<model.Question> questionsPage = questionService.searchQuestions(keyword, skill, difficulty, type, page, pageSize);
+                req.setAttribute("questionsPage", questionsPage);
+                req.setAttribute("questions", questionsPage.getItems());
                 req.getRequestDispatcher("/jsp/mentor/questions.jsp").forward(req, resp);
             } else {
                 int id = Integer.parseInt(pathInfo.substring(1));
@@ -47,6 +61,7 @@ public class MentorQuestionServlet extends HttpServlet {
                 }
                 req.setAttribute("question", question);
                 req.setAttribute("allTags", questionService.getAllTags());
+                req.setAttribute("allResources", new services.QuestionResourceService().getAllResources());
                 req.getRequestDispatcher("/jsp/mentor/question-detail.jsp").forward(req, resp);
                 }
         } catch (NumberFormatException e) {
@@ -72,37 +87,46 @@ public class MentorQuestionServlet extends HttpServlet {
             if ("create".equals(action)) {
                 Question question = buildQuestionFromRequest(req);
                 question.setCreatedBy(mentorId);
-                questionService.createQuestion(question, buildAnswersFromRequest(req));
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=Tạo+câu+hỏi+thành+công");
+                questionService.createQuestion(question, buildAnswersFromRequest(req), extractTagIds(req));
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + question.getQuestionId() + "?success=" + java.net.URLEncoder.encode("Tạo câu hỏi thành công", "UTF-8"));
 
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("questionId"));
                 Question existing = questionService.getQuestionById(id);
                 if (existing == null)
                     throw new Exception("Không tìm thấy câu hỏi #" + id);
-                if (!existing.getCreatedBy().equals(mentorId))
-                    throw new Exception("Bạn không có quyền chỉnh sửa câu hỏi này");
                 Question question = buildQuestionFromRequest(req);
                 question.setQuestionId(id);
-                questionService.updateQuestion(question, buildAnswersFromRequest(req));
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=Cập+nhật+thành+công");
+                questionService.updateQuestion(question, buildAnswersFromRequest(req), extractTagIds(req));
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + id + "?success=" + java.net.URLEncoder.encode("Cập nhật thành công", "UTF-8"));
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("questionId"));
-                questionService.deleteQuestion(id, mentorId);
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=Xóa+câu+hỏi+thành+công");
+                questionService.deleteQuestion(id);
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Xóa câu hỏi thành công", "UTF-8"));
+
+            } else if ("bulk_delete".equals(action)) {
+                String[] qIds = req.getParameterValues("questionIds");
+                if (qIds != null) {
+                    for (String idStr : qIds) {
+                        try {
+                            questionService.deleteQuestion(Integer.parseInt(idStr));
+                        } catch (Exception ignored) {}
+                    }
+                }
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions?success=" + java.net.URLEncoder.encode("Xóa hàng loạt câu hỏi thành công", "UTF-8"));
 
             } else if ("addTag".equals(action)) {
                 int questionId = Integer.parseInt(req.getParameter("questionId"));
                 int tagId      = Integer.parseInt(req.getParameter("tagId"));
-                questionService.addTagToQuestion(questionId, tagId, mentorId);
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=Gắn+tag+thành+công");
+                questionService.addTagToQuestion(questionId, tagId);
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=" + java.net.URLEncoder.encode("Gắn tag thành công", "UTF-8"));
 
             } else if ("removeTag".equals(action)) {
                 int questionId = Integer.parseInt(req.getParameter("questionId"));
                 int tagId = Integer.parseInt(req.getParameter("tagId"));
-                questionService.removeTagFromQuestion(questionId, tagId, mentorId);
-                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=Xóa+tag+thành+công");
+                questionService.removeTagFromQuestion(questionId, tagId);
+                resp.sendRedirect(req.getContextPath() + "/mentor/questions/" + questionId + "?success=" + java.net.URLEncoder.encode("Xóa tag thành công", "UTF-8"));
             } else {
                 resp.sendRedirect(req.getContextPath() + "/mentor/questions");
             }
@@ -127,6 +151,19 @@ public class MentorQuestionServlet extends HttpServlet {
         if (orderStr != null && !orderStr.isBlank())
             q.setOrderInResource(Integer.parseInt(orderStr));
         return q;
+    }
+
+    private List<Integer> extractTagIds(HttpServletRequest req) {
+        List<Integer> tagIds = new ArrayList<>();
+        String[] ids = req.getParameterValues("tagIds");
+        if (ids != null) {
+            for (String id : ids) {
+                try {
+                    tagIds.add(Integer.parseInt(id));
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        return tagIds;
     }
 
     private List<Answer> buildAnswersFromRequest(HttpServletRequest req) {

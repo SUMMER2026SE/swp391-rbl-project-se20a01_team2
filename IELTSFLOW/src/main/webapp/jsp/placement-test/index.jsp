@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
@@ -159,32 +159,12 @@
 
     <div class="layout-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand">IELTSFLOW</div>
-            <div class="user-profile">
-                <div class="avatar">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}</div>
-                <div>
-                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: 7.0</p>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Dashboard</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Weekly Plan</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Library</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link active">🎯 Test</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 History &amp; Redo</a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Logout</a>
-            </div>
-        </aside>
+<jsp:include page="/jsp/candidate/sidebar.jsp">
+            <jsp:param name="activePage" value="tests" />
+        </jsp:include>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" id="appMainContent">
             <div class="mock-hero animate-fade-up">
                 <div class="hero-badge">🎯 Placement Test</div>
                 <h1>Đánh giá năng lực đầu vào</h1>
@@ -219,8 +199,6 @@
                                 <ul>
                                     <li>Bài thi sẽ bắt đầu ở chế độ <strong>Toàn màn hình</strong>.</li>
                                     <li>Nếu bạn thoát toàn màn hình hoặc chuyển tab quá <strong>3 lần</strong>, bài thi sẽ tự động nộp và bị đánh dấu vi phạm.</li>
-                                    <li>Câu hỏi được <strong>sắp xếp ngẫu nhiên</strong> mỗi lần thi.</li>
-                                    <li>Bạn có thể xem lại đáp án chi tiết và AI Feedback sau khi nộp bài.</li>
                                 </ul>
                             </div>
 
@@ -249,5 +227,9 @@
             </div>
         </main>
     </div>
+    <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
+    
 </body>
 </html>
+

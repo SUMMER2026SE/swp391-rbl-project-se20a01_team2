@@ -106,7 +106,8 @@ try {
        </c:forEach>
     */
 } catch (Exception e) {
-    e.printStackTrace();
+    // Thay vì dùng e.printStackTrace(), hãy dùng Logger để dễ tracking log trên server thật
+    java.util.logging.Logger.getLogger("AI_Evaluation").log(java.util.logging.Level.SEVERE, "Lỗi khi parse Feedback JSON", e);
 }
 ```
 

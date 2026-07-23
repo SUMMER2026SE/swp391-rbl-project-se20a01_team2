@@ -1,189 +1,403 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
-<%@ taglib uri="jakarta.tags.core" prefix="c" %>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <script>window.contextPath = '${pageContext.request.contextPath}';</script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H&#7895; tr&#7907; - IELTSFlow</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <style>
-        .page-title { font-size: 1.8rem; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
-        .page-subtitle { color: #64748b; font-size: 0.9rem; margin: 0 0 32px; }
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
+    <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+        <!DOCTYPE html>
+        <html lang="vi">
 
-        .layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
-        @media(max-width:768px) { .layout { grid-template-columns: 1fr; } }
+        <head>
+            <script>window.contextPath = '${pageContext.request.contextPath}';</script>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Hỗ trợ - IELTSFlow</title>
+            <link rel="stylesheet"
+                href="${pageContext.request.contextPath}/css/style.css?v=<%= System.currentTimeMillis() %>">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <style>
+                .layout {
+                    display: grid;
+                    grid-template-columns: 1fr 360px;
+                    gap: 24px;
+                }
 
-        /* Ticket List */
-        .ticket-list { display: flex; flex-direction: column; gap: 12px; }
-        .ticket-card {
-            background: white; border-radius: 12px; padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border-left: 4px solid;
-            text-decoration: none; color: inherit;
-            transition: box-shadow 0.2s, transform 0.1s;
-            display: block;
-        }
-        .ticket-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); }
-        .ticket-card[data-status="Open"] { border-left-color: #3b82f6; }
-        .ticket-card[data-status="InProgress"] { border-left-color: #f59e0b; }
-        .ticket-card[data-status="Resolved"] { border-left-color: #22c55e; }
-        .ticket-card[data-status="Closed"] { border-left-color: #94a3b8; }
+                @media(max-width:768px) {
+                    .layout {
+                        grid-template-columns: 1fr;
+                    }
+                }
 
-        .ticket-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .ticket-subject { font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; }
-        .status-badge {
-            padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
-            white-space: nowrap; flex-shrink: 0; margin-left: 10px;
-        }
-        .badge-Open { background: #dbeafe; color: #1d4ed8; }
-        .badge-InProgress { background: #fef3c7; color: #b45309; }
-        .badge-Resolved { background: #dcfce7; color: #15803d; }
-        .badge-Closed { background: #f1f5f9; color: #64748b; }
+                /* GitHub Issues Style List */
+                .issues-container {
+                    border: 1px solid #d0d7de;
+                    border-radius: 6px;
+                    background: #ffffff;
+                }
 
-        .ticket-preview { color: #64748b; font-size: 0.85rem; margin: 0 0 10px; line-height: 1.5; }
-        .ticket-date { font-size: 12px; color: #94a3b8; }
+                .issues-header {
+                    background-color: #f6f8fa;
+                    border-bottom: 1px solid #d0d7de;
+                    padding: 16px;
+                    border-top-left-radius: 6px;
+                    border-top-right-radius: 6px;
+                    display: flex;
+                    gap: 16px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #24292f;
+                }
 
-        /* Create Form */
-        .create-card {
-            background: white; border-radius: 12px; padding: 24px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); height: fit-content;
-            position: sticky; top: 20px;
-        }
-        .create-title { font-weight: 700; font-size: 1rem; color: #1e293b; margin: 0 0 20px; }
-        .form-group { margin-bottom: 16px; }
-        .form-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
-        .form-input, .form-textarea {
-            width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0;
-            border-radius: 8px; font-size: 14px; font-family: inherit;
-            transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;
-        }
-        .form-input:focus, .form-textarea:focus {
-            outline: none; border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
-        }
-        .form-textarea { resize: vertical; min-height: 120px; }
-        .btn-submit {
-            width: 100%; padding: 12px; background: #f97316; color: white;
-            border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .btn-submit:hover { background: #ea580c; }
+                .issues-header span {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    cursor: pointer;
+                }
 
-        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
-        .alert-success { background: #dcfce7; border: 1px solid #86efac; color: #15803d; }
-        .alert-error { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; }
-        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
-    </style>
-</head>
-<body>
-    <div class="bg-blob blob-1"></div>
-    <div class="bg-blob blob-2"></div>
-    <div class="layout-wrapper">
-        <aside class="sidebar">
-            <div class="brand">IELTSFLOW</div>
-            <div class="user-profile">
-                <div class="avatar" style="overflow: hidden;">
-                    <c:choose>
-                        <c:when test="${not empty sessionScope.profilePic}">
-                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                        </c:when>
-                        <c:otherwise>
-                            ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                <div>
-                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Mục tiêu: 7.0</p>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Bảng điều khiển</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Kế hoạch tuần</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Thư viện</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link">🎯 Bài thi</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 Lịch sử & Làm lại</a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link active">🎫 Ticket hỗ trợ</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Đăng xuất</a>
-            </div>
-        </aside>
+                .issues-header .text-muted {
+                    color: #57606a;
+                    font-weight: 400;
+                }
 
-        <main class="main-content">
-        <div class="animate-fade-up" style="margin-bottom: 20px;">
-            <h1 style="margin-bottom: 10px;">🎫 Ticket Hỗ Trợ</h1>
-            <p style="color: var(--text-secondary); margin-bottom: 30px;">Gửi câu hỏi và theo dõi phản hồi từ Mentor</p>
-        </div>
+                .issue-row {
+                    display: flex;
+                    padding: 12px 16px;
+                    border-bottom: 1px solid #d0d7de;
+                    transition: background 0.1s;
+                }
 
-    <c:if test="${not empty param.success}">
-        <div class="alert alert-success">&#9989; ${param.success}</div>
-    </c:if>
-    <c:if test="${not empty error}">
-        <div class="alert alert-error">&#10060; ${error}</div>
-    </c:if>
+                .issue-row:last-child {
+                    border-bottom: none;
+                    border-bottom-left-radius: 6px;
+                    border-bottom-right-radius: 6px;
+                }
 
-    <div class="layout animate-fade-up" style="animation-delay: 0.1s;">
-        <!-- Danh sach ticket -->
-        <div>
-            <h2 style="font-size:1rem;font-weight:600;color:#374151;margin:0 0 16px;">Ticket c&#7911;a b&#7841;n</h2>
-            <c:choose>
-                <c:when test="${empty tickets}">
-                    <div class="empty-state">
-                        <div style="font-size:3rem;">&#127915;</div>
-                        <p>B&#7841;n ch&#432;a g&#7917;i ticket n&#224;o</p>
+                .issue-row:hover {
+                    background-color: #f6f8fa;
+                }
+
+                .issue-icon {
+                    margin-right: 8px;
+                    margin-top: 2px;
+                    flex-shrink: 0;
+                }
+
+                .issue-icon-open {
+                    color: #1a7f37;
+                }
+
+                .issue-icon-closed {
+                    color: #8250df;
+                }
+
+                .issue-content {
+                    flex-grow: 1;
+                }
+
+                .issue-title {
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: #0969da;
+                    text-decoration: none;
+                    margin-bottom: 4px;
+                    display: inline-block;
+                }
+
+                .issue-title:hover {
+                    color: #0969da;
+                    text-decoration: underline;
+                }
+
+                .issue-meta {
+                    font-size: 12px;
+                    color: #57606a;
+                }
+
+                .issue-comments {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 4px;
+                    color: #57606a;
+                    font-size: 12px;
+                    text-decoration: none;
+                    margin-left: 16px;
+                }
+
+                .issue-comments:hover {
+                    color: #0969da;
+                }
+
+                .label-badge {
+                    display: inline-block;
+                    padding: 0 7px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    line-height: 18px;
+                    border-radius: 2em;
+                    border: 1px solid transparent;
+                    margin-left: 4px;
+                    vertical-align: middle;
+                }
+
+                .label-inprogress {
+                    background-color: #d4a72c;
+                    color: #fff;
+                }
+
+                .label-resolved {
+                    background-color: #2da44e;
+                    color: #fff;
+                }
+
+                /* Create Form */
+                .create-card {
+                    background: white;
+                    border-radius: 6px;
+                    padding: 24px;
+                    border: 1px solid #d0d7de;
+                    height: fit-content;
+                    position: sticky;
+                    top: 20px;
+                }
+
+                .create-title {
+                    font-weight: 600;
+                    font-size: 16px;
+                    color: #24292f;
+                    margin: 0 0 20px;
+                    border-bottom: 1px solid #d0d7de;
+                    padding-bottom: 8px;
+                }
+
+                .form-group {
+                    margin-bottom: 16px;
+                }
+
+                .form-label {
+                    display: block;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #24292f;
+                    margin-bottom: 6px;
+                }
+
+                .form-input,
+                .form-textarea {
+                    width: 100%;
+                    padding: 5px 12px;
+                    border: 1px solid #d0d7de;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-family: inherit;
+                    background-color: #f6f8fa;
+                    color: #24292f;
+                    transition: border-color 0.2s, box-shadow 0.2s;
+                    box-sizing: border-box;
+                    line-height: 20px;
+                }
+
+                .form-input:focus,
+                .form-textarea:focus {
+                    outline: none;
+                    border-color: #0969da;
+                    box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+                    background-color: #fff;
+                }
+
+                .form-textarea {
+                    resize: vertical;
+                    min-height: 150px;
+                    font-family: monospace;
+                }
+
+                .btn-submit {
+                    padding: 5px 16px;
+                    background-color: #2da44e;
+                    color: white;
+                    border: 1px solid rgba(27, 31, 36, 0.15);
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    line-height: 20px;
+                }
+
+                .btn-submit:hover {
+                    background-color: #2c974b;
+                }
+
+                .alert {
+                    padding: 12px 16px;
+                    border-radius: 6px;
+                    margin-bottom: 20px;
+                    font-size: 14px;
+                    border: 1px solid transparent;
+                }
+
+                .alert-success {
+                    background-color: #dafbe1;
+                    border-color: #4ac26b;
+                    color: #1a7f37;
+                }
+
+                .alert-error {
+                    background-color: #ffebe9;
+                    border-color: #ff8182;
+                    color: #cf222e;
+                }
+
+                .empty-state {
+                    text-align: center;
+                    padding: 60px 20px;
+                    color: #57606a;
+                }
+
+                /* Markdown hint */
+                .markdown-hint {
+                    font-size: 12px;
+                    color: #57606a;
+                    margin-top: 6px;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+            </style>
+        </head>
+
+        <body>
+            <div class="bg-blob blob-1"></div>
+            <div class="bg-blob blob-2"></div>
+            <div class="layout-wrapper">
+                <jsp:include page="/jsp/candidate/sidebar.jsp">
+                    <jsp:param name="activePage" value="tickets" />
+                </jsp:include>
+
+                <main class="main-content" id="appMainContent">
+                    <div class="animate-fade-up" style="margin-bottom: 20px;">
+                        <h1 style="margin-bottom: 10px; font-size: 24px; font-weight: 600; color: #24292f;">Tickets</h1>
                     </div>
-                </c:when>
-                <c:otherwise>
-                    <div class="ticket-list">
-                        <c:forEach var="t" items="${tickets}">
-                            <a href="${pageContext.request.contextPath}/candidate/tickets?id=${t.ticketId}"
-                               class="ticket-card" data-status="${t.status}">
-                                <div class="ticket-header">
-                                    <div class="ticket-subject">#${t.ticketId} - ${t.subject}</div>
-                                    <span class="status-badge badge-${t.status}">
-                                        <c:choose>
-                                            <c:when test="${t.status == 'Open'}">M&#7903;</c:when>
-                                            <c:when test="${t.status == 'InProgress'}">&#272;ang x&#7917; l&#253;</c:when>
-                                            <c:when test="${t.status == 'Resolved'}">&#272;&#227; gi&#7843;i quy&#7871;t</c:when>
-                                            <c:otherwise>&#272;&#227; &#273;&#243;ng</c:otherwise>
-                                        </c:choose>
-                                    </span>
+
+                    <c:if test="${not empty param.success}">
+                        <div class="alert alert-success"><i class="fa-solid fa-check-circle me-2"></i> ${param.success}
+                        </div>
+                    </c:if>
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-error"><i class="fa-solid fa-circle-exclamation me-2"></i> ${error}
+                        </div>
+                    </c:if>
+
+                    <div class="layout animate-fade-up" style="animation-delay: 0.1s;">
+                        <!-- Danh sach ticket -->
+                        <div>
+                            <div class="issues-container">
+                                <div class="issues-header">
+                                    <span><i class="fa-regular fa-circle-dot"></i> Tickets</span>
                                 </div>
-                                <div class="ticket-preview">${t.lastMessage}</div>
-                                <div class="ticket-date">&#128197; ${t.createdAt}</div>
-                            </a>
-                        </c:forEach>
-                    </div>
-                </c:otherwise>
-            </c:choose>
-        </div>
 
-        <!-- Form tao ticket moi -->
-        <div>
-            <div class="create-card">
-                <div class="create-title">&#9997;&#65039; G&#7917;i c&#226;u h&#7887;i m&#7899;i</div>
-                <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
-                    <input type="hidden" name="action" value="create">
-                    <div class="form-group">
-                        <label class="form-label" for="subject">Ti&#234;u &#273;&#7873; *</label>
-                        <input type="text" id="subject" name="subject" class="form-input"
-                               placeholder="T&#243;m t&#7855;t v&#7845;n &#273;&#7873; c&#7911;a b&#7841;n" required maxlength="200">
+                                <c:choose>
+                                    <c:when test="${empty tickets}">
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-ticket"
+                                                style="font-size: 24px; margin-bottom: 16px;"></i>
+                                            <h4>No tickets found</h4>
+                                            <p>You haven't created any tickets yet.</p>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="ticket-list-body">
+                                            <c:forEach var="t" items="${tickets}">
+                                                <div class="issue-row">
+                                                    <div
+                                                        class="issue-icon ${t.status == 'Closed' ? 'issue-icon-closed' : 'issue-icon-open'}">
+                                                        <c:choose>
+                                                            <c:when test="${t.status == 'Closed'}"><i
+                                                                    class="fa-regular fa-circle-check"></i></c:when>
+                                                            <c:otherwise><i class="fa-regular fa-circle-dot"></i>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                    <div class="issue-content">
+                                                        <a href="${pageContext.request.contextPath}/candidate/tickets?id=${t.ticketId}"
+                                                            class="issue-title">${t.subject}</a>
+                                                        <c:if test="${t.status == 'InProgress'}"><span
+                                                                class="label-badge label-inprogress">in progress</span>
+                                                        </c:if>
+                                                        <c:if test="${t.status == 'Resolved'}"><span
+                                                                class="label-badge label-resolved">resolved</span>
+                                                        </c:if>
+                                                        <div class="issue-meta">
+                                                            #${t.ticketId} opened <span class="time-ago"
+                                                                data-time="${t.createdAt}">${t.createdAt}</span> by
+                                                            ${t.user.fullName}
+                                                        </div>
+                                                    </div>
+                                                    <c:if test="${t.replies.size() > 1}">
+                                                        <a href="${pageContext.request.contextPath}/candidate/tickets?id=${t.ticketId}"
+                                                            class="issue-comments">
+                                                            <i class="fa-regular fa-message"></i> ${t.replies.size() -
+                                                            1}
+                                                        </a>
+                                                    </c:if>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
+
+                        <!-- Form tao ticket moi -->
+                        <div>
+                            <div class="create-card">
+                                <div class="create-title">New Ticket</div>
+                                <form method="POST" action="${pageContext.request.contextPath}/candidate/tickets">
+                                    <input type="hidden" name="action" value="create">
+                                    <div class="form-group">
+                                        <label class="form-label" for="subject">Title</label>
+                                        <input type="text" id="subject" name="subject" class="form-input"
+                                            placeholder="Title" required maxlength="200">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="content">Leave a comment</label>
+                                        <textarea id="content" name="content" class="form-textarea"
+                                            placeholder="Add your description here..." required></textarea>
+                                        <div class="markdown-hint">
+                                            <i class="fa-brands fa-markdown"></i> Markdown is supported
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: flex-end;">
+                                        <button type="submit" class="btn-submit">Submit new ticket</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="content">N&#7897;i dung *</label>
-                        <textarea id="content" name="content" class="form-textarea"
-                                  placeholder="M&#244; t&#7843; chi ti&#7871;t c&#226;u h&#7887;i ho&#7863;c v&#7845;n &#273;&#7873; b&#7841;n g&#7863;p ph&#7843;i..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn-submit">G&#7917;i ticket &rarr;</button>
-                </form>
+                </main>
             </div>
-        </div>
-    </div>
-        </main>
-    </div>
-</body>
-</html>
+            <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    function timeAgo(dateString) {
+                        const date = new Date(dateString);
+                        const seconds = Math.floor((new Date() - date) / 1000);
+                        let interval = seconds / 31536000;
+                        if (interval >= 1) return Math.floor(interval) + " years ago";
+                        interval = seconds / 2592000;
+                        if (interval >= 1) return Math.floor(interval) + " months ago";
+                        interval = seconds / 86400;
+                        if (interval >= 1) return Math.floor(interval) + " days ago";
+                        interval = seconds / 3600;
+                        if (interval >= 1) return Math.floor(interval) + " hours ago";
+                        interval = seconds / 60;
+                        if (interval >= 1) return Math.floor(interval) + " minutes ago";
+                        if (seconds < 0) return "just now";
+                        return Math.floor(seconds) + " seconds ago";
+                    }
+                    document.querySelectorAll('.time-ago').forEach(el => {
+                        const dateVal = el.getAttribute('data-time');
+                        if (dateVal) el.textContent = timeAgo(dateVal);
+                    });
+                });
+                </script>
+        </body>
+
+        </html>

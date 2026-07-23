@@ -9,6 +9,10 @@ import model.TestSubmission;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Random;
 
 /**
@@ -35,9 +39,29 @@ public class MockTestService {
         return examDAO.getRandomPlacementTest();
     }
 
+    /** Lấy tất cả đề Mock Test. */
+    public List<Exam> getAllMockTests() {
+        return examDAO.getAllMockTests();
+    }
+
+    /** Lấy tất cả đề Practice Test. */
+    public List<Exam> getAllPracticeTests() {
+        return examDAO.getAllPracticeTests();
+    }
+
+    /** Lấy đề thi theo ID. */
+    public Exam getMockTestById(int examId) {
+        return examDAO.getMockTestById(examId);
+    }
+
     /** Lấy toàn bộ câu hỏi (đã shuffle) của một đề thi. */
     public List<Question> getQuestionsForExam(int examId) {
         return examDAO.getQuestionsForExam(examId);
+    }
+
+    /** Lấy toàn bộ Section của một đề thi. */
+    public List<model.ExamSection> getSectionsWithQuestionsForExam(int examId) {
+        return examDAO.getSectionsWithQuestionsForExam(examId);
     }
 
     // ──── Submission lifecycle ────────────────────────────────────────
@@ -84,16 +108,74 @@ public class MockTestService {
 
     /**
      * Kiểm tra đáp án trắc nghiệm/điền vào chỗ trống.
+     * Hỗ trợ đáp án đơn (String bình thường) hoặc mảng nhiều đáp án (JSON Array).
+     * Trả về số lượng đáp án đúng (tối đa bằng questionCount).
      */
-    public boolean isAnswerCorrect(Question q, String candidateAnswer) {
-        if (candidateAnswer == null || candidateAnswer.isBlank()) return false;
-        for (model.Answer a : q.getAnswers()) {
-            if (a.isCorrect() && candidateAnswer.equalsIgnoreCase(a.getContent().trim())) return true;
+    public int isAnswerCorrect(Question q, String candidateAnswer) {
+        if (candidateAnswer == null || candidateAnswer.isBlank()) return 0;
+        
+        // Handle JSON array (nhiều đáp án/ô trống)
+        if (candidateAnswer.trim().startsWith("[")) {
+            System.out.println("[MockTestService] NEW GRADING ENGINE RUNNING! qType: " + q.getQuestionType() + " | answer: " + candidateAnswer);
+            int correctCount = 0;
             try {
-                if (a.isCorrect() && a.getAnswerId() == Integer.parseInt(candidateAnswer.trim())) return true;
+                ObjectMapper mapper = new ObjectMapper();
+                List<String> answers = mapper.readValue(candidateAnswer, new TypeReference<List<String>>(){});
+                
+                if ("FillInBlanks".equals(q.getQuestionType()) || "FillBlank".equals(q.getQuestionType()) || "Matching".equals(q.getQuestionType())) {
+                    if (q.getAnswers() != null && !q.getAnswers().isEmpty()) {
+                        model.Answer correctAns = q.getAnswers().get(0);
+                        if (correctAns.getContentJson() != null && !correctAns.getContentJson().isBlank()) {
+                            Map<String, List<String>> answerMap = mapper.readValue(correctAns.getContentJson(), new TypeReference<Map<String, List<String>>>(){});
+                            for (int i = 0; i < answers.size(); i++) {
+                                String uAns = answers.get(i);
+                                if (uAns == null || uAns.trim().isEmpty()) continue;
+                                String blankKey = String.valueOf(i + 1);
+                                List<String> validOptions = answerMap.get(blankKey);
+                                if (validOptions != null) {
+                                    for (String validOpt : validOptions) {
+                                        if (uAns.trim().equalsIgnoreCase(validOpt.trim())) {
+                                            correctCount++;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return Math.min(correctCount, q.getQuestionCount());
+                }
+
+                for (String ans : answers) {
+                    if (ans == null || ans.isBlank()) continue;
+                    for (model.Answer a : q.getAnswers()) {
+                        if (a.isCorrect() && ans.equalsIgnoreCase(a.getContent().trim())) {
+                            correctCount++;
+                            break;
+                        }
+                        try {
+                            if (a.isCorrect() && a.getAnswerId() == Integer.parseInt(ans.trim())) {
+                                correctCount++;
+                                break;
+                            }
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+                return Math.min(correctCount, q.getQuestionCount());
+            } catch (Exception e) {
+                System.err.println("[MockTestService] Lỗi parse JSON array đáp án: " + e.getMessage());
+                // Fallback xuống logic đáp án đơn bên dưới
+            }
+        }
+        
+        // Single answer logic
+        for (model.Answer a : q.getAnswers()) {
+            if (a.isCorrect() && candidateAnswer.equalsIgnoreCase(a.getContent().trim())) return 1;
+            try {
+                if (a.isCorrect() && a.getAnswerId() == Integer.parseInt(candidateAnswer.trim())) return 1;
             } catch (NumberFormatException ignored) {}
         }
-        return false;
+        return 0;
     }
 
     /**
@@ -132,17 +214,29 @@ public class MockTestService {
 
     // ──── Band score calculation ──────────────────────────────────────
 
-    /** Chuyển % đúng sang thang band IELTS. */
+    /** Chuyển % đúng sang thang band IELTS quy đổi về thang 40 câu. */
     public double rawToBand(int correct, int total) {
-        if (total == 0) return 0;
-        double pct = (double) correct / total;
-        if (pct >= 0.97) return 9.0; if (pct >= 0.93) return 8.5;
-        if (pct >= 0.87) return 8.0; if (pct >= 0.80) return 7.5;
-        if (pct >= 0.73) return 7.0; if (pct >= 0.67) return 6.5;
-        if (pct >= 0.60) return 6.0; if (pct >= 0.53) return 5.5;
-        if (pct >= 0.47) return 5.0; if (pct >= 0.40) return 4.5;
-        if (pct >= 0.33) return 4.0; if (pct >= 0.27) return 3.5;
-        if (pct >= 0.20) return 3.0; return 2.5;
+        if (total == 0) return 0.0;
+        
+        int equivalentCorrect = (int) Math.round(((double) correct / total) * 40.0);
+        
+        if (equivalentCorrect >= 39) return 9.0;
+        if (equivalentCorrect >= 37) return 8.5;
+        if (equivalentCorrect >= 35) return 8.0;
+        if (equivalentCorrect >= 33) return 7.5;
+        if (equivalentCorrect >= 30) return 7.0;
+        if (equivalentCorrect >= 27) return 6.5;
+        if (equivalentCorrect >= 23) return 6.0;
+        if (equivalentCorrect >= 19) return 5.5;
+        if (equivalentCorrect >= 15) return 5.0;
+        if (equivalentCorrect >= 13) return 4.5;
+        if (equivalentCorrect >= 10) return 4.0;
+        if (equivalentCorrect >= 8)  return 3.5;
+        if (equivalentCorrect >= 6)  return 3.0;
+        if (equivalentCorrect >= 4)  return 2.5;
+        if (equivalentCorrect >= 2)  return 2.0;
+        if (equivalentCorrect >= 1)  return 1.0;
+        return 0.0;
     }
 
     /** Tính Overall Band (làm tròn 0.5). */

@@ -1,6 +1,7 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -121,29 +122,9 @@
 
     <div class="layout-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand">IELTSFLOW</div>
-            <div class="user-profile">
-                <div class="avatar">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}</div>
-                <div>
-                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: 7.0</p>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Dashboard</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Weekly Plan</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Library</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link active">🎯 Test</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 History &amp; Redo</a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Logout</a>
-            </div>
-        </aside>
+        <jsp:include page="/jsp/candidate/sidebar.jsp">
+            <jsp:param name="activePage" value="tests" />
+        </jsp:include>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -156,9 +137,11 @@
                     Kết quả bài thi Placement Test •
                     <fmt:formatDate value="${submission.startTimeAsDate}" pattern="dd/MM/yyyy HH:mm" type="both"/>
                 </p>
+                <c:if test="${not empty timeTaken}">
+                    <p style="margin-top: 8px; color: var(--accent-blue); font-weight: 500;">⏱️ Thời gian làm bài thực tế: ${timeTaken}</p>
+                </c:if>
             </div>
 
-            <%-- Violation notice --%>
             <c:if test="${submission.cheated}">
                 <div class="violation-notice animate-fade-up" style="animation-delay:.05s;">
                     ⚠️
@@ -166,7 +149,6 @@
                 </div>
             </c:if>
 
-            <%-- Band Scores --%>
             <div class="band-grid animate-fade-up" style="animation-delay:.1s;">
                 <div class="band-card listening">
                     <div class="band-icon">🎧</div>
@@ -224,22 +206,15 @@
                 </div>
             </div>
 
-            <%-- Actions --%>
             <div class="result-actions animate-fade-up" style="animation-delay:.15s;">
-                <a href="${pageContext.request.contextPath}/candidate/placement-test"
-                   class="btn-result primary" id="btn-retake">
-                    🔄 Thi lại
-                </a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises"
-                   class="btn-result outline" id="btn-history">
-                    📋 Xem lịch sử
-                </a>
-                <a href="${pageContext.request.contextPath}/candidate/dashboard"
-                   class="btn-result outline" id="btn-dashboard">
-                    📊 Về Dashboard
-                </a>
+                <a href="${pageContext.request.contextPath}/candidate/placement-test" class="btn-result primary" id="btn-retake">🔄 Thi lại</a>
+                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="btn-result outline" id="btn-history">📋 Xem lịch sử</a>
+                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-result outline" id="btn-dashboard">📊 Về Dashboard</a>
             </div>
-        </main>
+
     </div>
+    <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
 </body>
 </html>
+

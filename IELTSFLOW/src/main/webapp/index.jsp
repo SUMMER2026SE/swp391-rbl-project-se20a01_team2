@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -856,8 +856,11 @@
                     <c:when test="${not empty sessionScope.fullName}">
                         <div style="display: flex; align-items: center; gap: 16px;">
                             <c:choose>
-                                <c:when test="${sessionScope.roleId == 1 || sessionScope.roleId == 2}">
-                                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">B&#7843;ng &#273;i&#7873;u khi&#7875;n</a>
+                                <c:when test="${sessionScope.roleId == 1}">
+                                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">B&#7843;ng &#273;i&#7873;u khi&#7875;n (Admin)</a>
+                                </c:when>
+                                <c:when test="${sessionScope.roleId == 2}">
+                                    <a href="${pageContext.request.contextPath}/mentor/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">B&#7843;ng &#273;i&#7873;u khi&#7875;n (Mentor)</a>
                                 </c:when>
                                 <c:otherwise>
                                     <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">B&#7843;ng &#273;i&#7873;u khi&#7875;n</a>

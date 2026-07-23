@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -7,27 +7,11 @@
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M&#7909;c ti&#234;u IELTS - IELTSFlow</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css">
+    <title>Mục tiêu IELTS - IELTSFlow</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css?v=<%= System.currentTimeMillis() %>">
     <style>
         body { background-color: var(--color-bg); margin: 0; overflow-x: hidden; }
 
-        /* Sidebar */
-        .sidebar { width: 260px; position: fixed; top: 0; left: 0; height: 100vh; background: var(--color-surface); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; z-index: var(--z-sticky); transition: transform var(--dur-300) var(--ease-out); }
-        .sidebar-header { padding: var(--sp-6); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--sp-3); }
-        .sidebar-logo { width: 32px; height: 32px; background: var(--grad-primary); color: white; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: var(--fw-bold); font-size: var(--text-lg); }
-        .sidebar-nav { padding: var(--sp-4) var(--sp-3); flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: var(--sp-1); }
-        .sidebar-nav-item { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-medium); text-decoration: none; transition: all var(--dur-200); cursor: pointer; }
-        .sidebar-nav-item:hover { background: var(--color-bg-alt); color: var(--color-primary-600); }
-        .sidebar-nav-item.active { background: var(--color-primary-50); color: var(--color-primary-600); font-weight: var(--fw-semibold); }
-        .nav-divider { height: 1px; background: var(--color-border); margin: var(--sp-4) 0; }
-        .sidebar-footer { padding: var(--sp-4); border-top: 1px solid var(--color-border); }
-        .user-mini-card { display: flex; align-items: center; gap: var(--sp-3); }
-        .user-avatar-small { width: 36px; height: 36px; border-radius: 50%; background: var(--grad-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: var(--fw-bold); font-size: var(--text-sm); flex-shrink: 0; }
-        .user-info-small { min-width: 0; flex: 1; }
-
-        /* Main Content */
-        .main-content { margin-left: 260px; padding: var(--sp-8); max-width: 1024px; }
         .card { background: var(--color-surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); }
         .card-header { padding: var(--sp-6); border-bottom: 1px solid var(--color-border); }
         .card-title { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 0; }
@@ -52,8 +36,6 @@
         .toast-success { border-left: 4px solid var(--color-success-500); }
         .toast-error { border-left: 4px solid var(--color-danger-500); }
 
-        .mobile-toggle { display: none; position: fixed; top: var(--sp-4); left: var(--sp-4); z-index: var(--z-max); background: white; border-radius: var(--radius-md); padding: var(--sp-2); box-shadow: var(--shadow-md); border: none; cursor: pointer; }
-        
         .flex { display: flex; }
         .justify-end { justify-content: flex-end; }
         .mt-2 { margin-top: 0.5rem; }
@@ -64,17 +46,25 @@
         .text-primary { color: var(--color-primary-900); }
         .text-muted { color: var(--color-text-muted); }
 
+        /* Mobile Toggle */
+        .mobile-toggle { display: none; position: fixed; top: var(--sp-4); left: var(--sp-4); z-index: var(--z-max); background: white; border-radius: var(--radius-md); padding: var(--sp-2); box-shadow: var(--shadow-md); border: none; cursor: pointer; align-items: center; justify-content: center; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: calc(var(--z-max) - 1); }
+        .sidebar-overlay.active { display: block; }
+
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
+            .mobile-toggle { display: flex; }
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: var(--z-max); }
             .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: var(--sp-12) var(--sp-4) var(--sp-4); }
-            .mobile-toggle { display: block; }
+            .main-content { margin-left: 0 !important; padding: 80px var(--sp-4) var(--sp-4) !important; }
         }
     </style>
 </head>
 <body>
-    <button class="mobile-toggle" id="mobileToggle">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" id="mobileToggle" aria-label="Mở menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="pointer-events: none;"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
 
     <!-- Sidebar -->
@@ -84,7 +74,7 @@
                 <div class="sidebar-logo">IF</div>
                 <div>
                     <div class="fw-bold text-lg">IELTS Flow</div>
-                    <div class="text-xs text-muted font-medium">T&#192;I KHO&#7842;N</div>
+                    <div class="text-xs text-muted font-medium">TÀI KHOẢN</div>
                 </div>
             </div>
         </a>
@@ -123,10 +113,16 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Trang chủ
             </a>
-            <c:if test="${sessionScope.roleId == 1 || sessionScope.roleId == 2}">
+            <c:if test="${sessionScope.roleId == 1}">
             <a href="${pageContext.request.contextPath}/admin/dashboard" class="sidebar-nav-item">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                Hệ thống
+                Hệ thống (Admin)
+            </a>
+            </c:if>
+            <c:if test="${sessionScope.roleId == 2}">
+            <a href="${pageContext.request.contextPath}/mentor/dashboard" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Hệ thống (Mentor)
             </a>
             </c:if>
 
@@ -159,8 +155,8 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="mb-8">
-            <h1 class="text-3xl fw-bold text-primary">M&#7909;c ti&#234;u IELTS</h1>
-            <p class="text-muted mt-2">Theo d&#245;i h&#224;nh tr&#236;nh &#273;&#7841;t band &#273;i&#7875;m m&#417; &#432;&#7899;c c&#7911;a b&#7841;n.</p>
+            <h1 class="text-3xl fw-bold text-primary">Mục tiêu IELTS</h1>
+            <p class="text-muted mt-2">Theo dõi hành trình đạt band điểm mơ ước của bạn.</p>
         </div>
 
         <c:if test="${not empty param.success}">
@@ -171,15 +167,15 @@
 
         <section class="card mb-12">
             <div class="card-header">
-                <h2 class="card-title">Band &#273;i&#7875;m m&#7909;c ti&#234;u</h2>
+                <h2 class="card-title">Band điểm mục tiêu</h2>
             </div>
             <div class="card-body">
                 <div class="form-group">
-                    <label class="form-label">Ch&#7885;n band &#273;i&#7875;m m&#7909;c ti&#234;u</label>
+                    <label class="form-label">Chọn band điểm mục tiêu</label>
                     <div class="band-selector" id="targetBandSelector"></div>
                 </div>
                 <div class="flex justify-end mt-2">
-                    <button type="button" id="saveGoalBtn" class="btn btn-cta">L&#432;u m&#7909;c ti&#234;u</button>
+                    <button type="button" id="saveGoalBtn" class="btn btn-cta">Lưu mục tiêu</button>
                 </div>
             </div>
         </section>
@@ -193,5 +189,24 @@
         };
     </script>
     <script src="${pageContext.request.contextPath}/js/account.js?v=9"></script>
+    <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script>
+        (function() {
+            const toggle = document.getElementById('mobileToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (toggle && sidebar) {
+                toggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('active');
+                });
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

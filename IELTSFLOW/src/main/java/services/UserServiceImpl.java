@@ -159,7 +159,15 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!userDAO.updateStatus(user.getUserId(), "Active")) {
-            throw new Exception("L-i h th`ng khi c-p nh-t trng thA?i.");
+            throw new Exception("Lỗi hệ thống khi cập nhật trạng thái.");
+        }
+        
+        // Gửi thông báo chào mừng
+        try {
+            services.NotificationService notifService = new services.NotificationService();
+            notifService.sendWelcomeNotifications(user.getUserId());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -331,6 +339,58 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(int id) {
         userDAO.softDelete(id);
+    }
+
+    @Override
+    public void adminUpdateUserStatus(int adminId, int targetUserId, String status) {
+        userDAO.updateStatus(targetUserId, status);
+        dao.SystemLogDAO logDAO = new dao.SystemLogDAO();
+        logDAO.createSystemLog(new model.SystemLog(adminId, "UPDATE_STATUS", "Users", "Changed status of UserID " + targetUserId + " to " + status));
+    }
+    
+    @Override
+    public void adminDeleteUser(int adminId, int targetUserId) {
+        userDAO.softDelete(targetUserId);
+        dao.SystemLogDAO logDAO = new dao.SystemLogDAO();
+        logDAO.createSystemLog(new model.SystemLog(adminId, "DELETE_USER", "Users", "Soft deleted UserID " + targetUserId));
+    }
+    
+    @Override
+    public void adminChangePassword(int adminId, int targetUserId, String newPassword) {
+        try {
+            String newHash = PasswordUtil.hashPassword(newPassword);
+            userDAO.updatePassword(targetUserId, newHash);
+            dao.SystemLogDAO logDAO = new dao.SystemLogDAO();
+            logDAO.createSystemLog(new model.SystemLog(adminId, "CHANGE_PASSWORD", "Users", "Admin changed password for UserID " + targetUserId));
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error changing password", e);
+        }
+    }
+    
+    @Override
+    public void bulkAction(int adminId, String actionType, List<Integer> userIds) {
+        dao.SystemLogDAO logDAO = new dao.SystemLogDAO();
+        for (int id : userIds) {
+            if ("lock".equals(actionType)) {
+                userDAO.updateStatus(id, "Inactive");
+            } else if ("unlock".equals(actionType)) {
+                userDAO.updateStatus(id, "Active");
+            } else if ("delete".equals(actionType)) {
+                userDAO.softDelete(id);
+            }
+        }
+        logDAO.createSystemLog(new model.SystemLog(adminId, "BULK_ACTION", "Users", "Admin performed " + actionType + " on users: " + userIds.toString()));
+    }
+    
+    @Override
+    public List<User> findUsers(int page, int limit, String search, String roleFilter, String statusFilter, String sortBy, String sortOrder) {
+        return userDAO.findUsers(page, limit, search, roleFilter, statusFilter, sortBy, sortOrder);
+    }
+    
+    @Override
+    public long countUsers(String search, String roleFilter, String statusFilter) {
+        return userDAO.countUsers(search, roleFilter, statusFilter);
     }
 }
 

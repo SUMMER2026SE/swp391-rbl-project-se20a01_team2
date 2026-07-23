@@ -39,6 +39,9 @@ public class Question {
     @Column(name = "contentJSON", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String contentJson;
 
+    @Column(name = "QuestionCount")
+    private int questionCount = 1;
+
     @Column(name = "CreatedBy")
     private Integer createdBy;
 
@@ -46,7 +49,7 @@ public class Question {
     private boolean deleted = false;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "QuestionID")
+    @JoinColumn(name = "QuestionID", nullable = false)
     private List<Answer> answers = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -100,4 +103,13 @@ public class Question {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
     public List<Answer> getAnswers() { return answers; }
     public void setAnswers(List<Answer> answers) { this.answers = answers; }
+    @Transient
+    public boolean isMultipleAnswer() {
+        if (answers == null || answers.isEmpty()) return false;
+        long correctCount = answers.stream().filter(Answer::isCorrect).count();
+        return correctCount > 1;
+    }
+
+    public int getQuestionCount() { return questionCount; }
+    public void setQuestionCount(int questionCount) { this.questionCount = questionCount; }
 }

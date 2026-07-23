@@ -4,6 +4,7 @@ import dao.ExamDAO;
 import model.Exam;
 import java.time.LocalDateTime;
 import java.util.List;
+import util.PaginatedList;
 
 public class ExamService {
 
@@ -15,6 +16,10 @@ public class ExamService {
 
     public Exam getExamById(int id) {
         return examDAO.findById(id);
+    }
+
+    public PaginatedList<Exam> searchExams(String keyword, String skillFocus, String type, int page, int pageSize) {
+        return examDAO.searchExams(keyword, skillFocus, type, page, pageSize);
     }
 
     public List<Exam> searchExams(String keyword, String skillFocus, String type) {
@@ -70,7 +75,64 @@ public class ExamService {
             throw new Exception("Tiêu đề không được để trống");
         if (exam.getType() == null || exam.getType().isBlank())
             throw new Exception("Loại đề thi không được để trống");
-        if (exam.getDuration() <= 0)
-            throw new Exception("Thời lượng phải lớn hơn 0");
+        if (exam.getDuration() < 0)
+            throw new Exception("Thời lượng không được âm");
+    }
+
+    // --- Section & Question Management ---
+    private final dao.ExamSectionDAO sectionDAO = new dao.ExamSectionDAO();
+    private final dao.ExamQuestionDAO examQuestionDAO = new dao.ExamQuestionDAO();
+
+    public List<model.ExamSection> getExamSections(int examId) {
+        List<model.ExamSection> sections = sectionDAO.findByExamId(examId);
+        for (model.ExamSection sec : sections) {
+            sec.setExamQuestions(examQuestionDAO.findBySectionId(sec.getSectionId()));
+        }
+        return sections;
+    }
+
+    public model.ExamSection getSectionById(int sectionId) {
+        return sectionDAO.findById(sectionId);
+    }
+
+    public void addSection(model.ExamSection section) {
+        if (section.getOrderIndex() <= 0) {
+            List<model.ExamSection> existing = sectionDAO.findByExamId(section.getExamId());
+            int nextOrder = existing.size() + 1;
+            section.setOrderIndex(nextOrder);
+        }
+        sectionDAO.save(section);
+    }
+
+    public void updateSection(model.ExamSection section) {
+        sectionDAO.update(section);
+    }
+
+    public void deleteSection(int sectionId) {
+        sectionDAO.delete(sectionId);
+    }
+
+    public void updateExamSectionOrders(int examId, java.util.List<Integer> sectionIds) {
+        sectionDAO.updateOrderIndexes(examId, sectionIds);
+    }
+
+    public void addQuestionToSection(int sectionId, int questionId) {
+        if (examQuestionDAO.exists(sectionId, questionId)) {
+            return; // Ignore duplicates
+        }
+        int nextOrder = examQuestionDAO.getMaxOrderIndex(sectionId) + 1;
+        model.ExamQuestion eq = new model.ExamQuestion();
+        eq.setSectionId(sectionId);
+        eq.setQuestionId(questionId);
+        eq.setOrderIndex(nextOrder);
+        examQuestionDAO.save(eq);
+    }
+
+    public void removeQuestionFromSection(int sectionId, int questionId) {
+        examQuestionDAO.delete(sectionId, questionId);
+    }
+
+    public void updateExamQuestionOrders(int sectionId, java.util.List<Integer> questionIds) {
+        examQuestionDAO.updateOrderIndexes(sectionId, questionIds);
     }
 }

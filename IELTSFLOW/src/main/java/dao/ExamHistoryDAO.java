@@ -74,6 +74,34 @@ public class ExamHistoryDAO {
         });
     }
 
+    /**
+     * Lấy bài thi Placement Test hoàn thành mới nhất của user
+     */
+    public TestSubmission getLatestCompletedPlacementTest(int userId) {
+        return JpaHelper.query(em -> {
+            String sql =
+                "SELECT TOP 1 ts.SubmissionID, ts.UserID, ts.ExamID, e.Title, e.Type, " +
+                "       ts.StartTime, ts.EndTime, " +
+                "       ts.ListeningBand, ts.ReadingBand, ts.WritingBand, ts.SpeakingBand, " +
+                "       ts.OverallBand, ts.TotalScore, " +
+                "       ts.ViolationCount, ts.IsCheated, ts.Status " +
+                "FROM TestSubmissions ts " +
+                "JOIN Exams e ON ts.ExamID = e.ExamID " +
+                "WHERE ts.UserID = :userId " +
+                "  AND e.Type = 'Placement Test' " +
+                "  AND ts.Status = 'Completed' " +
+                "ORDER BY ts.EndTime DESC";
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(sql)
+                    .setParameter("userId", userId)
+                    .getResultList();
+
+            if (rows.isEmpty()) return null;
+            return mapRow(rows.get(0));
+        });
+    }
+
     /** Map một hàng kết quả native query sang DTO TestSubmission */
     private TestSubmission mapRow(Object[] row) {
         TestSubmission s = new TestSubmission();

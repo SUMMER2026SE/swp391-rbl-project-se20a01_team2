@@ -1,10 +1,11 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Dashboard</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
@@ -14,43 +15,12 @@
     
     <div class="layout-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <a href="${pageContext.request.contextPath}/" style="text-decoration: none; color: inherit;">
-                <div class="brand">IELTSFLOW</div>
-            </a>
-            <div class="user-profile">
-                <div class="avatar" style="overflow: hidden;">
-                    <c:choose>
-                        <c:when test="${not empty sessionScope.profilePic}">
-                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                        </c:when>
-                        <c:otherwise>
-                            ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                <div>
-                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Mục tiêu: ${not empty stats.targetBand and stats.targetBand > 0 ? stats.targetBand : 'N/A'}</p>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link active">🏠 Bảng điều khiển</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Kế hoạch tuần</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Thư viện</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link">🎯 Bài thi</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 Lịch sử & Làm lại</a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Đăng xuất</a>
-            </div>
-        </aside>
+<jsp:include page="/jsp/candidate/sidebar.jsp">
+            <jsp:param name="activePage" value="dashboard" />
+        </jsp:include>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" id="appMainContent">
             <div class="welcome-banner animate-fade-up" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
                 <div>
                     <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Chào mừng trở lại! 🚀</h1>
@@ -96,10 +66,12 @@
             </div>
 
             <div class="stats-grid animate-fade-up" style="animation-delay: 0.1s;">
-                <div class="stat-card">
+                <%-- 
+                <div class="stat-card" style="display: none;">
                     <p>Giờ học (Tuần này)</p>
                     <h3 style="color: var(--accent-blue);">${stats.studyHours}h</h3>
                 </div>
+                --%>
                 <div class="stat-card">
                     <p>Bài học đã hoàn thành</p>
                     <h3 style="color: var(--accent-green);">${stats.lessonsCompleted}</h3>
@@ -117,6 +89,16 @@
         </main>
     </div>
 
+    <!-- AI Chatbox Widget -->
+    <jsp:include page="/jsp/components/chat-widget.jsp" />
+
+    <script>
+        window.MOCK_LESSONS = ${not empty lessonsJson ? lessonsJson : '[]'};
+        window.MOCK_TODAY_LESSONS = window.MOCK_LESSONS.slice(0, 4); // Show top 4 lessons as today's
+    </script>
     <script src="${pageContext.request.contextPath}/js/api.js?v=${System.currentTimeMillis()}"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
+
 </body>
 </html>
+

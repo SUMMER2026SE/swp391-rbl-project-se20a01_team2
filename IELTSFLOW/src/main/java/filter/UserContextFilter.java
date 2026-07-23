@@ -11,7 +11,7 @@ import java.io.IOException;
  * Filter bắt mọi request để trích xuất userId từ Session 
  * và gắn vào ThreadLocal (UserContext) cho các tầng dưới sử dụng.
  */
-@WebFilter("/*")
+@WebFilter(value = "/*", asyncSupported = true)
 public class UserContextFilter implements Filter {
 
     @Override

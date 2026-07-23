@@ -23,7 +23,7 @@ import java.io.IOException;
  *  - /jsp/change-password.jsp → Yêu cầu đăng nhập
  *  - Còn lại              → Cho phép tự do (Guest)
  */
-@WebFilter("/*")
+@WebFilter(value = "/*", asyncSupported = true)
 public class AuthFilter implements Filter {
 
     // Các đường dẫn yêu cầu đăng nhập (bất kỳ role nào)
@@ -33,6 +33,7 @@ public class AuthFilter implements Filter {
         "/jsp/candidate/dashboard.jsp",
         "/jsp/candidate/weekly-plan.jsp",
         "/jsp/candidate/lessons.jsp",
+        "/jsp/candidate/lesson-detail.jsp",
         "/jsp/candidate/redo-exercises.jsp",
         "/jsp/candidate/notifications.jsp",
         "/jsp/candidate/tickets.jsp",
@@ -47,6 +48,7 @@ public class AuthFilter implements Filter {
         "/candidate/dashboard",
         "/candidate/weekly-plan",
         "/candidate/lessons",
+        "/candidate/lesson-detail",
         "/candidate/redo-exercises",
         "/candidate/notifications",
         "/candidate/tickets"
@@ -100,14 +102,29 @@ public class AuthFilter implements Filter {
         }
 
         // ── 1. Kiểm tra đường dẫn Admin ────────────────────────────────────
-        if (isStaffPath(path)) {
+        if (isAdminPath(path)) {
+            if (!isLoggedIn) {
+                redirectToLogin(resp, contextPath, "Vui lòng đăng nhập để tiếp tục");
+                return;
+            }
+            if (roleId != 1) {
+                // Không phải Admin → Chuyển về trang chủ với thông báo
+                resp.sendRedirect(contextPath + "/?error=forbidden");
+                return;
+            }
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // ── 1.1 Kiểm tra đường dẫn Mentor ────────────────────────────────────
+        if (isMentorPath(path)) {
             if (!isLoggedIn) {
                 redirectToLogin(resp, contextPath, "Vui lòng đăng nhập để tiếp tục");
                 return;
             }
             if (roleId != 1 && roleId != 2) {
                 // Không phải Admin hoặc Mentor → Chuyển về trang chủ với thông báo
-                resp.sendRedirect(contextPath + "/index.html?error=forbidden");
+                resp.sendRedirect(contextPath + "/?error=forbidden");
                 return;
             }
             chain.doFilter(request, response);
@@ -135,14 +152,19 @@ public class AuthFilter implements Filter {
     //morier: whats the use of this function then?
 
     /** Kiểm tra đường dẫn có phải là Admin không */
-    private boolean isStaffPath(String path) {
+    private boolean isAdminPath(String path) {
         return path.startsWith(ADMIN_PATH_PREFIX)
                 || path.startsWith("/admin/")
                 || path.equals("/admin")
-                || path.startsWith("/api/admin/")
-                || path.startsWith(MENTOR_PATH_PREFIX)
+                || path.startsWith("/api/admin/");
+    }
+
+    /** Kiểm tra đường dẫn có phải là Mentor không */
+    private boolean isMentorPath(String path) {
+        return path.startsWith(MENTOR_PATH_PREFIX)
                 || path.startsWith("/mentor/")
-                || path.equals("/mentor");
+                || path.equals("/mentor")
+                || path.startsWith("/api/mentor/");
     }
 
     /** Kiểm tra đường dẫn có nằm trong danh sách cần bảo vệ không */

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * PlacementTestServlet — Xử lý toàn bộ luồng Mock Test:
@@ -50,6 +51,22 @@ public class PlacementTestServlet extends HttpServlet {
         String action = req.getParameter("action");
         if (action == null) action = "";
 
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+
+        if (!hasActiveSub) {
+            if ("result".equals(action)) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_result");
+                return;
+            }
+            java.util.List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
+            if (!history.isEmpty()) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_placement");
+                return;
+            }
+        }
+
         try {
             switch (action) {
                 case "take":
@@ -63,8 +80,8 @@ public class PlacementTestServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            req.setAttribute("errorMsg", "Đã xảy ra lỗi: " + e.getMessage());
-            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
+            resp.setContentType("text/plain;charset=UTF-8");
+            e.printStackTrace(resp.getWriter());
         }
     }
 
@@ -84,6 +101,22 @@ public class PlacementTestServlet extends HttpServlet {
         String action = req.getParameter("action");
         if (action == null) action = "";
 
+        int userId = (int) session.getAttribute("userId");
+        services.SubscriptionService subService = new services.SubscriptionService();
+        boolean hasActiveSub = (subService.getActiveSubscriptionByUserId(userId) != null);
+
+        if (!hasActiveSub) {
+            if ("result".equals(action)) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_result");
+                return;
+            }
+            java.util.List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
+            if (!history.isEmpty()) {
+                resp.sendRedirect(req.getContextPath() + "/subscription?error=premium_required_placement");
+                return;
+            }
+        }
+
         try {
             switch (action) {
                 case "start":
@@ -100,8 +133,8 @@ public class PlacementTestServlet extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            req.setAttribute("errorMsg", "Đã xảy ra lỗi: " + e.getMessage());
-            req.getRequestDispatcher("/jsp/error.jsp").forward(req, resp);
+            resp.setContentType("text/plain;charset=UTF-8");
+            e.printStackTrace(resp.getWriter());
         }
     }
 
@@ -128,10 +161,12 @@ public class PlacementTestServlet extends HttpServlet {
 
         int submissionId = mockTestService.createSubmission(userId, exam.getExamId());
         List<Question> questions = mockTestService.getQuestionsForExam(exam.getExamId());
+        List<model.ExamSection> sections = mockTestService.getSectionsWithQuestionsForExam(exam.getExamId());
 
         HttpSession session = req.getSession();
         session.setAttribute("mt_currentExam", exam);
         session.setAttribute("mt_currentQuestions", questions);
+        session.setAttribute("mt_currentSections", sections);
         session.setAttribute("mt_currentSubmissionId", submissionId);
         session.setAttribute("mt_examStartTime", System.currentTimeMillis());
 
@@ -149,6 +184,7 @@ public class PlacementTestServlet extends HttpServlet {
         }
         req.setAttribute("exam", exam);
         req.setAttribute("questions", session.getAttribute("mt_currentQuestions"));
+        req.setAttribute("sections", session.getAttribute("mt_currentSections"));
         req.setAttribute("submissionId", session.getAttribute("mt_currentSubmissionId"));
         req.setAttribute("maxViolations", mockTestService.getMaxViolations());
         req.getRequestDispatcher("/jsp/placement-test/take.jsp").forward(req, resp);
@@ -161,47 +197,142 @@ public class PlacementTestServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         int submissionId = (Integer) session.getAttribute("mt_currentSubmissionId");
         List<Question> questions = (List<Question>) session.getAttribute("mt_currentQuestions");
+        List<model.FeedbackWriting> writingFeedbacks = new ArrayList<>();
+        List<model.FeedbackSpeaking> speakingFeedbacks = new ArrayList<>();
 
         int correctReading = 0, totalReading = 0;
         int correctListening = 0, totalListening = 0;
         double sumWriting = 0, sumSpeaking = 0;
         int countWriting = 0, countSpeaking = 0;
+        services.AIEvaluationService aiSvc = new services.AIEvaluationService();
+
+        java.util.List<int[]>    writingDetailIds    = new java.util.ArrayList<>();
+        java.util.List<String>   writingTopics       = new java.util.ArrayList<>();
+        java.util.List<String>   writingAnswers      = new java.util.ArrayList<>();
+        java.util.List<int[]>    speakingDetailIds   = new java.util.ArrayList<>();
+        java.util.List<String>   speakingTopics      = new java.util.ArrayList<>();
+        java.util.List<String>   speakingTranscripts = new java.util.ArrayList<>();
+        java.util.List<double[]> speakingScores      = new java.util.ArrayList<>();
 
         for (Question q : questions) {
             String skill  = q.getSkill()        != null ? q.getSkill().trim()        : "";
             String qType  = q.getQuestionType() != null ? q.getQuestionType().trim() : "";
-            String answer = req.getParameter("q_" + q.getQuestionId());
+            
+            // Xử lý parameter gửi lên từ form
+            String[] answersArray = req.getParameterValues("q_" + q.getQuestionId());
+            String answer = null;
+            if (answersArray != null && answersArray.length > 0) {
+                if (answersArray.length == 1) {
+                    answer = answersArray[0];
+                } else {
+                    // Nếu là nhiều đáp án, gom thành JSON Array string
+                    try {
+                        answer = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(answersArray);
+                    } catch (Exception e) {
+                        answer = answersArray[0];
+                    }
+                }
+            }
+
+            // Only apply answer-ID-to-content conversion for objective (non-AI) skills
+            boolean isAiSkill = "Speaking".equalsIgnoreCase(skill) || "Writing".equalsIgnoreCase(skill);
+            if (!isAiSkill && ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType)) 
+                && answer != null && !answer.isBlank()) {
+                
+                // Nếu chỉ có 1 đáp án dạng ID, convert sang nội dung text (như code cũ)
+                if (!answer.trim().startsWith("[")) {
+                    try {
+                        int ansId = Integer.parseInt(answer.trim());
+                        for (model.Answer a : q.getAnswers()) {
+                            if (a.getAnswerId() == ansId) {
+                                answer = a.getContent();
+                                break;
+                            }
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
 
             SubmissionDetail detail = new SubmissionDetail();
             detail.setSubmissionId(submissionId);
             detail.setQuestionId(q.getQuestionId());
             detail.setCandidateAnswer(answer);
 
-            if ("Multiple_Choice".equals(qType) || "FillBlank".equals(qType)) {
-                boolean correct = mockTestService.isAnswerCorrect(q, answer);
-                detail.setIsCorrect(correct);
-                detail.setScore(correct ? 1.0 : 0.0);
+            // Route to objective grading only if the skill is NOT Speaking/Writing.
+            // Speaking questions may have QuestionType='FillInBlanks' in the DB,
+            // so skill must take precedence over qType here.
+            if (!isAiSkill && ("Multiple_Choice".equals(qType) || "MultipleChoice".equals(qType) || "FillBlank".equals(qType) || "FillInBlanks".equals(qType))) {
+                int correctCount = mockTestService.isAnswerCorrect(q, answer);
+                detail.setIsCorrect(correctCount > 0);
+                detail.setScore((double) correctCount);
                 detail.setGradingStatus("Graded");
-                if ("Reading".equals(skill))   { totalReading++;   if (correct) correctReading++;   }
-                if ("Listening".equals(skill)) { totalListening++; if (correct) correctListening++; }
+                if ("Reading".equalsIgnoreCase(skill))   { 
+                    totalReading += q.getQuestionCount();   
+                    correctReading += correctCount;   
+                }
+                if ("Listening".equalsIgnoreCase(skill)) { 
+                    totalListening += q.getQuestionCount(); 
+                    correctListening += correctCount; 
+                }
                 mockTestService.saveDetail(detail);
             } else {
                 detail.setGradingStatus("Pending_AI");
-                if ("Speaking".equals(skill)) {
+                String transcript = null;
+                double azureScore = 0.0;
+                if ("Speaking".equalsIgnoreCase(skill) || "Speaking".equalsIgnoreCase(qType)) {
                     detail.setSpeakingUrl(req.getParameter("speaking_url_" + q.getQuestionId()));
-                    detail.setCandidateTranscript(req.getParameter("transcript_" + q.getQuestionId()));
+                    transcript = req.getParameter("transcript_" + q.getQuestionId());
+                    detail.setCandidateTranscript(transcript);
+                    String azureScoreStr = req.getParameter("azure_" + q.getQuestionId());
+                    if (azureScoreStr != null && !azureScoreStr.isEmpty()) {
+                        try { azureScore = Double.parseDouble(azureScoreStr); } catch (NumberFormatException ignored) {}
+                    }
                 }
                 int detailId = mockTestService.saveDetail(detail);
-                double aiScore = mockTestService.gradeSubjectiveAnswer(detailId, skill, answer);
-                if ("Writing".equals(skill))  { sumWriting  += aiScore; countWriting++;  }
-                if ("Speaking".equals(skill)) { sumSpeaking += aiScore; countSpeaking++; }
+
+                if ("Writing".equalsIgnoreCase(skill) || "Writing".equalsIgnoreCase(qType) || "Essay".equalsIgnoreCase(qType)) {
+                    countWriting++;
+                    writingDetailIds.add(new int[]{detailId});
+                    writingTopics.add(q.getContent());
+                    writingAnswers.add(answer);
+                } else if ("Speaking".equalsIgnoreCase(skill) || "Speaking".equalsIgnoreCase(qType)) {
+                    countSpeaking++;
+                    speakingDetailIds.add(new int[]{detailId});
+                    speakingTopics.add(q.getContent());
+                    speakingTranscripts.add(transcript);
+                    speakingScores.add(new double[]{azureScore});
+                }
             }
+        }
+
+        // Gộp tất cả Writing + Speaking vào 1 chain DUY NHẤT
+        java.util.concurrent.CompletableFuture<Void> allAiTasks =
+            java.util.concurrent.CompletableFuture.completedFuture(null);
+
+        for (int i = 0; i < writingDetailIds.size(); i++) {
+            final int detailId = writingDetailIds.get(i)[0];
+            final String topic = writingTopics.get(i);
+            final String essay = writingAnswers.get(i);
+            allAiTasks = allAiTasks.thenCompose(v ->
+                aiSvc.evaluateWritingAsync(detailId, topic, essay).thenApply(r -> null));
+        }
+
+        for (int i = 0; i < speakingDetailIds.size(); i++) {
+            final int detailId      = speakingDetailIds.get(i)[0];
+            final String topic      = speakingTopics.get(i);
+            final String transcript = speakingTranscripts.get(i);
+            final double azureScore = speakingScores.get(i)[0];
+            allAiTasks = allAiTasks.thenCompose(v ->
+                aiSvc.evaluateSpeakingAsync(detailId, topic, transcript, azureScore).thenApply(r -> null));
         }
 
         Double listeningBand = totalListening > 0 ? mockTestService.rawToBand(correctListening, totalListening) : null;
         Double readingBand   = totalReading   > 0 ? mockTestService.rawToBand(correctReading,   totalReading)   : null;
-        Double writingBand   = countWriting   > 0 ? (sumWriting  / countWriting)  : null;
-        Double speakingBand  = countSpeaking  > 0 ? (sumSpeaking / countSpeaking) : null;
+        
+        // Vì AI đang chấm ngầm, điểm ban đầu sẽ là null (Pending)
+        Double writingBand   = null;
+        Double speakingBand  = null;
+        
         Double overall = mockTestService.calcOverall(listeningBand, readingBand, writingBand, speakingBand);
 
         int violationCount = 0;
@@ -221,6 +352,24 @@ public class PlacementTestServlet extends HttpServlet {
         finalSub.setCheated(forcedSubmit);
         finalSub.setStatus(forcedSubmit ? "Abandoned" : "Completed");
         mockTestService.finaliseSubmission(finalSub);
+        
+        // Notify user if ready to generate weekly plan (Wait for all AI grading to finish)
+        Object uidObj = session.getAttribute("userId");
+        if (!forcedSubmit && uidObj != null) {
+            int uId = (int) uidObj;
+            allAiTasks.thenRun(() -> {
+                try {
+                    dao.CandidateTargetDAO targetDAO = new dao.CandidateTargetDAO();
+                    if (targetDAO.findActiveByUserId(uId).isPresent()) {
+                        services.NotificationService notifService = new services.NotificationService();
+                        notifService.sendReadyToGeneratePlanNotification(uId);
+                    }
+                } catch (Exception ignored) {}
+            });
+        }
+
+        req.setAttribute("writingFeedbacks", writingFeedbacks);
+        req.setAttribute("speakingFeedbacks", speakingFeedbacks);
 
         // Dọn sạch session
         session.removeAttribute("mt_currentExam");
@@ -277,6 +426,53 @@ public class PlacementTestServlet extends HttpServlet {
         }
 
         req.setAttribute("submission", sub);
+        
+        if (sub.getStartTime() != null && sub.getEndTime() != null) {
+            java.time.Duration duration = java.time.Duration.between(sub.getStartTime(), sub.getEndTime());
+            long totalSeconds = duration.getSeconds();
+            long h = totalSeconds / 3600;
+            long m = (totalSeconds % 3600) / 60;
+            long s = totalSeconds % 60;
+            String timeTaken = (h > 0 ? h + " giờ " : "") + (m > 0 ? m + " phút " : "") + s + " giây";
+            req.setAttribute("timeTaken", timeTaken);
+        }
+        
+        // --- AI Feedback ---
+        dao.AIEvaluationDAO aiDao = new dao.AIEvaluationDAO();
+        List<String> feedbackJsons = aiDao.getFeedbackJsonStringsBySubmissionId(subId);
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        List<model.FeedbackWriting> writingFeedbacks = new ArrayList<>();
+        List<model.FeedbackSpeaking> speakingFeedbacks = new ArrayList<>();
+
+        for (String json : feedbackJsons) {
+            try {
+                if (json.contains("\"taskResponse\"")) {
+                    writingFeedbacks.add(mapper.readValue(json, model.FeedbackWriting.class));
+                } else if (json.contains("\"pronunciation\"")) {
+                    speakingFeedbacks.add(mapper.readValue(json, model.FeedbackSpeaking.class));
+                }
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger("PlacementTestServlet").log(
+                    java.util.logging.Level.SEVERE, "Lỗi parse Feedback JSON", e);
+            }
+        }
+        req.setAttribute("writingFeedbacks", writingFeedbacks);
+        req.setAttribute("speakingFeedbacks", speakingFeedbacks);
+
+        // --- Answer Review cho Reading/Listening ---
+        java.util.List<model.AnswerReviewItem> answerReview =
+            aiDao.getAnswerReviewBySubmissionId(subId);
+        java.util.List<model.AnswerReviewItem> listeningReview = new java.util.ArrayList<>();
+        java.util.List<model.AnswerReviewItem> readingReview   = new java.util.ArrayList<>();
+        for (model.AnswerReviewItem item : answerReview) {
+            if ("Listening".equals(item.getSkill())) listeningReview.add(item);
+            else readingReview.add(item);
+        }
+        req.setAttribute("listeningReview", listeningReview);
+        req.setAttribute("readingReview",   readingReview);
+        // -------------------------------------------
+
         // Lấy lịch sử bài thi của user
         List<TestSubmission> history = mockTestService.getSubmissionsByUser(userId);
         req.setAttribute("history", history);

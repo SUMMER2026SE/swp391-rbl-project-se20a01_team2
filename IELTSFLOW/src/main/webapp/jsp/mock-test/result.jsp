@@ -1,6 +1,7 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -76,6 +77,18 @@
         .chart-section h2 { margin-bottom: 16px; font-size: 1.2rem; }
         .chart-wrapper { position: relative; height: 300px; }
 
+        /* Feedback Tabs */
+        .feedback-tabs {
+            display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; overflow-x: auto;
+        }
+        .tab-btn {
+            padding: 8px 16px; border: none; background: transparent; border-radius: 8px;
+            font-family: inherit; font-size: 0.95rem; font-weight: 600; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .tab-btn:hover { background: rgba(99, 102, 241, 0.05); color: var(--text-primary); }
+        .tab-btn.active { background: rgba(99, 102, 241, 0.1); color: var(--accent-blue); }
+
         /* History table */
         .history-section {
             max-width: 880px; margin: 0 auto 40px;
@@ -107,29 +120,9 @@
 
     <div class="layout-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand">IELTSFLOW</div>
-            <div class="user-profile">
-                <div class="avatar">${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}</div>
-                <div>
-                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Target: 7.0</p>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Dashboard</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link">📅 Weekly Plan</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Library</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link active">🎯 Test</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 History & Redo</a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Notifications</a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Support</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Settings</a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Logout</a>
-            </div>
-        </aside>
+        <jsp:include page="/jsp/candidate/sidebar.jsp">
+            <jsp:param name="activePage" value="tests" />
+        </jsp:include>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -138,7 +131,13 @@
                     ${submission.status == 'Completed' ? '✅ Completed' : '⚠️ Interrupted'}
                 </div>
                 <h1>${submission.examTitle}</h1>
-                <p>Test Result • ${submission.examType}</p>
+                <p>
+                    Test Result • ${submission.examType} •
+                    <fmt:formatDate value="${submission.startTimeAsDate}" pattern="dd/MM/yyyy HH:mm" type="both"/>
+                </p>
+                <c:if test="${not empty timeTaken}">
+                    <p style="margin-top: 8px; color: var(--accent-blue); font-weight: 500;">⏱️ Thời gian làm bài thực tế: ${timeTaken}</p>
+                </c:if>
             </div>
 
             <%-- Violation notice --%>
@@ -208,6 +207,241 @@
                 <a href="${pageContext.request.contextPath}/candidate/tests" class="btn-result primary">🔄 Take Another Test</a>
                 <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="btn-result outline">📋 Full History</a>
                 <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-result outline">📊 Dashboard</a>
+            </div>
+
+            <%-- AI Feedback --%>
+            <div class="chart-section animate-fade-up" style="animation-delay:.18s;">
+                <h2>🤖 Nhận xét & Phân tích chi tiết</h2>
+                
+                <!-- Tabs -->
+                <div class="feedback-tabs">
+                    <button class="tab-btn active" onclick="showFeedbackTab(event, 'listening')">🎧 Listening</button>
+                    <button class="tab-btn" onclick="showFeedbackTab(event, 'reading')">📖 Reading</button>
+                    <button class="tab-btn" onclick="showFeedbackTab(event, 'writing')">✍️ Writing</button>
+                    <button class="tab-btn" onclick="showFeedbackTab(event, 'speaking')">🗣️ Speaking</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <%-- TAB: LISTENING ANSWER REVIEW --%>
+                <div id="tab-listening" class="feedback-content" style="display: block;">
+                    <c:choose>
+                        <c:when test="${not empty listeningReview}">
+                            <%-- Score summary --%>
+                            <c:set var="listenCorrect" value="0"/>
+                            <c:forEach var="item" items="${listeningReview}">
+                                <c:if test="${item.correct}"><c:set var="listenCorrect" value="${listenCorrect + 1}"/></c:if>
+                            </c:forEach>
+                            <div style="background: rgba(99,179,237,0.1); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 2rem; font-weight: 700; color: var(--accent-blue);">${listenCorrect}/${fn:length(listeningReview)}</span>
+                                <span style="color: var(--text-secondary);">câu đúng</span>
+                            </div>
+                            <%-- Question list --%>
+                            <c:forEach var="item" items="${listeningReview}" varStatus="st">
+                                <div style="display:flex; gap:12px; padding:12px; border-radius:10px; margin-bottom:10px;
+                                            background: ${item.correct ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)'};
+                                            border-left: 4px solid ${item.correct ? '#10b981' : '#ef4444'};">
+                                    <div style="font-size:1.4rem; margin-top:2px;">${item.correct ? '✅' : '❌'}</div>
+                                    <div style="flex:1;">
+                                        <div style="font-weight:600; margin-bottom:6px; font-size:0.95rem;">${st.count}. ${item.questionContent}</div>
+                                        <c:if test="${not empty item.options}">
+                                            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                                                <c:forEach var="opt" items="${item.options}">
+                                                    <span style="padding: 2px 10px; border-radius: 20px; font-size:0.85rem;
+                                                        background: ${opt == item.correctAnswer ? 'rgba(16,185,129,0.2)' : (opt == item.candidateAnswer && !item.correct ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.05)')};
+                                                        border: 1px solid ${opt == item.correctAnswer ? '#10b981' : (opt == item.candidateAnswer && !item.correct ? '#ef4444' : 'transparent')};">
+                                                        ${opt}
+                                                        <c:if test="${opt == item.correctAnswer}"> ✓</c:if>
+                                                    </span>
+                                                </c:forEach>
+                                            </div>
+                                        </c:if>
+                                        <div style="font-size:0.88rem; display:flex; gap:16px; flex-wrap:wrap;">
+                                            <span>Bạn trả lời: <strong style="color:${item.correct ? '#10b981' : '#ef4444'};">${empty item.candidateAnswer ? '(bỏ trống)' : item.candidateAnswer}</strong></span>
+                                            <c:if test="${!item.correct}">
+                                                <span>Đáp án đúng: <strong style="color:#10b981;">${item.correctAnswer}</strong></span>
+                                            </c:if>
+                                        </div>
+                                        <c:if test="${not empty item.explanation}">
+                                            <div style="margin-top:6px; font-size:0.85rem; color:var(--text-secondary); font-style:italic;">${item.explanation}</div>
+                                        </c:if>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <p style="color:var(--text-secondary); font-style:italic;">Bạn không có câu hỏi Listening trong bài thi này.</p>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <%-- TAB: READING ANSWER REVIEW --%>
+                <div id="tab-reading" class="feedback-content" style="display: none;">
+                    <c:choose>
+                        <c:when test="${not empty readingReview}">
+                            <c:set var="readCorrect" value="0"/>
+                            <c:forEach var="item" items="${readingReview}">
+                                <c:if test="${item.correct}"><c:set var="readCorrect" value="${readCorrect + 1}"/></c:if>
+                            </c:forEach>
+                            <div style="background: rgba(52,211,153,0.1); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 2rem; font-weight: 700; color: #10b981;">${readCorrect}/${fn:length(readingReview)}</span>
+                                <span style="color: var(--text-secondary);">câu đúng</span>
+                            </div>
+                            <c:forEach var="item" items="${readingReview}" varStatus="st">
+                                <div style="display:flex; gap:12px; padding:12px; border-radius:10px; margin-bottom:10px;
+                                            background: ${item.correct ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)'};
+                                            border-left: 4px solid ${item.correct ? '#10b981' : '#ef4444'};">
+                                    <div style="font-size:1.4rem; margin-top:2px;">${item.correct ? '✅' : '❌'}</div>
+                                    <div style="flex:1;">
+                                        <div style="font-weight:600; margin-bottom:6px; font-size:0.95rem;">${st.count}. ${item.questionContent}</div>
+                                        <c:if test="${not empty item.options}">
+                                            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                                                <c:forEach var="opt" items="${item.options}">
+                                                    <span style="padding: 2px 10px; border-radius: 20px; font-size:0.85rem;
+                                                        background: ${opt == item.correctAnswer ? 'rgba(16,185,129,0.2)' : (opt == item.candidateAnswer && !item.correct ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.05)')};
+                                                        border: 1px solid ${opt == item.correctAnswer ? '#10b981' : (opt == item.candidateAnswer && !item.correct ? '#ef4444' : 'transparent')};">
+                                                        ${opt}
+                                                        <c:if test="${opt == item.correctAnswer}"> ✓</c:if>
+                                                    </span>
+                                                </c:forEach>
+                                            </div>
+                                        </c:if>
+                                        <div style="font-size:0.88rem; display:flex; gap:16px; flex-wrap:wrap;">
+                                            <span>Bạn trả lời: <strong style="color:${item.correct ? '#10b981' : '#ef4444'};">${empty item.candidateAnswer ? '(bỏ trống)' : item.candidateAnswer}</strong></span>
+                                            <c:if test="${!item.correct}">
+                                                <span>Đáp án đúng: <strong style="color:#10b981;">${item.correctAnswer}</strong></span>
+                                            </c:if>
+                                        </div>
+                                        <c:if test="${not empty item.explanation}">
+                                            <div style="margin-top:6px; font-size:0.85rem; color:var(--text-secondary); font-style:italic;">${item.explanation}</div>
+                                        </c:if>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <p style="color:var(--text-secondary); font-style:italic;">Bạn không có câu hỏi Reading trong bài thi này.</p>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+
+                <div id="tab-writing" class="feedback-content" style="display: none;">
+                    <c:choose>
+                        <c:when test="${not empty writingFeedbacks}">
+                            <c:forEach var="fw" items="${writingFeedbacks}" varStatus="st">
+                                <div style="background: rgba(245, 158, 11, 0.05); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid var(--accent-orange);">
+                                    <h4 style="margin-top: 0; margin-bottom: 10px; color: #d97706;">Task ${st.count}</h4>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; font-size: 0.95rem;">
+                                        <div><strong>Task Response:</strong> ${fw.taskResponse}</div>
+                                        <div><strong>Coherence & Cohesion:</strong> ${fw.coherenceAndCohesion}</div>
+                                        <div><strong>Lexical Resource:</strong> ${fw.lexicalResource}</div>
+                                        <div><strong>Grammar:</strong> ${fw.grammaticalRangeAndAccuracy}</div>
+                                    </div>
+                                    
+                                    <c:if test="${not empty fw.overallFeedback}">
+                                        <div style="margin-bottom: 12px; font-size: 0.95rem;">
+                                            <strong>Nhận xét chung:</strong>
+                                            <p style="margin-top: 4px; color: var(--text-secondary); line-height: 1.5;">${fw.overallFeedback}</p>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty fw.mistakes}">
+                                        <div style="margin-top: 10px; font-size: 0.95rem;">
+                                            <strong>Các lỗi cần sửa:</strong>
+                                            <ul style="padding-left: 20px; margin-top: 5px; color: var(--text-secondary);">
+                                            <c:forEach var="m" items="${fw.mistakes}">
+                                                <li style="margin-bottom: 6px;">
+                                                    Sai: <span style="color: #ef4444; text-decoration: line-through;">${m.mistake}</span> 
+                                                    &rarr; Sửa: <span style="color: #10b981;">${m.correction}</span> 
+                                                    (<i>${m.reason}</i>)
+                                                </li>
+                                            </c:forEach>
+                                            </ul>
+                                        </div>
+                                    </c:if>
+                                    
+                                    <c:if test="${not empty writingDetails[st.index].mentorScore}">
+                                        <div style="margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b;">
+                                            <h5 style="color: #d97706; margin-top: 0; margin-bottom: 8px;"><i class="fa-solid fa-user-tie"></i> Đánh giá từ Mentor</h5>
+                                            <p style="margin-bottom: 8px;"><strong>Điểm:</strong> <span style="font-size: 1.1em; font-weight: bold; color: #d97706;">${writingDetails[st.index].mentorScore}</span></p>
+                                            <p style="margin-bottom: 0;"><strong>Nhận xét:</strong> ${writingDetails[st.index].mentorFeedback}</p>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <c:choose>
+                                <c:when test="${submission.writingBand == null}">
+                                    <p style="color: var(--text-secondary); font-style: italic;">Hệ thống AI đang chấm điểm phần thi này. Vui lòng tải lại trang (F5) sau ít phút để xem kết quả chi tiết.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <p style="color: var(--text-secondary); font-style: italic;">Bạn không có bài thi Writing hoặc không có nhận xét AI cho phần này.</p>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <div id="tab-speaking" class="feedback-content" style="display: none;">
+                    <c:choose>
+                        <c:when test="${not empty speakingFeedbacks}">
+                            <c:forEach var="fs" items="${speakingFeedbacks}" varStatus="st">
+                                <div style="background: rgba(236, 72, 153, 0.05); padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid var(--accent-pink);">
+                                    <h4 style="margin-top: 0; margin-bottom: 10px; color: #db2777;">Phần ${st.count}</h4>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; font-size: 0.95rem;">
+                                        <div><strong>Fluency & Coherence:</strong> ${fs.fluencyAndCoherence}</div>
+                                        <div><strong>Lexical Resource:</strong> ${fs.lexicalResource}</div>
+                                        <div><strong>Grammar:</strong> ${fs.grammaticalRangeAndAccuracy}</div>
+                                        <div><strong>Pronunciation:</strong> ${fs.pronunciation}</div>
+                                    </div>
+                                    
+                                    <c:if test="${not empty fs.overallFeedback}">
+                                        <div style="margin-bottom: 12px; font-size: 0.95rem;">
+                                            <strong>Nhận xét chung:</strong>
+                                            <p style="margin-top: 4px; color: var(--text-secondary); line-height: 1.5;">${fs.overallFeedback}</p>
+                                        </div>
+                                    </c:if>
+
+                                    <c:if test="${not empty fs.mistakes}">
+                                        <div style="margin-top: 10px; font-size: 0.95rem;">
+                                            <strong>Các lỗi cần sửa:</strong>
+                                            <ul style="padding-left: 20px; margin-top: 5px; color: var(--text-secondary);">
+                                            <c:forEach var="m" items="${fs.mistakes}">
+                                                <li style="margin-bottom: 6px;">
+                                                    Sai: <span style="color: #ef4444; text-decoration: line-through;">${m.mistake}</span> 
+                                                    &rarr; Sửa: <span style="color: #10b981;">${m.correction}</span> 
+                                                    (<i>${m.reason}</i>)
+                                                </li>
+                                            </c:forEach>
+                                            </ul>
+                                        </div>
+                                    </c:if>
+                                    
+                                    <c:if test="${not empty speakingDetails[st.index].mentorScore}">
+                                        <div style="margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(236, 72, 153, 0.15); border: 1px solid #db2777;">
+                                            <h5 style="color: #be185d; margin-top: 0; margin-bottom: 8px;"><i class="fa-solid fa-user-tie"></i> Đánh giá từ Mentor</h5>
+                                            <p style="margin-bottom: 8px;"><strong>Điểm:</strong> <span style="font-size: 1.1em; font-weight: bold; color: #be185d;">${speakingDetails[st.index].mentorScore}</span></p>
+                                            <p style="margin-bottom: 0;"><strong>Nhận xét:</strong> ${speakingDetails[st.index].mentorFeedback}</p>
+                                        </div>
+                                    </c:if>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <c:choose>
+                                <c:when test="${submission.speakingBand == null}">
+                                    <p style="color: var(--text-secondary); font-style: italic;">Hệ thống AI đang chấm điểm phần thi này. Vui lòng tải lại trang (F5) sau ít phút để xem kết quả chi tiết.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <p style="color: var(--text-secondary); font-style: italic;">Bạn không có bài thi Speaking hoặc không có nhận xét AI cho phần này.</p>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </div>
 
             <%-- Progress Chart --%>
@@ -302,5 +536,18 @@
         });
     </script>
     </c:if>
+
+    <script>
+        function showFeedbackTab(event, tabId) {
+            document.querySelectorAll('.feedback-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+    <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
 </body>
 </html>
+

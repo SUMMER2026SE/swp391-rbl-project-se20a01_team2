@@ -99,6 +99,30 @@ public class GoalApiServlet extends HttpServlet {
             }
 
             dao.saveOrUpdate(userId, currentBand, targetBand);
+            
+            // Check for notifications
+            try {
+                services.PathwayService pwService = new services.PathwayService();
+                java.util.List<model.Pathway> pathways = pwService.getPathwaysByUser(userId);
+                services.NotificationService notifService = new services.NotificationService();
+                
+                if (pathways != null && !pathways.isEmpty()) {
+                    model.Pathway activePathway = pathways.get(0); // the latest
+                    if (activePathway.getTargetBand() != null && activePathway.getTargetBand().compareTo(targetBand) != 0) {
+                        notifService.sendTargetChangedNotification(userId);
+                    }
+                } else {
+                    // Check if they have a valid placement test
+                    services.ExamHistoryService examHistory = new services.ExamHistoryServiceImpl();
+                    model.TestSubmission latestTest = examHistory.getLatestCompletedPlacementTest(userId);
+                    if (latestTest != null) {
+                        notifService.sendReadyToGeneratePlanNotification(userId);
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
             out.print("{\"success\":true}");
 
         } catch (Exception e) {

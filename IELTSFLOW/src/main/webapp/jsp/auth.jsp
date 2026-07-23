@@ -1,10 +1,16 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%
     if (session.getAttribute("userEmail") != null) {
         Integer roleId = (Integer) session.getAttribute("roleId");
-        if (roleId != null && (roleId == 1 || roleId == 2)) {
-            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+        if (roleId != null) {
+            if (roleId == 1) {
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else if (roleId == 2) {
+                response.sendRedirect(request.getContextPath() + "/mentor/dashboard");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
+            }
         } else {
             response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
         }
@@ -300,38 +306,9 @@
         </div>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/auth.js?v=3"></script>
+    <script src="${pageContext.request.contextPath}/js/auth.js?v=4"></script>
     <script>
-        // Tab switching with register tab support from server
-        const tabLogin = document.getElementById('tabLoginBtn');
-        const tabRegister = document.getElementById('tabRegisterBtn');
-        const loginArea = document.getElementById('loginFormArea');
-        const registerArea = document.getElementById('registerFormArea');
-        const slider = document.getElementById('tabSlider');
-
-        function switchToLogin() {
-            tabLogin.classList.add('active');
-            tabRegister.classList.remove('active');
-            loginArea.classList.add('active');
-            registerArea.classList.remove('active');
-            slider.style.transform = 'translateX(0)';
-        }
-        function switchToRegister() {
-            tabRegister.classList.add('active');
-            tabLogin.classList.remove('active');
-            registerArea.classList.add('active');
-            loginArea.classList.remove('active');
-            slider.style.transform = 'translateX(100%)';
-        }
-
-        tabLogin.addEventListener('click', switchToLogin);
-        tabRegister.addEventListener('click', switchToRegister);
-
-        // Auto-switch to register tab if server says so
-        <c:if test="${tab == 'register'}">switchToRegister();</c:if>
-
-        // Also check URL param
-        if (new URLSearchParams(window.location.search).get('tab') === 'register') switchToRegister();
+        // Tab switching is handled in auth.js
     </script>
 </body>
 </html>

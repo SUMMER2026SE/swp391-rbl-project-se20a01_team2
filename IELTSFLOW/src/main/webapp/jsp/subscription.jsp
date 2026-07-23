@@ -459,14 +459,15 @@
                     <c:choose>
                         <c:when test="${not empty sessionScope.fullName}">
                             <div style="display: flex; align-items: center; gap: 16px;">
-                                <c:choose>
-                                    <c:when test="${sessionScope.roleId == 1 || sessionScope.roleId == 2}">
-                                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển</a>
-                                    </c:otherwise>
-                                </c:choose>
+                                <c:if test="${sessionScope.roleId == 1}">
+                                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển (Admin)</a>
+                                </c:if>
+                                <c:if test="${sessionScope.roleId == 2}">
+                                    <a href="${pageContext.request.contextPath}/mentor/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển (Mentor)</a>
+                                </c:if>
+                                <c:if test="${sessionScope.roleId != 1 && sessionScope.roleId != 2}">
+                                    <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn-cta" style="padding: 8px 20px; font-size: 14px;">Bảng điều khiển</a>
+                                </c:if>
                                 <div class="user-dropdown-container">
                                     <div class="user-avatar-btn">
                                         <c:choose>
@@ -507,6 +508,28 @@
                     Chọn gói đăng ký phù hợp nhất để đạt được band điểm mục tiêu của bạn.
                     <span style="flex: 1; height: 1px; background: #cbd5e1; max-width: 100px;"></span>
                 </p>
+
+                <c:if test="${not empty param.error}">
+                    <div style="background: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: center; font-weight: 500;">
+                        <c:choose>
+                            <c:when test="${param.error == 'premium_required'}">
+                                Bạn cần đăng ký gói thành viên để truy cập tính năng này.
+                            </c:when>
+                            <c:when test="${param.error == 'premium_required_mocktest'}">
+                                Bạn cần đăng ký gói thành viên để làm bài thi Mock Test.
+                            </c:when>
+                            <c:when test="${param.error == 'premium_required_placement'}">
+                                Bạn đã sử dụng hết lượt thi Placement Test miễn phí. Vui lòng nâng cấp gói thành viên để thi tiếp.
+                            </c:when>
+                            <c:when test="${param.error == 'premium_required_result'}">
+                                Bạn cần đăng ký gói thành viên để xem chi tiết kết quả và nhận xét từ AI.
+                            </c:when>
+                            <c:otherwise>
+                                Vui lòng nâng cấp gói thành viên để sử dụng tính năng này.
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </c:if>
 
                 <div class="pricing-cards">
                     <c:forEach var="pkg" items="${packages}" varStatus="status">

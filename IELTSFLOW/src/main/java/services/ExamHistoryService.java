@@ -20,6 +20,11 @@ public interface ExamHistoryService {
     List<TestSubmission> getCompletedSubmissionsForChart(int userId);
 
     /**
+     * Lấy bài thi Placement Test hoàn thành mới nhất của user
+     */
+    TestSubmission getLatestCompletedPlacementTest(int userId);
+
+    /**
      * Tính band trung bình từ danh sách bài thi đã hoàn thành.
      */
     double getAverageBand(List<TestSubmission> completed);

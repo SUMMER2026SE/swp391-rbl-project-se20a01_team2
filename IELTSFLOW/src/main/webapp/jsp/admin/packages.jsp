@@ -78,7 +78,7 @@
                                                 <a href="${pageContext.request.contextPath}/admin/packages?action=edit&id=${pkg.packageId}" class="btn btn-sm btn-outline-primary rounded-pill me-1"><i class="fa-solid fa-pen"></i></a>
                                                 <a href="${pageContext.request.contextPath}/admin/packages?action=delete&id=${pkg.packageId}" 
                                                    class="btn btn-sm btn-outline-danger rounded-pill" 
-                                                   onclick="return confirm('Cảnh báo: Bạn có chắc chắn muốn xóa mềm gói này?');"><i class="fa-solid fa-trash"></i></a>
+                                                   onclick="return customConfirm(event, this, 'Cảnh báo: Bạn có chắc chắn muốn xóa mềm gói này?');"><i class="fa-solid fa-trash"></i></a>
                                             </c:if>
                                             <c:if test="${pkg.deleted}">
                                                 <a href="${pageContext.request.contextPath}/admin/packages?action=restore&id=${pkg.packageId}" 
@@ -101,5 +101,7 @@
 </div>
 
 <!-- <script src="${pageContext.request.contextPath}/js/admin-script.js"></script> -->
+    <script src="${pageContext.request.contextPath}/js/api.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>
+

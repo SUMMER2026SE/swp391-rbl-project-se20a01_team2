@@ -1,229 +1,219 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
     <script>window.contextPath = '${pageContext.request.contextPath}';</script>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Weekly Plan</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=<%= System.currentTimeMillis() %>">
 </head>
 <body>
     <div class="bg-blob blob-2"></div>
     <div class="bg-blob blob-3"></div>
     
     <div class="layout-wrapper">
-        <aside class="sidebar">
-            <div class="brand">IELTSFLOW</div>
-            <div class="user-profile">
-                <div class="avatar" style="overflow: hidden;">
-                    <c:choose>
-                        <c:when test="${not empty sessionScope.profilePic}">
-                            <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                        </c:when>
-                        <c:otherwise>
-                            ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0, 1) : 'HV'}
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                <div>
-                    <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Học Viên'}</h4>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Mục tiêu: 7.0</p>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="${pageContext.request.contextPath}/candidate/dashboard" class="nav-link">🏠 Bảng điều khiển</a>
-                <a href="${pageContext.request.contextPath}/candidate/weekly-plan" class="nav-link active">📅 Kế hoạch tuần</a>
-                <a href="${pageContext.request.contextPath}/candidate/lessons" class="nav-link">📚 Thư viện</a>
-                <a href="${pageContext.request.contextPath}/candidate/tests" class="nav-link">🎯 Bài thi</a>
-                <a href="${pageContext.request.contextPath}/candidate/redo-exercises" class="nav-link">🔄 Lịch sử & Làm lại</a>
-                <a href="${pageContext.request.contextPath}/candidate/notifications" class="nav-link">🔔 Thông báo</a>
-                <a href="${pageContext.request.contextPath}/candidate/tickets" class="nav-link">🎫 Ticket hỗ trợ</a>
-                <a href="${pageContext.request.contextPath}/account" class="nav-link">⚙️ Cài đặt tài khoản</a>
-            </nav>
-            <div style="margin-top: auto;">
-                <a href="${pageContext.request.contextPath}/logout" class="nav-link" style="color: var(--accent-red);">🚪 Đăng xuất</a>
-            </div>
-        </aside>
+        <jsp:include page="/jsp/candidate/sidebar.jsp">
+            <jsp:param name="activePage" value="weekly-plan" />
+        </jsp:include>
 
         <main class="main-content">
-            <div class="animate-fade-up" style="margin-bottom: 40px;">
-                <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Your Pathway 🚀</h1>
-                <div style="display: flex; gap: 20px;">
-                    <div style="padding: 10px 20px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
-                        <span style="color: var(--text-secondary); font-size: 0.85rem;">Target Band</span>
-                        <div style="color: var(--accent-green); font-size: 1.5rem; font-weight: 700;">7.0</div>
+            <c:choose>
+                <c:when test="${needsTarget}">
+                    <div class="animate-fade-up" style="margin-bottom: 40px; text-align: center; margin-top: 50px;">
+                        <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Thiết lập Mục tiêu 🎯</h1>
+                        <p style="color: black; margin-bottom: 20px;">Bạn cần thiết lập mục tiêu Band điểm trước khi hệ thống có thể tạo lộ trình học.</p>
+                        <a href="${pageContext.request.contextPath}/candidate/dashboard" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px;">Đến trang Dashboard để thiết lập</a>
                     </div>
-                    <div style="padding: 10px 20px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
-                        <span style="color: var(--text-secondary); font-size: 0.85rem;">Current Band</span>
-                        <div style="color: var(--accent-blue); font-size: 1.5rem; font-weight: 700;">6.0</div>
-                    </div>
-                </div>
-            </div>
+                </c:when>
 
-            <div class="timeline animate-fade-up" style="animation-delay: 0.2s;">
-                <!-- Week 1 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot active"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px);">
-                        <span class="badge badge-blue">Week 1 (Current)</span>
-                        <h2 style="margin: 10px 0;">Foundation & Vocabulary</h2>
-                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                                <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--accent-green);">
-                                <span style="color: black; text-decoration: line-through;">Read Vocab List 1-5</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                                <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--accent-green);">
-                                <span>Complete Listening Mock Test 1</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                                <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--accent-green);">
-                                <span>Write 1 Task 1 Essay</span>
-                            </label>
-                        </div>
+                <c:when test="${hasNoPlacementTest}">
+                    <div class="animate-fade-up" style="margin-bottom: 40px; text-align: center; margin-top: 50px;">
+                        <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Bài thi đầu vào 📝</h1>
+                        <p style="color: black; margin-bottom: 20px;">Bạn chưa làm bài kiểm tra đầu vào, hoặc kết quả đã quá hạn.<br>Vui lòng làm bài kiểm tra để hệ thống cá nhân hóa lộ trình cho bạn.</p>
+                        <a href="${pageContext.request.contextPath}/candidate/placement-test" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px;">Làm bài Placement Test</a>
                     </div>
-                </div>
+                </c:when>
 
-                <!-- Week 2 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.6;">
-                        <span class="badge badge-purple">Week 2</span>
-                        <h2 style="margin: 10px 0;">Listening & Reading Skills</h2>
-                        <ul style="margin-left: 20px; margin-top: 15px; color: var(--text-secondary);">
-                            <li>Reading Practice Test A</li>
-                            <li>Watch Speaking Part 1 video</li>
-                        </ul>
+                <c:when test="${canGeneratePathway}">
+                    <div class="animate-fade-up" style="margin-bottom: 40px; text-align: center; margin-top: 50px;">
+                        <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Sẵn sàng tạo Lộ trình 🚀</h1>
+                        <p style="color: black; margin-bottom: 20px;">Hệ thống đã nhận diện được kết quả bài test gần nhất và mục tiêu của bạn.<br>Hãy nhấn nút bên dưới để AI bắt đầu phân tích và tạo lộ trình học 4 tuần.</p>
+                        <c:choose>
+                            <c:when test="${isGenerating}">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                                    <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(16, 185, 129, 0.3); border-top-color: var(--accent-green); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                    <p style="color: var(--accent-green); font-weight: bold;">Hệ thống đang sử dụng AI để phân tích và lập lộ trình.<br>Vui lòng đợi trong giây lát...</p>
+                                </div>
+                                <script>
+                                    // Tự động kiểm tra trạng thái mỗi 5 giây
+                                    setInterval(function() {
+                                          fetch('${pageContext.request.contextPath}/candidate/weekly-plan?action=check-status')
+                                              .then(response => response.json())
+                                              .then(data => {
+                                                  if (data.status === 'ready' || data.status === 'error') {
+                                                      window.location.reload();
+                                                  }
+                                              })
+                                            .catch(err => console.error(err));
+                                    }, 5000);
+                                </script>
+                                <style>
+                                    @keyframes spin { 100% { transform: rotate(360deg); } }
+                                </style>
+                              </c:when>
+                              <c:otherwise>
+                                  <c:if test="${not empty generationError}">
+                                      <div style="background-color: #fee2e2; color: #dc2626; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 500; border: 1px solid #f87171;">
+                                          ⚠️ ${generationError}
+                                      </div>
+                                  </c:if>
+                                  <form action="${pageContext.request.contextPath}/candidate/weekly-plan" method="post">
+                                    <input type="hidden" name="action" value="generate">
+                                    <input type="hidden" name="submissionId" value="${submissionId}">
+                                    <input type="hidden" name="targetBand" value="${targetBand}">
+                                    <button type="submit" class="btn btn-primary" style="padding: 15px 30px; font-size: 1.2rem; border-radius: 8px; background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));">
+                                        Nhận Lộ Trình Của Tôi ✨
+                                    </button>
+                                </form>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
-                </div>
-                
-                <!-- Week 3 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.4;">
-                        <span class="badge badge-orange">Week 3</span>
-                        <h2 style="margin: 10px 0;">Intensive Writing</h2>
-                        <ul style="margin-left: 20px; margin-top: 15px; color: var(--text-secondary);">
-                            <li>Submit 2 Writing Essays for Review</li>
-                            <li>Listening Section 3 drills</li>
-                        </ul>
-                    </div>
-                </div>
+                </c:when>
 
-                <!-- Week 4 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.4;">
-                        <span class="badge badge-purple">Week 4</span>
-                        <h2 style="margin: 10px 0;">Speaking & Pronunciation</h2>
-                        <ul style="margin-left: 20px; margin-top: 15px; color: var(--text-secondary);">
-                            <li>Mock Speaking Interview with AI</li>
-                            <li>Review pronunciation rules</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Week 5 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.3;">
-                        <span class="badge badge-blue">Week 5</span>
-                        <h2 style="margin: 10px 0;">Advanced Grammar</h2>
-                        <p style="margin-top: 15px; color: var(--text-secondary);">Upcoming AI-generated plan for Advanced Grammar patterns.</p>
-                    </div>
-                </div>
-
-                <!-- Week 6 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.3;">
-                        <span class="badge badge-green">Week 6</span>
-                        <h2 style="margin: 10px 0;">Mid-Term Mock Test</h2>
-                        <p style="margin-top: 15px; color: var(--text-secondary);">Comprehensive test across all 4 skills.</p>
-                    </div>
-                </div>
-
-                <!-- Week 7 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.3;">
-                        <span class="badge badge-orange">Week 7</span>
-                        <h2 style="margin: 10px 0;">Reading Comprehension II</h2>
-                        <p style="margin-top: 15px; color: var(--text-secondary);">Tackling True/False/Not Given questions.</p>
-                    </div>
-                </div>
-
-                <!-- Week 8 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.3;">
-                        <span class="badge badge-purple">Week 8</span>
-                        <h2 style="margin: 10px 0;">Writing Task 2 Focus</h2>
-                        <p style="margin-top: 15px; color: var(--text-secondary);">Structuring opinion and discussion essays.</p>
-                    </div>
-                </div>
-
-                <!-- Week 9 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.25;">
-                        <span class="badge badge-blue">Week 9</span>
-                        <h2 style="margin: 10px 0;">Listening Note-taking</h2>
-                        <p style="margin-top: 15px; color: var(--text-secondary);">Focus on Section 4 long lectures.</p>
-                    </div>
-                </div>
-
-                <!-- Week 10 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.25;">
-                        <span class="badge badge-green">Week 10</span>
-                        <h2 style="margin: 10px 0;">Speaking Part 2 & 3</h2>
-                        <p style="margin-top: 15px; color: var(--text-secondary);">Fluency and expanding answers.</p>
-                    </div>
-                </div>
-
-                <!-- Week 11 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.25;">
-                        <span class="badge badge-orange">Week 11</span>
-                        <h2 style="margin: 10px 0;">Final Review & Weakness Fixing</h2>
-                        <p style="margin-top: 15px; color: var(--text-secondary);">Targeting your most frequent mistakes.</p>
-                    </div>
-                </div>
-
-                <!-- Week 12 -->
-                <div class="timeline-node">
-                    <div class="timeline-dot"></div>
-                    <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: 0.25;">
-                        <span class="badge badge-purple">Week 12</span>
-                        <h2 style="margin: 10px 0;">Final Mock Test</h2>
-                        <p style="margin-top: 15px; color: var(--text-secondary);">Full simulated IELTS exam.</p>
-                    </div>
-                </div>
-
-                <!-- End of 3-month phase (Re-test Prompt) -->
-                <div class="timeline-node">
-                    <div class="timeline-dot" style="border-color: var(--accent-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);"></div>
-                    <div class="glass-panel" style="padding: 30px; transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
-                            <div>
-                                <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Phase Đã hoàn thành (3 Months)</span>
-                                <h2 style="margin: 15px 0 10px; color: var(--accent-red); font-size: 1.8rem;">Time for a Re-test! 🎯</h2>
-                                <p style="color: black; font-size: 1rem; line-height: 1.6;">You've reached the end of the 12-week study phase. To continue your journey and let our AI build the next personalized pathway, a re-evaluation is required.</p>
+                <c:otherwise>
+                    <c:if test="${targetBandMismatched}">
+                        <div class="animate-fade-up" style="margin-bottom: 30px; padding: 25px; background: rgba(245, 158, 11, 0.1); border: 2px solid rgba(245, 158, 11, 0.5); border-radius: 12px;">
+                            <h2 style="color: #d97706; margin-top: 0; margin-bottom: 10px; font-size: 1.5rem;">⚠️ Mục tiêu của bạn đã thay đổi!</h2>
+                            <p style="color: black; margin-bottom: 20px; font-size: 1.05rem;">
+                                Mục tiêu IELTS của bạn đã thay đổi (từ <strong>${oldTargetBand}</strong> lên <strong>${targetBand}</strong>). Lộ trình hiện tại dưới đây không còn phù hợp (Không khuyến nghị sử dụng tiếp).
+                            </p>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <form action="${pageContext.request.contextPath}/candidate/weekly-plan" method="post" style="margin: 0;">
+                                    <input type="hidden" name="action" value="generate">
+                                    <input type="hidden" name="submissionId" value="${submissionId}">
+                                    <input type="hidden" name="targetBand" value="${targetBand}">
+                                    <input type="hidden" name="useOldTest" value="true">
+                                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #d97706, #f59e0b); border: none; padding: 12px 25px; border-radius: 8px;">
+                                        Tạo lại lộ trình với kết quả Test cũ
+                                    </button>
+                                </form>
+                                <a href="${pageContext.request.contextPath}/candidate/placement-test" class="btn btn-outline" style="padding: 12px 25px; border-radius: 8px; border: 1px solid #d97706; color: #d97706; text-decoration: none;">
+                                    Làm lại bài Test đầu vào
+                                </a>
                             </div>
-                            <button class="btn btn-primary" style="background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); white-space: nowrap; padding: 15px 30px; font-size: 1.1rem; border-radius: 12px; cursor: pointer;">
-                                Take Re-test Now →
-                            </button>
+                        </div>
+                    </c:if>
+
+                    <div class="animate-fade-up" style="margin-bottom: 40px;">
+                        <h1 style="font-size: 2.5rem; margin-bottom: 15px;">Your Pathway 🚀</h1>
+                        <div style="display: flex; gap: 20px;">
+                            <div style="padding: 10px 20px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px;">
+                                <span style="color: var(--text-secondary); font-size: 0.85rem;">Target Band</span>
+                                <div style="color: var(--accent-green); font-size: 1.5rem; font-weight: 700;">${pathway.targetBand}</div>
+                            </div>
+                            <div style="padding: 10px 20px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px;">
+                                <span style="color: var(--text-secondary); font-size: 0.85rem;">Created At</span>
+                                <div style="color: var(--accent-blue); font-size: 1.2rem; font-weight: 700;">
+                                    ${pathway.createdAt.toLocalDate()}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+
+                    <div class="timeline animate-fade-up" style="animation-delay: 0.2s;" id="weekly-plans-container">
+                        <!-- Plans will be rendered here by JS -->
+                    </div>
+
+                    <script>
+                        const plansData = [
+                            <c:forEach items="${weeklyPlans}" var="plan" varStatus="loop">
+                                ${plan.planContent}${!loop.last ? ',' : ''}
+                            </c:forEach>
+                        ];
+                        const isPathwayExpired = ${not empty isPathwayExpired and isPathwayExpired};
+                        const retestUrl = '${pageContext.request.contextPath}/candidate/placement-test';
+                        
+                        const container = document.getElementById('weekly-plans-container');
+                        let html = '';
+                        
+                        const badges = ['badge-blue', 'badge-purple', 'badge-orange', 'badge-green'];
+                        
+                        plansData.forEach((plan, index) => {
+                            const badgeClass = badges[index % badges.length];
+                            const isCurrent = index === 0;
+                            const opacity = isCurrent ? 1 : 0.6 - (index * 0.03);
+                            
+                            let activitiesHtml = '';
+                            if (plan.activities && Array.isArray(plan.activities)) {
+                                plan.activities.forEach(act => {
+                                    activitiesHtml += `
+                                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                            <input type="checkbox" \${isCurrent ? '' : 'disabled'} style="width: 20px; height: 20px; accent-color: var(--accent-green);">
+                                            <span style="color: black;">\${act}</span>
+                                        </label>
+                                    `;
+                                });
+                            }
+                            
+                            html += `
+                            <div class="timeline-node">
+                                <div class="timeline-dot \${isCurrent ? 'active' : ''}"></div>
+                                <div class="glass-panel" style="padding: 20px; transform: translateY(-5px); opacity: \${opacity};">
+                                    <span class="badge \${badgeClass}">Tuần \${plan.weekNumber} \${isCurrent ? '(Hiện tại)' : ''}</span>
+                                    <h2 style="margin: 10px 0;">\${plan.skillsFocus}</h2>
+                                    <p style="color: var(--accent-blue); font-weight: 500;">Mục tiêu: \${plan.objectives}</p>
+                                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                                        \${activitiesHtml}
+                                    </div>
+                                </div>
+                            </div>
+                            `;
+                        });
+
+                        // Always append the re-test banner at the end, faded if not yet expired
+                        const dotStyle = 'border-color: var(--accent-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);';
+                        const panelStyle = isPathwayExpired
+                            ? 'padding: 30px; transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);'
+                            : 'padding: 30px; transform: translateY(-5px); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); opacity: 0.4; filter: grayscale(60%);';
+                        const btnStyle = isPathwayExpired
+                            ? 'background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); cursor: pointer;'
+                            : 'background: linear-gradient(135deg, var(--accent-red), var(--accent-orange)); opacity: 0.5; cursor: not-allowed;';
+                        const btnHref = isPathwayExpired ? `href="\${retestUrl}"` : '';
+
+                        html += `
+                        <div class="timeline-node">
+                            <div class="timeline-dot" style="\${dotStyle}"></div>
+                            <div class="glass-panel" style="\${panelStyle}">
+                                <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                                    <div>
+                                        <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">Giai đoạn hoàn thành (1 tháng)</span>
+                                        <h2 style="margin: 15px 0 10px; color: var(--accent-red); font-size: 1.8rem;">Đến lúc thi lại rồi! 🎯</h2>
+                                        <p style="color: black; font-size: 1rem; line-height: 1.6;">Bạn đã hoàn thành lộ trình học 4 tuần. Để tiếp tục hành trình và để AI tạo lộ trình cá nhân hóa tiếp theo, bạn cần thực hiện bài đánh giá lại.</p>
+                                    </div>
+                                    <a \${btnHref} class="btn btn-primary" style="\${btnStyle} white-space: nowrap; padding: 15px 30px; font-size: 1.1rem; border-radius: 12px; text-decoration: none;">
+                                        Thi lại ngay →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                        
+                        container.innerHTML = html;
+                    </script>
+                </c:otherwise>
+            </c:choose>
         </main>
     </div>
 
     <script src="${pageContext.request.contextPath}/js/api.js"></script>
+    <script src="${pageContext.request.contextPath}/js/candidate-mobile.js"></script>
+    <!-- AI Chatbox Widget -->
+    <jsp:include page="/jsp/components/chat-widget.jsp" />
+    
 </body>
 </html>
+
+
+

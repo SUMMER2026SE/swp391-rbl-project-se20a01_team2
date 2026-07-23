@@ -13,12 +13,12 @@
                     <img src="${pageContext.request.contextPath}${sessionScope.profilePic}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
                 </c:when>
                 <c:otherwise>
-                    ${sessionScope.user != null ? sessionScope.user.fullName.substring(0,1) : 'A'}
+                    ${not empty sessionScope.fullName ? sessionScope.fullName.substring(0,1) : 'A'}
                 </c:otherwise>
             </c:choose>
         </div>
         <div>
-            <h4 style="font-size: 1rem;">${sessionScope.user != null ? sessionScope.user.fullName : 'Quản trị viên'}</h4>
+            <h4 style="font-size: 1rem;">${not empty sessionScope.fullName ? sessionScope.fullName : 'Quản trị viên'}</h4>
             <span style="font-size: 0.75rem; color: var(--text-secondary);">Quản trị viên</span>
         </div>
     </div>
@@ -38,3 +38,105 @@
             style="color: var(--accent-red);">🚪 Đăng xuất</a>
     </div>
 </aside>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.sidebar');
+    const layoutWrapper = document.querySelector('.layout-wrapper');
+    if (!sidebar || !layoutWrapper || document.querySelector('.mobile-topbar')) return;
+
+    // 1. Create Mobile Topbar
+    const topbar = document.createElement('div');
+    topbar.className = 'mobile-topbar hidden-desktop';
+    
+    // Hamburger Button
+    const hamburgerBtn = document.createElement('button');
+    hamburgerBtn.className = 'mobile-menu-btn';
+    hamburgerBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>';
+    
+    // Brand Text
+    const brandContainer = document.createElement('div');
+    brandContainer.className = 'mobile-brand';
+    brandContainer.innerHTML = '<strong>ADMIN</strong>';
+    
+    topbar.appendChild(hamburgerBtn);
+    topbar.appendChild(brandContainer);
+    
+    // 2. Create Overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    
+    // 3. Inject into DOM
+    layoutWrapper.insertBefore(topbar, layoutWrapper.firstChild);
+    document.body.appendChild(overlay);
+    
+    // 4. Interaction Logic
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    }
+    
+    hamburgerBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // 5. Auto-wrap tables for responsiveness
+    document.querySelectorAll('table').forEach(table => {
+        if (!table.parentElement.classList.contains('table-responsive')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-responsive';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        }
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function customConfirm(event, element, message) {
+        event.preventDefault(); // Prevent default action (form submission or link navigation)
+        Swal.fire({
+            title: 'Xác nhận',
+            text: message,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // If the element is a form, submit it
+                if (element.tagName && element.tagName.toLowerCase() === 'form') {
+                    // Temporarily remove onsubmit to prevent infinite loop
+                    const oldOnSubmit = element.onsubmit;
+                    element.onsubmit = null;
+                    element.submit();
+                    element.onsubmit = oldOnSubmit;
+                } 
+                // If it's a button inside a form with onclick="return customConfirm(...)"
+                else if (element.form) {
+                    const form = element.form;
+                    // Append hidden input if it's a specific submit button with name/value
+                    if (element.name) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = element.name;
+                        input.value = element.value;
+                        form.appendChild(input);
+                    }
+                    const oldOnSubmit = form.onsubmit;
+                    form.onsubmit = null;
+                    form.submit();
+                    form.onsubmit = oldOnSubmit;
+                }
+                // If it's an anchor tag
+                else if (element.tagName && element.tagName.toLowerCase() === 'a') {
+                    window.location.href = element.href;
+                }
+            }
+        });
+        return false;
+    }
+</script>

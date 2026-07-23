@@ -72,8 +72,10 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("profilePic", user.getProfilePic());
             }
 
-            if (user.getRoleId() == 1 || user.getRoleId() == 2) { // Admin or Mentor
+            if (user.getRoleId() == 1) { // Admin
                 resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
+            } else if (user.getRoleId() == 2) { // Mentor
+                resp.sendRedirect(req.getContextPath() + "/mentor/dashboard");
             } else { // Candidate
                 resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
             }

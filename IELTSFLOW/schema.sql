@@ -23,11 +23,11 @@ CREATE TABLE Users (
     AuthProvider NVARCHAR(50) DEFAULT 'Local', -- Local, Google, Facebook
     ProviderID NVARCHAR(100) NULL, -- ID trả về từ Google/Facebook
     FullName NVARCHAR(100) NOT NULL,
-    ProfilePic NVARCHAR(500) NULL,
     Status NVARCHAR(20) DEFAULT 'Active', -- Active, Inactive, Banned
     CreatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID),
-    Deleted BIT DEFAULT 0
+    Deleted BIT DEFAULT 0,
+    ProfilePic NVARCHAR(500) NULL
 );
 
 CREATE TABLE CandidateTargets (
@@ -36,11 +36,11 @@ CREATE TABLE CandidateTargets (
 
     UserID INT NOT NULL,
 
-    TargetBand DECIMAL(3,1) NOT NULL, \-- Ví dụ: 6.5, 7.0
+    TargetBand DECIMAL(3,1) NOT NULL, -- Ví dụ: 6.5, 7.0
 
     CurrentBand DECIMAL(3,1),
 
-    IsActive BIT DEFAULT 1, \-- [CẬP NHẬT] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
+    IsActive BIT DEFAULT 1, -- [CẬP NHẬT] Đánh dấu mục tiêu hiện tại đang active để AI lên lộ trình
 
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 
@@ -91,9 +91,10 @@ CREATE TABLE UserSubscriptions (
 
 CREATE TABLE QuestionResource (
     ResourceID INT IDENTITY(1,1) PRIMARY KEY,
+    ResourceName NVARCHAR(255),
     ResourceText NVARCHAR(MAX),
     ResourceAudioURL NVARCHAR(500),
-    ResourceImageURL NVARCHAR(500),
+    ResourceImageURL NVARCHAR(MAX),
     Type NVARCHAR(50) NOT NULL, -- Passage, Audio
     CreatedBy INT NULL, -- Theo dõi Mentor nào tạo
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
@@ -104,12 +105,13 @@ CREATE TABLE Questions (
     QuestionID INT IDENTITY(1,1) PRIMARY KEY,
     ResourceID INT NULL, 
     Content NVARCHAR(MAX) NOT NULL,
-    QuestionType NVARCHAR(50) NOT NULL, -- MultipleChoice, Matching, FillInBlanks. Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
+    QuestionType NVARCHAR(50) NOT NULL, -- MultipleChoice, Matching, FillInBlanks,.... Note: Matching sẽ lấy data từ cột contentJson từ cả 2 bảng Question và Answer. Còn FillInBlanks sẽ lấy câu hỏi từ cột content của Questions; còn answer sẽ lấy từ json của answers
     Skill NVARCHAR(20) NOT NULL, -- Listening, Reading, Writing, Speaking
     Difficulty NVARCHAR(20), -- Easy, Medium, Hard
     Explanation NVARCHAR(MAX),
     OrderInResource INT NULL, -- [CẬP NHẬT] Thứ tự câu hỏi đi theo 1 bài đọc (Passage) hoặc audio
     contentJSON NVARCHAR(MAX) NOT NULL, 
+    QuestionCount INT DEFAULT 1,
     CreatedBy INT NULL, -- Theo dõi Mentor nào tạo
     FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID),
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
@@ -128,7 +130,8 @@ CREATE TABLE Answers (
 CREATE TABLE Tags (
     TagID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
-    Type NVARCHAR(50) -- Topic, Grammar, Vocabulary...
+    Type NVARCHAR(50), -- Topic, Grammar, Vocabulary...
+    Deleted BIT DEFAULT 0
 );
 
 CREATE TABLE QuestionTags (
@@ -192,21 +195,16 @@ CREATE TABLE Exams (
 );
 
 CREATE TABLE ExamSections (
-
     SectionID INT IDENTITY(1,1) PRIMARY KEY,
-
     ExamID INT NOT NULL,
-
     SectionName NVARCHAR(100) NOT NULL, -- Ví dụ: "Reading - Passage 1", "Listening - Part 3"
-
     ResourceID INT NULL, -- Gắn Passage/Audio thẳng vào Section (nếu có)
-
     OrderIndex INT NOT NULL, 
+    Skill NVARCHAR(20) NOT NULL DEFAULT 'Listening',
 
     FOREIGN KEY (ExamID) REFERENCES Exams(ExamID) ON DELETE CASCADE,
 
     FOREIGN KEY (ResourceID) REFERENCES QuestionResource(ResourceID)
-
 );
 
 CREATE TABLE ExamQuestions (
@@ -294,6 +292,7 @@ CREATE TABLE WeeklyPlans (
     WeekNumber INT NOT NULL,
     PlanContent NVARCHAR(MAX) NOT NULL, 
     IsCompleted BIT DEFAULT 0,
+    IsCurrentWeek BIT DEFAULT 0, -- Theo dõi trạng thái tuần học hiện tại
     FOREIGN KEY (PathwayID) REFERENCES Pathways(PathwayID) ON DELETE CASCADE,
     CONSTRAINT CHK_PlanContent CHECK (ISJSON(PlanContent) = 1) 
 );
@@ -356,6 +355,14 @@ CREATE TABLE UploadedFiles (
     UploadedBy INT NOT NULL,
     UploadedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (UploadedBy) REFERENCES Users(UserID)
+);
+GO
+
+CREATE TABLE upload_sessions (
+    upload_id VARCHAR(255) PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    total_chunks INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 GO
 
