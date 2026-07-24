@@ -44,7 +44,11 @@ public class GoogleAuthServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String tokenString = request.getParameter("idToken");
+        // Try all possible token param names (credential = Google One Tap, idToken = legacy, accessToken = OAuth2)
+        String tokenString = request.getParameter("credential");
+        if (tokenString == null || tokenString.trim().isEmpty()) {
+            tokenString = request.getParameter("idToken");
+        }
         if (tokenString == null || tokenString.trim().isEmpty()) {
             tokenString = request.getParameter("accessToken");
         }
@@ -135,10 +139,20 @@ public class GoogleAuthServlet extends HttpServlet {
                     session.setAttribute("profilePic", user.getProfilePic());
                 }
 
-                if (user.getRoleId() == 1 || user.getRoleId() == 2) {
+                if (user.getRoleId() == 1) {
                     response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                } else if (user.getRoleId() == 2) {
+                    response.sendRedirect(request.getContextPath() + "/mentor/dashboard");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
+                    // Check for redirectAfterLogin session attribute
+                    HttpSession session2 = request.getSession(false);
+                    String redirectTarget = (session2 != null) ? (String) session2.getAttribute("redirectAfterLogin") : null;
+                    if (redirectTarget != null && !redirectTarget.isEmpty()) {
+                        session2.removeAttribute("redirectAfterLogin");
+                        response.sendRedirect(request.getContextPath() + "/candidate/" + redirectTarget);
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/candidate/dashboard");
+                    }
                 }
             } else {
                 forwardError(request, response, "Token không hợp lệ hoặc đã hết hạn");

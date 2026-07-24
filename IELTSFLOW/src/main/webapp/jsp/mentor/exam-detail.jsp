@@ -72,7 +72,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Loại đề <span class="text-danger">*</span></label>
-                        <select name="type" class="form-select" required>
+                        <select name="type" id="examTypeSelect" class="form-select" required>
                             <option value="Practice" ${exam.type == 'Practice' ? 'selected' : ''}>Practice (Luyện tập)</option>
                             <option value="Mock Test" ${exam.type == 'Mock Test' ? 'selected' : ''}>Mock Test (Thi thử)</option>
                             <option value="Placement Test" ${exam.type == 'Placement Test' ? 'selected' : ''}>Placement Test (Thi xếp lớp)</option>
@@ -81,7 +81,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Kỹ năng tập trung <span class="text-danger">*</span></label>
-                        <select name="skill" class="form-select" required>
+                        <select name="skill" id="examSkillSelect" class="form-select" required>
                             <option value="All" ${exam.skillFocus == 'All' ? 'selected' : ''}>Full Test (Tất cả kỹ năng)</option>
                             <option value="Listening" ${exam.skillFocus == 'Listening' ? 'selected' : ''}>Listening</option>
                             <option value="Reading" ${exam.skillFocus == 'Reading' ? 'selected' : ''}>Reading</option>
@@ -491,6 +491,50 @@
             }
         });
     }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('examTypeSelect');
+        const skillSelect = document.getElementById('examSkillSelect');
+        
+        if (typeSelect && skillSelect) {
+            function updateSkillOptions() {
+                const type = typeSelect.value;
+                const options = skillSelect.querySelectorAll('option');
+                
+                options.forEach(option => {
+                    if (type === 'Practice') {
+                        if (option.value === 'All') {
+                            option.hidden = true;
+                            option.disabled = true;
+                        } else {
+                            option.hidden = false;
+                            option.disabled = false;
+                        }
+                    } else {
+                        if (option.value === 'All') {
+                            option.hidden = false;
+                            option.disabled = false;
+                        } else {
+                            option.hidden = true;
+                            option.disabled = true;
+                        }
+                    }
+                });
+
+                if (skillSelect.options[skillSelect.selectedIndex] && skillSelect.options[skillSelect.selectedIndex].disabled) {
+                    if (type === 'Practice') {
+                        skillSelect.value = 'Listening';
+                    } else {
+                        skillSelect.value = 'All';
+                    }
+                }
+            }
+
+            typeSelect.addEventListener('change', updateSkillOptions);
+            updateSkillOptions();
+        }
+    });
 </script>
 </body>
 </html>
