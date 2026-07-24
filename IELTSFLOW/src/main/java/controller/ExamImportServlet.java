@@ -55,12 +55,14 @@ public class ExamImportServlet extends HttpServlet {
             }
         } catch (Exception e) {
             LOGGER.severe("Exam Import Error: " + e.getMessage());
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            // Return 200 with { success: false, error: ... } instead of 500 to avoid Tomcat error valve
+            resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
             
-            java.util.Map<String, String> errorMap = new java.util.HashMap<>();
-            errorMap.put("error", e.getMessage());
+            java.util.Map<String, Object> errorMap = new java.util.HashMap<>();
+            errorMap.put("success", false);
+            errorMap.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error");
             resp.getWriter().write(mapper.writeValueAsString(errorMap));
         }
     }

@@ -49,3 +49,5 @@ IELTSFLOW/E2E_TestResults.html
 IELTSFLOW/src/test/resources/config/dev.properties
 
 screenshots/
+
+IELTSFLOW/documents/

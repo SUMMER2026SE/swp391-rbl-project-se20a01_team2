@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+<%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -81,8 +82,9 @@
             </form>
         </div>
 
-        <div id="search-results" class="glass-panel animate-fade-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
-            <div class="table-responsive">
+        <div id="search-container">
+            <div class="glass-panel animate-fade-up" style="animation-delay: 0.2s; padding: 0; overflow: hidden;">
+                <div class="table-responsive">
                 <table class="table table-custom mb-0">
                     <thead>
                         <tr>
@@ -136,55 +138,6 @@
                                     </td>
                                 </tr>
 
-                                <!-- Preview Modal for Lesson ${lesson.lessonId} -->
-                                <div class="modal fade" id="previewLessonModal${lesson.lessonId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title fw-bold">Xem Trước Bài Học: ${lesson.title}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body" style="background-color: #f8f9fa;">
-                                                <div class="container-fluid">
-                                                    <c:if test="${not empty lesson.videoUrl}">
-                                                        <div class="mb-4 bg-dark rounded shadow-sm overflow-hidden" style="position: relative; padding-top: 56.25%;">
-                                                            <c:choose>
-                                                                <c:when test="${lesson.videoUrl.contains('youtube.com') || lesson.videoUrl.contains('youtu.be')}">
-                                                                    <iframe src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" 
-                                                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-                                                                            frameborder="0" allowfullscreen>
-                                                                    </iframe>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
-                                                                        <source src="${pageContext.request.contextPath}${lesson.videoUrl}" type="video/mp4">
-                                                                        Trình duyệt của bạn không hỗ trợ video HTML5.
-                                                                    </video>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </div>
-                                                    </c:if>
-
-                                                    <c:if test="${not empty lesson.documentUrl}">
-                                                        <div class="mb-4">
-                                                            <a href="${lesson.documentUrl}" target="_blank" class="btn btn-outline-primary w-100">
-                                                                <i class="fa-solid fa-file-pdf me-2"></i> Xem tài liệu đính kèm
-                                                            </a>
-                                                        </div>
-                                                    </c:if>
-
-                                                    <div class="bg-white p-4 border rounded shadow-sm" style="line-height: 1.8;">
-                                                        ${lesson.content}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                             </c:if>
                         </c:forEach>
                         <c:if test="${empty lessons}">
@@ -194,8 +147,100 @@
                         </c:if>
                     </tbody>
                 </table>
+                </div>
             </div>
+
+            <c:forEach var="lesson" items="${lessons}">
+                <c:if test="${!lesson.deleted}">
+                    <!-- Preview Modal for Lesson ${lesson.lessonId} -->
+                    <div class="modal fade" id="previewLessonModal${lesson.lessonId}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                                <div class="modal-header border-bottom" style="background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 20px 30px;">
+                                    <h5 class="modal-title fw-bold" style="font-size: 1.5rem; color: var(--text-primary);">
+                                        <c:choose>
+                                            <c:when test="${lesson.skill == 'Listening'}"><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 me-2 align-middle" style="font-size: 0.9rem;">Listening</span></c:when>
+                                            <c:when test="${lesson.skill == 'Reading'}"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 me-2 align-middle" style="font-size: 0.9rem;">Reading</span></c:when>
+                                            <c:when test="${lesson.skill == 'Writing'}"><span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 me-2 align-middle" style="font-size: 0.9rem;">Writing</span></c:when>
+                                            <c:when test="${lesson.skill == 'Speaking'}"><span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 me-2 align-middle" style="font-size: 0.9rem;">Speaking</span></c:when>
+                                        </c:choose>
+                                        <span class="align-middle">${lesson.title}</span>
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body" style="background-color: #f8fafc; padding: 30px;">
+                                    <div class="container-fluid">
+                                        
+                                        <!-- Video Section -->
+                                        <c:if test="${not empty lesson.videoUrl}">
+                                            <div class="mb-5 bg-dark shadow-sm overflow-hidden" style="position: relative; padding-top: 56.25%; border-radius: 16px; border: 1px solid rgba(0,0,0,0.1);">
+                                                <c:choose>
+                                                    <c:when test="${lesson.videoUrl.contains('youtube.com') || lesson.videoUrl.contains('youtu.be')}">
+                                                        <iframe src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}" 
+                                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                                                                frameborder="0" allowfullscreen>
+                                                        </iframe>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
+                                                            <source src="${pageContext.request.contextPath}${lesson.videoUrl}" type="video/mp4">
+                                                            Trình duyệt của bạn không hỗ trợ video HTML5.
+                                                        </video>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                        </c:if>
+
+                                        <!-- Document Section -->
+                                        <c:if test="${not empty lesson.documentUrl}">
+                                            <c:set var="docUrl" value="${lesson.documentUrl.startsWith('http') ? lesson.documentUrl : pageContext.request.contextPath.concat(lesson.documentUrl)}" />
+                                            <c:set var="lowerD" value="${fn:toLowerCase(lesson.documentUrl)}" />
+                                            <c:set var="isPdf" value="${fn:endsWith(lowerD, '.pdf')}" />
+                                            <c:set var="isOffice" value="${fn:endsWith(lowerD, '.docx') || fn:endsWith(lowerD, '.doc') || fn:endsWith(lowerD, '.pptx') || fn:endsWith(lowerD, '.xlsx')}" />
+                                            
+                                            <div class="mb-5 p-4 bg-white shadow-sm" style="border-left: 4px solid var(--accent-blue); border-radius: 12px; border: 1px solid var(--border-color);">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <div>
+                                                        <h6 class="fw-bold mb-1" style="color: var(--text-primary); font-size: 1.1rem;"><i class="fa-solid fa-file-pdf text-danger me-2"></i>Tài liệu đính kèm</h6>
+                                                        <small class="text-muted">Bạn có thể xem trực tiếp hoặc tải về</small>
+                                                    </div>
+                                                    <a href="${docUrl}" target="_blank" download class="btn btn-outline-primary rounded-pill shadow-sm px-4">
+                                                        Tải về <i class="fa-solid fa-download ms-1"></i>
+                                                    </a>
+                                                </div>
+
+                                                <c:if test="${isPdf}">
+                                                    <div style="width: 100%; height: 600px; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; background: #f8f9fa;">
+                                                        <iframe src="${docUrl}" width="100%" height="100%" style="border: none;"></iframe>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${isOffice}">
+                                                    <div style="width: 100%; height: 600px; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; background: #f8f9fa;">
+                                                        <c:set var="embedUrl" value="https://docs.google.com/viewer?embedded=true&url=${lesson.documentUrl.startsWith('http') ? lesson.documentUrl : 'https://ieltsflow.tanmanh350.ovh'.concat(lesson.documentUrl)}" />
+                                                        <iframe src="${embedUrl}" width="100%" height="100%" style="border: none;"></iframe>
+                                                    </div>
+                                                </c:if>
+                                            </div>
+                                        </c:if>
+
+                                        <!-- Content Section -->
+                                        <div class="bg-white p-4 p-md-5 shadow-sm" style="line-height: 1.8; font-size: 1.05rem; color: #334155; border-radius: 16px; border: 1px solid var(--border-color);">
+                                            <h6 class="fw-bold mb-4 text-secondary text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;"><i class="fa-solid fa-align-left me-2"></i>Nội dung bài giảng</h6>
+                                            ${lesson.content}
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-top bg-white" style="padding: 15px 30px;">
+                                    <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm fw-bold" data-bs-dismiss="modal">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </c:if>
+            </c:forEach>
             
+
             <c:if test="${lessonsPage != null && lessonsPage.totalPages > 1}">
                 <c:set var="startPage" value="${lessonsPage.currentPage - 2}" />
                 <c:if test="${startPage < 1}"><c:set var="startPage" value="1" /></c:if>
@@ -224,6 +269,7 @@
     </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 <script>
 function ajaxSearch(form) {
@@ -235,7 +281,7 @@ function ajaxSearch(form) {
     }
     url.search = params.toString();
 
-    const results = document.getElementById('search-results');
+    const results = document.getElementById('search-container');
     if (results) {
         results.style.opacity = '0.5';
         results.style.transition = 'opacity 0.2s';
@@ -246,7 +292,7 @@ function ajaxSearch(form) {
         .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            const newResults = doc.getElementById('search-results');
+            const newResults = doc.getElementById('search-container');
             if (newResults && results) {
                 results.innerHTML = newResults.innerHTML;
                 results.style.opacity = '1';
