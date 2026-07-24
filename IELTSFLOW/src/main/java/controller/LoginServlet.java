@@ -20,11 +20,17 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Luu redirect target vao session neu co
+        String redirect = req.getParameter("redirect");
+        if (redirect != null && !redirect.trim().isEmpty()) {
+            req.getSession(true).setAttribute("redirectAfterLogin", redirect.trim());
+        }
         req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
         String email = req.getParameter("email");
         String password = req.getParameter("password");
 
@@ -76,8 +82,14 @@ public class LoginServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
             } else if (user.getRoleId() == 2) { // Mentor
                 resp.sendRedirect(req.getContextPath() + "/mentor/dashboard");
-            } else { // Candidate
-                resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
+            } else { // Candidate – check for redirect target
+                String redirectTarget = (String) session.getAttribute("redirectAfterLogin");
+                if (redirectTarget != null && !redirectTarget.isEmpty()) {
+                    session.removeAttribute("redirectAfterLogin");
+                    resp.sendRedirect(req.getContextPath() + "/candidate/" + redirectTarget);
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
