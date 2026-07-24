@@ -19,7 +19,7 @@ public class Notification {
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
-    @Column(name = "Title", nullable = false)
+    @Column(name = "Title", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String title;
 
     @Column(name = "Content", columnDefinition = "NVARCHAR(MAX)", nullable = false)

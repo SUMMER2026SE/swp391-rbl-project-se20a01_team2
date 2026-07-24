@@ -849,7 +849,6 @@
                 <a href="#pricing" class="nav-link">Bảng giá</a>
                 <a href="${pageContext.request.contextPath}/subscription" class="nav-link">Gói Đăng Ký</a>
                 <a href="#testimonials" class="nav-link">Đánh giá</a>
-                <a href="#" class="nav-link">Blog</a>
             </div>
             <div class="nav-actions" id="desktop-nav-actions">
                 <c:choose>
@@ -908,7 +907,6 @@
         <a href="#pricing" class="mobile-link">Bảng giá</a>
         <a href="${pageContext.request.contextPath}/subscription" class="mobile-link">Gói Đăng Ký</a>
         <a href="#testimonials" class="mobile-link">Đánh giá</a>
-        <a href="#" class="mobile-link">Blog</a>
         <div id="mobile-nav-actions" style="display:flex; flex-direction:column; gap:10px;">
             <c:choose>
                 <c:when test="${not empty sessionScope.fullName}">
@@ -1008,14 +1006,7 @@
                 <!-- Left: YouTube Embed -->
                 <div class="scroll-reveal">
                     <div style="position: relative; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.2); background: #000; aspect-ratio: 16/9;">
-                        <iframe
-                            src="https://www.youtube.com/embed/lJBsAW7lhC4?si=TYkKTarGgqBSU4vX&autoplay=0&rel=0&modestbranding=1"
-                            title="LexiPrep AI – IELTS Listening AI Demo"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen
-                            style="width:100%; height:100%; display:block;"
-                        ></iframe>
+                        <img src="img/index-img1.webp">
                     </div>
                     <!-- Caption -->
                     <div style="display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 12px 16px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
@@ -1023,8 +1014,8 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                         </div>
                         <div>
-                            <div style="font-weight: 600; font-size: 14px; color: #1e293b;">IELTS AI Reading Assistant</div>
-                            <div style="font-size: 12px; color: #64748b;">IELTSFlow AI • Luyện đề thực chiến</div>
+                            <div style="font-weight: 600; font-size: 14px; color: #1e293b;">Học và luyện thi IELTS cùng IELTSFlow</div>
+                            <div style="font-size: 12px; color: #64748b;">IELTSFlow • Luyện đề thực chiến</div>
                         </div>
                     </div>
                 </div>
@@ -1370,10 +1361,10 @@
                     IELTS Flow
                 </a>
                 <div class="footer-links">
-                    <a href="#">Blog</a>
-                    <a href="#">Điều khoản</a>
-                    <a href="#">Bảo mật</a>
-                    <a href="#">Liên hệ</a>
+                    <a href="#features" class="nav-link">Tính năng</a>
+                    <a href="#pricing" class="nav-link">Bảng giá</a>
+                    <a href="${pageContext.request.contextPath}/subscription" class="nav-link">Gói Đăng Ký</a>
+                    <a href="#testimonials" class="nav-link">Đánh giá</a>
                 </div>
             </div>
             <div class="copyright">

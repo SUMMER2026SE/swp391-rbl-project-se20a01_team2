@@ -600,10 +600,10 @@
                         IELTS Flow
                     </a>
                     <div class="footer-links">
-                        <a href="#">Blog</a>
-                        <a href="#">Điều khoản</a>
-                        <a href="#">Bảo mật</a>
-                        <a href="#">Liên hệ</a>
+                        <a href="#features" class="nav-link">Tính năng</a>
+                        <a href="#pricing" class="nav-link">Bảng giá</a>
+                        <a href="${pageContext.request.contextPath}/subscription" class="nav-link">Gói Đăng Ký</a>
+                        <a href="#testimonials" class="nav-link">Đánh giá</a>
                     </div>
                 </div>
                 <div class="copyright">
