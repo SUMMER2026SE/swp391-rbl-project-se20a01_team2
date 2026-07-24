@@ -56,7 +56,7 @@ public class RegisterServlet extends HttpServlet {
             req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
             return;
         }
-        if (confirmPassword != null && !password.equals(confirmPassword)) {
+        if (confirmPassword == null || !password.equals(confirmPassword)) {
             req.setAttribute("error", "Mật khẩu xác nhận không khớp");
             req.setAttribute("tab", "register");
             req.getRequestDispatcher("/jsp/auth.jsp").forward(req, resp);
