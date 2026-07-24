@@ -169,9 +169,6 @@ public class AuthFilter implements Filter {
 
     /** Kiểm tra đường dẫn có nằm trong danh sách cần bảo vệ không */
     private boolean isProtectedPath(String path) {
-        if (path.startsWith("/candidate/") || path.startsWith("/jsp/candidate/")) {
-            return true;
-        }
         for (String protectedPath : PROTECTED_PATHS) {
             if (path.equals(protectedPath) || path.startsWith(protectedPath + "?")) {
                 return true;

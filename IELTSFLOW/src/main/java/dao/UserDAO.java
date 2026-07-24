@@ -317,27 +317,4 @@ public class UserDAO {
             if (u != null) { u.setDeleted(true); em.merge(u); }
         });
     }
-
-    /**
-     * Tìm những ứng viên (Candidate) không hoạt động kể từ một mốc thời gian
-     * Hoạt động bao gồm: xem bài giảng (UserLessonProgress) hoặc làm bài thi (TestSubmissions)
-     */
-    public List<Integer> findInactiveCandidates(java.time.LocalDateTime threshold) {
-        return JpaHelper.query(em -> {
-            String sql = "SELECT u.UserID FROM Users u " +
-                         "WHERE u.RoleID = 3 AND u.Deleted = 0 AND u.CreatedAt < :threshold " +
-                         "AND NOT EXISTS (SELECT 1 FROM UserLessonProgress p WHERE p.UserID = u.UserID AND p.LastAccessed >= :threshold) " +
-                         "AND NOT EXISTS (SELECT 1 FROM TestSubmissions t WHERE t.UserID = u.UserID AND t.StartTime >= :threshold)";
-            List<Object> results = em.createNativeQuery(sql)
-                                     .setParameter("threshold", threshold)
-                                     .getResultList();
-            java.util.List<Integer> userIds = new java.util.ArrayList<>();
-            for (Object obj : results) {
-                if (obj instanceof Number) {
-                    userIds.add(((Number) obj).intValue());
-                }
-            }
-            return userIds;
-        });
-    }
 }

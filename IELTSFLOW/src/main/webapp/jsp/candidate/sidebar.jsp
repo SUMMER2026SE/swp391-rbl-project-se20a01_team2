@@ -42,10 +42,8 @@
                     class="nav-link ${param.activePage == 'redo-exercises' ? 'active' : ''}"
                     title="Lịch sử & Làm lại">🔄 <span class="nav-text">Lịch sử & Làm lại</span></a>
                 <a href="${pageContext.request.contextPath}/candidate/notifications"
-                    class="nav-link ${param.activePage == 'notifications' ? 'active' : ''}" title="Thông báo" style="position: relative;">
-                    🔔 <span class="nav-text">Thông báo</span>
-                    <span id="notif-badge" style="display: none; position: absolute; top: 10px; right: 10px; background: var(--accent-red); color: white; border-radius: 50%; font-size: 10px; padding: 2px 6px; font-weight: bold;">0</span>
-                </a>
+                    class="nav-link ${param.activePage == 'notifications' ? 'active' : ''}" title="Thông báo">🔔 <span
+                        class="nav-text">Thông báo</span></a>
                 <a href="${pageContext.request.contextPath}/candidate/tickets"
                     class="nav-link ${param.activePage == 'tickets' ? 'active' : ''}" title="Ticket hỗ trợ">🎫 <span
                         class="nav-text">Ticket hỗ trợ</span></a>
@@ -66,31 +64,4 @@
                 if (sidebar) sidebar.classList.toggle('collapsed');
                 if (mainContent) mainContent.classList.toggle('expanded');
             }
-
-            // Fetch unread notification count
-            function fetchUnreadNotifications() {
-                fetch('${pageContext.request.contextPath}/api/notifications/unread')
-                    .then(response => {
-                        if (response.ok) return response.json();
-                        throw new Error('Network response was not ok.');
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            const badge = document.getElementById('notif-badge');
-                            if (data.unreadCount > 0) {
-                                badge.textContent = data.unreadCount > 99 ? '99+' : data.unreadCount;
-                                badge.style.display = 'inline-block';
-                            } else {
-                                badge.style.display = 'none';
-                            }
-                        }
-                    })
-                    .catch(error => console.error('Error fetching unread notifications:', error));
-            }
-
-            // Call immediately and set interval for every 2 minutes
-            document.addEventListener('DOMContentLoaded', function() {
-                fetchUnreadNotifications();
-                setInterval(fetchUnreadNotifications, 120000);
-            });
         </script>
