@@ -255,6 +255,13 @@ function toggleBookmark() {
         showToast('Đã thêm vào danh sách Bookmark thành công!', 'success');
     }
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+    // Sync with backend API
+    fetch((window.contextPath || '') + '/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=toggle_lesson_bookmark&lessonId=' + id
+    }).catch(e => console.error("Failed to sync bookmark:", e));
 }
 
 function toggleLearned() {
@@ -283,6 +290,13 @@ function toggleLearned() {
         showToast('Đã đánh dấu hoàn thành bài học!', 'success');
     }
     localStorage.setItem('learnedLessons', JSON.stringify(learnedList));
+
+    // Sync with backend API
+    fetch((window.contextPath || '') + '/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=toggle_lesson_progress&lessonId=' + id
+    }).catch(e => console.error("Failed to sync progress:", e));
 }
 
 function renderRedoHistory() {

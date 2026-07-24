@@ -98,6 +98,10 @@
                     request.setAttribute("finalDocUrl", finalDocUrl);
                 %>
 
+                <div style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary); min-height: 100px; margin-bottom: 20px;">
+                    ${lesson.content}
+                </div>
+
                 <c:if test="${hasVideo}">
                     <div class="video-container">
                         <c:choose>
@@ -116,16 +120,6 @@
                         </c:choose>
                     </div>
                 </c:if>
-                <c:if test="${not hasVideo}">
-                    <div style="padding: 40px 20px; text-align: center; background: rgba(0,0,0,0.03); border-radius: 12px; margin-bottom: 20px; border: 1px dashed rgba(0,0,0,0.15); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-                        <div style="font-size: 2.2rem; opacity: 0.6; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">🎦</div>
-                        <div style="color: #64748b; font-style: italic; font-size: 0.95rem; font-weight: 500;">Không có video bài giảng cho bài học này</div>
-                    </div>
-                </c:if>
-
-                <div style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary); min-height: 100px; margin-bottom: 20px;">
-                    ${lesson.content}
-                </div>
 
                 <% if (hasDoc) { %>
                     <div style="margin-bottom: 30px; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 8px; border-left: 4px solid var(--accent-green);">
