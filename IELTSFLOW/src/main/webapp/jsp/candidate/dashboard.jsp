@@ -51,9 +51,9 @@
                 <div style="display: flex; gap: 20px;">
                     <div style="text-align: center;">
                         <div style="width: 100px; height: 100px; border-radius: 50%; border: 8px solid rgba(59, 130, 246, 0.3); border-top-color: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">
-                            ${target.currentBand}
+                            ${not empty stats.latestMockTest and stats.latestMockTest > 0 ? stats.latestMockTest : 'N/A'}
                         </div>
-                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Hiện tại</span>
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Điểm Test gần nhất</span>
                     </div>
                     <div style="text-align: center;">
                         <div style="width: 100px; height: 100px; border-radius: 50%; border: 8px solid rgba(16, 185, 129, 0.3); border-top-color: var(--accent-green); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">
@@ -71,7 +71,7 @@
                     <p>Giờ học (Tuần này)</p>
                     <h3 style="color: var(--accent-blue);">${stats.studyHours}h</h3>
                 </div>
-                --%>
+               
                 <div class="stat-card">
                     <p>Bài học đã hoàn thành</p>
                     <h3 style="color: var(--accent-green);">${stats.lessonsCompleted}</h3>
@@ -79,7 +79,7 @@
                 <div class="stat-card">
                     <p>Điểm Mock Test gần nhất</p>
                     <h3 style="color: var(--accent-purple);">${not empty stats.latestMockTest and stats.latestMockTest > 0 ? stats.latestMockTest : 'N/A'}</h3>
-                </div>
+                </div> --%>
             </div>
 
             <h2 style="margin-bottom: 20px; margin-top: 40px;" class="animate-fade-up">🔥 Trọng tâm hôm nay</h2>
