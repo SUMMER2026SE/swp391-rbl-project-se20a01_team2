@@ -174,12 +174,12 @@ public class SubmissionDetailsDAO {
                     // sd.setMentorScore(row[9] != null ? ((Number) row[9]).doubleValue() : null);
                     // sd.setMentorFeedback(row[10] != null ? row[10].toString() : null);
                     
-                    sd.setQuestionContent(row[11] != null ? row[11].toString() : null);
-                    sd.setQuestionType(row[12] != null ? row[12].toString() : null);
-                    sd.setSkill(row[13] != null ? row[13].toString() : null);
-                    sd.setCorrectAnswerContent(row[14] != null ? row[14].toString() : null);
-                    sd.setExplanation(row[15] != null ? row[15].toString() : null);
-                    sd.setAiFeedbackJson(row[16] != null ? row[16].toString() : null);
+                    sd.setQuestionContent(row[9] != null ? row[9].toString() : null);
+                    sd.setQuestionType(row[10] != null ? row[10].toString() : null);
+                    sd.setSkill(row[11] != null ? row[11].toString() : null);
+                    sd.setCorrectAnswerContent(row[12] != null ? row[12].toString() : null);
+                    sd.setExplanation(row[13] != null ? row[13].toString() : null);
+                    sd.setAiFeedbackJson(row[14] != null ? row[14].toString() : null);
                     
                     list.add(sd);
                 }
