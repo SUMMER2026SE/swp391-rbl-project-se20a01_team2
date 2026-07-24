@@ -138,7 +138,7 @@ public class SubmissionDetailsDAO {
             return JpaHelper.query(em -> {
                 String sql = "SELECT sd.DetailID, sd.SubmissionID, sd.QuestionID, sd.CandidateAnswer, " +
                              "sd.SpeakingUrl, sd.CandidateTranscript, sd.IsCorrect, sd.Score, sd.GradingStatus, " +
-                             "sd.MentorScore, sd.MentorFeedback, " +
+                             // "sd.MentorScore, sd.MentorFeedback, " +
                              "q.Content AS QuestionContent, q.QuestionType, q.Skill, " +
                              "(SELECT TOP 1 a.Content FROM Answers a WHERE a.QuestionID = q.QuestionID AND a.IsCorrect = 1) AS CorrectAnswerContent, " +
                              "q.Explanation, " +
@@ -171,8 +171,8 @@ public class SubmissionDetailsDAO {
                     
                     sd.setScore(row[7] != null ? ((Number) row[7]).doubleValue() : null);
                     sd.setGradingStatus(row[8] != null ? row[8].toString() : null);
-                    sd.setMentorScore(row[9] != null ? ((Number) row[9]).doubleValue() : null);
-                    sd.setMentorFeedback(row[10] != null ? row[10].toString() : null);
+                    // sd.setMentorScore(row[9] != null ? ((Number) row[9]).doubleValue() : null);
+                    // sd.setMentorFeedback(row[10] != null ? row[10].toString() : null);
                     
                     sd.setQuestionContent(row[11] != null ? row[11].toString() : null);
                     sd.setQuestionType(row[12] != null ? row[12].toString() : null);
