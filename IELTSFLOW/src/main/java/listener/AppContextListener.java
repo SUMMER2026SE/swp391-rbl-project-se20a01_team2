@@ -99,12 +99,12 @@ public class AppContextListener implements ServletContextListener {
             public void run() {
                 try {
                     System.out.println("Running automatic study reminder task...");
-                    UserLessonProgressDAO progressDAO = new UserLessonProgressDAO();
+                    dao.UserDAO userDAO = new dao.UserDAO();
                     NotificationService notifService = new NotificationService();
                     
                     // Find users who haven't studied for 3 days
                     LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-                    List<Integer> inactiveUsers = progressDAO.findInactiveUsers(threeDaysAgo);
+                    List<Integer> inactiveUsers = userDAO.findInactiveCandidates(threeDaysAgo);
                     
                     for (Integer userId : inactiveUsers) {
                         try {

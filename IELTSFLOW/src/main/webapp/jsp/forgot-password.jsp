@@ -7,206 +7,335 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quên mật khẩu - IELTSFlow</title>
-    <!-- Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/design-system.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --font-h: 'Inter', sans-serif;
+            --font-b: 'Inter', sans-serif;
+            --blue-600: #2563EB;
+            --grad-brand: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+            --text-dark: #0F172A;
+            --text-body: #334155;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+            --border-focus: #3B82F6;
+            --radius: 12px;
+            --shadow-sm: 0 2px 8px rgba(15,23,42,.04);
+            --shadow-md: 0 4px 20px rgba(15,23,42,.08);
+            background: #F8FAFC;
+        }
+
+        body.dark-mode {
+            --text-dark: #F1F5F9;
+            --text-body: #CBD5E1;
+            --text-muted: #94A3B8;
+            --border: #1E3A5F;
+            --border-focus: #3B82F6;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,.3);
+            --shadow-md: 0 4px 20px rgba(0,0,0,.35);
+            background: #0F172A;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--color-bg);
+            font-family: var(--font-b);
             margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            color: var(--text-body);
+            transition: background 0.3s;
         }
 
-        .auth-container {
+        .auth-right {
             width: 100%;
-            max-width: 460px;
-            padding: 24px;
+            max-width: 480px;
+            background: #fff;
+            padding: 40px 48px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            transition: background 0.3s, box-shadow 0.3s;
         }
 
-        .auth-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            padding: 40px;
+        body.dark-mode .auth-right {
+            background: #1E293B;
         }
 
-        .logo {
-            text-align: center;
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--color-primary-600);
-            text-decoration: none;
-            display: block;
-            margin-bottom: 24px;
+        /* Top-right controls */
+        .right-controls {
+            position: absolute;
+            top: 24px;
+            right: 28px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        h2 {
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 20px;
-            color: var(--color-text);
-        }
-
-        p.subtitle {
-            text-align: center;
-            color: var(--color-text-secondary);
-            font-size: 14px;
-            margin-bottom: 24px;
-            line-height: 1.5;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
+        .rc-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .8125rem;
             font-weight: 600;
-            color: var(--color-text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid var(--color-border);
-            border-radius: 10px;
-            font-size: 15px;
-            box-sizing: border-box;
-            transition: all 0.2s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--color-primary-500);
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 12px;
-            background: var(--grad-primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 15px;
+            color: var(--text-muted);
+            background: #fff;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: all .2s;
+        }
+        .rc-btn:hover { border-color: #CBD5E1; color: var(--text-dark); }
+        
+        body.dark-mode .rc-btn { background: #0F172A; border-color: #1E3A5F; color: #94A3B8; }
+        body.dark-mode .rc-btn:hover { border-color: #3B82F6; color: #93C5FD; }
+
+        /* Welcome */
+        .auth-welcome { margin-bottom: 28px; text-align: center; }
+        .auth-welcome h2 {
+            font-family: var(--font-h);
+            font-size: 1.625rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+        .auth-welcome p {
+            font-size: .9375rem;
+            color: var(--text-muted);
+            line-height: 1.6;
         }
 
-        .btn-submit:hover {
-            opacity: 0.9;
-        }
-
-        .back-link {
+        /* Form elements */
+        .fgrp { margin-bottom: 18px; }
+        .fgrp label {
             display: block;
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 7px;
+        }
+        body.dark-mode .fgrp label { color: #E2E8F0; }
+
+        .inp-wrap { position: relative; }
+        .inp-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: .875rem;
+            pointer-events: none;
+        }
+        .inp-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-family: var(--font-b);
+            font-size: .9375rem;
+            color: var(--text-dark);
+            background: #fff;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            box-sizing: border-box;
+        }
+        .inp-wrap input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+        }
+        .inp-wrap input::placeholder { color: var(--text-muted); }
+        
+        body.dark-mode .inp-wrap input { background: #0F172A; border-color: #1E3A5F; color: #F1F5F9; }
+        body.dark-mode .inp-wrap input:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+        body.dark-mode .inp-wrap input::placeholder { color: #475569; }
+
+        .btn-cta {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius);
+            background: var(--grad-brand);
+            color: #fff;
+            font-family: var(--font-b);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all .25s;
+            box-shadow: 0 4px 16px rgba(37,99,235,.28);
+            margin-top: 10px;
+        }
+        .btn-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37,99,235,.36);
+        }
+        .btn-cta:active { transform: scale(.98); }
+
+        .switch-cta {
             text-align: center;
             margin-top: 24px;
-            color: var(--color-text-secondary);
+            font-size: .875rem;
+            color: var(--text-muted);
+        }
+        .switch-cta a {
+            color: var(--blue-600);
+            font-weight: 700;
             text-decoration: none;
-            font-size: 14px;
+        }
+        body.dark-mode .switch-cta a { color: #93C5FD; }
+
+        .alert-err {
+            background: #FEF2F2;
+            border: 1px solid #FCA5A5;
+            color: #B91C1C;
+            padding: 11px 15px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: .875rem;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        body.dark-mode .alert-err { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.3); color: #FCA5A5; }
 
-        .back-link:hover {
-            color: var(--color-primary-600);
-        }
-
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 14px;
+        .alert-ok {
+            background: #F0FDF4;
+            border: 1px solid #86EFAC;
+            color: #166534;
+            padding: 11px 15px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: .875rem;
             font-weight: 500;
-            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        body.dark-mode .alert-ok { background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.3); color: #86EFAC; }
 
-        .alert-error {
-            background-color: #fef2f2;
-            color: #b91c1c;
-            border: 1px solid #fca5a5;
-        }
-
-        .alert-success {
-            background-color: #f0fdf4;
-            color: #15803d;
-            border: 1px solid #86efac;
+        @media(max-width: 480px) {
+            .auth-right { padding: 32px 24px; border-radius: 0; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+            .right-controls { top: 16px; right: 16px; }
         }
     </style>
 </head>
 <body>
 
-<div class="auth-container">
-    <div class="auth-card">
-        <a href="${pageContext.request.contextPath}/" class="logo">IELTS Flow</a>
-        
-        <c:if test="${not empty error}">
-            <div class="alert alert-error">${error}</div>
-        </c:if>
-        <c:if test="${not empty successMessage}">
-            <div class="alert alert-success">${successMessage}</div>
-        </c:if>
+<div class="auth-right">
+    <div class="right-controls">
+        <button class="rc-btn" id="darkToggle" onclick="toggleDark()">
+            <i class="fas fa-moon" id="darkIcon"></i>
+        </button>
+    </div>
 
+    <c:if test="${not empty error}">
+        <div class="alert-err"><i class="fas fa-exclamation-circle"></i> ${error}</div>
+    </c:if>
+    <c:if test="${not empty successMessage}">
+        <div class="alert-ok"><i class="fas fa-check-circle"></i> ${successMessage}</div>
+    </c:if>
+
+    <div class="auth-welcome">
         <c:choose>
-            <%-- STEP 1: SEND OTP --%>
             <c:when test="${empty step || step == 'sendOtp'}">
                 <h2>Khôi phục mật khẩu</h2>
-                <p class="subtitle">Nhập email của bạn và chúng tôi sẽ gửi mã OTP gồm 6 chữ số để đặt lại mật khẩu.</p>
-                <form action="${pageContext.request.contextPath}/forgot-password" method="POST">
-                    <input type="hidden" name="action" value="sendOtp">
-                    <div class="form-group">
-                        <label>Địa chỉ Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
-                    </div>
-                    <button type="submit" class="btn-submit">Gửi mã OTP</button>
-                </form>
+                <p>Nhập email của bạn và chúng tôi sẽ gửi mã OTP gồm 6 chữ số để đặt lại mật khẩu.</p>
             </c:when>
-
-            <%-- STEP 2: VERIFY OTP --%>
             <c:when test="${step == 'verifyOtp'}">
                 <h2>Xác thực OTP</h2>
-                <p class="subtitle">Vui lòng kiểm tra hòm thư của <b>${sessionScope.resetEmail}</b> và nhập mã 6 số bạn nhận được.</p>
-                <form action="${pageContext.request.contextPath}/forgot-password" method="POST">
-                    <input type="hidden" name="action" value="verifyOtp">
-                    <div class="form-group">
-                        <label>Mã OTP</label>
-                        <input type="text" name="otp" class="form-control" placeholder="Nhập 6 số..." maxlength="6" pattern="\d{6}" required>
-                    </div>
-                    <button type="submit" class="btn-submit">Xác thực</button>
-                </form>
+                <p>Vui lòng kiểm tra hòm thư của <b>${sessionScope.resetEmail}</b> và nhập mã 6 số bạn nhận được.</p>
             </c:when>
-
-            <%-- STEP 3: RESET PASSWORD --%>
             <c:when test="${step == 'resetPassword'}">
                 <h2>Đặt mật khẩu mới</h2>
-                <p class="subtitle">Tạo mật khẩu mới cho tài khoản của bạn. Mật khẩu nên có ít nhất 8 ký tự.</p>
-                <form action="${pageContext.request.contextPath}/forgot-password" method="POST">
-                    <input type="hidden" name="action" value="resetPassword">
-                    <div class="form-group">
-                        <label>Mật khẩu mới</label>
-                        <input type="password" name="newPassword" class="form-control" placeholder="Ít nhất 8 ký tự" required minlength="8">
-                    </div>
-                    <div class="form-group">
-                        <label>Xác nhận mật khẩu</label>
-                        <input type="password" name="confirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" required minlength="8">
-                    </div>
-                    <button type="submit" class="btn-submit">Đổi mật khẩu</button>
-                </form>
+                <p>Tạo mật khẩu mới cho tài khoản của bạn. Mật khẩu nên có ít nhất 8 ký tự.</p>
             </c:when>
         </c:choose>
+    </div>
 
-        <a href="${pageContext.request.contextPath}/jsp/auth.jsp" class="back-link">&larr; Quay lại Đăng nhập</a>
+    <c:choose>
+        <%-- STEP 1: SEND OTP --%>
+        <c:when test="${empty step || step == 'sendOtp'}">
+            <form action="${pageContext.request.contextPath}/forgot-password" method="POST">
+                <input type="hidden" name="action" value="sendOtp">
+                <div class="fgrp">
+                    <label>Địa chỉ Email</label>
+                    <div class="inp-wrap">
+                        <i class="fas fa-envelope inp-icon"></i>
+                        <input type="email" name="email" placeholder="Nhập email của bạn" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-cta">
+                    <span>Gửi mã OTP</span> <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </c:when>
+
+        <%-- STEP 2: VERIFY OTP --%>
+        <c:when test="${step == 'verifyOtp'}">
+            <form action="${pageContext.request.contextPath}/forgot-password" method="POST">
+                <input type="hidden" name="action" value="verifyOtp">
+                <div class="fgrp">
+                    <label>Mã OTP</label>
+                    <div class="inp-wrap">
+                        <i class="fas fa-key inp-icon"></i>
+                        <input type="text" name="otp" placeholder="Nhập 6 số..." maxlength="6" pattern="\d{6}" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-cta">
+                    <span>Xác thực</span> <i class="fas fa-check"></i>
+                </button>
+            </form>
+        </c:when>
+
+        <%-- STEP 3: RESET PASSWORD --%>
+        <c:when test="${step == 'resetPassword'}">
+            <form action="${pageContext.request.contextPath}/forgot-password" method="POST">
+                <input type="hidden" name="action" value="resetPassword">
+                <div class="fgrp">
+                    <label>Mật khẩu mới</label>
+                    <div class="inp-wrap">
+                        <i class="fas fa-lock inp-icon"></i>
+                        <input type="password" name="newPassword" placeholder="Ít nhất 8 ký tự" required minlength="8">
+                    </div>
+                </div>
+                <div class="fgrp">
+                    <label>Xác nhận mật khẩu</label>
+                    <div class="inp-wrap">
+                        <i class="fas fa-lock inp-icon"></i>
+                        <input type="password" name="confirmPassword" placeholder="Nhập lại mật khẩu" required minlength="8">
+                    </div>
+                </div>
+                <button type="submit" class="btn-cta">
+                    <span>Đổi mật khẩu</span> <i class="fas fa-save"></i>
+                </button>
+            </form>
+        </c:when>
+    </c:choose>
+
+    <div class="switch-cta">
+        <a href="${pageContext.request.contextPath}/auth">&larr; Quay lại Đăng nhập</a>
     </div>
 </div>
+
+<script>
+    function toggleDark() {
+        var dark = document.body.classList.toggle('dark-mode');
+        document.getElementById('darkIcon').className = dark ? 'fas fa-sun' : 'fas fa-moon';
+        localStorage.setItem('ieltsflow-dark', dark ? '1' : '0');
+    }
+    (function(){
+        if (localStorage.getItem('ieltsflow-dark') === '1') {
+            document.body.classList.add('dark-mode');
+            var icon = document.getElementById('darkIcon');
+            if (icon) icon.className = 'fas fa-sun';
+        }
+    })();
+</script>
 
 </body>
 </html>
