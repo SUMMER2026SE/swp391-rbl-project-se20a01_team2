@@ -1,3 +1,8 @@
+> [!NOTE]
+>
+> Please note that this repository serves as a mirror. The original source code and development history can be found in the [upstream repository](https://github.com/lehuymanhtan/SWP301_NHOM2_IELTSFLOW).
+
+
 # IELTSFlow
 
 **IELTSFlow** is a comprehensive, web-based platform designed to support IELTS learning and test preparation across all four skills (Listening, Reading, Writing, Speaking). The system integrates Artificial Intelligence (AI) to address common challenges such as the lack of practice environments, the absence of personalized learning paths, and long wait times for grading.
